@@ -388,6 +388,16 @@ angular.module("sampleApp")
                     return ar.join('.') //removed training space...
                 }
             }
+        })
+
+    .filter('getLastInPath',function(){
+            return function(path) {
+                //return the last part of a path
+                if (path) {
+                    var ar = path.split('.');
+                    return ar[ar.length-1]
+                }
+            }
         }
 
     ).filter('stripDiv',function(){

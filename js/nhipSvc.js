@@ -391,13 +391,14 @@ angular.module("sampleApp")
                 function lookForExtensions(art){
                     let deferred = $q.defer();
 
-                    let url = art.reference.reference;
+                    let url = art.reference.reference;  //the reference to to the LM
 
                     console.log(url)
 
                     getResourceAsync(url).then(
                         function(SD) {
                             //console.log(SD)
+                            let currentItem = {}
                             SD.snapshot.element.forEach(function (ed) {
                                 //look for extension mapping...
                                 if (ed.mapping) {
@@ -406,14 +407,40 @@ angular.module("sampleApp")
                                             //this is mapped to an extension
                                             //let ar = url.split('/')
 
-                                            let item = {url:url,ed:ed};
+                                            let item = {url:url,ed:ed,elements:[]};
                                             let arExt = getExtension(ed,extExtensionUrl);
                                             if (arExt.length > 0) {
                                                 item.extensionUrl = arExt[0].valueString;
                                             }
-                                            arExtension.push(item)
-                                            //console.log(ed)
+                                            //add the element details unless a backbone element
+                                            if (ed.type && ed.type.length > 0) {
+                                                if (ed.type[0].code !== 'BackboneElement') {
+                                                    let elementName = $filter('getLastInPath')(ed.path);
+                                                    let elementType = ed.type[0].code
+                                                    item.elements.push({name:elementName,type:elementType,short:ed.short});
+                                                }
+                                            }
+
+
+                                            arExtension.push(item);
+
+                                            currentItem = item;
+                                        } else {
+                                           // lastElementWasExtension = false;
                                         }
+
+                                        //now look for children
+                                        if (map.identity == 'fhir' && map.map.indexOf('#')>-1) {
+                                            //this is a child element of the extension
+                                            if (ed.type && ed.type.length > 0) {
+                                                let elementName = $filter('getLastInPath')(ed.path);
+                                                let elementType = ed.type[0].code
+                                                currentItem.elements.push({name:elementName,type:elementType,short:ed.short});
+                                                //console.log()
+                                            }
+
+                                        }
+
                                     })
                                 }
                                 //now for any bound ValueSets. Even if it is an extension, the logical model should still have the ValueSet binding...
@@ -539,6 +566,10 @@ angular.module("sampleApp")
                 }
                 return deferred.promise;
 
+            },
+            getSamples : function(igCode) {
+                let fullUrl = "content/nhip/samples.json" ;
+                return $http.get(fullUrl)
             },
             getIG : function(igCode) {
                 //assume the IG is on the conformance server (serverUrl)

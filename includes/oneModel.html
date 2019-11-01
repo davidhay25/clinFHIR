@@ -156,7 +156,7 @@
             <uib-tabset ng-show="selectedArtifact">
 
                 <uib-tab heading="Description">
-
+                    <br/>
                     <div ng-hide="arDocs.length > 0" >
                         <br/>
                         <div class="row">
@@ -535,16 +535,31 @@
                 </uib-tab>
 
                 <uib-tab heading="Extensions">
+                    <br/>
                     <table class="table table-bordered">
-                        <tr><th>Model</th><th>Path</th><th>Extension Url</th><th>Definition</th></tr>
+                        <tr><th>Path</th><th>Elements</th><th>Extension Url</th><th>Definition</th></tr>
                         <tr ng-repeat="ext in analysis.extensions"
                             ng-show="selectedArtifact.reference.reference == ext.url || input.showAllAnalysis">
-                            <td>{{ext.url| referenceType}}</td>
+
                             <td>{{ext.ed.path | dropFirstInPath}}</td>
+                            <td>
+                                <table class="table table-bordered table-condensed">
+                                    <tr ng-repeat = "ele in ext.elements">
+                                        <td>{{ele.name}}</td>
+                                        <td>{{ele.type}}</td>
+
+                                    </tr>
+                                </table>
+
+                            </td>
                             <td>{{ext.extensionUrl}}</td>
                             <td>{{ext.ed.definition}}</td>
+
                         </tr>
                     </table>
+                    <em>These are the extensions that have been defined for this resource. They represent new elements in the Logical Model, and are used by the profile.
+                    The information is derived from the Logical Model</em>
+                    <!-- <pre>{{analysis.extensions | json}}</pre>-->
                 </uib-tab>
 
                 <uib-tab heading="Profile">
@@ -607,6 +622,11 @@
                 </uib-tab>
 
                 <uib-tab heading="Server interaction">
+                    <br/>
+                    <div><strong>Profile:</strong> {{resourceDef[baseTypeForModel].profile}}</div>
+                    <div>
+                        <p ng-bind-html="resourceDef[baseTypeForModel].documentation | markDown"></p>
+                    </div>
 
 
                     <h4>Operations</h4>
@@ -647,7 +667,7 @@
                     </div>
 
                     <em>Derived from CapabilityStatement</em>
-   <!--
+<!--
                     <pre>{{resourceDef[baseTypeForModel] | json}}</pre>
 -->
                 </uib-tab>

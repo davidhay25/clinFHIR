@@ -30,18 +30,21 @@ angular.module("sampleApp")
                         $scope.artifacts = data.artifacts;
                         $scope.tabs = data.tabs;
 
+                        //add the dynamic tabs...
                         $scope.tabs.splice(3,0,{title:'Resources',includeUrl:"/includes/oneModel.html"})
-                        $scope.tabs.splice(8,0,{title:'Query Builder',includeUrl:"/includes/queryBuilder.html"})
+                        $scope.tabs.splice(8,0,{title:'Sample Queries',includeUrl:"/includes/queryBuilder.html"})
 
                         $scope.showTabsInView = true;
-                        var hash = $location.hash();
 
-                        if (hash) {
-                            console.log(hash);
+                        //todo note that we may want to dynamically set the url in the samples...
+                        nhipSvc.getSamples().then(
+                            function(data) {
+                                $scope.samples = data.data
+                            }
 
-                        }
+                        )
 
-                        console.log(data)
+                        //$http.get()
 
                     }
                 );
@@ -57,7 +60,31 @@ angular.module("sampleApp")
 
             };
 
-            //funcctions for query builder
+
+
+
+            //functions for query builder
+
+            $scope.selectSample = function(sample) {
+                delete $scope.sampleResult;
+                $scope.selectedSample = sample;
+            }
+
+            $scope.executeSample = function(sample) {
+               // delete $scope.sampleResult;
+                //let url = "http://home.clinfhir.com:8054/baseR4/"+ sample.url
+                $http.get(sample.url).then(
+                    function(data) {
+                        $scope.sampleResult = data
+                        console.log(data)
+                    },
+                    function(err) {
+                        $scope.sampleResult = err
+                        console.log(err)
+                    }
+                )
+            };
+
             $scope.input.qTypes = ["Practitioner","Organization","PractitionerRole","Location"];
             $scope.input.qType = "search"
             $scope.setQUrl = function() {
@@ -284,8 +311,6 @@ angular.module("sampleApp")
                         //may want different logic depending on type
                         $scope.selectedArtifact = art;
                         $scope.selectedResource = resource;
-                        //console.log(resource)
-                        //delete $scope.input.showAllAnalysis;
 
 
 
