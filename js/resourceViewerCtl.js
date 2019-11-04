@@ -80,10 +80,6 @@ angular.module("sampleApp")
                 )
             };
 
-
-
-
-
             //if a shortcut has been used there will be a hash so load that
             var hash = $location.hash();
             if (hash) {
@@ -134,9 +130,6 @@ angular.module("sampleApp")
                 }
             }
 
-
-
-
             $scope.isSMART = appConfigSvc.getCurrentDataServer().smart;     //if true, this server requires SMART
             $scope.oauthAccessToken;    //if SMART, this will be the access token...
 
@@ -152,41 +145,133 @@ angular.module("sampleApp")
                 );
             };
 
-            /* this was for SMART enabling - need to do this smarter :)
 
-            //always see if therer is an active token for this session.
-            //https://stackoverflow.com/questions/23124032/set-httpprovider-default-headers-after-user-authentification
-            $http.get("/smartAuth/getToken").then(
-                function(data) {
-                    sessionSvc.setAuthToken("Bearer " + data.data.token)
-                  //  $http.defaults.headers.common['Authorization'] = "Bearer " + data.data.token;
-                    alert("Bearer " + data.data.token)
-                }
-            );
 
+            //select graph options
+
+            $scope.selectScenario = function(){
+                let url = appConfigSvc.getCurrentDataServer().url + "DocumentReference?type=51899-3&_include=DocumentReference:subject";
+
+                //only get public scenarios
+                url += "&security-label=http://terminology.hl7.org/CodeSystem/v3-Confidentiality|U";
+
+                $http.get(url).then(
+                    function(data) {
+                        console.log(data);
+                        if (data.data && data.data.entry) {
+                            $uibModal.open({
+                                backdrop: 'static',      //means can't close by clicking on the backdrop. stuffs up the original settings...
+                                keyboard: false,       //same as above.
+                                templateUrl: 'modalTemplates/selectScenario.html',
+                                size:'lg',
+                                controller : function($scope,hashResource){
+                                    let docRefSystem = 'http://clinfhir.com/fhir/CodeSystem/graph/attachment-format';
+                                    $scope.hashResource = hashResource;
+                                    $scope.ResourceUtilsSvc = ResourceUtilsSvc;
+
+                                    $scope.select = function(){
+                                        $scope.$close({docRef:$scope.selectedDocRef,patient:$scope.selectedPatient})
+                                    };
+
+                                    $scope.selectScenario = function(docRef){
+                                        console.log(docRef);
+                                        $scope.selectedDocRef = docRef;
+                                        delete $scope.scenarioDescription;
+                                        let hashPatient =  hashResource['Patient'];
+                                        let ar = docRef.subject.reference.split('/');
+                                        let id = ar[ar.length-1];
+
+                                        $scope.selectedPatient = hashPatient[id];
+
+                                        console.log(ResourceUtilsSvc.getOneLineSummaryOfResource($scope.selectedPatient))
+
+                                        //find a description - will have the system url http://clinfhir.com/fhir/CodeSystem/graph/attachment-format
+                                        if (docRef.content && docRef.content.length > 0) {
+                                            //let b64 = atob(docRef.content[1].attachment);
+                                            delete $scope.bundle;
+                                            docRef.content.forEach(function(content) {
+                                                let format = content.format;
+                                                if (format && format.system && format.system == docRefSystem) {
+                                                    switch (format.code) {
+                                                        case 'notes' :
+                                                            $scope.scenarioDescription = atob(content.attachment.data)
+                                                            break;
+                                                        case 'bundle' :
+                                                            $scope.bundle = angular.fromJson(atob(content.attachment.data))
+                                                    }
+                                                }
+
+                                            });
+
+                                            if ($scope.bundle && $scope.bundle.entry){
+                                                //the docref has the list of resources in it
+                                                //todo - do I really want the
+                                                $scope.types = {};
+
+                                                $scope.bundle.entry.forEach(function (entry) {
+                                                    if (entry.fullUrl) {
+                                                        let ar = entry.fullUrl.split('/')
+                                                        let type = ar[ar.length -2]
+                                                        console.log(type)
+                                                        $scope.types[type] = $scope.types[type] || {cnt:0}
+                                                        $scope.types[type].cnt++
+                                                    }
+                                                })
+                                            }
+
+
+                                            //let docRefSystem = 'http://clinfhir.com/fhir/CodeSystem/graph/attachment-format';
+
+                                            //$scope.scenarioDescription = atob(docRef.content[1].attachment.data)
+                                        }
+/*
+                                        //look for other scenarios (graphs) for this patient
+                                        let hashDocRef = hashResource['DocumentReference'];
+                                        let cnt = 1;
+                                        angular.forEach(hashDocRef,function(k,v){
+                                          //  if (v)
+                                        })
 */
-            //----------------------
+                                    }
 
+                                },
+                                resolve : {
+                                    hashResource : function(){
+                                        let hashResource = {};
+                                        data.data.entry.forEach(function (entry) {
+                                            let resource = entry.resource;
+                                            hashResource[resource.resourceType] = hashResource[resource.resourceType] || {};
+                                            let hash = hashResource[resource.resourceType];
+                                            hash[resource.id] = hash[resource.id]
+                                            hash[resource.id] = resource;
 
+                                            //hashResource[resource.resourceType].push(resource)
+                                        });
+                                        return hashResource
+                                    }}
+                            }).result.then(
+                                function(vo) {
+                                    if (vo.patient) {
+                                        loadPatientById(vo.patient);
+                                    }
+                                }
+                            )
+                        } else {alert("Sorry, there are no public scenarios on this server")}
+                    },
+                    function(err) {
+                        console.log(err)
+                    }
+                )
+
+            };
+
+            $scope.patientShown = true;
             $scope.showPatientInGraph = function(){
                 $scope.patientShown = !  $scope.patientShown;
 
                 renderPatientDetails($scope.allResources,$scope.patientShown)
-            }
+            };
 
-/*
-            //find all the questionnaires (authored by CF) on the conformance server...
-            questionnaireSvc.findQ().then(
-                function(bundle) {
-                    $scope.QBundle = bundle;
-                }
-            )
-
-            $scope.selectQDEP = function(Q) {
-                $scope.currentQ = Q;
-            }
-
-*/
             $scope.showGQL = appConfigSvc.getCurrentDataServer().name == 'Grahames STU3 server';
 
             $scope.displayServers = "<div>Data: " + appConfigSvc.getCurrentDataServer().name + "</div>"
@@ -194,7 +279,7 @@ angular.module("sampleApp")
             //when a new scenario is selected with a patient from the server. passes in all data for that patient
             $scope.$on('patientSelected',function(event,patientResource){
 
-                renderPatientDetails(patientResource);
+                renderPatientDetails(patientResource,$scope.patientShown);
                 console.log(patientResource)
             });
 
@@ -205,8 +290,6 @@ angular.module("sampleApp")
                 $scope.documentReference = docRef;
                 delete $scope.docAttachment;
                 delete $scope.graphNotes;
-
-                //$scope.docAttachments = []
 
                 if (docRef.content && docRef.content.length > 0) {
                     let con = docRef.content[0];        //The first one is the bundle...
@@ -620,7 +703,7 @@ angular.module("sampleApp")
                             data.Patient = patientBundle
                         }
 
-                        renderPatientDetails(data)
+                        renderPatientDetails(data,$scope.patientShown)
                         $scope.$broadcast('patientObservations',data['Observation']);//used to draw the observation charts...
                     },
                     function(err){
@@ -644,7 +727,6 @@ angular.module("sampleApp")
                 //the order is significant - allResources must be set first...
                 appConfigSvc.setAllResources(allResources);
 
-
                 $scope.allResources = allResources;
                 $scope.singleBundle = {resourceType:'Bundle','type':'bundle',entry:[]}
 
@@ -665,9 +747,7 @@ angular.module("sampleApp")
                                 $scope.singleBundle.entry.push(entry) ;
                             })
                         }
-
                     }
-
                 });
 
                 $scope.outcome.resourceTypes.sort(function (a, b) {
@@ -787,17 +867,18 @@ angular.module("sampleApp")
                 $scope.outcome.allResourcesOfOneType = vo.bundle;
             };
 
-
-
             function createGraphOneResource(resource,containerId) {
 
                 //todo this is likely inefficient as may have already been done..
                 var resourceReferences = resourceSvc.getReference(resource, $scope.allResourcesAsList, $scope.allResourcesAsDict);
 
                 var graphData = resourceCreatorSvc.createGraphAroundSingleResourceInstance(resource,resourceReferences)
+
                 var container = document.getElementById(containerId);
 
-                var network = new vis.Network(container, graphData, {});
+                let options = {layout:{improvedLayout : false}}
+                var network = new vis.Network(container, graphData, options);
+
                 $scope.graph[containerId] = network;
 
                 network.on("click", function (obj) {
@@ -814,7 +895,7 @@ angular.module("sampleApp")
                         var nodeId = obj.nodes[0];  //get the first node
                         var node = graphData.nodes.get(nodeId);
                         $scope.resourceSelected({resource:node.resource});
-                       // $scope.$digest();
+
                     })
 
                 });
@@ -845,10 +926,14 @@ angular.module("sampleApp")
                 //delete $scope.outcome.allResourcesOfOneType; - leave the list of this type of resource intact...
 
                 if (entry && entry.resource) {
+                    //$scope.progressMessage = "Creating resource display, please wait...";
 
+                    //$scope.$apply();
                     var resource = entry.resource;
                     drawResourceTree(resource);         //display the resource tree
                     $scope.outcome.selectedResource = resource;     //for the json display
+
+
                     $scope.resourceReferences = resourceSvc.getReference(resource, $scope.allResourcesAsList, $scope.allResourcesAsDict);
 
                     if (! isVersion) {
@@ -857,7 +942,7 @@ angular.module("sampleApp")
                     }
 
                     createGraphOneResource(resource,'resourcenetwork');
-
+                    
                     $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(resource, true)], {type: "text/text"}));
                     $scope.downloadLinkJsonName = resource.resourceType + "-" + resource.id;
 
@@ -873,7 +958,7 @@ angular.module("sampleApp")
                             // alert(angular.toJson(err, true))
                         }
                     ).finally(function(){
-
+                        //delete $scope.progressMessage
                     })
 
                 }

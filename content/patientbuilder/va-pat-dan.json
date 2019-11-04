@@ -1,0 +1,46 @@
+{
+  "resourceType": "DocumentReference",
+  "id": "cc-pat-betsy",
+  "meta": {
+    "versionId": "3",
+    "lastUpdated": "2019-11-03T23:11:53.467+00:00",
+    "source": "#saS7DmELJ12QhpQl"
+  },
+  "status": "current",
+  "type": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "51899-3",
+        "display": "Details Document"
+      }
+    ],
+    "text": "clinFHIR graph"
+  },
+  "subject": {
+    "reference": "Patient/cc-pat-betsy"
+  },
+  "description": "Care Plan",
+  "securityLabel": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-Confidentiality",
+          "code": "U"
+        }
+      ],
+      "text": "Public"
+    }
+  ],
+  "content": [
+    {
+      "attachment": {
+        "data": "IyMgQ2FyZSBQbGFuIGdyYXBoCgpUaGlzIGlzIHRoZSBjYXJlIHBsYW4gZ3JhcGggdGhhdCBoYXMgYmVlbiBhc3NlbWJsZWQgdG8gZGVtb25zdHJhdGUgY2FyZSBwbGFucyBpbiBjaHJvbmljIGNhcmUuIERldGFpbHMgY2FuIGJlIGZvdW5kIGF0IHRoZSBbZ2l0aHViIHNpdGVdKGh0dHBzOi8vZ2l0aHViLmNvbS9jaHJvbmljLWNhcmUvc2FtcGxlLWRhdGEvdHJlZS9tYXN0ZXIvY2tkKQoKVGhpcyBncmFwaCBpcyBCZXRzeSBKb2huc29uLgoKIyMjRGVtb2dyYXBoaWNzCgoqIDYwIHllYXJzIG9sZAoqIFJldGlyZWQgc2Nob29sIHRlYWNoZXIKKiBXaWRvd2VkCiogTGl2ZXMgaW4gU3ByaW5nZmllbGQsIElMLCB3aXRoIGRhdWdodGVyOyBzb24gaW4gYW5vdGhlciBjaXR5CgojIyNQcm9ibGVtIExpc3QKCiogVHlwZSAyIGRpYWJldGVzIG1lbGxpdHVzIChETSksIG9uc2V0IDIwIHllYXJzIGFnbwoqIFByb2dyZXNzaXZlIGNocm9uaWMga2lkbmV5IGRpc2Vhc2UgKENLRCksIG9uc2V0IDEwIHllYXJzIGFnbwoqIERpYWJldGljIHJldGlub3BhdGh5IHdpdGggdmlzdWFsIGxvc3MsIG9uc2V0IDYgeWVhcnMgYWdvCiogU2VkZW50YXJ5IGxpZmVzdHlsZSwgb25zZXQgNSB5ZWFycyBhZ28KKiBEeXNsaXBpZGVtaWEgYW5kIHBlcmlwaGVyYWwgdmFzY3VsYXIgZGlzZWFzZSwgb25zZXQgNCB5ZWFycyBhZ28KKiBDb25nZXN0aXZlIGhlYXJ0IGZhaWx1cmUgKENIRiksIG9uc2V0IDIgeWVhcnMgYWdvCiogQW54aWV0eSwgb25zZXQgbmVhcmx5IDEgeWVhciBhZ28="
+      },
+      "format": {
+        "system": "http://clinfhir.com/fhir/CodeSystem/graph/attachment-format",
+        "code": "notes"
+      }
+    }
+  ]
+}

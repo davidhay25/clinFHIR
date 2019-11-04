@@ -883,9 +883,9 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
             //add the count parameter
             if (url.indexOf('?') > -1) {
-                url += "&_count=50"
+                url += "&_count=100"
             } else {
-                url += "?_count=50"
+                url += "?_count=100"
             }
 
             var deferred = $q.defer();

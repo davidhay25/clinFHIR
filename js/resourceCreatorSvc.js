@@ -2643,7 +2643,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     if (resource.name) {
                         label += getHumanNameLabel(resource.name[0]);
                     }
-
                     break;
 
                 case 'Encounter' :
@@ -2991,10 +2990,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         createGraphOfInstances: function (allResources,includePatient) {
             var that = this;
             var deferred = $q.defer();
-            //console.log(allResources)
-
-
-            //includePatient = true;  //<<<<<<<<<< temp
 
             //create the array for the graph
             var arNodes = [];
@@ -3034,7 +3029,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             //now generate the edges for each resource
             var arEdges = [];
             allResources.forEach(function (resource, inx) {
-
                 var thisNodeId;
 
                 if (resource.id.indexOf('urn:')>-1) {
@@ -3043,13 +3037,10 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     thisNodeId = objNodes[resource.resourceType + "/" + resource.id];
                 }
 
-
-
-                //console.log(thisNodeId)
                 var resourceReferences = resourceSvc.getReference(resource);    //get the outward links for this resource
                 resourceReferences.outwardLinks.forEach(function (link) {
                     var nodeId = objNodes[link.reference];
-                    // console.log(link)
+
 
                     //nodeId will only be set for resources in the 'allReference' object - ie ones we've loaded...
                     if (nodeId == 0 || nodeId) {
