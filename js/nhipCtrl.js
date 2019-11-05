@@ -13,6 +13,16 @@ angular.module("sampleApp")
 
             $scope.appConfigSvc = appConfigSvc;
 
+            $http.post('/stats/login',{module:"HPI"}).then(
+                function(data){
+                    //console.log(data);
+                },
+                function(err){
+                    console.log('error accessing clinfhir to register access',err)
+                }
+            );
+
+
             //the capability statement (that has the search's supported). Not sure if there should only be a single one or not...
             $http.get("http://home.clinfhir.com:8054/baseR4/CapabilityStatement/nhip-capstmt").then(
                 function(data) {
@@ -21,7 +31,7 @@ angular.module("sampleApp")
             );
 
             //get all the NamingSystem resources off the server. May want a more elegant way...
-            $http.get("http://home.clinfhir.com:8054/baseR4/NamingSystem").then(
+            $http.get("http://home.clinfhir.com:8054/baseR4/NamingSystem?_count=100").then(
                 function(data) {
                     $scope.namingSystem = [];
                     data.data.entry.forEach(function (entry) {
@@ -37,6 +47,14 @@ angular.module("sampleApp")
                     return true
                 } else {
                     let f = filter.toLowerCase()
+
+                    if (ns.usage) {
+                        let u = ns.usage.toLowerCase()
+                        if (u.indexOf(f) > -1) {
+                            return true
+                        }
+                    }
+
                     if (ns.description) {
                         let d = ns.description.toLowerCase()
                         if (d.indexOf(f) > -1) {

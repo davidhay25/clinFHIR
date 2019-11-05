@@ -21,7 +21,7 @@
 
 
     <table class="table table-bordered">
-        <tr><th>Url (in <em>system</em> element)</th><th>Description</th><th>Other identifiers for this entity</th></tr>
+        <tr><th>Url (in <em>system</em> element)</th><th>Description</th><th>Other identifiers for this entity</th><th>Usage Notes</th></tr>
         <tr ng-repeat="ns in namingSystem" ng-show="showNamingSystem(ns,filter)">
             <td><div ng-repeat="id in ns.uniqueId">
                 <div ng-if="id.type=='uri'">
@@ -37,9 +37,12 @@
                 </div>
 
             </td>
+            <td>{{ns.usage}}</td>
         </tr>
     </table>
 
     <em>This table is generated from NamingSystem resources on the conformance server.</em>
+
+    <em>Note that the URLs in this page will not actually resolve. Rather they are globally unique identifiers</em>
 
 </div>

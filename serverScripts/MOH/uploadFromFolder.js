@@ -9,7 +9,7 @@ let IGEntryType = 'http://clinfhir.com/StructureDefinition/igEntryType';
 let canonicalUrl = 'http://clinfhir.com/fhir/StructureDefinition/canonicalUrl';
 
 
-let IG = undefined;
+let IG = undefined;     //an undefined IG means the IG is not updated...
 //let IGPath = "/Users/davidhay/Dropbox/contracting/MOH/ResourcesForIG/nzRegistry.json"
 
     //let IG = JSON.parse(fs.readFileSync(IGPath).toString());
@@ -26,7 +26,10 @@ const termServerRoot = "http://home.clinfhir.com:8054/baseR4/";     //conf serve
 
 
 //where the files to upload are
-let folderPath = "/Users/davidhay/Dropbox/contracting/MOH/ResourcesForIG/Terminology/";
+//let folderPath = "/Users/davidhay/Dropbox/contracting/MOH/ResourcesForIG/Terminology/";
+
+let folderPath = "/Users/davidhay/Dropbox/contracting/MOH/ResourcesForRegistryIG/namingsystem/";
+
 
 //load the IG and update...
 
@@ -79,8 +82,9 @@ folder.forEach(file => {
                 } else {
                     console.log('  success');
                     //update the IG if necessary...
-                    let reference = json.resourceType + "/" + json.id;      //the reference to this resource in the IG
                     if (IG) {
+                        let reference = json.resourceType + "/" + json.id;      //the reference to this resource in the IG
+
                         //is there already a reference to this resource
                         let found = false
                         IG.definition.resource.forEach(entry =>{

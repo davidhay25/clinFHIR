@@ -1,3 +1,4 @@
+
 This is the design tool for the [HL7&reg; FHIR&copy;](http://hl7.org/fhir/) interface to the New Zealand HPI - Health Practitioner Index. It brings together all the artifacts that are necessary to  understand and use the FHIR API. Once complete, the artifacts will be assembled into a formal publication using the official tooling.
 
 The HPI ([Health Practitioner Index](https://www.health.govt.nz/our-work/health-identity/health-provider-index)) is a national registry service that holds information about the providers of healthcare in New Zealand, including the organizations where they work and the facilities that they work from. The key entities that are supported are:
@@ -34,7 +35,7 @@ The guide is organized into the following sections.
     * The **Extensions** defined for the model. Has a link to the definition (a [StructureDefinition](http://hl7.org/fhir/structuredefinition.html))
     * The formal **profile** for the model. This describes how the logical model is expressed 'on the wire' as a resource with extensions.
     * **Examples** of conformant resources that represent this model. Each resource has the Json, XML and tree representation
-    * A **Server Interaction** tab that describes the details of the API for this resource. It is derived from the [CapabilityStatement]() for the HPI as a whole, and contains the supported operations (read / write), search parameters and _includes
+    * A **Server API** tab that describes the details of the API for this resource. It is derived from the [CapabilityStatement]() for the HPI as a whole, and contains the supported operations (read / write), search parameters and _includes
 * The **Terminology** tab provides background reading on the use of Termnology in FHIR and the specific resources used by this guide.
 * **Example Queries** are provided to demonstrate how to interact with the API, and there is a query builder that can be used to assemble specific queries and execute them against the sample database. Samples are held in a generic FHIR server (provided by the [HAPI](https://hapifhir.io/) project).
 * **Downloads** allow all of the FHIR aritfacts to be downloaded. It is not yet fully populated.
