@@ -57,7 +57,7 @@
 
                             <div class="alert alert-warning" style="margin-top: 8px">
                                 <div class="row">
-                                    <div class="col-md-8 col-sm-8">
+                                    <div class="col-md-12 col-sm-12">
 
                                         <ul class="pagination" style="margin-top:1px;margin-bottom:1px" ng-show="resourceVersions && resourceVersions.entry.length > 1">
                                             <li><a href="#"><strong>Versions:</strong></a></li>
@@ -70,18 +70,7 @@
 
                                     </div>
 
-                                    <div class="col-md-4 col-sm-4">
-                                        <div class="pull-right">
-                                            <!-- not sure if we'll support edit form here - do it from the scenario...
-                                            <button class="btn btn-link" ng-hide="outcome.selectedResource.contained"
-                                                    ng-click="editExistingResource(outcome.selectedResource)">Edit Resource
-                                            </button>
-                                            <div ng-show="outcome.selectedResource.contained">
-                                                Can't edit with Contained
-                                            </div>
--->
-                                        </div>
-                                    </div>
+
                                 </div>
 
 
@@ -223,12 +212,15 @@
 
         </div>
 
+        <!-- don't think this is needed any more...
         <a href='#' ng-show="showPatientJson" ng-click="showPatientJson=false">Hide Patient Json</a>
         <a href="#" ng-hide="showPatientJson" ng-click="showPatientJson=true">Show Patient Json</a>
 
         <div ng-show="showPatientJson">
             <pre>{{appConfigSvc.getCurrentPatient() | json}}</pre>
         </div>
+
+        -->
 
     </uib-tab>
 <!--
@@ -240,14 +232,25 @@
         <br/>
 
         <div class="row">
-            <div class="col-md-8 col-sm-8">
-                <div id="mynetwork"></div>
-                <div><em>Note that the Patient is not displayed in this graph.</em></div>
+            <div class="col-md-2 col-sm-2">
+                <h3>Resource filter</h3>
+                <div ng-repeat = "(k,v) in allResources">
+                    <checkbox ng-model="input.showType[k]" ng-change="setShowType(k,input.showType[k])"/> {{k}}
+
+                </div>
+<!--
                 <div class="pull-right clickable" ng-click="showPatientInGraph()">
                     <span ng-hide="patientShown">Show Patient</span>
                     <span ng-show="patientShown">Hide Patient</span>
 
                 </div>
+
+                -->
+            </div>
+            <div class="col-md-6 col-sm-6">
+                <div id="mynetwork"></div>
+
+
             </div>
             <div class="col-md-4 col-sm-4">
                 <uib-tabset>
@@ -398,11 +401,6 @@
                                 </div>
 
                             </div>
-
-
-
-
-
 
 
                         </uib-tab>

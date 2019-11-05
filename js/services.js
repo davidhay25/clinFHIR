@@ -1009,20 +1009,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
                             return ResourceUtilsSvc.getOneLineSummaryOfResource(m.resource);
 
-                            /*
-                            let name = ""
-                            if (m.resource) {
-                                if (m.resource.medicationReference) {
-                                    name = m.resource.medicationReference.display;
-                                }
-                                if (m.resource.medicationCodeableConcept) {
-                                    name = m.resource.medicationCodeableConcept.text;
-                                }
-                            }
-                            if (name) {
-                                 return name.trim();
-                            }
-                            */
+
                            
 
                         }

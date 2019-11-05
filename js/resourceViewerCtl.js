@@ -57,6 +57,7 @@ angular.module("sampleApp")
 
             $scope.outcome = {};
             $scope.graph = {};
+            $scope.input = {};
 
             $scope.ResourceUtilsSvc = ResourceUtilsSvc; //needed for 1 line summary
             $scope.appConfigSvc = appConfigSvc;     //for displaying the patient json
@@ -146,6 +147,16 @@ angular.module("sampleApp")
             };
 
 
+            $scope.input.showType = {};
+            $scope.setShowType = function(type,show) {
+                console.log(type,show)
+                //$scope.input.showType[type] =  show;
+
+                //todo - inefficient - refactor renderPatientDetails to pull ont the graph...
+                //renderPatientDetails($scope.allResources,true);
+                drawGraph();
+
+            }
 
             //select graph options
 
@@ -165,7 +176,7 @@ angular.module("sampleApp")
                                 templateUrl: 'modalTemplates/selectScenario.html',
                                 size:'lg',
                                 controller : function($scope,hashResource){
-                                    let docRefSystem = 'http://clinfhir.com/fhir/CodeSystem/graph/attachment-format';
+                                    let docRefSystem = 'http://clinfhir.com/fhir/CodeSystem/attachment-format';
                                     $scope.hashResource = hashResource;
                                     $scope.ResourceUtilsSvc = ResourceUtilsSvc;
 
@@ -447,7 +458,7 @@ angular.module("sampleApp")
 
 
             //generate the document graph from the bundle
-            var generateDocGraph = function(bundle) {
+            var generateDocGraphDEP = function(bundle) {
 
                 var allResources = [];
 
@@ -489,7 +500,7 @@ angular.module("sampleApp")
 
 
             //assuming that this is a fhir document - generate the document views - html & tree
-            var getDocHtml = function(bundle) {
+            var getDocHtmlDEP = function(bundle) {
 
                 var comp = _.find(bundle.entry,function(o){
                     return o.resource.resourceType=='Composition';
@@ -693,9 +704,12 @@ angular.module("sampleApp")
                     //returns an object hash - type as hash, contents as bundle - eg allResources.Condition = {bundle}
 
                     function(data){
-                        if (data.DocumentReference) {
+                        if (data.DocumentReference) {       //now used for scenarios...
                             $scope.documentReferenceList = data.DocumentReference.entry;
                         }
+
+
+
 
                         //need to make sure the patient resource is in the allPatients object (set in renderPatientDetails)
                         if (! data.Patient) {
@@ -703,7 +717,7 @@ angular.module("sampleApp")
                             data.Patient = patientBundle
                         }
 
-                        renderPatientDetails(data,$scope.patientShown)
+                        renderPatientDetails(data,$scope.patientShown);     //sets $scope.allResources
                         $scope.$broadcast('patientObservations',data['Observation']);//used to draw the observation charts...
                     },
                     function(err){
@@ -717,17 +731,36 @@ angular.module("sampleApp")
 
             }
 
-
+            //
             function renderPatientDetails(allResources,showPatient) {
                 $scope.hasVitals = false;
                 delete $scope.vitalsTable;
                 delete $scope.outcome.selectedResource;
-                delete $scope.
+                $scope.input.showType = {};
+                //let hashShowType = {};
 
                 //the order is significant - allResources must be set first...
                 appConfigSvc.setAllResources(allResources);
 
-                $scope.allResources = allResources;
+
+
+                //make allResources sorted (for type list on reference graph)
+                let ar = []
+                angular.forEach(allResources,function (k,v) {
+                    ar.push(v)
+                });
+                ar.sort();
+                $scope.allResources = {}
+                ar.forEach(function(k){
+                    $scope.allResources[k] = allResources[k];
+                });
+
+
+
+               // $scope.allResources = allResources;
+
+
+
                 $scope.singleBundle = {resourceType:'Bundle','type':'bundle',entry:[]}
 
                 //all conditions is used by the timeline display to
@@ -735,6 +768,9 @@ angular.module("sampleApp")
                 angular.forEach(allResources, function (bundle, type) {
 
                     if (bundle && bundle.entry &&  bundle.entry.length > 0) {
+
+                        $scope.input.showType[type] = true;         //for the type hide / show
+
                         $scope.outcome.resourceTypes.push({type: type, bundle: bundle});
                         if (type == 'Observation') {
                             //if there are Obervations, then may be able to build a Vitals table...
@@ -749,6 +785,19 @@ angular.module("sampleApp")
                         }
                     }
                 });
+/*
+                //sort the list of types
+                let ar = []
+                angular.forEach(hashShowType,function (k,v) {
+                    ar.push(v)
+                })
+                ar.sort();
+                ar.forEach(function(k){
+                    $scope.input.showType[k] = true;
+                })
+*/
+
+
 
                 $scope.outcome.resourceTypes.sort(function (a, b) {
                     if (a.type > b.type) {
@@ -790,7 +839,9 @@ angular.module("sampleApp")
 
 
                 //create and draw the graph representation...
-                var graphData = resourceCreatorSvc.createGraphOfInstances($scope.allResourcesAsList,showPatient);
+                drawGraph();
+                /*
+                var graphData = resourceCreatorSvc.createGraphOfInstances($scope.allResourcesAsList,showPatient,$scope.input.showType);
                 $scope.graphData = graphData;
                 var container = document.getElementById('mynetwork');
                 if (container) {
@@ -812,7 +863,7 @@ angular.module("sampleApp")
                     //alert("can't find the element 'mynetwork' in the page")
                 }
 
-
+*/
 
 
 
@@ -844,6 +895,35 @@ angular.module("sampleApp")
 
               // $scope.generate3dgraph(graphData);
 
+
+            }
+
+
+            var drawGraph = function()  {
+
+
+
+                var graphData = resourceCreatorSvc.createGraphOfInstances( $scope.allResourcesAsList,true,$scope.input.showType);
+                $scope.graphData = graphData;
+                var container = document.getElementById('mynetwork');
+                if (container) {
+                    var network = new vis.Network(container, graphData, {});
+                    $scope.graph['mynetwork'] = network;
+                    network.on("click", function (obj) {
+
+                        var nodeId = obj.nodes[0];  //get the first node
+                        var node = graphData.nodes.get(nodeId);
+
+                        $scope.selectedGraphNode = graphData.nodes.get(nodeId);
+                        // console.log($scope.selectedGraphNode);
+
+                        drawResourceTree($scope.selectedGraphNode.resource)
+
+                        $scope.$digest();
+                    });
+                } else {
+                    //alert("can't find the element 'mynetwork' in the page")
+                }
 
             }
 
@@ -942,7 +1022,7 @@ angular.module("sampleApp")
                     }
 
                     createGraphOneResource(resource,'resourcenetwork');
-                    
+
                     $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(resource, true)], {type: "text/text"}));
                     $scope.downloadLinkJsonName = resource.resourceType + "-" + resource.id;
 

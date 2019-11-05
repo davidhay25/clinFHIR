@@ -2987,7 +2987,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             //return data;
 
         },
-        createGraphOfInstances: function (allResources,includePatient) {
+        createGraphOfInstances: function (allResources,includePatient,hashShowResourceTypes) {
             var that = this;
             var deferred = $q.defer();
 
@@ -3011,15 +3011,32 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     node.color = objColours[resource.resourceType];
                 }
 
-                //don't include the patient - it completely skews the graph...
-                if (includePatient) {
-                    arNodes.push(node)
-                } else {
-                    if (resource.resourceType !== 'Patient') {
-                        arNodes.push(node)
+
+                let include = false
+                if (hashShowResourceTypes) {
+                    if (hashShowResourceTypes[resource.resourceType]) {
+                        include = true
                     }
+                } else {
+                    include = true;
                 }
 
+
+/*
+                //don't include the patient - it completely skews the graph...
+                if (includePatient) {
+                    //arNodes.push(node)
+                    include = true
+                } else {
+                    if (resource.resourceType !== 'Patient') {
+                        //arNodes.push(node)
+                        include = true
+                    }
+                }
+*/
+                if (include) {
+                    arNodes.push(node)
+                }
 
 
             });

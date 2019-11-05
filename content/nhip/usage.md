@@ -1,19 +1,19 @@
 How to use the API
 
-* get a login
+_Under development_
+
+* How to get a login
     * app conformance checking for behaviour
 * SMART 
 * Expected behaviours
-    * eg when updating - read forst immediatley update
-    * local storage of resources
+    * eg when updating - read first, then  immediately update
+    * issues around local storage of resources
     * 
     
-local caching
-    
-    
-    Notes on security
-    
-    * Use of SSL
-    * Authentication - OAuth2 - 
-    * Access over Health Network (? in version 1)
-    * Auditing
+
+*Notes on security*
+
+* Use of SSL
+* Access over Health Network (in version 1)
+* Authentication - OAuth2 / SMART 
+* Auditing

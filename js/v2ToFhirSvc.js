@@ -308,7 +308,7 @@ angular.module("sampleApp")
                 };
 
 
-                return {graphData : data, allReferences:allReferences, nodes: arNodes};
+                return {graphData : data, allReferences:allReferences, nodes: arNodes, visNodes:nodes,visEdges:edges};
 
 
                 function findReferences(refs,node,nodePath,index) {

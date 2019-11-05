@@ -1,0 +1,45 @@
+<div>
+
+    <div>The following are the naming systems that are used by the HPI</div>
+
+
+    <br/>
+
+    <div class="row">
+        <div class="col-md-1">
+            Filter:
+        </div>
+        <div class="col-md-3">
+            <input class="form-control" type="text" ng-model="filter"/>
+        </div>
+        <div class="col-md-8">
+            The filter string will check the description and the url and adjust the list accordingly.
+        </div>
+    </div>
+
+    <br/>
+
+
+    <table class="table table-bordered">
+        <tr><th>Url (in <em>system</em> element)</th><th>Description</th><th>Other identifiers for this entity</th></tr>
+        <tr ng-repeat="ns in namingSystem" ng-show="showNamingSystem(ns,filter)">
+            <td><div ng-repeat="id in ns.uniqueId">
+                <div ng-if="id.type=='uri'">
+                    {{id.value}}
+                </div>
+            </div></td>
+            <td>{{ns.description}}</td>
+            <td>
+                <div ng-repeat="id in ns.uniqueId">
+                    <div ng-if="id.type !=='uri'">
+                        {{id.value}} <span ng-show="id.comment">({{id.comment}})</span>
+                    </div>
+                </div>
+
+            </td>
+        </tr>
+    </table>
+
+    <em>This table is generated from NamingSystem resources on the conformance server.</em>
+
+</div>

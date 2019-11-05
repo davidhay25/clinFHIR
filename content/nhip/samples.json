@@ -21,8 +21,8 @@
   },
   {"title": "Find Practitioners employed by an Organization - III",
     "type" : "Practitioner",
-    "url": "http://home.clinfhir.com:8054/baseR4/PractitionerRole?organization=organization1&_include=PractitionerRole:practitioner&_include=PractitionerRole:location",
-    "description" : "Returns PractitionerRole resources where the organization has the id 'organization1', and also includes the Practitioner and Location resources as well"
+    "url": "http://home.clinfhir.com:8054/baseR4/PractitionerRole?organization=organization1&_include=PractitionerRole:practitioner&_include=PractitionerRole:location,&_include=PractitionerRole:organization",
+    "description" : "Returns PractitionerRole resources where the organization has the id 'organization1', and also includes the Organization, Practitioner and Location resources as well"
   },
   {"title": "Find location by name",
     "url": "http://home.clinfhir.com:8054/baseR4/Location?name=East end",

@@ -686,7 +686,7 @@ angular.module("sampleApp")
                     let url = "content/nhip/"+ nameUrl;
                     return $http.get(url).then(
                         function (data) {
-                            console.log(data)
+                            //console.log(data)
                             tab.contents = data.data;
                            // tabs.push({url:url,title:title,contents:data.data})
 

@@ -2,6 +2,13 @@
 
 The following notes apply to all resources in this implementation.
 
+### Key relationships between resources
+
+![relationships](content/nhip/resources.png) 
+
+
+
+
 
 ### Resource representation: Json & XML
 

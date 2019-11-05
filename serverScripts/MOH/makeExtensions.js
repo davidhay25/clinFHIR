@@ -68,10 +68,13 @@ IG.definition.resource.forEach(function (item) {
 });
 
 
-//arModels = ["HpiPractitioner"];
+arModels = ["HpiPractitioner"];
+arModels = ["HpiOrganization"];
+arModels = ["HpiLocation"];
+arModels = ["HpiPractitionerRole"];
 
 //arModels = ["NzNHIPatient"];
-arModels = ["Nzulm"];
+//arModels = ["Nzulm"];
 
 //assume all the models are for the same IG...
 let arIgEntry = [];   //a set of definition.resource entries to insert into an IG. ?todo directly update IG?

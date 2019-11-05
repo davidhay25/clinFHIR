@@ -1,6 +1,7 @@
 angular.module("sampleApp")
     .controller('nhipCtrl',
-        function ($scope,$firebaseAuth,$uibModal,modalService,nhipSvc,logicalModelSvc,$http,$sce,appConfigSvc,v2ToFhirSvc,$timeout,$location) {
+        function ($scope,$firebaseAuth,$uibModal,modalService,nhipSvc,logicalModelSvc,$http,
+                  v2ToFhirSvc,$sce,appConfigSvc,v2ToFhirSvc,$timeout,$location) {
 
             $scope.selectedGroup = 'logical';       //initial group to display
             $scope.input = {};
@@ -19,6 +20,47 @@ angular.module("sampleApp")
                 }
             );
 
+            //get all the NamingSystem resources off the server. May want a more elegant way...
+            $http.get("http://home.clinfhir.com:8054/baseR4/NamingSystem").then(
+                function(data) {
+                    $scope.namingSystem = [];
+                    data.data.entry.forEach(function (entry) {
+                        $scope.namingSystem.push(entry.resource)
+                    })
+
+                    console.log($scope.namingSystem)
+                }
+            );
+            $scope.showNamingSystem = function(ns,filter) {
+
+                if (!filter) {
+                    return true
+                } else {
+                    let f = filter.toLowerCase()
+                    if (ns.description) {
+                        let d = ns.description.toLowerCase()
+                        if (d.indexOf(f) > -1) {
+                            return true
+                        }
+                    }
+                    if (ns.uniqueId) {
+                       // ns.uniqueId.forEach(function (id) {
+                        for (var i=0; i < ns.uniqueId.length; i++) {
+                            let v = ns.uniqueId[i].value.toLowerCase();
+//console.log(v,f,v.indexOf(f))
+                            if (v.indexOf(f) > -1) {
+                                return true
+                                break;
+                            }
+
+                        }
+                    }
+
+                }
+
+            }
+
+
             $scope.selectIG = function(igCode) {
                 clearDetail();
                 $scope.showTabsInView = false;
@@ -31,7 +73,8 @@ angular.module("sampleApp")
                         $scope.tabs = data.tabs;
 
                         //add the dynamic tabs...
-                        $scope.tabs.splice(3,0,{title:'Resources',includeUrl:"/includes/oneModel.html"})
+                        $scope.tabs.splice(3,0,{title:'Resources',includeUrl:"/includes/oneModel.html"});
+                        $scope.tabs.splice(7,0,{title:'Identifier Systems',includeUrl:"/includes/identifierSystems.html"})
                         $scope.tabs.splice(8,0,{title:'Sample Queries',includeUrl:"/includes/queryBuilder.html"})
 
                         $scope.showTabsInView = true;
@@ -44,10 +87,12 @@ angular.module("sampleApp")
 
                         )
 
-                        //$http.get()
 
                     }
                 );
+
+
+
 
                //neet separate capability statement & IG...
                nhipSvc.getCapabilityStatement('hpi').then(
@@ -57,7 +102,6 @@ angular.module("sampleApp")
                        $scope.resourceDef = data.resourceDef;
                    }
                )
-
             };
 
 
@@ -68,15 +112,22 @@ angular.module("sampleApp")
             $scope.selectSample = function(sample) {
                 delete $scope.sampleResult;
                 $scope.selectedSample = sample;
-            }
+                $scope.input.selectedSampleUrl = sample.url;
+            };
 
-            $scope.executeSample = function(sample) {
+            $scope.executeSample = function(url) {
                // delete $scope.sampleResult;
                 //let url = "http://home.clinfhir.com:8054/baseR4/"+ sample.url
-                $http.get(sample.url).then(
+                $http.get(url).then(
                     function(data) {
                         $scope.sampleResult = data
                         console.log(data)
+
+
+                        $scope.sampleGraph = makeGraph (data.data,'resourcesGraph')
+
+
+
                     },
                     function(err) {
                         $scope.sampleResult = err
@@ -85,8 +136,18 @@ angular.module("sampleApp")
                 )
             };
 
+            $scope.fitGraph = function(graph) {
+                if (graph) {
+                    $timeout(function () {
+                        graph.fit();
+                    },500)
+
+                }
+
+            };
+
             $scope.input.qTypes = ["Practitioner","Organization","PractitionerRole","Location"];
-            $scope.input.qType = "search"
+            $scope.input.qType = "search";
             $scope.setQUrl = function() {
                 $scope.qUrl = $scope.input.type;
 
@@ -110,6 +171,9 @@ angular.module("sampleApp")
                     function(data) {
                         $scope.qResult = data
                         console.log(data)
+                        $scope.adhocGraph = makeGraph (data.data,'adHocRresourcesGraph')
+
+
                     },
                     function(err) {
                         $scope.qResult = err
@@ -118,6 +182,52 @@ angular.module("sampleApp")
                 )
 
             };
+
+            let makeGraph = function(bundle,id) {
+                if (!bundle) {
+                    return;
+                }
+                let options = {bundle:bundle,hashErrors:{}};//,centralResourceId:id}
+
+
+               // options.showInRef = $scope.input.showInRef;
+                //options.showOutRef = $scope.input.showOutRef;
+
+                let vo = v2ToFhirSvc.makeGraph(options);
+                let container = document.getElementById(id);
+                let graphOptions = {
+                    physics: {
+                        enabled: true,
+                        barnesHut: {
+                            gravitationalConstant: -10000,
+                        }
+                    }
+                };
+                let graph=new vis.Network(container, vo.graphData, graphOptions);
+
+                graph.on("click", function (obj) {
+                     //console.log(obj.edges[0])
+                    let nodeId = obj.nodes[0];  //get the first node
+                    if (nodeId) {
+                        let node = vo.visNodes.get(nodeId);
+                        //console.log(node)
+                        $scope.selectedResource = $scope.selectedResource || {}
+                        $scope.selectedResource[id] = node.resource;
+                    } else {
+                        let edgeId = obj.edges[0];
+                        if (edgeId) {
+                            let edge = vo.visEdges.get(edgeId);
+                            //console.log(edge)
+                        }
+                    }
+                    //console.log(nodeId)
+
+                    $scope.$digest();
+                })
+
+                return graph
+
+            }
 
             $scope.analyse = function(){
                 console.log($scope.artifacts);

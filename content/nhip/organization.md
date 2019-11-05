@@ -1,4 +1,4 @@
-## Organization
+#### Description
 
 An organization is a grouping of people for some purpose. Examples in the HPI include:
 
@@ -9,7 +9,7 @@ An organization is a grouping of people for some purpose. Examples in the HPI in
 *   Other Community group
 
 
-### Key differences from spec
+#### Key differences from spec
 
 
 
@@ -17,7 +17,7 @@ An organization is a grouping of people for some purpose. Examples in the HPI in
 *   There is an extension for establishment period. 
 
 
-### Resource Identifier
+#### Resource Identifier
 
 As with the Practitioner resource, the id of the Organisation resource will be assigned by the HPI, and will also be present as an identifier with a system value of ‘https://standards.digital.health.nz/id/hpi-organisation’.
 
@@ -45,7 +45,7 @@ As with the Practitioner resource, the id of the Organisation resource will be a
   <tr>
    <td>identifier
    </td>
-   <td>
+   <td>https://standards.digital.health.nz/id/hpi-nzbn
    </td>
    <td>The New Zealand Business Number assigned to HPI Organisation that have been allocated one.
    </td>
