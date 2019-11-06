@@ -324,6 +324,9 @@ angular.module("sampleApp")
                 if (arWork.length > 0) {
                     $q.all(arWork).then(
                         function () {
+
+
+
                             deferred.resolve({extensions:arExtension,valueSets:arValueSet})
                         }
                     )

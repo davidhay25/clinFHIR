@@ -322,7 +322,7 @@ angular.module("sampleApp")
                                 }
                             })
                             vo.valueSets.sort(function(a,b){
-                                if (a.url > b.url) {
+                                if (a.valueSetUrl > b.valueSetUrl) {
                                     return 1
                                 } else {
                                     return -1
@@ -333,7 +333,7 @@ angular.module("sampleApp")
                             makeVSDownload()
 
                             //console.log(vo)
-                        },1000)
+                        },3000)
                 })
             }
 

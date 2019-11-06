@@ -276,8 +276,10 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                                     function(err) {
                                         $scope.showWaiting = false;
                                         console.log(err);
-                                        if (err.statusCode == 422) {
+                                        if (err.status == 422) {
                                             alert('There were too many concepts to expand - use a filter.');
+                                        } else if (err.status == 404) {
+                                            alert('Sorry, the ValueSet was not found on the Terminology server so could not be expanded.')
                                         } else {
                                             alert('Sorry, there was an error performing the expansion: '+angular.toJson(err));
                                         }
