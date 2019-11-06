@@ -36,6 +36,39 @@ angular.module("sampleApp")
                     $scope.namingSystem = [];
                     data.data.entry.forEach(function (entry) {
                         $scope.namingSystem.push(entry.resource)
+                    });
+
+                    $scope.namingSystem.sort(function(a,b){
+                        if (a.description > b.description) {
+                            return 1
+                        } else {
+                            return -1
+                        }
+
+
+/*
+                        let url1 = getUrl(a)
+                        let url2 = getUrl(b)
+                        if (url1 > url2) {
+                            return 1
+                        } else {
+                            return -1
+                        }
+
+
+                        function getUrl(ns) {
+                            let url = "";
+                            if (ns.uniqueId) {
+
+                                ns.uniqueId.forEach(function(id){
+                                    if (id.type='uri') {
+                                        url = id.value
+                                    }
+                                })
+                            }
+                            return url;
+                        }
+                        */
                     })
 
                     console.log($scope.namingSystem)
@@ -76,7 +109,7 @@ angular.module("sampleApp")
 
                 }
 
-            }
+            };
 
 
             $scope.selectIG = function(igCode) {
@@ -88,7 +121,25 @@ angular.module("sampleApp")
                 nhipSvc.getIG(igCode).then(
                     function(data) {
                         $scope.artifacts = data.artifacts;
+
+                        $scope.analyse()
+
+
                         $scope.tabs = data.tabs;
+                        $scope.hashTabs = {};       //for terminilogy ATM
+
+                        //actually, these would be all bettter as an extension in the IG (adding the includeUrl)
+                        $scope.tabs.forEach(function(tab){
+                            $scope.hashTabs[tab.title] = tab;
+                            switch (tab.title) {
+                                case 'Terminology' :
+                                    tab.includeUrl  = "/includes/terminology.html"
+                                    tab.hideContents = tab.contents;
+                                    delete tab.contents;
+
+                            }
+                        });
+                        console.log($scope.hashTabs)
 
                         //add the dynamic tabs...
                         $scope.tabs.splice(3,0,{title:'Resources',includeUrl:"/includes/oneModel.html"});
@@ -102,10 +153,7 @@ angular.module("sampleApp")
                             function(data) {
                                 $scope.samples = data.data
                             }
-
                         )
-
-
                     }
                 );
 
@@ -250,6 +298,9 @@ angular.module("sampleApp")
             $scope.analyse = function(){
                 console.log($scope.artifacts);
                 nhipSvc.analyseIG($scope.artifacts).then(
+
+
+
                     function (vo) {
                         //this gets called before all the Valuesets have been located - but as it's a reference, it 'catches up'
 
@@ -259,7 +310,7 @@ angular.module("sampleApp")
 
 
                         $scope.analysis = vo;
-                        //console.log(vo)
+                        console.log(vo)
 
                         //wait a second before sorting. This is a  bit scruffy...
                         $timeout(function(){
@@ -469,14 +520,14 @@ angular.module("sampleApp")
 
                                 drawTree();
 
-
+/* - not using tasks ATM
                                 nhipSvc.getTasksForModel($scope.treeData,$scope.selectedResource.id).then(
                                     function (tasks) {
                                         $scope.tasks =tasks;
                                     }
                                 );
 
-
+*/
                                 break;
                         }
 
@@ -486,7 +537,7 @@ angular.module("sampleApp")
                 ).finally(
                     function () {
                         $scope.showWaiting = false;
-                        $scope.analyse()
+                     //   $scope.analyse()
                     }
                 )
             };

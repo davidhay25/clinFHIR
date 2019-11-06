@@ -20,7 +20,7 @@ angular.module("sampleApp")
         //the code for tasks that correstond to notes against the model
         let taskCode =  {system:"http://loinc.org",code:"48767-8"};
 
-        let cache = {};
+        //let cache = {};
 
         //get the value of a single extension
         function getExtension(resource, url) {
@@ -131,9 +131,30 @@ angular.module("sampleApp")
         }
 
 
-
+        let cache = {}
 
         return {
+
+            getArtifact : function(url) {
+                //note - nott actually using this ATM
+                let deferred = $q.defer();
+                //get an artifact by direct url (not canonocal). cache the SD
+                if (cache[url]) {
+                    deferred.resolve(cache[url])
+                } else {
+                    $http.get(url).then(
+                        function(data) {
+                            cache[url] = data.data;
+                            deferred.resolve(cache[url])
+                        },
+                        function(err) {
+                            deferred.reject(err)
+                        }
+                    )
+                }
+
+                return deferred.promise;
+            },
 
             getCapabilityStatement : function(code) {
                 let deferred = $q.defer();

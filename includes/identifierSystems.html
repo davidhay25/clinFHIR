@@ -21,14 +21,17 @@
 
 
     <table class="table table-bordered">
-        <tr><th>Url (in <em>system</em> element)</th><th>Description</th><th>Other identifiers for this entity</th><th>Usage Notes</th></tr>
+        <tr><th>Description</th><th>Url (in <em>system</em> element)</th><th>Other identifiers for this entity</th><th>Usage Notes</th></tr>
         <tr ng-repeat="ns in namingSystem" ng-show="showNamingSystem(ns,filter)">
-            <td><div ng-repeat="id in ns.uniqueId">
+            <td>{{ns.description}}</td>
+            <td>
+                <div ng-repeat="id in ns.uniqueId">
                 <div ng-if="id.type=='uri'">
                     {{id.value}}
                 </div>
-            </div></td>
-            <td>{{ns.description}}</td>
+            </div>
+            </td>
+
             <td>
                 <div ng-repeat="id in ns.uniqueId">
                     <div ng-if="id.type !=='uri'">

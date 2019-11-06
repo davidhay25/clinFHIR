@@ -1,0 +1,61 @@
+<div>
+
+    <uib-tabset>
+        <uib-tab heading="Background">
+            <br/>
+            <p ng-bind-html="hashTabs.Terminology.hideContents | markDown"></p>
+        </uib-tab>
+        <uib-tab heading="All ValueSets">
+            <br/>
+            <strong>All ValueSets used in this guide</strong>
+
+            <div>
+                <a class="btn btn-link pull-right" download="{{vsDwnloadLinkJsonName}}"
+                   href="{{vsDownloadLinkJsonContent}}" title="{{vsDwnloadLinkJsonName}}" >
+                    Download CSV of full table
+                </a>
+            </div>
+
+            <table class="table table-bordered">
+                <tr><th>Path
+                    <span class="pull-right">
+                                <i class="glyphicon glyphicon-question-sign"
+                                   popover-class="plain"
+                                   uib-popover="Where in the model the ValueSet is used. It can either be a core element or an extension."
+                                   popover-trigger="'mouseenter'"
+                                   popover-placement="right"></i>
+                            </span>
+                </th><th>ValueSet Url
+
+                    <span class="pull-right">
+                                <i class="glyphicon glyphicon-question-sign"
+                                   popover-class="plain"
+                                   uib-popover="The ValueSet Url may not resolve. Regardless, it should be considered as a unique identifier"
+                                   popover-trigger="'mouseenter'"
+                                   popover-placement="right"></i>
+                            </span>
+
+                </th><th>Description</th><th>Strength</th><th>CodeSystem Urls</th><th>Note</th></tr>
+                <tr ng-repeat="vs in analysis.valueSets"
+                >
+                    <!-- <td>{{vs.url | referenceType}}</td> -->
+                    <td>{{vs.ed.path}}</td>
+                    <td>
+                                         <span class="clickable" ng-click="viewVS(vs.valueSetUrl)">
+                                            {{vs.valueSetUrl}}
+                                         </span>
+                    </td>
+                    <td>{{vs.valueSet.description}}</td>
+                    <td>{{vs.strength}}</td>
+                    <td>
+                        <div ng-repeat = "inc in vs.codeSystems">{{inc}}</div>
+                    </td>
+                    <td>{{vs.note}}</td>
+                </tr>
+            </table>
+        </uib-tab>
+    </uib-tabset>
+
+
+
+</div>

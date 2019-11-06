@@ -6,7 +6,10 @@ The following notes apply to all resources in this implementation.
 
 ![relationships](content/nhip/resources.png) 
 
-
+Note that the 2 'CreatedBy' references are to support the ability for end-users to create and modify PractitionerRole
+resources (to ensure that they are updated by the organizations/people that created them). The other references are
+the key 'structural' relationships with the PractitionerRole recording a Practitioner working for an Organization at
+a Location.
 
 
 
