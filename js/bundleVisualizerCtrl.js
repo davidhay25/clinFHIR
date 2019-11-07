@@ -472,12 +472,33 @@ console.log(doc)
 
             $scope.createGraphOneEntry = function(){
 
-                let id = $scope.selectedBundleEntry.resource.id || $scope.selectedBundleEntry.fullUrl;
-                let options = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:$scope.serverRoot,centralResourceId:id}
+
+                //the fullUrl is a default ?if it exists should we onlt use that???
+                let url = $scope.selectedBundleEntry.fullUrl;// || resource.resourceType + "/" + resource.id;
+                if (!url) {
+                    //If the resource has an id, then construct the url from that.
+                    //If a serverRoot has been passed in, then make the url an absolute one.
+                    let resource = $scope.selectedBundleEntry.resource;
+                    if (resource.id) {
+                        if ($scope.serverRoot) {
+                            url = $scope.serverRoot + resource.resourceType + "/" + resource.id;
+                        } else {
+                            url = resource.resourceType + "/" + resource.id;
+                        }
+                    }
+                }
 
 
+
+               // let id = $scope.selectedBundleEntry.resource.id || $scope.selectedBundleEntry.fullUrl;
+
+
+
+
+                let options = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:$scope.serverRoot,centralResourceId:url}
                 options.showInRef = $scope.input.showInRef;
                 options.showOutRef = $scope.input.showOutRef;
+                options.recursiveRef = $scope.input.recursiveRef;
 
                 let vo = v2ToFhirSvc.makeGraph(options);
                 //let vo = v2ToFhirSvc.makeGraph($scope.fhir,$scope.hashErrors,$scope.serverRoot,false,id)
@@ -565,6 +586,8 @@ console.log(newBundle)
                     $scope.showWaiting = false;
                 })
             };
+
+
 
             //validate the resources in the bundle, then draw the graph (which needs the errors to display)
             let processBundle = function(oBundle) {

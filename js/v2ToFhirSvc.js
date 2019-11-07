@@ -25,7 +25,7 @@ angular.module("sampleApp")
         objColours.Immunization = '#aeb76c';
 
         return {
-            validateBundle : function(validationServer,bundle) {
+            validateBundleDEP : function(validationServer,bundle) {
                 //validate the contents of a bundle by making separate calls for each resource in it...
                 let deferred = $q.defer();
                 let arQuery = [];
@@ -70,12 +70,12 @@ angular.module("sampleApp")
             buildResourceTree: function (resource) {
                 //pass in a resource instance...
                 if (! resource) {
-                    //function is called when clicking on the space between resources...
+                    //function is also called when clicking on the space between resources...
                     return;
                 }
-                var tree = [];
-                var idRoot = 0;
-                //console.log(resource)
+                let tree = [];
+                let idRoot = 0;
+
                 function processNode(tree, parentId, element, key, level,pathRoot) {
 
                     if (angular.isArray(element)) {
@@ -146,7 +146,7 @@ angular.module("sampleApp")
                     processNode(tree, rootId, element, key, 1,resource.resourceType);
                 });
 
-                //var parentId = '#';
+
                 return tree;
 
                 //generate a new ID for an element in the tree...
@@ -176,19 +176,25 @@ angular.module("sampleApp")
                 var objNodes = {};
 
                 var allReferences = [];
-
+                let centralResourceNodeId;      //the node id of the centralNode (if any)
+                //create the nodes...
                 bundle.entry.forEach(function(entry,inx) {
-
                     var resource = entry.resource;
 
+                    //If the fullUrl exists then it is the url for the resource. Otherwise, constructs from the server rool
                     let url = entry.fullUrl;// || resource.resourceType + "/" + resource.id;
 
-
-                    if (resource.id) {
-                        url = resource.resourceType + "/" + resource.id;
+                    if (! url) {
+                        //If the resource has an id, then construct the url from that.
+                        //If a serverRoot has been passed in, then make the url an absolute one.
+                        if (resource.id) {
+                            if (serverRoot) {
+                                url = serverRoot + resource.resourceType + "/" + resource.id;
+                            } else {
+                                url = resource.resourceType + "/" + resource.id;
+                            }
+                        }
                     }
-
-
 
                     let node = {id: arNodes.length +1, label: resource.resourceType,
                         shape: 'box',url:url,resource:resource, cf : {entry:resource}};
@@ -208,6 +214,11 @@ angular.module("sampleApp")
 
                     arNodes.push(node);
 
+                    if (centralResourceId && url == centralResourceId) {
+                        //this is the central id
+                        centralResourceNodeId = arNodes.length;
+                    }
+
                     if (hidePatient) {
 
                         if (node.title == 'Patient') {
@@ -219,6 +230,7 @@ angular.module("sampleApp")
                     } else {
                         objNodes[node.url] = node;
                     }
+
 
 
                     var refs = [];
@@ -242,6 +254,8 @@ angular.module("sampleApp")
                 //so now we have the references, build the graph model...
                 let hash = {};      //this will be a hash of nodes that have a reference to centralResourceId (if specified)
                 //hash[]
+
+
                 allReferences.forEach(function(ref){
 
 
@@ -253,9 +267,7 @@ angular.module("sampleApp")
                         //if (ref.src.resource.id == centralResourceId) {
                         if (ref.src.normalizedId == centralResourceId && options.showOutRef) {
                             //this is from the central resource to the given central resource
-
                             hash[ref.targ] = true;      //this is the url property of the node
-
                         }
                         //if (targetNode && targetNode.resource.id == centralResourceId) {
                         if (targetNode && targetNode.normalizedId == centralResourceId  && options.showInRef) {
@@ -277,12 +289,11 @@ angular.module("sampleApp")
 
 
                 var nodes;
+                let edges;
                 if (centralResourceId) {
                     //only include the nodes that have a reference to or from the central node
                     let nodesToInclude = []
                     arNodes.forEach(function(node){
-
-
 
                         //if (node.resource.id == centralResourceId) {
                         if (node.normalizedId == centralResourceId) {
@@ -295,11 +306,31 @@ angular.module("sampleApp")
 
                     nodes = new vis.DataSet(nodesToInclude);
 
+                    //if not recursive, remove edges where there isn't a direct reference to or from the centrlal resource id.
+                    if (! options.recursiveRef) {
+                        let ar = [];
+                        arEdges.forEach(function (edge) {
+                            if (edge.from == centralResourceNodeId || edge.to == centralResourceNodeId) {
+                                ar.push(edge)
+                            }
+                        });
+                        edges = new vis.DataSet(ar);
+                    } else {
+                        edges = new vis.DataSet(arEdges);
+                    }
+
+
+                    //edges = new vis.DataSet(arEdges);
                 } else {
                     nodes = new vis.DataSet(arNodes);
+                    edges = new vis.DataSet(arEdges);
                 }
 
-                var edges = new vis.DataSet(arEdges);
+
+
+
+
+                //var edges = new vis.DataSet(arEdges);
 
                 // provide the data in the vis format
                 var data = {
@@ -328,14 +359,22 @@ angular.module("sampleApp")
                                             // this is an uuid
                                             refs.push({path: lpath, reference: obj.reference})
                                         } else {
-                                            if (serverRoot) {
-                                                //if there's a serverRoot and it this is a relative reference, then convert to an absolute reference
-                                                //todo check if relative first!
-                                                refs.push({path: lpath, reference: serverRoot + obj.reference})
-
-                                            } else {
+                                            if (obj.reference.indexOf('http') == 0) {
+                                                //this is an absolute reference
                                                 refs.push({path: lpath, reference: obj.reference})
+                                            } else {
+                                                //construct an absolute reference from the server root if possible
+                                                if (serverRoot) {
+                                                    //if there's a serverRoot and it this is a relative reference, then convert to an absolute reference
+
+                                                    refs.push({path: lpath, reference: serverRoot + obj.reference})
+
+                                                } else {
+                                                    refs.push({path: lpath, reference: obj.reference})
+                                                }
                                             }
+
+
                                         }
 
 
@@ -361,14 +400,21 @@ angular.module("sampleApp")
                                     refs.push({path: lpath, reference: value.reference, index: index})
                                 } else {
 
-
-                                    if (serverRoot) {
-                                        //if there's a serverRoot and it this is a relative reference, then convert to an absolute reference
-                                        //todo check if relative first!
-                                        refs.push({path: lpath, reference: serverRoot + value.reference, index: index})
-                                    } else {
+                                    if (value.reference.indexOf('http') == 0) {
+                                        //this is an absolute reference
                                         refs.push({path: lpath, reference: value.reference, index: index})
+                                    } else {
+                                        if (serverRoot) {
+                                            //if there's a serverRoot and it this is a relative reference, then convert to an absolute reference
+                                            //todo check if relative first!
+                                            refs.push({path: lpath, reference: serverRoot + value.reference, index: index})
+                                        } else {
+                                            refs.push({path: lpath, reference: value.reference, index: index})
+                                        }
                                     }
+
+
+
                                 }
 
 
