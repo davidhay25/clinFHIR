@@ -136,6 +136,11 @@ angular.module("sampleApp")
                                     tab.includeUrl  = "/includes/terminology.html"
                                     tab.hideContents = tab.contents;
                                     delete tab.contents;
+                                    break;
+                                case 'Identifiers' :
+                                    tab.includeUrl  = "/includes/identifierSystems.html"
+                                    tab.hideContents = tab.contents;
+                                    delete tab.contents;
 
                             }
                         });
@@ -143,7 +148,7 @@ angular.module("sampleApp")
 
                         //add the dynamic tabs...
                         $scope.tabs.splice(3,0,{title:'Resources',includeUrl:"/includes/oneModel.html"});
-                        $scope.tabs.splice(7,0,{title:'Identifier Systems',includeUrl:"/includes/identifierSystems.html"})
+                        //$scope.tabs.splice(7,0,{title:'Identifier Systems',includeUrl:"/includes/identifierSystems.html",hideContents:"/includes/identifierSystems.html"})
                         $scope.tabs.splice(8,0,{title:'Sample Queries',includeUrl:"/includes/queryBuilder.html"})
 
                         $scope.showTabsInView = true;

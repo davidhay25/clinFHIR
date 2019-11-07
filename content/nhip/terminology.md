@@ -8,7 +8,7 @@ There are 2 key terminology resources that are used by this guide.
 
 In general terms, the ValueSet is the one that most people will deal with. Terminology specialists are responsible for creating and mainting teh link between ValueSet and CodeSystem.
 
-FHIR defines a number of terminology *operations* that make it easier to use ValueSets. The one that is most commonly used in this guide is the [$expansion]() operation. This takes a ValueSet, and potentially a filter, and returns the list of concepts that match. This is the operation that is used when you click on a valueset Url in the guide and display the ValueSet explorer that allows you to list the contents. 
+FHIR defines a number of terminology *operations* that make it easier to use ValueSets. The one that is most commonly used in this guide is the [$expand]() operation. This takes a ValueSet, and potentially a filter, and returns the list of concepts that match. This is the operation that is used when you click on a valueset Url in the guide and display the ValueSet explorer that allows you to list the contents. 
 
 There are other operations on [CodeSystem](http://hl7.org/fhir/codesystem-operations.html) and [ValueSet](http://hl7.org/fhir/valueset-operations.html) that are useful in particular scenarios.
 

@@ -49,24 +49,10 @@ angular.module("sampleApp")
                             doc.composition = {};
                             doc.composition.title = resource.title;
                         }
-
                     });
 
-/*
-
-                    let doc = {};
-                    doc.composition = {author: {"display":"Dr Marcus Welby"},title:"Discharge Summary"};
-
-                    doc.composition.problems = [{name:"asthma"},{name:"diabetes"}];
-                    doc.composition.medications = [{name:"Atenolol 25mg mane"},{name:"Frusemide 40mg mane"}];
-
-
-
-
-*/
 
                     doc.patient = {name:'John Doe',gender:"male",birthDate:"1955-12-16"}
-
                     doc.composition.medications = [];
 
                     let med = {};       //a single medication
@@ -86,7 +72,7 @@ console.log(doc)
 
 
 
-            }
+            };
 
             $scope.addQuery = function(){
                 $uibModal.open({
@@ -851,10 +837,9 @@ console.log(newBundle)
             function deDupeBundle(bundle) {
                 let newBundle = angular.copy(bundle)
 
+                return newBundle
+                //I don't know why I needed to do this - and sorting is dangerous for Document & Message bundkes
 
-                //return newBundle;
-
-                //------- tet
 
                 newBundle.entry.length = 0;
                 let idHash = {};
