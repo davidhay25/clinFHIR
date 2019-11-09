@@ -302,7 +302,6 @@ angular.module("sampleApp")
 
                     //now look for Valuesets. Need to do this here as there can be multiple per model
                     let url = art.reference.reference;
-                    console.log(url)
 
                     getResourceAsync(url).then(
                         function(SD) {
@@ -417,7 +416,7 @@ angular.module("sampleApp")
 
                     let url = art.reference.reference;  //the reference to to the LM
 
-                    console.log(url)
+
 
                     getResourceAsync(url).then(
                         function(SD) {
@@ -445,6 +444,9 @@ angular.module("sampleApp")
                                                 }
                                             }
 
+                                            if (map.map.indexOf('odifierExtension')>-1) {
+                                                item.isModifier=true;
+                                            }
 
                                             arExtension.push(item);
 

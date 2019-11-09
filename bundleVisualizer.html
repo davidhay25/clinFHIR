@@ -62,7 +62,21 @@
             border: 1px solid lightgray;
         }
 
+        table {
+            border-collapse: collapse;
+        }
 
+        table, th, td {
+            border: 1px solid black;
+            padding: 5px;
+        }
+
+        th {
+            font-weight: bold;
+        }
+        thead {
+            font-weight: bold;
+        }
 
     </style>
 
@@ -104,6 +118,13 @@
 
             <div class="col-md-1">
                 <div class="navbar-text">
+                    <div ng-show="fhir">
+                        <div ng-hide="input.showHelp" ng-click="input.showHelp = true">Show Help</div>
+                        <div ng-show="input.showHelp" ng-click="input.showHelp = false">Hide Help</div>
+                    </div>
+
+
+
 
                 </div>
 
@@ -219,7 +240,32 @@
         </div>
         <div class="col-md-10">
 
-            <uib-tabset>
+            <div ng-show="!fhir || input.showHelp">
+                <br/>
+                <strong>Adding a bundle to view</strong>
+                <br/> <br/>
+                The left pane allows 2 ways to add a bundle to the visualizer.
+                <ul>
+                    <li>A bundle can be pasted in directly by clicking the 'Import Bundle'.
+                        Json bundles are processed directly. XML bundles are saved to the Data server, and then retrieved as Json.
+                        In either case the bundle can be saved to the bundle list by supplying an identifier.</li>
+                    <li>A query can be entered that will call the REST API of a server to return the bundle. The format
+                        must be Json and the server must support CORS.</li>
+                </ul>
+
+
+
+                <strong>Strategy for determining references between resources</strong>
+                <br/> <br/>
+                <ul>
+                    <li>If an entry has a fullUrl (preferred), then this will become the id of the resource from the
+                        perspective of a reference target. Otherwise
+                        the data server root, resource type and resource id are combined to make an absolute url to act as the id </li>
+                    <li>If a reference is relative, it is combined with the server root to make it absolute.</li>
+                </ul>
+            </div>
+
+            <uib-tabset ng-show="fhir">
 
                 <uib-tab heading="FHIR Bundle visualizations" ng-show="fhir">
                     <br/>
@@ -397,7 +443,7 @@
 
                         </uib-tab>
 
-                        <uib-tab ng-show = "fhir.type == 'document'" heading="HandleBars Document">
+                        <uib-tab ng-show = "1==2 && fhir.type == 'document' " heading="HandleBars Document">
 
                             <button class="btn btn-primary" ng-click="hbDoc()">Load HandleBars template and render document</button>
                             <hr/>
@@ -414,6 +460,8 @@
 
                         </uib-tab>
                         -->
+
+
                     </uib-tabset>
 
 
@@ -506,6 +554,7 @@
 
 
                 </uib-tab>
+
 
 
             </uib-tabset>

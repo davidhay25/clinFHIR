@@ -11,51 +11,17 @@ resources (to ensure that they are updated by the organizations/people that crea
 the key 'structural' relationships with the PractitionerRole recording a Practitioner working for an Organization at
 a Location.
 
-
-
 ### Resource representation: Json & XML
 
 Resources can be expressed either as Json or XML, and both formats are supported by this implementation.
 
 
-### Notes on identifiers
-
-* Describe identifiers
-    * especially importance of system
-    * 'use' element (as applied to Practitioner.iedntifier)
-* Summary of identifier systems
-    * possibly move from individual resources
-
 ### Id and Identifiers
-
-
-
-
-    
+  
 All of the FHIR resources in this implementation have both an id and an identifier.
 
-The id is the ‘physical’ identity of the resource, and the identifier is the business identifier. The difference between the two is that the id uniquely identifies the resource on the server where it is located. If the resource is copied from one server to another then it will (almost certainly) be different - much as a primary key in a database changes if a record is moved between databases. 
-
-The identifier property however is a part of the resource and does not change when moved between servers. The identifier is a specific [datatype](http://hl7.org/fhir/datatypes.html#Identifier), and has a number of properties, of which 3 are used by this implementation.
-
-
-
-*   The namespace within which the value of the identifier is guaranteed to be unique (system)
-*   The actual value of the identifier (value)
-*   The purpose of the identifier (use)
-
-Here is an example of an identifier:
-
-
-```
-"identifier": [
-    {
-      "use": "official",
-      "system": "https://standards.digital.health.nz/id/hpi-person",
-      "value": "96ZZZZ"
-    }
-  ]
-```
+The id is the ‘physical’ identity of the resource, and the identifier is the business identifier. 
+Refer to the 'Identifier' tab for further details
 
 
 In this implementation, **the id of the resource will always be the same as the value of the identifier assigned by the HPI with a use value of ‘official’**. (There will only ever be a single identifier with this use type in a resource). Thus the id for the resource above would be ‘96ZZZZ’, and the url something like:
@@ -101,7 +67,7 @@ References are directional - from a source to a target. There are 2 ways that re
 
 #### As a reference to the id of the target resource. 
 
-The following example is 
+The following example shows a reference to a Practitioner with the id of "example"
 
 
 ``
@@ -118,10 +84,10 @@ This is a relative reference (ie the target is on the same server as the source)
 
 #### Using the target resource identifier
 
-`...`	
 
 
 ```
+...
   "practitioner": {
     "identifier": {
         "system": "https://standards.digital.health.nz/id/hpi",
@@ -135,7 +101,10 @@ This is a relative reference (ie the target is on the same server as the source)
 ```
 
 
-This is a reference from a property called ‘practitioner’ to a Practitioner resource that has the identifier _prac-X_. 
+This is a reference from a property called ‘practitioner’ to a Practitioner resource that has the identifier _prac-X_ 
+in the system _https://standards.digital.health.nz/id/hpi_  It has the disadvantage that if the client wishes to
+retrieve the target resource, then it must do a query by identifier. There are also a number of search queries
+that require a direct reference rather than an identifier.
 
 
 ### Merging resource and Dormant identifiers
@@ -230,24 +199,16 @@ GET [host]/PractitionerResource?practitioner=96ZZZ
 
 GET [host]/PractitionerResource?practitioner=96YYY
 
+### Must support
+
+The 'must support' indicator means that the client must have a strategy to deal with this element. details [here](http://hl7.org/fhir/profiling.html#mustsupport)
+
+(todo - more details needed)
 
 ### Contained resources
 
 Contained resources are where the referenced (target) resource is contained within the source resource.
 
 
-### Extensions
-
-_(There will be a separate page of all extensions with their definition. These will be generated from the models)_
-
-
-# Specific resources
-
-_(Each resource will have a separate page in the IG. Each page will have the Profile - and possibly the Logical model as well)_
-
-_The link to the models is [http://clinfhir.com/nhip.html](http://clinfhir.com/nhip.html) - same models as through nz.clinfhir.com, but a tidier interface_
-
-_(Note that the resource page will also have the element descriptions from the model in it. What’s in this page is the ‘amplifying’ data)_
-
-
+### Modifier Extensions
 

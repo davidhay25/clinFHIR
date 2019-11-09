@@ -112,6 +112,67 @@ angular.module("sampleApp")
             };
 
 
+            $scope.showValueSet = function(vs,filter) {
+
+                if (!filter) {
+                    return true
+                } else {
+                    let f = filter.toLowerCase()
+                    if (vs.url && vs.url.toLowerCase().indexOf(filter) >-1) {
+                        return true;
+                    }
+
+                    if (vs.valueSet && vs.valueSet.description && vs.valueSet.description.toLowerCase().indexOf(filter) >-1) {
+                        return true;
+                    }
+
+                    if (vs.codeSystems) {
+                        for (i=0; i < vs.codeSystems.length;i++) {
+                            if (vs.codeSystems[i].toLowerCase().indexOf(f) > -1) {
+                                return true;
+                                break;
+                            }
+
+                        }
+
+                    }
+
+                    console.log(vs)
+
+
+                    /*
+
+
+                    if (ns.usage) {
+                        let u = ns.usage.toLowerCase()
+                        if (u.indexOf(f) > -1) {
+                            return true
+                        }
+                    }
+
+                    if (ns.description) {
+                        let d = ns.description.toLowerCase()
+                        if (d.indexOf(f) > -1) {
+                            return true
+                        }
+                    }
+                    if (ns.uniqueId) {
+                        // ns.uniqueId.forEach(function (id) {
+                        for (var i=0; i < ns.uniqueId.length; i++) {
+                            let v = ns.uniqueId[i].value.toLowerCase();
+//console.log(v,f,v.indexOf(f))
+                            if (v.indexOf(f) > -1) {
+                                return true
+                                break;
+                            }
+
+                        }
+                    }
+*/
+                }
+
+            };
+
             $scope.selectIG = function(igCode) {
                 clearDetail();
                 $scope.showTabsInView = false;
@@ -335,9 +396,10 @@ angular.module("sampleApp")
                             })
 
 
+
                             makeVSDownload()
 
-                            //console.log(vo)
+                            console.log(vo)
                         },3000)
                 })
             }

@@ -9,6 +9,7 @@ angular.module("sampleApp")
         objColours.Observation = '#FFFFCC';
         objColours.Practitioner = '#FFBB99';
         objColours.MedicationStatement = '#ffb3ff';
+        objColours.MedicationRequest = '#ffb3ff';
         objColours.CarePlan = '#FF9900';
         objColours.Sequence = '#FF9900';
         objColours.CareTeam = '#FFFFCC';

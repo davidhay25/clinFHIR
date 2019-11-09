@@ -15,6 +15,24 @@
                 </a>
             </div>
 
+            <br/>
+
+            <div class="row">
+                <div class="col-md-1">
+                    Filter:
+                </div>
+                <div class="col-md-3">
+                    <input class="form-control" type="text" ng-model="termFilter"/>
+                </div>
+                <div class="col-md-8">
+                    The filter string will check the description and the url and adjust the list accordingly.
+                </div>
+            </div>
+
+            <br/>
+
+
+
             <table class="table table-bordered">
                 <tr><th>ValueSet Url
 
@@ -36,7 +54,7 @@
                             </span>
                 </th><th>Description</th><th>Strength</th><th>CodeSystem Urls</th><th>Note</th></tr>
                 <tr ng-repeat="vs in analysis.valueSets"
-                >
+                    ng-show="showValueSet(vs,termFilter)">
                     <!-- <td>{{vs.url | referenceType}}</td> -->
 
                     <td>

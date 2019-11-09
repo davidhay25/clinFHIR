@@ -642,6 +642,7 @@ console.log(newBundle)
                 delete $scope.document;     //contains the document specific resources suitable for layout
                 if (bundle.type == 'document') {
                     let arComposition = [];
+
                     //create a hash by type & id - to find document references
                     let hash = {}
 
@@ -650,11 +651,24 @@ console.log(newBundle)
 
 
                             let key;
+
+                            if  (entry.fullUrl) {
+                                key = entry.fullUrl
+                            } else {
+                                key = entry.resource.resourceType + "/" + entry.resource.id
+                            }
+                            /*
                             if (entry.resource.id) {
-                                key = entry.resource.resourceType + "/" + id
+                                key = entry.resource.resourceType + "/" + entry.resource.id
                             } else {
                                 key = entry.fullUrl
                             }
+*/
+                            /*if (entry.resource.id) {
+                                key = entry.resource.resourceType + "/" + entry.resource.id
+                            } else {
+                                key = entry.fullUrl
+                            }*/
 
                             //let id = entry.resource.id || entry.fullUrl;
                             //let key = entry.resource.resourceType + "/" + id;
@@ -687,6 +701,7 @@ console.log(newBundle)
 
 
                                 $scope.document.subject = hash[$scope.document.composition.subject.reference];
+
                                 if (!$scope.document.subject) {
                                     alert('The subject reference from Composition ('+$scope.document.composition.subject.reference+') is not in the bundle')
                                 }

@@ -8,11 +8,11 @@ Examples from outside of health would be a passport or a drivers license. There 
 * The _type_ of identifier. This is a high level categorization of identifiers - for example to indicate that it is a driving license of some sort or a passport from some country
 * The _use_ to which the identifier can be used. eg this is an official identifier, or it is one that is old.
 * The _period_ over which the identifier is valid
-* The _assigned_ of the identifier - eg the New Zealand government.
+* The _assigner_ of the identifier - eg the New Zealand government.
 
 Of these, the system and value are most commonly present. Indeed, if they are not both present then uniqueness cannot be assumed.
 
-In this guide, the __use__ element is also important as it indicates identifiers that have been deprecated (or made dormant) - eg an identifier determined to be a duplicate. In this case the use element will have a value of _old_.
+In this guide, the _use_ element is also important as it indicates identifiers that have been deprecated (or made dormant) - eg an identifier determined to be a duplicate. In this case the use element will have a value of _old_.
  
 Identifiers differ from the id of a resource (thought they are often confused).
 * The Identifier is a property of the resource. If the resource is copied or moved to a different server then it will be the same.

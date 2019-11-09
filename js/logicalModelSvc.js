@@ -3010,17 +3010,21 @@ angular.module("sampleApp")
 
                             //this is a horrible hack to cover the fact that hapi doesn't yet support the final R3...
 
-
-
                             ed.mapping.forEach(function(map){
                                 var internalMap = {identity:map.identity}
                                 var ar = map.map.split('|');        //the 'map' will always include the comment separated by '|'
                                 internalMap.map = ar[0];            //the first entry is the actual map
 
-                                //is this an extensiom
-                                if (internalMap.map.indexOf('extension') > -1) {
+                                //is this an extensiom - 2019-11-9 = was missing modifier extensions!
+                                if (internalMap.map.indexOf('xtension') > -1) {
                                     item.data.isExtension = true;
                                 }
+
+                                //this just appears in the tree view
+                                if (internalMap.map.indexOf('odifierExtension') > -1) {
+                                    item.data.isModifierExtension = true;
+                                }
+
 
                                 if (map.comment) {
                                     internalMap.comment = map.comment
