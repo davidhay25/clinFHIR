@@ -119,8 +119,8 @@
             <div class="col-md-1">
                 <div class="navbar-text">
                     <div ng-show="fhir">
-                        <div ng-hide="input.showHelp" ng-click="input.showHelp = true">Show Help</div>
-                        <div ng-show="input.showHelp" ng-click="input.showHelp = false">Hide Help</div>
+                        <div class="clickable" ng-hide="input.showHelp" ng-click="input.showHelp = true">Show Help</div>
+                        <div class="clickable" ng-show="input.showHelp" ng-click="input.showHelp = false">Hide Help</div>
                     </div>
 
 
@@ -263,6 +263,8 @@
                         the data server root, resource type and resource id are combined to make an absolute url to act as the id </li>
                     <li>If a reference is relative, it is combined with the server root to make it absolute.</li>
                 </ul>
+
+                <a href="https://docs.google.com/document/d/1bwyRKU100m8VOM30bcR_6bUms8FaC13SMrPAK5o6IR8/edit#" target="_blank">Link to on-line docs</a>
             </div>
 
             <uib-tabset ng-show="fhir">
@@ -507,6 +509,9 @@
                                                        </div>
                                                    </em></div>
                                                    {{issue.diagnostics}}
+                                                   <div ng-repeat = "exp in issue.expression">
+                                                       {{exp}}
+                                                   </div>
                                                </td>
 
                                            </tr>
@@ -526,6 +531,9 @@
                                                        </div>
                                                    </em></div>
                                                    {{issue.diagnostics}}
+                                                   <div ng-repeat = "exp in issue.expression">
+                                                       {{exp}}
+                                                   </div>
                                                </td>
 
                                            </tr>

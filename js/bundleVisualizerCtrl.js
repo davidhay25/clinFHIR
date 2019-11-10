@@ -458,6 +458,9 @@ console.log(doc)
 
             $scope.createGraphOneEntry = function(){
 
+                if (!$scope.selectedBundleEntry) {
+                    return;
+                }
 
                 //the fullUrl is a default ?if it exists should we onlt use that???
                 let url = $scope.selectedBundleEntry.fullUrl;// || resource.resourceType + "/" + resource.id;
@@ -752,7 +755,10 @@ console.log(newBundle)
             //perform a validation of the resources in the bundle...
             let validate = function(bundle,cb) {
 
-                let url = "http://home.clinfhir.com:8054/baseR4/Bundle/$validate";
+                let url = $scope.validationServer.url+"Bundle/$validate";
+
+
+                //let url = "http://home.clinfhir.com:8054/baseR4/Bundle/$validate";
                 //let url = $scope.conformanceServer.url + "Bundle/$validate";
 
 
