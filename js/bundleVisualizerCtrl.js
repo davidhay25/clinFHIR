@@ -1,6 +1,6 @@
 angular.module("sampleApp")
     .controller('bundleVisualizerCtrl',
-        function ($scope,$uibModal,$http,v2ToFhirSvc,$timeout,modalService,GetDataFromServer,appConfigSvc,$localStorage) {
+        function ($scope,$uibModal,$http,v2ToFhirSvc,$timeout,modalService,GetDataFromServer,appConfigSvc,$localStorage,$q) {
 
             //$scope.conformanceServer = 'http://fhirtest.uhn.ca/baseR4/';
             //$scope.dataServer = 'http://fhirtest.uhn.ca/baseR4/';
@@ -587,7 +587,9 @@ console.log(newBundle)
 
                 validate(oBundle,function(hashErrors){
                     $scope.hashErrors = hashErrors;
+console.log(hashErrors)
 
+                    $scope.validationResult = hashErrors
 
                     //the serverRoot is needed to figure out the references when the reference is relative
                     //we assume that all the resoruces are from the same server, so figure out the server root
@@ -754,14 +756,97 @@ console.log(newBundle)
 
             //perform a validation of the resources in the bundle...
             let validate = function(bundle,cb) {
-
-                let url = $scope.validationServer.url+"Bundle/$validate";
-
+               // let deferred = $q.defer();
+                //let url = $scope.validationServer.url+"Bundle/$validate";
+                $scope.showWaiting = true;
 
                 //let url = "http://home.clinfhir.com:8054/baseR4/Bundle/$validate";
                 //let url = $scope.conformanceServer.url + "Bundle/$validate";
 
 
+                $scope.valErrors = 0, $scope.valWarnings=0;
+
+                //this is the 'per entry' validation
+                let arQuery = []
+                let hashErrors = {};    //related to position in bundle...
+                bundle.entry.forEach(function (entry,inx) {
+                    let resource = entry.resource
+
+                    let url = $scope.validationServer.url+resource.resourceType +"/$validate";
+                    arQuery.push(processValidation(url,resource,hashErrors,inx))
+                });
+
+
+                if (arQuery.length > 0) {
+                    $q.all(arQuery).then(
+                        function(){
+                          //  deferred.resolve(hashErrors)
+                            cb(hashErrors)
+                        },
+                        function(){
+                          //  deferred.resolve(hashErrors)
+                            cb(hashErrors)
+                        }
+
+
+                    ).finally(function(){
+                        $scope.showWaiting = false;
+                    })
+
+
+                } else {
+                    cb({})
+                }
+
+               // return deferred.promise;
+
+
+                function processValidation(url,resource,hash,inx){
+                    let deferred = $q.defer();
+                    $http.post(url,resource).then(
+                        function(data){
+                            //no errors
+                            //hash[inx] = data.data.issue
+                            let addToIssue = false
+                            if (data.data.issue) {
+                                data.data.issue.forEach(function(iss){
+                                    if (iss.severity == 'warning') {
+                                        $scope.valWarnings++
+                                        addToIssue = true
+                                    } 
+                                });
+
+                                if ( addToIssue ) {
+                                    hash[inx] = data.data.issue
+                                }
+                            }
+
+                            deferred.resolve();
+                        },
+
+                        function(err){
+                            hash[inx] = err.data.issue
+
+                            err.data.issue.forEach(function(iss){
+                                if (iss.severity == 'error') {
+                                    $scope.valErrors++
+                                } else {
+                                    $scope.valWarnings++
+                                }
+                            })
+
+
+                            deferred.resolve();
+                        }
+                    )
+
+                    return deferred.promise;
+                }
+
+
+
+                return;
+                //bundle validation...
                 $scope.showWaiting = true;
                 //delete $scope.hashErrors;
                 $http.post(url,bundle).then(
