@@ -31,150 +31,7 @@
             $locationProvider.hashPrefix('!');
         });
         angular.module("sampleApp").constant("moment", moment);
-/*
-        angular.module("sampleApp")
-            .controller('csiroCtrlXXX',
-                function ($scope,$uibModal,$http,modalService,$timeout,$firebaseObject,appConfigSvc,$location) {
 
-
-                    $scope.input = {};
-                    $scope.error = 'error'
-
-                    $scope.validate = function( ){
-                        let resource = $scope.input.resource;
-                        if (resource) {
-                            let resourceType;
-                            let config = {headers: {'Content-type':'application/xml+fhir', accept:'application/json+fhir'}};
-                            resource = resource.trim();
-
-                            if (resource.substr(0,1) == '<') {
-                                //this is xml
-                                let g = resource.indexOf('<?xml');
-                                if (g > -1) {
-                                    let gg = resource.indexOf('?>');
-                                    resource = resource.substr(gg+2)
-                                    console.log(resource)
-                                    resource = resource.trim()
-                                }
-
-                                let g1 = resource.indexOf('>');
-                                let gg1 = resource.indexOf(' ');
-                                if (gg1 < g1) {
-                                    //there's a space before the '<' - probably means that there's a namespece there...
-                                    resourceType = resource.substr(1,gg1-1);
-                                } else {
-                                    resourceType = resource.substr(1,g1-1);
-                                }
-
-
-                                console.log(resourceType)
-
-                            } else {
-                                //assume json
-                                try {
-                                    let r = angular.fromJson(resource);
-                                    resourceType = r.resourceType;
-                                    config.headers['Content-type'] = 'application/json+fhir'
-                                } catch (ex) {
-                                    alert("I thought this was Json, but I couldn't parse it");
-                                    return;
-                                }
-                            }
-
-
-                           // let resourceType = "Patient";
-
-                            delete $scope.oo;
-                            let baseUrl = "https://primarycare.ontoserver.csiro.au/fhir/";
-                            let url = baseUrl + resourceType + '/$validate';
-                            $scope.url = url;
-
-                            $scope.showWaiting = true;
-                            $http.post(url,resource,config).then(
-                                function(data){
-                                    console.log(data)
-                                    $scope.oo = data.data;
-                                },
-                                function(err) {
-                                    console.log(err)
-                                    alert(angular.toJson(err))
-                                }
-                            ).finally(
-                                function(){
-                                    $scope.showWaiting = false;
-                                }
-                            )
-
-                        }
-
-
-                    }
-                    console.log(location.host)
-                    //will update the config. We don't care if manually entered servers are lost or the default servers changed
-                    if (appConfigSvc.checkConfigVersion()) {
-                        alert('The config was updated. You can continue.')
-                    };
-
-                    firebase.auth().onAuthStateChanged(function(user) {
-
-
-                        if (user) {
-                            $scope.user = user;
-
-                           console.log(user)
-
-
-                        } else {
-                            delete $scope.user
-
-                        }
-
-                    });
-
-                    $scope.login=function(){
-                        $uibModal.open({
-                            backdrop: 'static',      //means can't close by clicking on the backdrop.
-                            keyboard: false,       //same as above.
-                            templateUrl: 'modalTemplates/login.html',
-                            controller: 'loginCtrl'
-                        })
-                    };
-
-                    $scope.logout=function(){
-                        firebase.auth().signOut().then(function() {
-                            delete $scope.user;
-                            modalService.showModal({}, {bodyText: 'You have been logged out of clinFHIR'})
-
-                        }, function(error) {
-                            modalService.showModal({}, {bodyText: 'Sorry, there was an error logging out - please try again'})
-                        });
-
-                    };
-
-
-                    let appRoot = location.host;
-*/
-                    /*
-                    //set the servers to the ones used by the csiro project.
-                    appConfigSvc.setServerType('conformance','http://home.clinfhir.com:8030/baseDstu3/');
-                    appConfigSvc.setServerType('data','http://home.clinfhir.com:8030/baseDstu3/');       //set the data server to the same as the conformance for the comments
-                    appConfigSvc.setServerType('terminology',"https://primarycare.ontoserver.csiro.au/fhir/");
-
-
-                    //$scope.uberModel = "http://clinfhir.com/logicalModeller.html#9xmtt";
-                    //$scope.commonModel = "http://clinfhir.com/logicalModeller.html#f5jor";
-                    $scope.taskManager = "/taskManager.html"
-
-                    $scope.uberModel =  "/logicalModeller.html#$$$CsiroUberModel";
-                    $scope.commonModel = "/logicalModeller.html#$$$CsiroCommon";
-                    $scope.testModel = "/logicalModeller.html#$$$ConditionTest";
-                    //$scope.taskManager = "/taskManager.html";
-
-*/
-                    /*
-                }
-            )
-*/
     </script>
 
     <script>
@@ -209,10 +66,10 @@
     <script src="js/libs/ngStorage.min.js"></script>
     <script src="js/filters.js"></script>
     <script src="js/loginCtrl.js"></script>
-    <script src="js/validateSampleCtrl.js"></script>
+    <script src="js/validateResourceCtrl.js"></script>
 
 
-    <title>Sample Validator</title>
+    <title>Resource Validator</title>
 
 </head>
 
@@ -227,22 +84,14 @@
             <div class="col-md-7 col-sm-7">
                 <span>
                     <a class="navbar-brand" href="#" ng-click="showVersion()">
-                        Sample Validator
+                        Resource Validator
                     </a>
                 </span>
-
             </div>
-
-
-
-
 
             <div class="col-md-2 col-sm-2">
                 <form class="navbar-form navbar-left">
                     <img ng-show="showWaiting" src="css/ajax_loader_blue_32.gif"/>
-
-
-
                 </form>
             </div>
 
@@ -281,9 +130,12 @@
             <strong>Select the validation servers </strong>
             <div ng-repeat = "server in allServers">
                 <input type="checkbox" ng-model="server.selected" /> {{server.display}}
+                <span class="pull-right" ng-if="server.local"><button class="btn btn-link" ng-click="removeServer(server)">Remove</button> </span>
             </div>
 
-            <button ng-show="input.resource" class="btn btn-link pull-right" ng-click="validate()">Validate</button>
+            <button class="btn btn-link" ng-click="AddServer()">Add Server</button>
+
+            <button ng-show="input.resource" class="btn btn-primary pull-right" ng-click="validate()">Validate</button>
 
         </div>
         <div class="col-md-5">
@@ -293,7 +145,7 @@
 
                 </div>
                 <div class="col-md-2">
-                    <button class="btn btn-link" ng-click="fetchResource(queryUrl)">Fetch</button>
+                    <button ng-show="queryUrl" class="btn btn-link" ng-click="fetchResource(queryUrl)">Fetch</button>
                 </div>
             </div>
             <textarea class="form-control" rows="20" ng-model="input.resource"
@@ -308,6 +160,19 @@
 
 
             <uib-tabset>
+                <uib-tab heading="Summary">
+                    <br/>
+                    <table class="table">
+                        <tr><th>Server</th><th>Warnings</th><th>Errors</th></tr>
+                        <tr ng-repeat = "svr in allServers" ng-if="svr.selected">
+                            <td>{{svr.display}}</td>
+                            <td>{{svr.cntWarning}}</td>
+                            <td>{{svr.cntError}}</td>
+                        </tr>
+                    </table>
+
+                </uib-tab>
+
                 <uib-tab ng-repeat="svr in allServers" ng-show="svr.selected" heading="{{svr.display}}">
 
                     <uib-tabset>
@@ -334,7 +199,12 @@
                             </table>
                         </uib-tab>
                         <uib-tab heading="Json">
+
                             <pre>{{svr.response | json}}</pre>
+                        </uib-tab>
+                        <uib-tab heading="Server">
+
+                            Url: {{svr.url}}
                         </uib-tab>
                     </uib-tabset>
 

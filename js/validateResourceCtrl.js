@@ -1,20 +1,43 @@
 angular.module("sampleApp")
     .controller('validateSampleCtrl',
-        function ($scope,$uibModal,$http,modalService,$timeout,$firebaseObject,appConfigSvc,$location) {
+        function ($scope,$uibModal,$http,modalService,$timeout,$firebaseObject,appConfigSvc,$localStorage) {
 
 
             $scope.input = {};
             $scope.error = 'error';
 
+            $http.post('/stats/login',{module:'validator'}).then(
+                function(data){
+
+                },
+                function(err){
+                    console.log('error accessing clinfhir to register access',err)
+                }
+            );
+
+
             $scope.allServers = [];
 
-            $scope.allServers.push({display:"Au primary care","url":"https://primarycare.ontoserver.csiro.au/fhir/",selected:true})
-            $scope.allServers.push({display:"Public HAPI 4","url":"http://fhirtest.uhn.ca/baseR4/"})
-            $scope.allServers.push({display:"FHIR test 4","url":"http://test.fhir.org/r4/"})
+
+            $scope.allServers.push({display:"FHIR test 3","url":"http://test.fhir.org/stu3/"});
+            $scope.allServers.push({display:"FHIR test 4","url":"http://test.fhir.org/r4/",selected:true});
+
+            $scope.allServers.push({display:"Public HAPI 3","url":"http://fhirtest.uhn.ca/baseDstu3/"})
+            $scope.allServers.push({display:"Public HAPI 4","url":"http://fhirtest.uhn.ca/baseR4/"});
+
             $scope.allServers.push({display:"Telstra Health R3",url:"http://sqlonfhir-stu3.azurewebsites.net/fhir/",needsParameter:true})
             $scope.allServers.push({display:"Telstra Health R4",url:"http://sqlonfhir-r4.azurewebsites.net/fhir/",needsParameter:true})
 
+            $scope.allServers.push({display:"Ontoserver R3","url":"https://ontoserver.csiro.au/stu3-latest/"});
+            $scope.allServers.push({display:"Ontoserver R4","url":"https://r4.ontoserver.csiro.au/fhir/"});
+            $scope.allServers.push({display:"Au primary care","url":"https://primarycare.ontoserver.csiro.au/fhir/"});
 
+            if ($localStorage.validationServers) {
+                $localStorage.validationServers.forEach(function(svr){
+                    svr.local = true;
+                    $scope.allServers.push(svr)
+                })
+            }
 
             $scope.fetchResource = function(url) {
                 $http.get(url).then(
@@ -28,6 +51,13 @@ angular.module("sampleApp")
             };
 
             $scope.validate = function( ){
+
+                $scope.allServers.forEach(function(svr){
+                    delete svr.response;
+                    delete svr.outcome;
+                })
+
+
                 let resource = $scope.input.resource;
                 if (resource) {
                     let resourceType;
@@ -55,7 +85,7 @@ angular.module("sampleApp")
                         }
 
 
-                        console.log(resourceType)
+                        //console.log(resourceType)
 
                     } else {
                         //assume json
@@ -102,6 +132,7 @@ angular.module("sampleApp")
                                     console.log(data)
                                     svr.response = data.data;
                                     svr.outcome = true;
+                                    updateServer(svr,data.data)
                                    // $scope.oo = data.data;
                                 },
                                 function(err) {
@@ -109,6 +140,7 @@ angular.module("sampleApp")
                                     //$scope.oo = err.data;
                                     svr.response = err.data;
                                     svr.outcome = false;
+                                    updateServer(svr,err.data)
 
                                     //alert(angular.toJson(err))
                                 }
@@ -121,30 +153,41 @@ angular.module("sampleApp")
 
                     }
 
-                    /*
-                    $http.post(url,resource,config).then(
-                        function(data){
-                            console.log(data)
-                            $scope.oo = data.data;
-                        },
-                        function(err) {
-                            console.log(err)
-                            $scope.oo = err.data;
 
 
-                            //alert(angular.toJson(err))
+                }
+
+                function updateServer(svr,oo) {
+                    svr.cntError = 0;
+                    svr.cntWarning = 0;
+                    if (oo) {
+                        try {
+                            let OO = angular.fromJson(oo)
+
+                            if (OO.issue) {
+                                OO.issue.forEach(function (iss) {
+                                    switch (iss.severity) {
+                                        case 'error' :
+                                            svr.cntError++
+                                            break;
+                                        case 'warning' :
+                                            svr.cntWarning++
+                                            break;
+                                    }
+                                })
+                            }
+
+                    console.log(svr)
+
+                        } catch (ex){
+                            console.log(ex)
                         }
-                    ).finally(
-                        function(){
-                            $scope.showWaiting = false;
-                        }
-                    )
-                    */
-
+                    }
                 }
 
 
             }
+            /*
             console.log(location.host)
             //will update the config. We don't care if manually entered servers are lost or the default servers changed
             if (appConfigSvc.checkConfigVersion()) {
@@ -189,7 +232,7 @@ angular.module("sampleApp")
 
 
             let appRoot = location.host;
-
+*/
             /*
             //set the servers to the ones used by the csiro project.
             appConfigSvc.setServerType('conformance','http://home.clinfhir.com:8030/baseDstu3/');
