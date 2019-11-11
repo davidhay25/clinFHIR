@@ -39,7 +39,6 @@
 
                     firebase.auth().onAuthStateChanged(function(user) {
 
-
                         if (user) {
                             $scope.user = user;
 
@@ -50,7 +49,6 @@
                             delete $scope.user
 
                         }
-
                     });
 
                     $scope.login=function(){

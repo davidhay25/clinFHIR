@@ -16,6 +16,7 @@
     <script src="js/libs/firebase.js"></script>
     <script src="js/libs/angularfire.min.js"></script>
 
+
     <style>
         .error {
             color:red;
@@ -30,9 +31,9 @@
             $locationProvider.hashPrefix('!');
         });
         angular.module("sampleApp").constant("moment", moment);
-
+/*
         angular.module("sampleApp")
-            .controller('csiroCtrl',
+            .controller('csiroCtrlXXX',
                 function ($scope,$uibModal,$http,modalService,$timeout,$firebaseObject,appConfigSvc,$location) {
 
 
@@ -152,7 +153,7 @@
 
 
                     let appRoot = location.host;
-
+*/
                     /*
                     //set the servers to the ones used by the csiro project.
                     appConfigSvc.setServerType('conformance','http://home.clinfhir.com:8030/baseDstu3/');
@@ -170,9 +171,10 @@
                     //$scope.taskManager = "/taskManager.html";
 
 */
+                    /*
                 }
             )
-
+*/
     </script>
 
     <script>
@@ -207,7 +209,7 @@
     <script src="js/libs/ngStorage.min.js"></script>
     <script src="js/filters.js"></script>
     <script src="js/loginCtrl.js"></script>
-
+    <script src="js/validateSampleCtrl.js"></script>
 
 
     <title>Sample Validator</title>
@@ -217,7 +219,7 @@
 
 <body style="padding: 8px;padding-top: 80px" >
 
-<div ng-app="sampleApp" ng-controller="csiroCtrl" class="container-fluid">
+<div ng-app="sampleApp" ng-controller="validateSampleCtrl" class="container-fluid">
 
     <nav ng-hide="startupParams.hideNav" class="navbar navbar-default navbar-fixed-top" role="navigation">
 
@@ -275,15 +277,86 @@
 
 
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-2">
+            <strong>Select the validation servers </strong>
+            <div ng-repeat = "server in allServers">
+                <input type="checkbox" ng-model="server.selected" /> {{server.display}}
+            </div>
+
+            <button ng-show="input.resource" class="btn btn-link pull-right" ng-click="validate()">Validate</button>
+
+        </div>
+        <div class="col-md-5">
+            <div class="row">
+                <div class="col-md-10">
+                    <input type="text" class="form-control" placeholder="Url to a single resource" ng-model="queryUrl"/>
+
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-link" ng-click="fetchResource()">Fetch</button>
+                </div>
+            </div>
             <textarea class="form-control" rows="20" ng-model="input.resource"
             placeholder="Paste the resource (XML or Json) and click 'validate'"
             ></textarea>
-            <button class="btn btn-link" ng-click="validate()">Validate</button>
-            {{url}}
+
+
         </div>
-        <div class="col-md-6">
+
+
+        <div class="col-md-5">
+
+
+            <uib-tabset>
+                <uib-tab ng-repeat="svr in allServers" ng-show="svr.selected" heading="{{svr.display}}">
+
+                    <uib-tabset>
+                        <uib-tab heading="Details">
+                            <table class="table table-bordered">
+                                <tr><th>Location</th><th>Diagnostics</th><th>Severity</th></tr>
+                                <tr ng-repeat = "iss in svr.response.issue"
+                                    ng-class="{error:iss.severity=='error'}">
+                                    <td>
+                                        <div ng-repeat = 'l in iss.location'>
+                                            {{l}}
+                                        </div>
+                                    </td>
+                                    <td>{{iss.diagnostics}}
+                                        <div>{{iss.details.text}}</div>
+                                        <div ng-repeat="exp in expression">
+                                            {{exp}}
+                                        </div>
+
+                                    </td>
+                                    <td>{{iss.severity}}</td>
+
+                                </tr>
+                            </table>
+                        </uib-tab>
+                        <uib-tab heading="Json">
+                            <pre>{{svr.response | json}}</pre>
+                        </uib-tab>
+                    </uib-tabset>
+
+                </uib-tab>
+            </uib-tabset>
+
+<!--
+            ==========================
             <h4 ng-show="oo">Outcome of Validation</h4>
+
+            <uib-tabset>
+                <uib-tab heading="Details">
+
+                </uib-tab>
+                <uib-tab heading="Json">
+                    <pre>{{oo | json}}</pre>
+                </uib-tab>
+            </uib-tabset>
+
+
+
+
             <table ng-show="oo" class="table table-bordered">
                 <tr><th>Location</th><th>Diagnostics</th><th>Severity</th></tr>
                 <tr ng-repeat = "iss in oo.issue"
@@ -298,7 +371,7 @@
 
                 </tr>
             </table>
-
+-->
         </div>
     </div>
 

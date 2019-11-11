@@ -813,7 +813,7 @@ console.log(hashErrors)
                                     if (iss.severity == 'warning') {
                                         $scope.valWarnings++
                                         addToIssue = true
-                                    } 
+                                    }
                                 });
 
                                 if ( addToIssue ) {
@@ -841,9 +841,15 @@ console.log(hashErrors)
                     )
 
                     return deferred.promise;
+
+                    function processValidationItem(issue) {
+
+
+                    }
+
                 }
 
-
+/*
 
                 return;
                 //bundle validation...
@@ -914,6 +920,8 @@ console.log(hashErrors)
 
                     }
                 )
+
+                */
             };
 
             $scope.copyToClipboard = function(){

@@ -363,7 +363,13 @@
                                                 <table class="table">
                                                     <tr ng-repeat="err in selectedBundleEntryErrors">
                                                         <td>{{err.severity}}</td>
-                                                        <td>{{err.diagnostics}}</td>
+                                                        <td>
+                                                            {{err.diagnostics}}
+                                                            {{err.details.text}}
+                                                            <div ng-repeat = "ex in err.expression">
+                                                                {{ex}}
+                                                            </div>
+                                                        </td>
                                                         <td>
                                                             <div ng-repeat="location in err.location">
                                                                 {{location}}
