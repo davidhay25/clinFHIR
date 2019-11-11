@@ -16,13 +16,16 @@ angular.module("sampleApp")
 
 
 
-            $scope.fetch = function(url) {
+            $scope.fetchResource = function(url) {
                 $http.get(url).then(
                     function(data) {
-                        $scope.input.resource = data.data;
+                        $scope.input.resource = angular.toJson(data.data);
+                    },
+                    function(err) {
+                        alert(angular.toJson(err))
                     }
                 )
-            }
+            };
 
             $scope.validate = function( ){
                 let resource = $scope.input.resource;
