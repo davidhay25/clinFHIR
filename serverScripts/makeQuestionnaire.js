@@ -48,12 +48,14 @@ let quest = {resourceType:"Questionnaire",id:modelId,status:'draft',item:[]}
 let hashItem = {};      //a has of item by path
 model.snapshot.element.forEach(function(ed,inx) {
     let path = ed.path;         //the path for this element...
-    let item = makeItem(ed);    //the individual questionnaire item
+    let item = makeItem(ed,inx);    //the individual questionnaire item
     let parentPath;
     let ar = path.split('.');
     if (ar.length == 1) {
         //this is  the root
-        hashItem[path] = quest;     //direct children will add to the Questionnaire.item element...
+        item.type="group";
+        quest.item  = [item];
+        hashItem[path] = item;     //direct children will add to the Questionnaire.item element...
         //quest.item.push(item)
     } else {
         //this is an 'ordinary' item.
@@ -112,9 +114,10 @@ if (uploadServer) {
 
 
 
-function makeItem(ed) {
+function makeItem(ed,inx) {
     let item = {}
     item.text = ed.definition + " "+ed.path;
+    item.linkId = inx;
     if (ed.max !== 1) {
         item.repeats = true;
     }

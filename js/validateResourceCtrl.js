@@ -15,18 +15,16 @@ angular.module("sampleApp")
                 }
             );
 
-
             $scope.allServers = [];
 
-
-            $scope.allServers.push({display:"FHIR test 3","url":"http://test.fhir.org/stu3/"});
+            $scope.allServers.push({display:"FHIR test 3","url":"http://test.fhir.org/r3/"});
             $scope.allServers.push({display:"FHIR test 4","url":"http://test.fhir.org/r4/",selected:true});
 
-            $scope.allServers.push({display:"Public HAPI 3","url":"http://fhirtest.uhn.ca/baseDstu3/"})
+            $scope.allServers.push({display:"Public HAPI 3","url":"http://fhirtest.uhn.ca/baseDstu3/"});
             $scope.allServers.push({display:"Public HAPI 4","url":"http://fhirtest.uhn.ca/baseR4/"});
 
-            $scope.allServers.push({display:"Telstra Health R3",url:"http://sqlonfhir-stu3.azurewebsites.net/fhir/",needsParameter:true})
-            $scope.allServers.push({display:"Telstra Health R4",url:"http://sqlonfhir-r4.azurewebsites.net/fhir/",needsParameter:true})
+            $scope.allServers.push({display:"Telstra Health R3",url:"http://sqlonfhir-stu3.azurewebsites.net/fhir/",needsParameter:true});
+            $scope.allServers.push({display:"Telstra Health R4",url:"http://sqlonfhir-r4.azurewebsites.net/fhir/",needsParameter:true});
 
             $scope.allServers.push({display:"Ontoserver R3","url":"https://ontoserver.csiro.au/stu3-latest/"});
             $scope.allServers.push({display:"Ontoserver R4","url":"https://r4.ontoserver.csiro.au/fhir/"});
@@ -187,68 +185,91 @@ angular.module("sampleApp")
 
 
             }
-            /*
-            console.log(location.host)
-            //will update the config. We don't care if manually entered servers are lost or the default servers changed
-            if (appConfigSvc.checkConfigVersion()) {
-                alert('The config was updated. You can continue.')
-            };
-
-            firebase.auth().onAuthStateChanged(function(user) {
 
 
-                if (user) {
-                    $scope.user = user;
-
-                    console.log(user)
 
 
-                } else {
-                    delete $scope.user
 
-                }
-
-            });
-
-            $scope.login=function(){
+            $scope.addServer = function(){
                 $uibModal.open({
                     backdrop: 'static',      //means can't close by clicking on the backdrop.
                     keyboard: false,       //same as above.
-                    templateUrl: 'modalTemplates/login.html',
-                    controller: 'loginCtrl'
+                    templateUrl: 'modalTemplates/addValidationServer.html',
+                    size:'lg',
+                    controller: function($scope,appConfigSvc,modalService){
+
+                        $scope.input = {valid : false};
+
+                        $scope.add = function() {
+                            var svr = {display:$scope.input.name,url:$scope.input.url}
+                            if ($scope.input.parameter) {
+                                svr.needsParameter=true;
+                            }
+                            console.log(svr);
+
+                            $scope.$close(svr);
+
+                        };
+
+                        $scope.test = function() {
+
+
+                            if ($scope.input.url.substr(-1,1) !== '/') {
+                                $scope.input.url += '/';
+                            }
+
+                            let url = $scope.input.url + "metadata";
+                            $scope.waiting=true;
+                            $http.get(url).then(
+                                function(data){
+                                    $scope.input.valid = true;
+                                },
+                                function(err){
+                                    modalService.showModal({}, {bodyText: 'There is no valid FHIR server at this URL:'+url})
+                                }
+                            ).finally(function(){
+                                $scope.waiting=false;
+                            });
+
+
+                        }
+
+                    }
+                }).result.then(function (svr) {
+                    console.log(svr);
+                    svr.local=true;
+                    svr.id = 'id-'+ new Date().getTime();
+                    $localStorage.validationServers = $localStorage.validationServers ||[]
+                    $localStorage.validationServers.push(svr)
+                    $scope.allServers.push(svr)
+                  //  if ($localStorage.validationServers) {
+
                 })
-            };
+            }
 
-            $scope.logout=function(){
-                firebase.auth().signOut().then(function() {
-                    delete $scope.user;
-                    modalService.showModal({}, {bodyText: 'You have been logged out of clinFHIR'})
+            $scope.removeServer = function(svr) {
+                if (svr && svr.id) {
+                    //delete from
+                    console.log(svr)
+                    for (var i=0; i < $localStorage.validationServers.length; i++) {
+                        let s = $localStorage.validationServers[i]
+                        if (s.id == svr.id) {
+                            //remove from the cache...
+                            $localStorage.validationServers.splice(i,1)
+                            //now update the allServers...
+                            for (j=0; j< $scope.allServers.length; j++) {
+                                let s1 = $scope.allServers[j]
+                                if (s1.id == svr.id) {
+                                    $scope.allServers.splice(j,1);
+                                    break;
+                                }
+                            }
+                            break;
+                        }
+                    }
 
-                }, function(error) {
-                    modalService.showModal({}, {bodyText: 'Sorry, there was an error logging out - please try again'})
-                });
+                }
+            }
 
-            };
-
-
-            let appRoot = location.host;
-*/
-            /*
-            //set the servers to the ones used by the csiro project.
-            appConfigSvc.setServerType('conformance','http://home.clinfhir.com:8030/baseDstu3/');
-            appConfigSvc.setServerType('data','http://home.clinfhir.com:8030/baseDstu3/');       //set the data server to the same as the conformance for the comments
-            appConfigSvc.setServerType('terminology',"https://primarycare.ontoserver.csiro.au/fhir/");
-
-
-            //$scope.uberModel = "http://clinfhir.com/logicalModeller.html#9xmtt";
-            //$scope.commonModel = "http://clinfhir.com/logicalModeller.html#f5jor";
-            $scope.taskManager = "/taskManager.html"
-
-            $scope.uberModel =  "/logicalModeller.html#$$$CsiroUberModel";
-            $scope.commonModel = "/logicalModeller.html#$$$CsiroCommon";
-            $scope.testModel = "/logicalModeller.html#$$$ConditionTest";
-            //$scope.taskManager = "/taskManager.html";
-
-*/
         }
     )

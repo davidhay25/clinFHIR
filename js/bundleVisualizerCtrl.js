@@ -2,11 +2,6 @@ angular.module("sampleApp")
     .controller('bundleVisualizerCtrl',
         function ($scope,$uibModal,$http,v2ToFhirSvc,$timeout,modalService,GetDataFromServer,appConfigSvc,$localStorage,$q) {
 
-            //$scope.conformanceServer = 'http://fhirtest.uhn.ca/baseR4/';
-            //$scope.dataServer = 'http://fhirtest.uhn.ca/baseR4/';
-            //$scope.dataServer = "http://hapi.fhir.org/baseR4/";
-            //$scope.dataServer = "http://snapp.clinfhir.com:8081/baseDstu3/";
-            //$scope.conformanceServer = 'http://snapp.clinfhir.com:8081/baseDstu3/';
 
             //will update the config. We don't care if manually entered servers are lost or the default servers changed
             if (appConfigSvc.checkConfigVersion()) {
