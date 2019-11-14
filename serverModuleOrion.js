@@ -33,7 +33,7 @@ function setup(app,db) {
 
     });
 
-    app.post('/clinFHIR/executeFP',function(req,res){
+    app.post('/clinFHIR/executeFP-DEP',function(req,res){
 
         var body = "";
 

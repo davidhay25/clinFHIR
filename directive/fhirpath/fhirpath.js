@@ -27,10 +27,17 @@ angular.module('sampleApp')
 
                 $scope.executeJSONPath = function(path) {
                     delete $scope.FHIRPathResult;
+                    delete $scope.FHIRPathError;
+                    try {
+                        $scope.FHIRPathResult = fhirpath.evaluate($scope.resource, path);
+                    } catch (ex) {
+                        $scope.FHIRPathError = ex.message;
+                    }
 
-                    var url = "clinFHIR/executeFP";
-
+/*
+ var url = "clinFHIR/executeFP";
                     var data = {path:path,resource:$scope.resource}
+
                     $http.post(url,data).then(
                         function(data) {
                             //console.log(data.data)
@@ -41,11 +48,7 @@ angular.module('sampleApp')
                         }
                     );
 
-                    /*
-                     var allElements = JSONPath({path:path,json:$scope.dataFromServer.fhir,flatten:true})
-                     $scope.JSONPathResult = allElements;
-                     console.log(allElements)
-                     */
+*/
                 }
             }
         }

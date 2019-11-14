@@ -16,4 +16,8 @@
     <div>
         <pre ng-show="FHIRPathResult">{{FHIRPathResult | json}}</pre>
     </div>
+
+    <div ng-show="FHIRPathError" class="alert alert-danger">
+        {{FHIRPathError}}
+    </div>
 </div>

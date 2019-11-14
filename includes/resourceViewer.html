@@ -442,7 +442,6 @@
                         <uib-accordion>
 
                             <div uib-accordion-group class="panel-default" heading="{{key}}"
-
                                  ng-show = "value.entry.length > 0"
                                  ng-repeat="(key,value)  in allResources">
                                 <ul class="list-group">
@@ -467,15 +466,19 @@
 
                         </div>
 
-                        <ul class="list-group">
+                        <strong>Entries</strong>
+                        <div style="height: 700px; overflow-y: scroll;">
+                            <ul class="list-group">
 
-                            <li ng-class="{'list-group-item':1==1,'list-group-item-info':entry.resource.id == outcome.selectedResource.id}"
-                                style = "cursor: pointer"
-                                ng-repeat = "entry in singleBundle.entry" ng-click="selectFPResource(entry)">
-                                <ng-include src="'./includes/resourceDisplayTemplates.html'"></ng-include>
+                                <li ng-class="{'list-group-item':1==1,'list-group-item-info':entry.resource.id == outcome.selectedResource.id}"
+                                    style = "cursor: pointer"
+                                    ng-repeat = "entry in singleBundle.entry" ng-click="selectFPResource(entry)">
+                                    <ng-include src="'./includes/resourceDisplayTemplates.html'"></ng-include>
 
-                            </li>
-                        </ul>
+                                </li>
+                            </ul>
+                        </div>
+
 
 
 
@@ -487,7 +490,17 @@
             </div>
 
             <div class="col-md-5 col-sm-5">
+                <strong>Source for FHIRPath evaluation</strong>
                 <pre>{{fpResource | json}}</pre>
+                <div ng-hide="fpResource">
+                    <p>Please select a resource to the left to evaluate the FHIRPath expression on. </p>
+                    <ul>
+                        <li>From the 'By type' tab you can select the resource type, then a single resource instance</li>
+                        <li>The 'Bundle' tab allows you to select a resource from the bundle, or the bundle itself - in
+                        which case the FHIRPath operates on the bundle as a whole.</li>
+                    </ul>
+
+                </div>
             </div>
 
             <div class="col-md-5 col-sm-5">

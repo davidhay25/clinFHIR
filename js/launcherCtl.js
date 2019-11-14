@@ -77,7 +77,6 @@ console.log(user)
 
             // an event that is called after the date range is changed in the graph...
             var evt = function(min,max){
-
                 //re- call the summary endpoint, but only update the moduleList and countryList properties...
                 GetDataFromServer.getAccessAudit(null,min,max).then(
                     function(log){

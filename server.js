@@ -12,7 +12,7 @@ var Cookies = require( "cookies" )
 var express = require('express');
 var app = express();
 
-var orionModule = require("./serverModuleOrion.js")
+//var orionModule = require("./serverModuleOrion.js")
 var smartModule = require("./serverModuleSMART.js")
 
 
@@ -38,10 +38,10 @@ var taskModule = require("./serverModuleTask");
 taskModule.setup(app,wss,WebSocket)     // need WebSocket for the constants
 
 //for v2 processing
-console.log('including server modele');
-let v2Module = require("./serverModuleV2");
-v2Module.setup(app);
-console.log('included server modele');
+//console.log('including server modele');
+//let v2Module = require("./serverModuleV2");
+//v2Module.setup(app);
+//console.log('included server modele');
 
 wss.on('connection', function connection(ws) {
     ws.on('message', function incoming(message) {
@@ -66,7 +66,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/clinfhir', function(err, ldb) {
         console.log('>>> Mongo server not running')
     } else {
         db = ldb;
-        orionModule.setup(app,db);
+      //  orionModule.setup(app,db);
         smartModule.setup(app,db);
 
     }

@@ -116,6 +116,8 @@
 
     <script src="resourceBuilder/vsBrowser.js"></script>
 
+    <script src="js/libs/fhirpath.min.js"></script>
+
 
     <!-- for the 3d graph - and others
 
@@ -167,7 +169,7 @@
 
 
             </div>
-            <div class="col-md-6 col-sm-6">
+            <div class="col-md-5 col-sm-5">
 
                 <div class="navbar-text" ng-show="currentPatient">
                     {{ResourceUtilsSvc.getOneLineSummaryOfResource(currentPatient)}} ({{currentPatient.id}})
@@ -180,7 +182,7 @@
                     <img src="css/ajax_loader_blue_32.gif"/>
                 </div>
             </div>
-            <div class="col-md-3 col-sm-3">
+            <div class="col-md-4 col-sm-4">
 
                 <form ng-show = "appConfigSvc.getCurrentDataServer().smart && ! oauthAccessToken" class="navbar-form navbar-right">
                     <button class="btn btn-danger" ng-click="smartLogin()">Logon</button>

@@ -517,8 +517,8 @@ angular.module("sampleApp")
 
             //==== for fhirpath ===
 
-            $scope.selectFPResource = function(resource){
-                $scope.fpResource = resource
+            $scope.selectFPResource = function(entry){
+                $scope.fpResource = entry.resource
             };
 
             $scope.selectSingleBundle = function(bundle){
