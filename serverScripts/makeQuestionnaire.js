@@ -112,11 +112,10 @@ if (uploadServer) {
 }
 
 
-
-
 function makeItem(ed,inx) {
     let item = {}
-    item.text = ed.definition + " "+ed.path;
+    //item.text = ed.definition + " "+ed.path;
+    item.text = ed.short;
     item.linkId = inx;
     if (ed.max !== 1) {
         item.repeats = true;

@@ -122,8 +122,17 @@ angular.module("sampleApp")
                                 }
                                 content = {resourceType:'Parameters',parameter:[]}
                                 content.parameter.push({name:'resource',resource:angular.fromJson(resource)})
+                                //content.parameter.push({name:'mode',valueCode:'profile'})
                             }
 
+                            //if a validation url has been set, then it must be sent as a parameter
+                            if ($scope.profileUrl) {
+                                content = {resourceType:'Parameters',parameter:[]}
+                                content.parameter.push({name:'resource',resource:angular.fromJson(resource)})
+                                //content.parameter.push({name:'mode',valueCode:'profile'})
+                                //content.parameter.push({name:'profile',valueUri:$scope.profileUrl})
+                                content.parameter.push({name:'profile',value:$scope.profileUrl})
+                            }
 
                             $http.post(url,content,config).then(
                                 function(data){

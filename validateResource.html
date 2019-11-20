@@ -141,16 +141,25 @@
         <div class="col-md-5">
             <div class="row">
                 <div class="col-md-10">
-                    <input type="text" class="form-control" placeholder="QueryUrl" ng-model="queryUrl"/>
+                    <input type="text" class="form-control" placeholder="The url to retrieve the resource to validate" ng-model="queryUrl"/>
 
                 </div>
                 <div class="col-md-2">
                     <button ng-show="queryUrl" class="btn btn-link" ng-click="fetchResource(queryUrl)">Fetch</button>
                 </div>
             </div>
+
             <textarea class="form-control" rows="20" ng-model="input.resource"
-            placeholder="Paste the resource (XML or Json) and click 'validate'"
-            ></textarea>
+            placeholder="Paste the resource (XML or Json) and click 'validate'"></textarea>
+            <div class="row">
+                <div class="col-md-10">
+                    <input type="text" class="form-control" placeholder="The canonical url of the profile to validate against (if any)" ng-model="profileUrl"/>
+
+                </div>
+                <div class="col-md-2">
+
+                </div>
+            </div>
 
 
         </div>

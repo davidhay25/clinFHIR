@@ -1,7 +1,7 @@
 
 angular.module("sampleApp")
     .controller('launcherCtrl',
-        function ($scope,modalService,$firebaseObject,GetDataFromServer,$uibModal,appConfigSvc,$interval,$http,logicalModelSvc,$timeout) {
+        function ($scope,modalService,$firebaseObject,GetDataFromServer,$uibModal,appConfigSvc,$interval,$http,logicalModelSvc,$timeout,$location) {
 
             GetDataFromServer.registerAccess('launcher');
 
@@ -15,6 +15,23 @@ angular.module("sampleApp")
                 txt += " (Note that the servers have been re-set to the defaults, and also you will need to re-enter any direct servers you have added via the 'gear' icon)"
                 modalService.showModal({}, {bodyText: txt})
             }
+
+
+            let search = $location.search();
+            console.log(search)
+            //the data server. assume one only passed in...
+
+            if (search.data) {
+                appConfigSvc.setServerType('data',search.data);
+            }
+
+            if (search.term) {
+                appConfigSvc.setServerType('terminology',search.term);
+            }
+            if (search.conf) {
+                appConfigSvc.setServerType('conformance',search.conf);
+            }
+
 
             //---------- login stuff
             //called whenever the auth state changes - eg login/out, initial load, create user etc.

@@ -239,7 +239,6 @@ angular.module("sampleApp")
                     }
                 }
 
-
                 $localStorage.config.allKnownServers.push(svr)
                 if (isTerminology) {
                     $localStorage.config.terminologyServers.push(svr);
@@ -248,9 +247,14 @@ angular.module("sampleApp")
             setServerType : function(type,url) {
                 //set a default server type for this instance!
 
+                //for now - assume the url
+
+
+
+
                 $localStorage.config.servers[type] = url;
-                //defaultConfig.servers[type] = url;
-                //$localStorage.config = defaultConfig;
+
+
             },
             init : function(){
                 $http.get("config.json").then(
@@ -424,12 +428,16 @@ angular.module("sampleApp")
                 //return dataServer;
             },
             getCurrentConformanceServer : function() {
+                //is this a named server? (ie in allServers
                 for (var i=0; i < $localStorage.config.allKnownServers.length; i++){
                     var svr = $localStorage.config.allKnownServers[i];
                     if (svr.url == $localStorage.config.servers.conformance) {
                         return svr;
                     }
                 }
+                //no matcheserver
+                //if the server url is not one of the named ones...
+                return {url:$localStorage.config.servers.data,name:$localStorage.config.servers.data}
             },
             getCurrentTerminologyServer : function() {
                 for (var i=0; i < $localStorage.config.allKnownServers.length; i++){
@@ -438,6 +446,8 @@ angular.module("sampleApp")
                         return svr;
                     }
                 }
+                //if the server url is not one of the named ones...
+                return {url:$localStorage.config.servers.data,name:$localStorage.config.servers.data}
             },
             getCurrentFhirVersion : function() {
                 var version = 3;       //default to v3
