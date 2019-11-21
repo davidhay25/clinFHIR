@@ -22,14 +22,14 @@ angular.module("sampleApp")
             //the data server. assume one only passed in...
 
             if (search.data) {
-                appConfigSvc.setServerType('data',search.data);
+                appConfigSvc.setServerType('data',search.data,search.dataname);
             }
 
             if (search.term) {
-                appConfigSvc.setServerType('terminology',search.term);
+                appConfigSvc.setServerType('terminology',search.term,search.termname);
             }
             if (search.conf) {
-                appConfigSvc.setServerType('conformance',search.conf);
+                appConfigSvc.setServerType('conformance',search.conf,search.confname);
             }
 
 

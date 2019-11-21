@@ -110,7 +110,7 @@ angular.module("sampleApp")
             }
 
             function setCurrent(svr){
-                var sel = {}
+                var sel = svr; //{}
                 $scope.allServers.forEach(function(s){
                     if (svr.url == s.url) {
                         sel = s

@@ -244,15 +244,30 @@ angular.module("sampleApp")
                     $localStorage.config.terminologyServers.push(svr);
                 }
             },
-            setServerType : function(type,url) {
+            setServerType : function(type,url,name) {
                 //set a default server type for this instance!
 
                 //for now - assume the url
 
 
+                //if this url is not in all servers then add it...
+
 
 
                 $localStorage.config.servers[type] = url;
+
+                //added devdays2019
+                for (var i=0; i < $localStorage.config.allKnownServers.length; i++){
+                    if ($localStorage.config.allKnownServers[i].url == url) {
+                        return;
+                    }
+                }
+
+                //if here, then not in allservers - add it
+                let svr = {url:url}
+                svr.name = name || url
+                $localStorage.config.allKnownServers.push(svr)
+
 
 
             },
