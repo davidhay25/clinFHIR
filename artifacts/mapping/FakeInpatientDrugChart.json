@@ -1,0 +1,319 @@
+{
+  "resourceType": "StructureDefinition",
+  "url": "http://example.org/mappingengine/fhir/StructureDefinition/FakeInpatientDrugChart",
+  "name": "FakeInpatientDrugChart",
+  "status": "draft",
+  "fhirVersion": "3.0.1",
+  "kind": "logical",
+  "abstract": false,
+  "type": "http://example.org/fhir/StructureDefinition/FakeInpatientDrugChart",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Element",
+  "derivation": "specialization",
+  "differential": {
+    "element": [
+      {
+        "id": "FakeInpatientDrugChart",
+        "path": "FakeInpatientDrugChart",
+        "min": 0,
+        "max": "*",
+        "type": [
+          {
+            "code": "Element"
+          }
+        ]
+      },
+      {
+        "id": "FakeInpatientDrugChart.mpi",
+        "path": "FakeInpatientDrugChart.mpi",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "string",
+            "profile": "http://hl7.org/fhir/StructureDefinition/string"
+          }
+        ]
+      },
+      {
+        "id": "FakeInpatientDrugChart.patientName",
+        "path": "FakeInpatientDrugChart.patientName",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "string",
+            "profile": "http://hl7.org/fhir/StructureDefinition/string"
+          }
+        ]
+      },
+      {
+        "id": "FakeInpatientDrugChart.dateOfBirth",
+        "path": "FakeInpatientDrugChart.dateOfBirth",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "string",
+            "profile": "http://hl7.org/fhir/StructureDefinition/string"
+          }
+        ]
+      },
+      {
+        "id": "FakeInpatientDrugChart.contact",
+        "path": "FakeInpatientDrugChart.contact",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "BackboneElement"
+          }
+        ]
+      },
+      {
+        "id": "FakeInpatientDrugChart.contact.address",
+        "path": "FakeInpatientDrugChart.contact.address",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "string",
+            "profile": "http://hl7.org/fhir/StructureDefinition/string"
+          }
+        ]
+      },
+      {
+        "id": "FakeInpatientDrugChart.contact.email",
+        "path": "FakeInpatientDrugChart.contact.email",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "string",
+            "profile": "http://hl7.org/fhir/StructureDefinition/string"
+          }
+        ]
+      },
+      {
+        "id": "FakeInpatientDrugChart.contact.telephone",
+        "path": "FakeInpatientDrugChart.contact.telephone",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "string",
+            "profile": "http://hl7.org/fhir/StructureDefinition/string"
+          }
+        ]
+      },
+      {
+        "id": "FakeInpatientDrugChart.guardian",
+        "path": "FakeInpatientDrugChart.guardian",
+        "min": 0,
+        "max": "*",
+        "type": [
+          {
+            "code": "BackboneElement"
+          }
+        ]
+      },
+      {
+        "id": "FakeInpatientDrugChart.guardian.name",
+        "path": "FakeInpatientDrugChart.guardian.name",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "string",
+            "profile": "http://hl7.org/fhir/StructureDefinition/string"
+          }
+        ]
+      },
+      {
+        "id": "FakeInpatientDrugChart.guardian.address",
+        "path": "FakeInpatientDrugChart.guardian.address",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "string",
+            "profile": "http://hl7.org/fhir/StructureDefinition/string"
+          }
+        ]
+      },
+      {
+        "id": "FakeInpatientDrugChart.guardian.email",
+        "path": "FakeInpatientDrugChart.guardian.email",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "string",
+            "profile": "http://hl7.org/fhir/StructureDefinition/string"
+          }
+        ]
+      },
+      {
+        "id": "FakeInpatientDrugChart.guardian.telephone",
+        "path": "FakeInpatientDrugChart.guardian.telephone",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "string",
+            "profile": "http://hl7.org/fhir/StructureDefinition/string"
+          }
+        ]
+      },
+      {
+        "id": "FakeInpatientDrugChart.weight",
+        "path": "FakeInpatientDrugChart.weight",
+        "short": "Patient's weight, in kg.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "decimal",
+            "profile": "http://hl7.org/fhir/StructureDefinition/decimal"
+          }
+        ]
+      },
+      {
+        "id": "FakeInpatientDrugChart.height",
+        "path": "FakeInpatientDrugChart.height",
+        "short": "Patient's height, in cm.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "integer",
+            "profile": "http://hl7.org/fhir/StructureDefinition/integer"
+          }
+        ]
+      },
+      {
+        "id": "FakeInpatientDrugChart.pregnant",
+        "path": "FakeInpatientDrugChart.pregnant",
+        "definition": "Is the patient pregnant? (for female patients only)",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "boolean",
+            "profile": "http://hl7.org/fhir/StructureDefinition/boolean"
+          }
+        ]
+      },
+      {
+        "id": "FakeInpatientDrugChart.drugSensitivity",
+        "path": "FakeInpatientDrugChart.drugSensitivity",
+        "min": 0,
+        "max": "*",
+        "type": [
+          {
+            "code": "BackboneElement"
+          }
+        ]
+      },
+      {
+        "id": "FakeInpatientDrugChart.drugSensitivity.drugOrSubstance",
+        "path": "FakeInpatientDrugChart.drugSensitivity.drugOrSubstance",
+        "short": "Drug/substance",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "string",
+            "profile": "http://hl7.org/fhir/StructureDefinition/string"
+          }
+        ]
+      },
+      {
+        "id": "FakeInpatientDrugChart.drugSensitivity.reaction",
+        "path": "FakeInpatientDrugChart.drugSensitivity.reaction",
+        "short": "Description of allergy/reaction",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "string",
+            "profile": "http://hl7.org/fhir/StructureDefinition/string"
+          }
+        ]
+      },
+      {
+        "id": "FakeInpatientDrugChart.drugSensitivity.dateRecorded",
+        "path": "FakeInpatientDrugChart.drugSensitivity.dateRecorded",
+        "short": "When this sensitivity was recorded",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "dateTime",
+            "profile": "http://hl7.org/fhir/StructureDefinition/dateTime"
+          }
+        ]
+      },
+      {
+        "id": "FakeInpatientDrugChart.prescribedDrug",
+        "path": "FakeInpatientDrugChart.prescribedDrug",
+        "min": 0,
+        "max": "*",
+        "type": [
+          {
+            "code": "BackboneElement"
+          }
+        ]
+      },
+      {
+        "id": "FakeInpatientDrugChart.prescribedDrug.drug",
+        "path": "FakeInpatientDrugChart.prescribedDrug.drug",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "string",
+            "profile": "http://hl7.org/fhir/StructureDefinition/string"
+          }
+        ]
+      },
+      {
+        "id": "FakeInpatientDrugChart.prescribedDrug.dose",
+        "path": "FakeInpatientDrugChart.prescribedDrug.dose",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "string",
+            "profile": "http://hl7.org/fhir/StructureDefinition/string"
+          }
+        ]
+      },
+      {
+        "id": "FakeInpatientDrugChart.prescribedDrug.route",
+        "path": "FakeInpatientDrugChart.prescribedDrug.route",
+        "short": "Route of administration for the drug",
+        "definition": "The route that the drug should be administered by.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "code",
+            "profile": "http://hl7.org/fhir/StructureDefinition/code"
+          }
+        ]
+      },
+      {
+        "id": "FakeInpatientDrugChart.gender",
+        "path": "FakeInpatientDrugChart.gender",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "string",
+            "profile": "http://hl7.org/fhir/StructureDefinition/string"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -2,18 +2,19 @@ angular.module("sampleApp")
 //this performs marking services
 
 
-    .service('sessionSvc', function() {
+    .service('sessionSvc', function($localStorage) {
 
 
         var token;
 
         return {
             getAuthToken: function () {
-                return token
+                return $localStorage.token
 
             },
             setAuthToken : function(authToken){
-                token = authToken;
+                $localStorage.token = authToken
+                //token = authToken;
             }
         }
     })

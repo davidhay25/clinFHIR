@@ -1,0 +1,169 @@
+/// version = 0.1
+/// title = "FHIR Mapper Tutorial : FakeInpatientDrugChart"
+/// status = draft
+
+/*
+  The following FHIR Mapping Language file demonstrates the currently supported features of the FHIR Mapper
+    (Firely's implementation of the FHIR Mapping Language).
+  To learn more about the FHIR Mapper, see http://docs.simplifier.net/mappingengine/index.html
+
+  This is a pretty extensive example - feel free to refer to it when writing your own maps!
+
+  Maps are monodirectional: in this case we map from a logical model to FHIR resources.
+*/
+
+map "http://vonk.fire.ly/fhir/StructureMap/FHIRMapperTutorial" = FHIRMapperTutorial
+
+uses "http://hl7.org/fhir/StructureDefinition/FakeInpatientDrugChart" as source
+uses "http://hl7.org/fhir/StructureDefinition/Patient" as target
+uses "http://hl7.org/fhir/StructureDefinition/Observation" as target
+uses "http://hl7.org/fhir/StructureDefinition/MedicationRequest" as target
+
+group MapFakeInpatientDrugChart(source src: FakeInpatientDrugChart, target bundle: Bundle)
+{
+  src -> bundle.id = uuid();
+  src -> bundle.type = 'collection';
+  src -> bundle.entry as entry, entry.resource = create('Patient') as patient then
+    TransformPatient(src, patient), TransformPatientPostHandler(src, patient, bundle);
+}
+
+group TransformPatient(source src : FakeInpatientDrugChart, target patient: Patient)
+{
+  src -> patient.id = uuid();
+  src.mpi as mpi -> patient.identifier =
+    id('http://vonk.fire.ly/fhir/CodeSystem/mpi', mpi) as identifier, identifier.use = 'official';
+  src.patientName as patientName -> patient.name as humanName, humanName.text = patientName;
+  src.dateOfBirth as dateOfBirth -> patient.birthDate = dateOp(dateOfBirth);
+
+  src.contact as contact, contact.address as sourceAddress -> patient.address as targetAddress collate,
+    targetAddress.line = sourceAddress;
+  src.contact as contact, contact.email as email -> patient.telecom as telecom,
+    telecom.system = 'email', telecom.value = email;
+  src.contact as contact, contact.telephone as telephone -> patient.telecom as telecom,
+    telecom.system = 'phone', telecom.value = telephone;
+
+  src.guardian as guardian -> patient.contact = create('BackboneElement') as contact collate then
+  {
+    guardian.name as name -> contact.relationship =
+      cc('http://terminology.hl7.org/CodeSystem/v2-0131', 'C', 'Emergency Contact'),
+      contact.name as humanName, humanName.text = name;
+
+    guardian.email as email -> contact.telecom as telecom,
+      telecom.system = 'email', telecom.value = email;
+
+    guardian.telephone as telephone -> contact.telecom as telecom,
+      telecom.system = 'phone', telecom.value = telephone;
+  };
+
+  src.gender as gender -> patient.gender =
+    translate(gender, 'http://vonk.fire.ly/fhir/ConceptMap/MyFakePatientGender', 'code');
+}
+
+group TransformPatientPostHandler(source src: FakeInpatientDrugChart, source patient: Patient,
+  target bundle: Bundle) {
+
+  src where "weight.exists()" -> bundle.entry as entry,
+            entry.resource = create('Observation') as observation
+            then TransformObservationWeight(src, patient, observation);
+
+  src where "height.exists()" -> bundle.entry as entry,
+         entry.resource = create('Observation') as observation
+         then TransformObservationHeight(src, patient, observation);
+
+  src where "pregnant.exists()" -> bundle.entry as entry,
+         entry.resource = create('Observation') as observation
+         then TransformObservationPregnancy(src, patient, observation);
+
+  src where "prescribedDrug.exists()" -> bundle.entry as entry,
+         entry.resource = create('MedicationRequest') as medicationrequest
+         then TransformPrescription(src, patient, medicationrequest);
+
+  src where "drugSensitivity.exists()" -> bundle.entry as entry,
+         entry.resource = create('AllergyIntolerance') as allergyintolerance
+         then TransformAllergyIntolerance(src, patient, allergyintolerance);
+}
+
+group TransformObservationWeight(source src: FakeInpatientDrugChart, source patient: Patient,
+  target observation: Observation)
+{
+    src -> observation.id = uuid();
+    src -> observation.status = 'final';
+    src -> observation.category = cc('http://hl7.org/fhir/observation-category', 'vital-signs', 'Vital Signs');
+    src -> observation.code = cc('http://loinc.org', '29463-7', 'Body weight');
+
+    src.weight as weight -> observation.value = create('Quantity') as value collate, value.value = weight;
+    src -> observation.value as value collate, value.unit = 'kg';
+    src -> observation.value as value collate, value.code = 'kg';
+    src -> observation.value as value collate, value.system = 'http://unitsofmeasure.org';
+
+    patient.id as patientId log "$this" -> observation.subject = create('Reference') as subject,
+      subject.reference = evaluate(patientId, '\'Patient/\' + $this');
+}
+
+group TransformObservationHeight(source src: FakeInpatientDrugChart, source patient: Patient,
+  target observation: Observation)
+{
+    src -> observation.id = uuid();
+    src -> observation.status = 'final';
+    src -> observation.category = cc('http://hl7.org/fhir/observation-category', 'vital-signs', 'Vital Signs');
+    src -> observation.code = cc('http://loinc.org', '8302-2', 'Body height');
+
+    src.height as height -> observation.value = create('Quantity') as value collate, value.value = height;
+    src -> observation.value as value collate, value.unit = 'cm';
+    src -> observation.value as value collate, value.code = 'cm';
+    src -> observation.value as value collate, value.system = 'http://unitsofmeasure.org';
+
+    patient.id as patientId -> observation.subject = create('Reference') as subject,
+      subject.reference = evaluate(patientId, '\'Patient/\' + $this');
+}
+
+group TransformObservationPregnancy(source src: FakeInpatientDrugChart, source patient: Patient,
+  target observation: Observation)
+{
+    src -> observation.id = uuid();
+    src -> observation.status = 'final';
+    src -> observation.category = cc('http://hl7.org/fhir/observation-category', 'vital-signs', 'Vital Signs');
+    src -> observation.code = cc('http://loinc.org', '11449-6', 'Pregnancy status');
+
+    src.pregnant as pregnant where "$this.gender = f" -> observation.value;
+
+    patient.id as patientId -> observation.subject = create('Reference') as subject,
+      subject.reference = evaluate(patientId, '\'Patient/\' + $this');
+}
+
+group TransformPrescription(source src: FakeInpatientDrugChart, source patient: Patient,
+  target medicationrequest: MedicationRequest)
+{
+  src -> medicationrequest.id = uuid();
+  src -> medicationrequest.intent = 'order';
+
+  patient.id as patientId -> medicationrequest.subject = create('Reference') as subject,
+    subject.reference = evaluate(patientId, '\'Patient/\' + $this');
+
+  src.prescribedDrug as prescription then {
+    prescription.drug as drug -> medicationrequest.medicationCodeableConcept = cc(drug);
+    prescription.dose as dose -> medicationrequest.dosageInstruction = create('Dosage') as dosage,
+      dosage.text = dose;
+    prescription.route as route -> medicationrequest.dosageInstruction as di,
+      di.route = create('CodeableConcept') as cc, cc.text = route; // we can't trust it to be actually coded
+  };
+}
+
+group TransformAllergyIntolerance(source src: FakeInpatientDrugChart, source patient: Patient,
+  target allergyintolerance: AllergyIntolerance)
+{
+  src -> allergyintolerance.id = uuid();
+  src -> allergyintolerance.clinicalStatus = 'active';
+  src -> allergyintolerance.verificationStatus = 'confirmed';
+
+  patient.id as patientId -> allergyintolerance.patient = create('Reference') as patient,
+    patient.reference = evaluate(patientId, '\'Patient/\' + $this');
+
+  src.drugSensitivity as sensitivity then {
+    sensitivity.drugOrSubstance as dos -> allergyintolerance.code = cc(dos);
+    sensitivity.reaction -> allergyintolerance.reaction = create('BackboneElement') as reaction then {
+      sensitivity.reaction as reactiontext -> reaction.manifestation = cc(reactiontext);
+      sensitivity.dateRecorded as date -> reaction.onset = date;
+    };
+  };
+}

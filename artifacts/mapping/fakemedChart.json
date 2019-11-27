@@ -1,0 +1,43 @@
+{
+  "resourceType": "FakeInpatientDrugChart",
+  "mpi": "13027305-4623-4b3a-9ef7-006cf4bb5592",
+  "patientName": "Sam Fhirman",
+  "dateOfBirth": "1988-01-01",
+  "contact": {
+    "address": "My Home Address 1234",
+    "email": "sam@fhir_is_awesome.org",
+    "telephone": "+1 123456 7890"
+  },
+  "guardian": [
+    {
+      "name": "Alexander Fhirman",
+      "address": "My Home Address 1234",
+      "email": "alexander@fhir_is_awesome.org",
+      "telephone": "+1 09876 54321"
+    },
+    {
+      "name": "Susan Fhirman",
+      "address": "My Home Address 1234",
+      "email": "susan@fhir_is_awesome.org",
+      "telephone": "+1 09876 54321"
+    }
+  ],
+  "weight": "85.5",
+  "height": "185",
+  "pregnant": true,
+  "gender": "female",
+  "prescribedDrug": [
+    {
+      "drug": "citalopram",
+      "dose": "1 tablet daily",
+      "route": "oral"
+    }
+  ],
+  "drugSensitivity": [
+    {
+      "drugOrSubstance": "Cashew nuts",
+      "reaction": "anaphylactic reaction",
+      "dateRecorded": "2014-10-09"
+    }
+  ]
+}

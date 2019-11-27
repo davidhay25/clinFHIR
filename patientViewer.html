@@ -68,7 +68,7 @@
         angular.module("sampleApp").factory('authIntercept',['sessionSvc',function(sessionSvc){
             return {
                 'request': function(config){
-                    //console.log('intercept '+ sessionSvc.getAuthToken());
+                    console.log('intercept '+ sessionSvc.getAuthToken());
                     if (sessionSvc.getAuthToken()) {
                         config.headers['Authorization'] = sessionSvc.getAuthToken();
                         config.headers['myAuth'] = sessionSvc.getAuthToken();

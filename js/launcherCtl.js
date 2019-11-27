@@ -1,10 +1,10 @@
 
 angular.module("sampleApp")
     .controller('launcherCtrl',
-        function ($scope,modalService,$firebaseObject,GetDataFromServer,$uibModal,appConfigSvc,$interval,$http,logicalModelSvc,$timeout,$location) {
+        function ($scope,modalService,$firebaseObject,GetDataFromServer,$uibModal,appConfigSvc,
+                  $localStorage,$interval,$http,logicalModelSvc,$timeout,$location,sessionSvc) {
 
             GetDataFromServer.registerAccess('launcher');
-
 
             $scope.testing = {};
             $scope.showServers = false;
@@ -32,6 +32,13 @@ angular.module("sampleApp")
                 appConfigSvc.setServerType('conformance',search.conf,search.confname);
             }
 
+            //If there's a token then include it with the request. Save it in the local cache...
+            delete $localStorage.token;
+
+            if (search.token) {
+                sessionSvc.setAuthToken(search.token)
+                $scope.token = search.token;
+            }
 
             //---------- login stuff
             //called whenever the auth state changes - eg login/out, initial load, create user etc.

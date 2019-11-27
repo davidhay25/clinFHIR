@@ -1,0 +1,120 @@
+{
+  "resourceType": "StructureDefinition",
+  "url": "http://clinfhir.com/fhir/StructureDefinition/mappingMap",
+  "text": {
+    "status": "additional",
+    "div": "<div xmlns='http://www.w3.org/1999/xhtml'>Extension Definition</div>"
+  },
+  "id": "mappingMap",
+  "name": "mappingMap",
+  "status": "draft",
+  "fhirVersion": "4.0.0",
+  "kind": "complex-type",
+  "abstract": false,
+  "publisher": "clinFHIR",
+	"context":["StructureMap"],
+	"contextType":"resource",
+  "type": "Extension",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation": "constraint",
+  "snapshot": {
+    "element": [
+      {
+        "id": "Extension",
+        "path": "Extension",
+        "short": "Extension",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Extension",
+          "min": 0,
+          "max": "*"
+        },
+        "definition": "No description"
+      },
+      {
+        "id": "Extension.id",
+        "path": "Extension.id",
+        "short": "Extension id",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Extension.id",
+          "min": 0,
+          "max": "1"
+        },
+        "definition": "Unique id for referencing",
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension",
+        "path": "Extension.extension",
+        "short": "Extension extension",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Extension.extension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        },
+        "definition": "extension on extension"
+      },
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "short": "Extension url",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "Extension.url",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "url"
+          }
+        ],
+        "fixedUri": "http:clinfhir.com/fhir/StructureDefinition/mappingMap",
+        "definition": "The unique Url"
+      },
+      {
+        "id": "Extension.valueString:valueString",
+        "path": "Extension.valueString",
+        "sliceName": "valueString",
+        "short": "Value of extension",
+        "definition": "The actula value of the extension",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Extension.value[x]",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      }
+    ]
+  }
+}

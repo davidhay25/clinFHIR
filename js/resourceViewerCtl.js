@@ -131,8 +131,8 @@ angular.module("sampleApp")
                 }
             }
 
-            $scope.isSMART = appConfigSvc.getCurrentDataServer().smart;     //if true, this server requires SMART
-            $scope.oauthAccessToken;    //if SMART, this will be the access token...
+            //$scope.isSMART = appConfigSvc.getCurrentDataServer().smart;     //if true, this server requires SMART
+            //$scope.oauthAccessToken;    //if SMART, this will be the access token...
 
             //---------- SMART stuff ------ move to a common service eventually..
             $scope.smartLogin = function() {
@@ -156,7 +156,7 @@ angular.module("sampleApp")
                 //renderPatientDetails($scope.allResources,true);
                 drawGraph();
 
-            }
+            };
 
             //select graph options
 
