@@ -10,7 +10,7 @@
             </div>
             <div class="col-md-6 col-sm-6 col-xs-6">
 
-                <button ng-show="input.path" class="btn btn-success pull-right" ng-click="add()">
+                <button ng-show="validId" class="btn btn-success pull-right" ng-click="add()">
                     Add
                 </button>
                 <button class="btn btn-link pull-right" ng-click="$dismiss()">Cancel</button>
@@ -24,17 +24,64 @@
 
 
         <div class="row" style="margin-bottom: 10px">
+        <div class="col-md-2 col-sm-2">
+            Project Id
+        </div>
+        <div class="col-md-3 col-sm-3">
+            <input ng-disabled="validId" type="text" class="form-control" ng-model="id"/>
+        </div>
+        <div class="col-md-1 col-sm-1">
+            <div ng-show="id">
+                <button ng-hide="validId" class="btn btn-warning" ng-click="checkId()">Check</button>
+            </div>
+
+            <div ng-show="validId">OK</div>
+        </div>
+        <div class="col-md-6 col-sm-6">
+            <em>The id for the project. This is the id of the StructureMap resource, and must
+                be unique on the Mapping server.</em>
+        </div>
+    </div>
+
+        <div class="row" style="margin-bottom: 10px">
+            <div class="col-md-2 col-sm-2">
+                Name
+            </div>
             <div class="col-md-4 col-sm-4">
-
-            </div>
-            <div class="col-md-8 col-sm-8">
-
+                <input type="text" class="form-control" ng-model="name"/>
             </div>
 
+            <div class="col-md-6 col-sm-6">
+                <em>A meaningful name for the model</em>
+            </div>
         </div>
 
+        <div class="row" style="margin-bottom: 10px">
+            <div class="col-md-2 col-sm-2">
+                Description
+            </div>
 
+            <div class="col-md-4 col-sm-4">
+                <textarea class="form-control" ng-model="description"></textarea>
+            </div>
+            <div class="col-md-6 col-sm-6">
+                <em>The description of what the mapping project is about</em>
+            </div>
+        </div>
 
+        <div class="row" style="margin-bottom: 10px">
+            <div class="col-md-2 col-sm-2">
+                Use sample
+            </div>
+
+            <div class="col-md-4 col-sm-4">
+                <checkbox ng-model="sample">Sample</checkbox>
+            </div>
+            <div class="col-md-6 col-sm-6">
+                <em>If checked, then the Firely sample mapping and example will be added. This is useful
+                when new to the mapping language</em>
+            </div>
+        </div>
 
 
 
@@ -44,6 +91,8 @@
 
         <div class="row">
             <div class="col-md-12 col-sm-12">
+                Create a new mapping project. This is centered around a StructureMap resource which contains the
+                parsed map, as well as extensions for the example inputs and the text map.
             </div>
         </div>
     </div>

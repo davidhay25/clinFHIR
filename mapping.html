@@ -20,7 +20,7 @@
     <script src="js/libs/angularfire.min.js"></script>
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase','ngSanitize']).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.bootstrap','ui.checkbox','ngStorage','firebase','ngSanitize']).config(function($locationProvider) {
             $locationProvider.html5Mode(true);
             $locationProvider.hashPrefix('!');
         });
@@ -52,6 +52,7 @@
     <script src="js/filters.js"></script>
     <script src="js/modalDialogSvc.js"></script>
     <script src="js/loginCtrl.js"></script>
+    <script src="js/libs/angular-bootstrap-checkbox.js"></script>
    <!--
     <script src="js/taskManagerCtl.js"></script>
     <script src="js/modalDialogSvc.js"></script>
@@ -68,7 +69,7 @@
 </head>
 
 <style>
-    textarea
+    .editor
     {
         font-family:"Courier New";
         font-weight: bold;
@@ -101,9 +102,16 @@
 
             <div class="col-md-2 col-sm-2">
                 <div class="navbar-text">
+                    <select ng-model="currentSM" class="form-control"
+                            ng-change="selectMapFromDD(currentSM)"
+                            ng-options="map.id for map in maps"></select>
+<!--
                     <select ng-model="input.model" class="form-control"
-                            ng-change="selectMap(map)"
-                            ng-options="map.name for map in maps"></select>
+                            ng-change="selectMapFromDD(input.model)"
+                            ng-options="map.id for map in maps"></select>
+                    -->
+
+
                 </div>
             </div>
 
@@ -111,7 +119,6 @@
                 <div class="navbar-text">
                     <i class="glyphicon glyphicon-plus-sign clickable" ng-click="addMap()"></i>
                 </div>
-
             </div>
 
 
@@ -125,13 +132,8 @@
             <div class="col-md-1 col-sm-1">
                 <form class="navbar-form navbar-left">
                     <img ng-show="showWaiting" src="css/ajax_loader_blue_32.gif"/>
-
-
-
                 </form>
             </div>
-
-
 
             <div class="col-md-3 col-sm-3">
 
@@ -159,18 +161,47 @@
         </div>
     </nav>
 
-<!--
-    <div class="row">
-        <div class="col-md-2">
-            <h4>Projects</h4>
-        </div>
--->
 
-        <div class="col-md-12">
+
+        
+            <button ng-show="input.isDirty" class="btn btn-primary pull-right"
+                    ng-click="updateStructureMap()">Update StructureMap resource</button>
             <uib-tabset>
                 <uib-tab heading="Project">
+                    <br/>
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-6" >
+
+                            <div class="row" style="margin-bottom: 10px">
+                                <div class="col-md-3">
+                                    <strong>Id</strong>
+                                </div>
+                                <div class="col-md-9">
+                                    <input class="form-control" disabled="disabled" ng-model="currentSM.id"/>
+
+                                </div>
+                            </div>
+                            <div class="row" style="margin-bottom: 10px">
+                                <div class="col-md-3">
+                                    <strong>Name</strong>
+                                </div>
+                                <div class="col-md-9">
+
+                                    <input class="form-control" ng-model="currentSM.name"/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <strong>Description</strong>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea class="form-control"
+                                              ng-change="input.isDirty = true"
+                                              ng-model="currentSM.description"></textarea>
+
+                                </div>
+                            </div>
+
                         </div>
                         <div class="col-md-6">
                             <h4>Structure Definitions</h4>
@@ -185,8 +216,9 @@
                     </div>
 
                 </uib-tab>
-                <uib-tab heading="Input file">
-                    <textarea rows = "30" class="form-control" ng-model="input.inputJson"></textarea>
+                <uib-tab heading="Example input">
+                    <br/>
+                    <textarea rows = "30" class="form-control" ng-change="input.isDirty = true" ng-model="input.inputJson"></textarea>
                 </uib-tab>
                 <uib-tab heading="Mapping File">
                     <br/>
@@ -195,12 +227,8 @@
                             Error: {{iss.details.text}}
                         </div>
                     </div>
-                    <div>
-                        <strong>StructureMap Id</strong> {{structureMapId}}
-                        <button ng-show="input.isDirty" class="btn btn-primary pull-right" ng-click="updateStructureMap()">Update StructureMap resource</button>
-                    </div>
-                    <br/>
-                    <textarea rows = "30" class="form-control" ng-change="input.isDirty = true" ng-model="input.mappingFile"></textarea>
+
+                    <textarea rows = "30" class="form-control editor" ng-change="input.isDirty = true" ng-model="input.mappingFile"></textarea>
                 </uib-tab>
 
 
@@ -214,6 +242,10 @@
                     <br/>
                     <button class="btn btn-link pull-right" ng-show="output"
                             ng-click="copyToClipboard()">Copy to Clipboard</button>
+
+                    <button class="btn btn-link pull-right" ng-show="output"
+                            ng-click="validate()">Validate</button>
+
                     <div>
                         <button class="btn btn-primary" ng-click="transform()">Execute transform</button>
                         <span class="pull-right">{{transformMessage}}</span>
@@ -261,7 +293,7 @@
                                     <div id="resourceGraph"></div>
                                 </div>
                                 <div class="col-md-4">
-                                    <div class="col-md-10">
+                                    <div class="col-md-12">
                                         <uib-tabset>
                                             <uib-tab heading="Json">
                                                 <pre>{{selectedEntry | json}}</pre>
@@ -285,7 +317,7 @@
             </uib-tabset>
 
 
-        </div>
+
     </div>
 
 </div>
