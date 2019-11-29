@@ -123,7 +123,7 @@ angular.module("sampleApp")
                         };
 
                         $scope.add = function(){
-                            $scope.$close({id:$scope.id,sample:$scope.sample,description:$scope.description,name:name})
+                            $scope.$close({id:$scope.id,sample:$scope.sample,description:$scope.description,name:$scope.name})
                         }
 
                     },resolve : {
@@ -143,11 +143,14 @@ angular.module("sampleApp")
                         $scope.updateStructureMap(function(map){
                             //after the map has been created, we add it to the list of maps and make it current...
                             $scope.maps.push(map);
-                            $scope.input.model = map;   //for the dropdown
+                            //$scope.input.model = map;   //for the dropdown
                             //$scope.currentSM = map;
                         });
                     } else {
-
+                        //this has no sample data. It won't be saved until a mapping text has been entered & updated...
+                        delete $scope.input.inputJson, $scope.input.mappingFile;
+                        $scope.currentSM = {resourceType:'StructureMap',id:vo.id,name:vo.name,description:vo.description}
+                        $scope.maps.push($scope.currentSM);
                     }
                 })
             };
@@ -179,6 +182,12 @@ angular.module("sampleApp")
 
             //convert the map into an SM resource using $convert, then update the SM resource if the conversion was successful...
             $scope.updateStructureMap = function(cb) {
+
+                if (! $scope.input.mappingFile) {
+                    alert("There must be some text in the mapping file before the StructureMap can be created")
+                    return;
+                }
+
                 $scope.showWaiting = true;
                 delete $scope.convertError, $scope.transformError;
                 let url = $scope.serverRoot + "StructureMap/$convert";
@@ -265,6 +274,11 @@ angular.module("sampleApp")
 
             //perform the actual expansion...
             $scope.transform = function(){
+
+                //todo - save automatically...
+                if ($scope.isDirty) {
+                    alert('There are unsaved changes. The transformation will be performed aginst the version stored on the server.')
+                }
                 delete $scope.output;
                 delete $scope.convertError, $scope.transformError;
                 $scope.transformMessage = "Executing map on server, please wait...";
