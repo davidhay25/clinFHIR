@@ -1,0 +1,55 @@
+
+<div>
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-6 col-sm-6 col-xs-6">
+
+                <h3 class="modal-title">Open a map</h3>
+
+            </div>
+            <div class="col-md-6 col-sm-6 col-xs-6">
+
+
+                <button class="btn btn-link pull-right" ng-click="$dismiss()">Cancel</button>
+
+            </div>
+
+        </div>
+
+    </div>
+    <div class="modal-body">
+
+
+        <div class="row" >
+        <div class="col-md-2 col-sm-2">
+            StructureMap Id
+        </div>
+        <div class="col-md-3 col-sm-3">
+            <input ng-disabled="validId" type="text" class="form-control" ng-model="id"/>
+        </div>
+        <div class="col-md-1 col-sm-1">
+            <div ng-show="id">
+                <button ng-hide="validId" class="btn btn-primary" ng-click="open()">Open</button>
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+</div>
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+                <em>Open an existing map. This allows you to open any map provided you know the Id. The primary
+                    purpose is to allow others to look at your maps - for example to assist with a problem.</em>
+                <strong>Do need to think about security</strong>
+
+            </div>
+        </div>
+    </div>
+</div>

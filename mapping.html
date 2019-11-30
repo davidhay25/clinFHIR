@@ -91,7 +91,7 @@
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
 
         <div class="container-fluid">
-            <div class="col-md-3 col-sm-3">
+            <div class="col-md-4 col-sm-4">
                 <span>
                     <a class="navbar-brand" href="#" ng-click="showVersion()">
                         Mapping language designer
@@ -106,24 +106,8 @@
                     <select ng-model="currentSM" class="form-control"
                             ng-change="selectMapFromDD(currentSM)"
                             ng-options="map.id for map in maps"></select>
-<!--
-                    <select ng-model="input.model" class="form-control"
-                            ng-change="selectMapFromDD(input.model)"
-                            ng-options="map.id for map in maps"></select>
-                    -->
-
 
                 </div>
-            </div>
-
-
-
-
-            <div class="col-md-2 col-sm-2">
-                <div class="navbar-text">
-                    {{currentSM.name}}
-                </div>
-
             </div>
 
             <div class="col-md-1 col-sm-1">
@@ -133,23 +117,36 @@
                 </div>
             </div>
 
-
             <div class="col-md-1 col-sm-1">
-                <form class="navbar-form navbar-left">
-                    <img ng-show="showWaiting" src="css/ajax_loader_blue_32.gif"/>
-                </form>
+                <div class="navbar-text">
+                    <button btn class="btn btn-primary" ng-click="openMap()">Open Map</button>
+                    <!-- <i class="glyphicon glyphicon-plus-sign clickable" ng-click="addMap()"></i>-->
+                </div>
             </div>
 
+
             <div class="col-md-1 col-sm-1">
+                <div class="navbar-text">
+                   <!-- {{currentSM.name}} -->
+                </div>
+            </div>
+
+
+
+
+
+            <div class="col-md-2 col-sm-2">
                 <span class="navbar-text clickable" style="font-size:1.8em" uib-popover="Toggle help"
                       popover-placement="left"
                       popover-trigger="'mouseenter'">
                     <i class="glyphicon glyphicon-question-sign" ng-click="showHelp = ! showHelp"></i>
                 </span>
 
+                <img style="margin-top: 12px" ng-show="showWaiting" src="css/ajax_loader_blue_32.gif"/>
+
             </div>
 
-            <div class="col-md-2 col-sm-2">
+            <div class="col-md-1 col-sm-1">
 
                 <div class="nav navbar-form navbar-right" ng-hide="user">
                     <span style="font-size:1.8em; cursor: pointer" uib-popover="Click to log in"
@@ -197,7 +194,7 @@
             </li>
             <li>
                 The StructureMap resource which is created from the mapping file using the $convert operation (in this implementation - other architectures are possible).
-                
+
             </li>
         </ul>
 
@@ -250,30 +247,29 @@
 
     </div>
 
-
-    <button ng-show="input.isDirty" class="btn btn-primary pull-right"
-            ng-click="updateStructureMap()">Update StructureMap resource</button>
-
-
     <uib-tabset ng-show="currentSM && !showHelp">
 
                 <uib-tab heading="Workspace">
                     <br/>
                     <div class="row">
-                        <div class="col-md-5">
+                        <div class="col-md-4">
                             <div style="text-align: center">
-                            <strong>Sample Input</strong>
+                            <div class="alert alert-warning">Sample Input</div>
                             </div>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-4">
                             <div style="text-align: center">
-                            <button ng-hide="transformMessage" class="btn btn-danger" ng-click="transform()">Execute transform</button>
-                                <span>{{transformMessage}}</span>
+                            <button ng-hide="transformMessage || input.isDirty" class="btn btn-danger" ng-click="transform()">Execute transform</button>
+
+                            <button ng-show="input.isDirty" class="btn btn-primary"
+                                        ng-click="updateStructureMap()">Update StructureMap resource</button>
+
+                                <span ng-hide="input.isDirty">{{transformMessage}}</span>
                             </div>
                         </div>
-                        <div class="col-md-5">
+                        <div class="col-md-4">
                             <div style="text-align: center">
-                                <strong>Mapping</strong>
+                                <div class="alert alert-warning">Mapping file</div>
                             </div>
 
                         </div>
@@ -284,9 +280,10 @@
                             <textarea rows = "15" class="form-control editor" ng-change="input.isDirty = true" ng-model="input.inputJson"></textarea>
                         </div>
                         <div class="col-md-6">
+
                             <div class="alert alert-danger" ng-show="convertError">
                                 <div ng-repeat = "iss in convertError.issue">
-                                    Error: {{iss.details.text}}
+                                    Error: {{iss.details.text}} {{iss.diagnostics}}
                                 </div>
                             </div>
 
@@ -298,20 +295,17 @@
                     <hr/>
                     <div class="alert alert-danger" ng-show="transformError">
                         <div ng-repeat = "iss in transformError.issue">
-                            Error: {{iss.details.text}}
+                            Error: {{iss.details.text}} {{iss.diagnostics}}
                         </div>
                     </div>
                     <br/>
+
                     <button class="btn btn-link pull-right" ng-show="output"
                             ng-click="copyToClipboard()">Copy to Clipboard</button>
 
                     <button class="btn btn-link pull-right" ng-show="output"
                             ng-click="validate()">Validate</button>
 
-                    <div>
-
-
-                    </div>
                     <br/>
 
                     <pre ng-show="transformError">{{transformError | json}}</pre>
@@ -434,7 +428,7 @@
 
 
                 </uib-tab>
-
+<!--
 
                 <uib-tab heading="Example input" ng-show="1==2">
                     <br/>
@@ -533,7 +527,7 @@
 
 
                 </uib-tab>
-
+-->
             </uib-tabset>
 
 

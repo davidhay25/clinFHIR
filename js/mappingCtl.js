@@ -23,8 +23,14 @@ angular.module("sampleApp")
                 );
             }
 
+            function clearInputs() {
+                delete $scope.input.mappingFile;
+                delete $scope.input.inputJson;
+            }
+
             function selectMap(map) {
-                delete $scope.input.mappingFile, $scope.input.inputJson;
+                clearInputs()
+                //delete $scope.input.mappingFile, $scope.input.inputJson;
                 //$scope.currentSM = map;
                 let mf = getStringExtension(map,extMapUrl);
                 if (mf.length > 0) {
@@ -35,8 +41,6 @@ angular.module("sampleApp")
                     $scope.input.inputJson = ex[0]
                 }
             }
-
-
             $scope.maps = [];
             firebase.auth().onAuthStateChanged(function(user) {
                 if (user) {
@@ -90,8 +94,50 @@ angular.module("sampleApp")
                 });
             };
 
+            $scope.openMap = function(){
+                $uibModal.open({
+                    backdrop: 'static',      //means can't close by clicking on the backdrop.
+                    keyboard: false,       //same as above.
+                    //size:'lg',
+                    templateUrl: 'modalTemplates/openMap.html',
+                    controller: function($scope,$http,serverRoot){
+                        $scope.validId = false;
+                        $scope.open = function(){
+                            $scope.$close({id:$scope.id})
+                        }
+
+                    },resolve : {
+                        serverRoot: function () {          //the default config
+                            return $scope.serverRoot;
+                        }
+                    }
+                }).result.then(function(vo){
+                    console.log(vo)
+                    // $scope.structureMapId = vo.id;      //the id of the current map
+
+                    if (vo.id) {
+                        let url = $scope.serverRoot + "StructureMap/"+ vo.id
+                        $http.get(url).then(
+                            function(data) {
+                                let map = data.data;
+                                $scope.currentSM = map
+                                $scope.maps.push(map);
+                                selectMap(map)
+                            }, function (err) {
+                                alert ("Sorry, the StructureMap resource with the id " +vo.id+  "could not be found.")
+                            }
+                        )
+                    }
+
+
+                })
+            }
+
             //when a map is selected from the drop down list for this user
             $scope.selectMapFromDD = function(map){
+                delete $scope.convertError;
+                delete $scope.transformError;
+                delete $scope.transformMessage;
                 console.log(map)
                 selectMap(map)
 
@@ -148,7 +194,8 @@ angular.module("sampleApp")
                         });
                     } else {
                         //this has no sample data. It won't be saved until a mapping text has been entered & updated...
-                        delete $scope.input.inputJson, $scope.input.mappingFile;
+                        delete $scope.input.inputJson;
+                        delete $scope.input.mappingFile;
                         $scope.currentSM = {resourceType:'StructureMap',id:vo.id,name:vo.name,description:vo.description}
                         $scope.maps.push($scope.currentSM);
                     }
@@ -183,13 +230,17 @@ angular.module("sampleApp")
             //convert the map into an SM resource using $convert, then update the SM resource if the conversion was successful...
             $scope.updateStructureMap = function(cb) {
 
+                delete $scope.transformMessage;         //if set, transformMessage hides the transform button
+                delete $scope.convertError;
+
                 if (! $scope.input.mappingFile) {
                     alert("There must be some text in the mapping file before the StructureMap can be created")
                     return;
                 }
 
                 $scope.showWaiting = true;
-                delete $scope.convertError, $scope.transformError;
+
+
                 let url = $scope.serverRoot + "StructureMap/$convert";
                 let options = {headers:{}};
                 options.headers['content-type'] = 'text/fhir-mapping;charset=utf-8';
@@ -214,7 +265,7 @@ angular.module("sampleApp")
                         //let url = $scope.serverRoot + "StructureMap/" + $scope.structureMapId;
                         $http.put(url,structureMapResource).then(
                             function() {
-                                alert("StructureMap updated")
+                                ///alert("StructureMap updated")
                                 $scope.input.isDirty = false;
                                 //$scope.currentSM = structureMapResource;
 
@@ -277,22 +328,37 @@ angular.module("sampleApp")
 
                 //todo - save automatically...
                 if ($scope.isDirty) {
-                    alert('There are unsaved changes. The transformation will be performed aginst the version stored on the server.')
+                    alert('There are unsaved changes. The transformation will be performed against the version stored on the server.')
                 }
+
+                delete $scope.transformMessage;         //if set, transformMessage hides the transform button
+
                 delete $scope.output;
-                delete $scope.convertError, $scope.transformError;
+                delete $scope.convertError;
+                delete $scope.transformError;
                 $scope.transformMessage = "Executing map on server, please wait...";
                 //https://vonk.fire.ly/StructureMap/dh/$transform
                 //let url = $scope.serverRoot + "StructureMap/" + $scope.structureMapId + "/$transform";
                 let url = $scope.serverRoot + "StructureMap/" + $scope.currentSM.id + "/$transform";
-                let input = $scope.input.inputJson;
-                $http.post(url,input).then(
+
+                //if the inpput is a resource then post directly. Otherwise must use a Paramaters
+                let json = angular.fromJson($scope.input.inputJson);
+                let content = $scope.input.inputJson;
+                if (! json.resourceType) {
+                    content = {resourceType:'Parameters',parameter:[]};
+                    content.parameter.push({name:'content',valueString:$scope.input.inputJson});
+                }
+
+
+                $http.post(url,content).then(
                     function(data) {
                         $scope.output = data.data;
-                        delete $scope.transformMessage;
+                        $scope.transformMessage = 'Transform succeeded'
+                        //delete $scope.transformMessage;
                         makeGraph($scope.output)
                     },
                     function (err) {
+                        $scope.transformMessage = "There was an error";
                         $scope.transformError = err.data;
                     }
                 )
@@ -318,6 +384,11 @@ angular.module("sampleApp")
 
 
             function makeGraph(bundle) {
+
+                if (!bundle || !(bundle.resourceType == 'Bundle') || !bundle.entry) {
+                    return
+                }
+
                 let options = {bundle:bundle,hashErrors: {},serverRoot:"https://vonk.fire.ly/"}
                 let vo = v2ToFhirSvc.makeGraph(options)
 
