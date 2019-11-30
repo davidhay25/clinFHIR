@@ -63,9 +63,13 @@ angular.module("sampleApp")
                             //$scope.input.mappingFile = getStringExtension($scope.currentSM,extMapUrl)[0];
                             //$scope.input.inputJson = getStringExtension($scope.currentSM,extExampleUrl)[0];
                             console.log($scope.maps)
-                            $scope.currentSM = $scope.maps[0]
-                            //$scope.input.model = $scope.maps[0]     //todo input.model is what the selector DD is bound to - is this right??
-                            selectMap($scope.currentSM);      //sets currentSM and the map and json vars from the SM
+                            if ($scope.maps.length > 0) {
+                                $scope.currentSM = $scope.maps[0]
+                                //$scope.input.model = $scope.maps[0]     //todo input.model is what the selector DD is bound to - is this right??
+                                selectMap($scope.currentSM);      //sets currentSM and the map and json vars from the SM
+                            }
+
+
                         }
                     ).finally(function () {
                         $scope.showWaiting = false;
@@ -186,6 +190,7 @@ angular.module("sampleApp")
                         $scope.input.inputJson = $scope.sample.inputJson;
                         $scope.input.mappingFile = $scope.sample.mappingFile;
                         //create the actual StructureMap resource
+                        $scope.currentSM = {resourceType:'StructureMap',id:vo.id,name:vo.name,description:vo.description}
                         $scope.updateStructureMap(function(map){
                             //after the map has been created, we add it to the list of maps and make it current...
                             $scope.maps.push(map);
