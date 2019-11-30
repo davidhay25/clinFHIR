@@ -1,27 +1,50 @@
 angular.module("sampleApp")
     .controller('mappingCtrl',
-        function ($scope,$http,v2ToFhirSvc,$uibModal,$timeout,modalService) {
+        function ($scope,$http,v2ToFhirSvc,$uibModal,$timeout,modalService,logicalModelSvc) {
             $scope.input = {};
             $scope.serverRoot = "https://vonk.fire.ly/";
            // $scope.structureMapId = 'dh';
             $scope.input.isDirty = false;
 
+/*
+
+            $timeout(function(){
+
+                var te = document.getElementById("te");
+                let cmOptions = {lineNumbers:true,lineWrapping:true,value:'testrt text'}
+                var myCodeMirror = CodeMirror.fromTextArea(te,cmOptions);
+                    console.log(myCodeMirror)
+                myCodeMirror.on('change',function(evt){
+                    console.log(evt)
+                })
+
+            },1000);
+
+*/
+            //https://stackoverflow.com/questions/6637341/use-tab-to-indent-in-textarea
+
+            $timeout(function(){
+                var textareas = document.getElementsByTagName('textarea');
+                var count = textareas.length;
+                for(var i=0;i<count;i++){
+                    textareas[i].onkeydown = function(e){
+                        if(e.keyCode==9 || e.which==9){
+                            e.preventDefault();
+                            var s = this.selectionStart;
+                            this.value = this.value.substring(0,this.selectionStart) + "  " + this.value.substring(this.selectionEnd);
+                            //this.value = this.value.substring(0,this.selectionStart) + "\t" + this.value.substring(this.selectionEnd);
+                            //this.selectionEnd = s+1;
+                            this.selectionEnd = s+2;
+                        }
+                    }
+                }
+            },1000);
+
+
+
             //todo - should these move to app config svc???
             let extMapUrl = "https://vonk.fire.ly/StructureDefinition/mappingMap";
             let extExampleUrl = "https://vonk.fire.ly/StructureDefinition/mappingExample";
-
-            //get the default project (map). Really just for testing... Th
-            function loadSMDEP(id) {
-                let dUrl = $scope.serverRoot + "StructureMap/"+id
-                $http.get(dUrl).then(
-                    function(data) {
-                        $scope.currentSM = data.data;
-
-                        $scope.input.mappingFile = getStringExtension($scope.currentSM,extMapUrl)[0];
-                        $scope.input.inputJson = getStringExtension($scope.currentSM,extExampleUrl)[0];
-                    }
-                );
-            }
 
             function clearInputs() {
                 delete $scope.input.mappingFile;
@@ -30,6 +53,11 @@ angular.module("sampleApp")
 
             function selectMap(map) {
                 clearInputs()
+                delete $scope.selectedEntry;
+                if ($scope.chart) {
+                    $scope.chart.destroy();
+                }
+
                 //delete $scope.input.mappingFile, $scope.input.inputJson;
                 //$scope.currentSM = map;
                 let mf = getStringExtension(map,extMapUrl);
@@ -40,6 +68,20 @@ angular.module("sampleApp")
                 if (ex.length > 0) {
                     $scope.input.inputJson = ex[0]
                 }
+
+
+/*
+                var elSample = document.getElementById("sample");
+                let cmOptions = {lineNumbers:true,lineWrapping:true}
+                var myCodeMirror = CodeMirror.fromTextArea(elSample,cmOptions);
+                console.log(myCodeMirror);
+                myCodeMirror.on('change',function(evt){
+                    console.log(evt)
+                })
+
+*/
+
+
             }
             $scope.maps = [];
             firebase.auth().onAuthStateChanged(function(user) {
@@ -390,6 +432,7 @@ angular.module("sampleApp")
 
             function makeGraph(bundle) {
 
+
                 if (!bundle || !(bundle.resourceType == 'Bundle') || !bundle.entry) {
                     return
                 }
@@ -435,6 +478,116 @@ angular.module("sampleApp")
                 },1000)
 
             };
+
+            $scope.refreshHistory = function() {
+                $scope.history = [];
+                let url = $scope.serverRoot + "StructureMap/"+$scope.currentSM.id + "/_history";
+                $scope.waiting = true;
+                $http.get(url).then(
+                    function(data) {
+                        console.log(data.data)
+                        if (data.data && data.data.entry) {
+                            data.data.entry.forEach(function (entry) {
+                                let map = entry.resource;
+                                if (map.resourceType == 'StructureMap') {
+                                    let vo = {};
+                                    vo.date = map.meta.lastUpdated;
+                                    let mf = getStringExtension(map,extMapUrl);
+                                    if (mf.length > 0) {
+                                        vo.map = mf[0]
+                                    }
+                                    let ex = getStringExtension(map,extExampleUrl);
+                                    if (ex.length > 0) {
+                                        vo.example  = ex[0]
+                                    }
+                                    $scope.history.push(vo)
+                                }
+
+                            })
+                        }
+                    },
+                    function(err) {
+                        console.log(err)
+                    }
+                ).finally(
+                    function () {
+                        $scope.waiting = false;
+                    }
+                )
+            }
+
+            $scope.showHistoryItem = function(hx) {
+                $scope.hxItem = hx;
+            }
+
+            //draws a logical model tree
+            function drawTree(treeData) {
+
+                $('#lmTreeView').jstree('destroy');
+                $('#lmTreeView').jstree(
+                    {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
+
+                ).on('changed.jstree', function (e, data) {
+                    //seems to be the node selection event...
+
+                    if (data.node) {
+                        $scope.selectedNode = data.node;
+                        $scope.selectedED = logicalModelSvc.getEDForPath($scope.selectedResource,data.node)
+                        console.log($scope.selectedED)
+                        console.log(data.node)
+                    }
+
+                    $scope.$digest();       //as the event occurred outside of angular...
+
+                }).on('redraw.jstree', function (e, data) {
+
+                    //ensure the selected node remains so after a redraw...
+                    if ($scope.treeIdToSelect) {
+                        $("#lmTreeView").jstree("select_node", "#"+$scope.treeIdToSelect);
+                        delete $scope.treeIdToSelect
+                    }
+
+                }).on('open_node.jstree',function(e,data){
+
+                    //set the opened status of the scope property to the same as the tree node so we can remember the state...
+                    $scope.treeData.forEach(function(node){
+                        if (node.id == data.node.id){
+                            node.state.opened = data.node.state.opened;
+                        }
+                    });
+                    $scope.$digest();
+                }).on('close_node.jstree',function(e,data){
+
+                    //set the opened status of the scope propert to the same as the tree node so we can remember the state...
+                    $scope.treeData.forEach(function(node){
+                        if (node.id == data.node.id){
+                            node.state.opened = data.node.state.opened;
+                        }
+                    })
+                    $scope.$digest();
+                });
+
+
+            }
+
+            $scope.showLM = function(canonicalUrl) {
+                let url = $scope.serverRoot + "StructureDefinition?url="+ canonicalUrl;
+                $scope.showWaiting=true;
+                $http.get(url).then(
+                    function(data) {
+                        if (data.data && data.data.entry && data.data.entry.length > 0) {
+                            let resource = data.data.entry[0].resource
+                            let treeData = logicalModelSvc.createTreeArrayFromSD(resource);
+                            drawTree(treeData)
+                        }
+                    }
+                ).finally(function () {
+                    $scope.showWaiting=false;
+                })
+
+            }
+
+
 
 
         }

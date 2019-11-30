@@ -6,9 +6,17 @@
     <script src="js/libs/jquery-1.9.0.min.js"></script>
     <script src="js/libs/angular.min1-5.js"></script>
     <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+    <script src="js/libs/jstree.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
+    <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
 
     <script src="js/libs/moment.min.js"></script>
+<!--
+    <script src="js/libs/codemirror.js"></script>
 
+    <link rel="stylesheet" type="text/css" href="css/codemirror.css"/>
+-->
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
     <link rel="stylesheet" type="text/css" href="css/main.css"/>
 
@@ -53,6 +61,10 @@
     <script src="js/modalDialogSvc.js"></script>
     <script src="js/loginCtrl.js"></script>
     <script src="js/libs/angular-bootstrap-checkbox.js"></script>
+
+    <script src="js/logicalModelSvc.js"></script>
+    <script src="js/appConfigSvc.js"></script>
+    <script src="resourceBuilder/rbServices.js"></script>
    <!--
     <script src="js/taskManagerCtl.js"></script>
     <script src="js/modalDialogSvc.js"></script>
@@ -172,11 +184,19 @@
         </div>
     </nav>
 
+<!--
+    <div class="row">
+        <div class="col-md-4">
+            <textarea id="te"></textarea>
+        </div>
+    </div>
+-->
+
     <div ng-hide="user">
         Only logged in users can view or create maps. To log in click the <span><i class="glyphicon glyphicon-log-in"></i></span> icon in the navbar.
     </div>
 
-    <div ng-show="maps.length == 0" && user>
+    <div ng-show="maps.length == 0" && user && !showWaiting>
         There are no maps currently defined for this user. To create a new map, click the 'New Map' button
         in the navbar and add a new map.
     </div>
@@ -277,7 +297,7 @@
                     <hr/>
                     <div class="row">
                         <div class="col-md-6">
-                            <textarea rows = "15" class="form-control editor" ng-change="input.isDirty = true" ng-model="input.inputJson"></textarea>
+                            <textarea id="sample" rows = "15" class="form-control editor" ng-change="input.isDirty = true" ng-model="input.inputJson"></textarea>
                         </div>
                         <div class="col-md-6">
 
@@ -293,6 +313,7 @@
 
 
                     <hr/>
+
                     <div class="alert alert-danger" ng-show="transformError">
                         <div ng-repeat = "iss in transformError.issue">
                             Error: {{iss.details.text}} {{iss.diagnostics}}
@@ -398,25 +419,30 @@
                                             <strong>Description</strong>
                                         </div>
                                         <div class="col-md-9">
-                                    <textarea class="form-control"
+                                                <textarea class="form-control"
                                               ng-change="input.isDirty = true"
                                               ng-model="currentSM.description"></textarea>
 
                                         </div>
                                     </div>
-
-                                </div>
-                                <div class="col-md-6">
                                     <h4>Structure Definitions</h4>
                                     <table class="table table-bordered">
                                         <tr><th>Url</th><th>Mode</th></tr>
                                         <tr ng-repeat="struct in currentSM.structure">
-                                            <td>{{struct.url}}</td>
+                                            <td><div class="clickable" ng-click="showLM(struct.url)">{{struct.url}}</div> </td>
                                             <td>{{struct.mode}}</td>
                                         </tr>
                                     </table>
+
+
+                                </div>
+                                <div class="col-md-6">
+                                    <div id="lmTreeView"></div>
                                 </div>
                             </div>
+
+
+
 
                         </uib-tab>
                         <uib-tab heading="Json">
@@ -428,6 +454,41 @@
 
 
                 </uib-tab>
+
+                <uib-tab heading="History">
+
+                    <button class="btn btn-link" ng-click="refreshHistory()">Refresh</button>
+
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="list-group">
+                                <div ng-class="{'list-group-item':true,'listItemSelected':hx == hxItem}"
+                                     style="cursor: pointer"
+                                     ng-repeat="hx in history" ng-click="showHistoryItem(hx)">
+                                    {{hx.date | getPrettyDate}}
+                                    <div>({{hx.date | getAgeSeconds}})</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-10">
+                            <div class="row" ng-show="hxItem">
+                                <div class="col-md-6">
+                                    <pre >{{hxItem.example}}</pre>
+                                </div>
+                                <div class="col-md-6">
+                                    <pre>{{hxItem.map}}</pre>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+
+
+
+                </uib-tab>
+
+
 <!--
 
                 <uib-tab heading="Example input" ng-show="1==2">
@@ -535,5 +596,7 @@
     </div>
 
 </div>
+
+
 </body>
 </html>

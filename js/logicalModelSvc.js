@@ -17,7 +17,6 @@ angular.module("sampleApp")
         //the url to the extension in an element...
         var simpleExtensionUrl = appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl
 
-
         var dataTypes = [];
         $http.get("artifacts/dt.json").then(
             function(data) {
@@ -27,14 +26,13 @@ angular.module("sampleApp")
         );
 
         //logical models (like Dosage). Might extend to complex datatypes for expanding logical models later on...
-        var fhirLM = {}
+        var fhirLM = {};
         $http.get("artifacts/fhirLM.json").then(
             function(data) {
                 fhirLM = data.data;
 
             }
         );
-
 
         if (!String.prototype.startsWith) {
             String.prototype.startsWith = function(search, pos) {
