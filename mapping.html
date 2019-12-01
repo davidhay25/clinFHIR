@@ -52,7 +52,7 @@
     </script>
 
     <script src="js/mappingCtl.js"> </script>
-
+    <script src="js/mappingSvc.js"></script>
     <script src="js/libs/ngStorage.min.js"></script>
     <script src="js/mappingCtl.js"></script>
     <script src="js/v2ToFhirSvc.js"></script>
@@ -196,7 +196,7 @@
         Only logged in users can view or create maps. To log in click the <span><i class="glyphicon glyphicon-log-in"></i></span> icon in the navbar.
     </div>
 
-    <div ng-show="maps.length == 0" && user && !showWaiting>
+    <div ng-show="maps.length == 0 && user && (! showWaiting)">
         There are no maps currently defined for this user. To create a new map, click the 'New Map' button
         in the navbar and add a new map.
     </div>
@@ -431,13 +431,31 @@
                                         <tr ng-repeat="struct in currentSM.structure">
                                             <td><div class="clickable" ng-click="showLM(struct.url)">{{struct.url}}</div> </td>
                                             <td>{{struct.mode}}</td>
+                                            <td><span class="clickable" ng-click="importModel(struct.url)">Import</span></td>
                                         </tr>
                                     </table>
 
 
                                 </div>
                                 <div class="col-md-6">
-                                    <div id="lmTreeView"></div>
+                                    <uib-tabset>
+                                        <uib-tab heading="Tree">
+                                            <br/>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div id="lmTreeView"></div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <pre>{{selectedNodeED | json}}</pre>
+                                                </div>
+                                            </div>
+
+                                        </uib-tab>
+                                        <uib-tab heading="Json">
+                                            <pre>{{selectedLM | json}}</pre>
+                                        </uib-tab>
+                                    </uib-tabset>
+
                                 </div>
                             </div>
 

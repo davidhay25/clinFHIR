@@ -1,28 +1,34 @@
 angular.module("sampleApp")
     .controller('mappingCtrl',
-        function ($scope,$http,v2ToFhirSvc,$uibModal,$timeout,modalService,logicalModelSvc) {
+        function ($scope,$http,v2ToFhirSvc,$uibModal,$timeout,modalService,logicalModelSvc,mappingSvc) {
             $scope.input = {};
             $scope.serverRoot = "https://vonk.fire.ly/";
-           // $scope.structureMapId = 'dh';
+            $scope.adminRoot = "https://vonk.fire.ly/administration/";        //where custom SD's are found
+            $scope.confServer = "http://fhirtest.uhn.ca/baseDstu3/";            //where the CF models are found
+
             $scope.input.isDirty = false;
 
-/*
+            //todo - should these move to app config svc???
+            let extMapUrl = "https://vonk.fire.ly/StructureDefinition/mappingMap";
+            let extExampleUrl = "https://vonk.fire.ly/StructureDefinition/mappingExample";
 
-            $timeout(function(){
 
-                var te = document.getElementById("te");
-                let cmOptions = {lineNumbers:true,lineWrapping:true,value:'testrt text'}
-                var myCodeMirror = CodeMirror.fromTextArea(te,cmOptions);
-                    console.log(myCodeMirror)
-                myCodeMirror.on('change',function(evt){
-                    console.log(evt)
-                })
+            /*
 
-            },1000);
+                        $timeout(function(){
 
-*/
+                            var te = document.getElementById("te");
+                            let cmOptions = {lineNumbers:true,lineWrapping:true,value:'testrt text'}
+                            var myCodeMirror = CodeMirror.fromTextArea(te,cmOptions);
+                                console.log(myCodeMirror)
+                            myCodeMirror.on('change',function(evt){
+                                console.log(evt)
+                            })
+
+                        },1000);
+
+            */
             //https://stackoverflow.com/questions/6637341/use-tab-to-indent-in-textarea
-
             $timeout(function(){
                 var textareas = document.getElementsByTagName('textarea');
                 var count = textareas.length;
@@ -40,11 +46,6 @@ angular.module("sampleApp")
                 }
             },1000);
 
-
-
-            //todo - should these move to app config svc???
-            let extMapUrl = "https://vonk.fire.ly/StructureDefinition/mappingMap";
-            let extExampleUrl = "https://vonk.fire.ly/StructureDefinition/mappingExample";
 
             function clearInputs() {
                 delete $scope.input.mappingFile;
@@ -389,13 +390,17 @@ angular.module("sampleApp")
                 let url = $scope.serverRoot + "StructureMap/" + $scope.currentSM.id + "/$transform";
 
                 //if the inpput is a resource then post directly. Otherwise must use a Paramaters
-                let json = angular.fromJson($scope.input.inputJson);
-                let content = $scope.input.inputJson;
-                if (! json.resourceType) {
-                    content = {resourceType:'Parameters',parameter:[]};
-                    content.parameter.push({name:'content',valueString:$scope.input.inputJson});
-                }
 
+                let content = $scope.input.inputJson;
+                try {
+                    let json = angular.fromJson($scope.input.inputJson);
+                    if (! json.resourceType) {
+                        content = {resourceType:'Parameters',parameter:[]};
+                        content.parameter.push({name:'content',valueString:$scope.input.inputJson});
+                    }
+                } catch (ex) {
+                    console.log("Invalid Json as input...")
+                }
 
                 $http.post(url,content).then(
                     function(data) {
@@ -518,7 +523,7 @@ angular.module("sampleApp")
 
             $scope.showHistoryItem = function(hx) {
                 $scope.hxItem = hx;
-            }
+            };
 
             //draws a logical model tree
             function drawTree(treeData) {
@@ -531,15 +536,17 @@ angular.module("sampleApp")
                     //seems to be the node selection event...
 
                     if (data.node) {
-                        $scope.selectedNode = data.node;
-                        $scope.selectedED = logicalModelSvc.getEDForPath($scope.selectedResource,data.node)
-                        console.log($scope.selectedED)
+                        let selectedNode = data.node;
+                        $scope.selectedNodeED = selectedNode.data.ed
+                      //  $scope.selectedED = logicalModelSvc.getEDForPath($scope.selectedResource,data.node)
+                       // console.log($scope.selectedED)
                         console.log(data.node)
                     }
 
                     $scope.$digest();       //as the event occurred outside of angular...
 
-                }).on('redraw.jstree', function (e, data) {
+                })
+                    .on('redraw.jstree', function (e, data) {
 
                     //ensure the selected node remains so after a redraw...
                     if ($scope.treeIdToSelect) {
@@ -547,7 +554,8 @@ angular.module("sampleApp")
                         delete $scope.treeIdToSelect
                     }
 
-                }).on('open_node.jstree',function(e,data){
+                })
+                    .on('open_node.jstree',function(e,data){
 
                     //set the opened status of the scope property to the same as the tree node so we can remember the state...
                     $scope.treeData.forEach(function(node){
@@ -556,7 +564,8 @@ angular.module("sampleApp")
                         }
                     });
                     $scope.$digest();
-                }).on('close_node.jstree',function(e,data){
+                })
+                    .on('close_node.jstree',function(e,data){
 
                     //set the opened status of the scope propert to the same as the tree node so we can remember the state...
                     $scope.treeData.forEach(function(node){
@@ -566,29 +575,45 @@ angular.module("sampleApp")
                     })
                     $scope.$digest();
                 });
-
-
             }
 
             $scope.showLM = function(canonicalUrl) {
-                let url = $scope.serverRoot + "StructureDefinition?url="+ canonicalUrl;
+                let url = $scope.adminRoot + "StructureDefinition?url="+ canonicalUrl;
                 $scope.showWaiting=true;
                 $http.get(url).then(
                     function(data) {
                         if (data.data && data.data.entry && data.data.entry.length > 0) {
-                            let resource = data.data.entry[0].resource
+                            let resource = data.data.entry[0].resource;
+
+                            if (!resource.snapshot) {
+                                resource.snapshot = resource.differential;
+                            }
+
+                            $scope.selectedLM = resource;
                             let treeData = logicalModelSvc.createTreeArrayFromSD(resource);
+
+
                             drawTree(treeData)
                         }
+                    },
+                    function(err) {
+                        alert(angular.toJson(err))
                     }
                 ).finally(function () {
                     $scope.showWaiting=false;
                 })
 
+            };
+
+            $scope.importModel = function(url) {
+                mappingSvc.importModel(url,$scope.confServer,$scope.adminRoot).then(
+                    function(data) {
+                        alert('Model has been imported')
+                    },
+                    function(err) {
+                        alert('There was an error: ' + angular.toJson(err))
+                    }
+                )
             }
-
-
-
-
         }
     );
