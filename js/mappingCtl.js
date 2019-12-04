@@ -1,7 +1,7 @@
 angular.module("sampleApp")
     .controller('mappingCtrl',
         function ($scope,$http,v2ToFhirSvc,$uibModal,$timeout,$window,$location,
-                  modalService,logicalModelSvc,mappingSvc,Utilities,$firebaseObject) {
+                  modalService,logicalModelSvc,mappingSvc) {
             $scope.input = {};
             $scope.serverRoot = "https://vonk.fire.ly/";
             $scope.adminRoot = "https://vonk.fire.ly/administration/";        //where custom SD's are found
@@ -18,6 +18,13 @@ angular.module("sampleApp")
             let extMapUrl = "https://vonk.fire.ly/StructureDefinition/mappingMap";
             let extExampleUrl = "https://vonk.fire.ly/StructureDefinition/mappingExample";
 
+            var hash = $location.hash();
+
+            if (hash) {
+                $scope.modelSpecified = hash;
+                console.log(hash)
+                loadMap(hash)
+            }
 
             /*
 
@@ -54,8 +61,8 @@ angular.module("sampleApp")
 
 
 
-
-            $scope.generateShortCut = function() {
+/*
+            $scope.generateShortCutDEP = function() {
                 let hash = Utilities.generateHash();
                 let shortCut = $window.location.href+"#"+hash
 
@@ -74,16 +81,9 @@ angular.module("sampleApp")
                 )
             };
 
-            var hash = $location.hash();
-            if (hash) {
-                var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
+            */
 
-                sc.$loaded().then(
-                    function(){
-                        var id = sc.modelId;
-                        console.log(id)
-                    })
-            }
+
 
             function clearInputs() {
                 delete $scope.input.mappingFile;
@@ -120,9 +120,10 @@ angular.module("sampleApp")
                 })
 
 */
-
+                makeDownload(map)
 
             }
+
             $scope.maps = [];
             firebase.auth().onAuthStateChanged(function(user) {
                 if (user) {
@@ -146,9 +147,12 @@ angular.module("sampleApp")
                             //$scope.input.inputJson = getStringExtension($scope.currentSM,extExampleUrl)[0];
                             console.log($scope.maps)
                             if ($scope.maps.length > 0) {
-                                $scope.currentSM = $scope.maps[0]
-                                //$scope.input.model = $scope.maps[0]     //todo input.model is what the selector DD is bound to - is this right??
-                                selectMap($scope.currentSM);      //sets currentSM and the map and json vars from the SM
+                                $scope.currentSM = $scope.maps[0];
+                                //modelSpecified is set when the model is specified as a hash...
+                                if (! $scope.modelSpecified ) {
+                                    selectMap($scope.currentSM);      //sets currentSM and the map and json vars from the SM
+                                }
+
                             }
 
 
@@ -199,25 +203,27 @@ angular.module("sampleApp")
                     }
                 }).result.then(function(vo){
                     console.log(vo)
-                    // $scope.structureMapId = vo.id;      //the id of the current map
 
                     if (vo.id) {
-                        let url = $scope.serverRoot + "StructureMap/"+ vo.id
-                        $http.get(url).then(
-                            function(data) {
-                                let map = data.data;
-                                $scope.currentSM = map
-                                $scope.maps.push(map);
-                                selectMap(map)
-                            }, function (err) {
-                                alert ("Sorry, the StructureMap resource with the id " +vo.id+  "could not be found.")
-                            }
-                        )
+                        loadMap(id)
                     }
-
-
                 })
+            };
+
+            function loadMap(id) {
+                let url = $scope.serverRoot + "StructureMap/"+ id
+                $http.get(url).then(
+                    function(data) {
+                        let map = data.data;
+                        $scope.currentSM = map
+                        $scope.maps.push(map);
+                        selectMap(map)
+                    }, function (err) {
+                        alert ("Sorry, there is no StructureMap resource at " + url)
+                    }
+                )
             }
+
 
             //when a map is selected from the drop down list for this user
             $scope.selectMapFromDD = function(map){
@@ -360,6 +366,16 @@ angular.module("sampleApp")
                 $scope.selectedEntry = entry
             };
 
+            function makeDownload(map) {
+                $scope.downloadMapContent = window.URL.createObjectURL(new Blob([angular.toJson(map)],
+                    {type: "text/text"}));
+
+                var now = moment().format();
+                $scope.downloadMapName = "StructureMap-"+ map.id + '-' + now + '.json';
+
+            }
+
+
             //convert the map into an SM resource using $convert, then update the SM resource if the conversion was successful...
             $scope.updateStructureMap = function(cb) {
 
@@ -394,6 +410,10 @@ angular.module("sampleApp")
                         addStringExtension(structureMapResource,extExampleUrl,$scope.input.inputJson);
 
                         console.log(data.data)
+
+
+                        makeDownload(structureMapResource)
+
                         let url = $scope.serverRoot + "StructureMap/" + $scope.currentSM.id;
                         //let url = $scope.serverRoot + "StructureMap/" + $scope.structureMapId;
                         $http.put(url,structureMapResource).then(
@@ -626,14 +646,13 @@ angular.module("sampleApp")
                     if (data.node) {
                         let selectedNode = data.node;
                         $scope.selectedNodeED = selectedNode.data.ed
-                      //  $scope.selectedED = logicalModelSvc.getEDForPath($scope.selectedResource,data.node)
-                       // console.log($scope.selectedED)
+
                         console.log(data.node)
                     }
 
                     $scope.$digest();       //as the event occurred outside of angular...
 
-                })
+                })/*
                     .on('redraw.jstree', function (e, data) {
 
                     //ensure the selected node remains so after a redraw...
@@ -651,6 +670,8 @@ angular.module("sampleApp")
                             node.state.opened = data.node.state.opened;
                         }
                     });
+
+
                     $scope.$digest();
                 })
                     .on('close_node.jstree',function(e,data){
@@ -662,7 +683,7 @@ angular.module("sampleApp")
                         }
                     })
                     $scope.$digest();
-                });
+                });*/
             }
 
             $scope.showLM = function(canonicalUrl) {

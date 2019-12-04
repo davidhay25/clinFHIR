@@ -33,6 +33,11 @@
             $locationProvider.hashPrefix('!');
         });
         angular.module("sampleApp").constant("moment", moment);
+
+        angular.module("sampleApp").config(['$compileProvider', function ($compileProvider) {
+            $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|blob):/);
+        }]);
+        
     </script>
 
 
@@ -410,6 +415,13 @@
 
                 <uib-tab heading="Project">
                     <br/>
+
+
+                    <a class="btn btn-link pull-right" download="{{downloadMapName}}"
+                       href="{{downloadMapContent}}" title="{{downloadMapName}}" >
+                        Download StructureMap resource
+                    </a>
+
 
                     <uib-tabset>
                         <uib-tab heading="Summary">
