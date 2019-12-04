@@ -88,6 +88,11 @@
         font-size: 12px;
     }
 
+    .scrollOutput {
+        height: 500px;
+        overflow-y: scroll;
+    }
+
     #resourceGraph {
         width: 100%;
         height: 550px;
@@ -139,7 +144,7 @@
 
             <div class="col-md-1 col-sm-1">
                 <div class="navbar-text">
-                   <!-- {{currentSM.name}} -->
+                  <!--  <button class="btn btn-success" ng-click="generateShortCut()">Share</button>-->
                 </div>
             </div>
 
@@ -272,7 +277,7 @@
                 <uib-tab heading="Workspace">
                     <br/>
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-2">
                             <div style="text-align: center">
                             <div class="alert alert-warning">Sample Input</div>
                             </div>
@@ -287,7 +292,7 @@
                                 <span ng-hide="input.isDirty">{{transformMessage}}</span>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div style="text-align: center">
                                 <div class="alert alert-warning">Mapping file</div>
                             </div>
@@ -296,10 +301,15 @@
                     </div>
                     <hr/>
                     <div class="row">
-                        <div class="col-md-6">
-                            <textarea id="sample" rows = "15" class="form-control editor" ng-change="input.isDirty = true" ng-model="input.inputJson"></textarea>
+                        <div class="col-md-4">
+                            <div class="alert alert-warning" ng-show="validateSampleMessage">
+                                {{validateSampleMessage}}
+                            </div>
+                            <textarea id="sample" rows = "25" class="form-control editor"
+                                      ng-blur="checkSample()"
+                                      ng-change="input.isDirty = true" ng-model="input.inputJson"></textarea>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-8">
 
                             <div class="alert alert-danger" ng-show="convertError">
                                 <div ng-repeat = "iss in convertError.issue">
@@ -307,7 +317,7 @@
                                 </div>
                             </div>
 
-                            <textarea rows = "15" class="form-control editor" ng-change="input.isDirty = true" ng-model="input.mappingFile"></textarea>
+                            <textarea rows = "25" class="form-control editor" ng-change="input.isDirty = true" ng-model="input.mappingFile"></textarea>
                         </div>
                     </div>
 
@@ -324,16 +334,27 @@
                     <button class="btn btn-link pull-right" ng-show="output"
                             ng-click="copyToClipboard()">Copy to Clipboard</button>
 
-                    <button class="btn btn-link pull-right" ng-show="output"
-                            ng-click="validate()">Validate</button>
-
-                    <br/>
-
                     <pre ng-show="transformError">{{transformError | json}}</pre>
 
                     <uib-tabset ng-show="output">
                         <uib-tab heading="Json">
-                            <pre>{{output | json}}</pre>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="scrollOutput">
+                                        <pre>{{output | json}}</pre>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <button class="btn btn-link" ng-show="output"
+                                            ng-click="validate()">Validate</button>
+                                    <div class="scrollOutput">
+                                        <pre>{{validateResult | json}}</pre>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
 
                         </uib-tab>
                         <uib-tab ng-show="output.resourceType=='Bundle'" heading="Bundle entries">

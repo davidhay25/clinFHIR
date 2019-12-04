@@ -1,10 +1,16 @@
 angular.module("sampleApp")
     .controller('mappingCtrl',
-        function ($scope,$http,v2ToFhirSvc,$uibModal,$timeout,modalService,logicalModelSvc,mappingSvc) {
+        function ($scope,$http,v2ToFhirSvc,$uibModal,$timeout,$window,$location,
+                  modalService,logicalModelSvc,mappingSvc,Utilities,$firebaseObject) {
             $scope.input = {};
             $scope.serverRoot = "https://vonk.fire.ly/";
             $scope.adminRoot = "https://vonk.fire.ly/administration/";        //where custom SD's are found
             $scope.confServer = "http://fhirtest.uhn.ca/baseDstu3/";            //where the CF models are found
+
+
+            $scope.serverRoot = "https://vonk.fire.ly/R4/";
+            $scope.adminRoot = "https://vonk.fire.ly/administration/R4/";        //where custom SD's are found
+            $scope.confServer = "http://fhirtest.uhn.ca/baseR4/";            //where the CF models are found
 
             $scope.input.isDirty = false;
 
@@ -47,14 +53,47 @@ angular.module("sampleApp")
             },1000);
 
 
+
+
+            $scope.generateShortCut = function() {
+                let hash = Utilities.generateHash();
+                let shortCut = $window.location.href+"#"+hash
+
+                var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
+
+                sc.modelId = $scope.currentSM.id;     //this should make it possible to query below...
+                sc.shortCut = shortCut;     //the full shortcut
+                sc.$save().then(
+                    function(){
+                        //todo add sc as extension to model
+                        //$scope.treeData.shortCut = sc;
+
+                        modalService.showModal({}, {bodyText: "The shortcut  " +  shortCut + "  has been generated for this model"})
+
+                    }
+                )
+            };
+
+            var hash = $location.hash();
+            if (hash) {
+                var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
+
+                sc.$loaded().then(
+                    function(){
+                        var id = sc.modelId;
+                        console.log(id)
+                    })
+            }
+
             function clearInputs() {
                 delete $scope.input.mappingFile;
                 delete $scope.input.inputJson;
             }
 
             function selectMap(map) {
-                clearInputs()
+                clearInputs();
                 delete $scope.selectedEntry;
+                delete $scope.output;
                 if ($scope.chart) {
                     $scope.chart.destroy();
                 }
@@ -196,9 +235,32 @@ angular.module("sampleApp")
                     keyboard: false,       //same as above.
                     size:'lg',
                     templateUrl: 'modalTemplates/addMap.html',
-                    controller: function($scope,$http,serverRoot){
+                    controller: function($scope,$http,serverRoot,modalService){
                         $scope.validId = false;
                         $scope.checkId = function(){
+
+                            if ($scope.id) {
+                                if ($scope.id.indexOf(" ") > -1) {
+                                    modalService.showModal({},{bodyText:"The name cannot have spaces in it. Try again."})
+                                    return;
+                                }
+                                if ($scope.id.indexOf(".") > -1) {
+                                    modalService.showModal({},{bodyText:"The name cannot have a dot/period (.) in it. Try again."})
+                                    return;
+                                }
+                                if ($scope.id.indexOf("_") > -1) {
+                                    modalService.showModal({},{bodyText:"The name cannot have an underscore (_) in it. Try again."})
+                                    return;
+                                }
+                            } else {
+                                modalService.showModal({},{bodyText:"The Id cannot be blank. Try again."})
+                                return;
+                            }
+
+
+
+
+
                             let url = serverRoot+"StructureMap/"+$scope.id
                             $http.get(url).then(
                                 function(){
@@ -268,7 +330,30 @@ angular.module("sampleApp")
             );
 
             $scope.validate = function() {
-                alert('validate not yet enabled')
+                delete $scope.validateResult;
+                let url = $scope.serverRoot + "Bundle/$validate";
+                $http.post(url,$scope.output).then(
+                    function(data) {
+                        console.log(data)
+                        $scope.validateResult = data.data;
+                    }, function (err) {
+                        console.log(err)
+                    }
+                )
+
+                //alert('validate not yet enabled')
+            };
+
+            $scope.checkSample = function() {
+                delete $scope.validateSampleMessage;
+                try {
+                    let json = angular.fromJson($scope.input.inputJson);
+                    if (! json.resourceType) {
+                        $scope.validateSampleMessage = "This is valid Json, but there is no resourceType so the transform will likely fail"
+                    }
+                } catch (ex) {
+                    $scope.validateSampleMessage = "This is not valid Json, which is required at the moment"
+                }
             };
 
             $scope.selectEntryFromBundle = function(entry){
@@ -380,7 +465,7 @@ angular.module("sampleApp")
                 }
 
                 delete $scope.transformMessage;         //if set, transformMessage hides the transform button
-
+                delete $scope.validateResult;
                 delete $scope.output;
                 delete $scope.convertError;
                 delete $scope.transformError;
@@ -399,7 +484,10 @@ angular.module("sampleApp")
                         content.parameter.push({name:'content',valueString:$scope.input.inputJson});
                     }
                 } catch (ex) {
-                    console.log("Invalid Json as input...")
+                    alert("The sample is not valid Json. Please correct and retry...");
+                    delete $scope.transformMessage;
+                    return;
+                    //console.log("Invalid Json as input...")
                 }
 
                 $http.post(url,content).then(
@@ -606,6 +694,7 @@ angular.module("sampleApp")
             };
 
             $scope.importModel = function(url) {
+                $scope.showWaiting=true;
                 mappingSvc.importModel(url,$scope.confServer,$scope.adminRoot).then(
                     function(data) {
                         alert('Model has been imported')
@@ -613,7 +702,7 @@ angular.module("sampleApp")
                     function(err) {
                         alert('There was an error: ' + angular.toJson(err))
                     }
-                )
+                ).finally(function(){ $scope.showWaiting=false;})
             }
         }
     );
