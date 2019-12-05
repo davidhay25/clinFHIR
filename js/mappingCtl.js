@@ -110,16 +110,32 @@ angular.module("sampleApp")
                 }
 
 
-/*
-                var elSample = document.getElementById("sample");
-                let cmOptions = {lineNumbers:true,lineWrapping:true}
-                var myCodeMirror = CodeMirror.fromTextArea(elSample,cmOptions);
-                console.log(myCodeMirror);
-                myCodeMirror.on('change',function(evt){
-                    console.log(evt)
-                })
+/* */
 
-*/
+                $timeout(function(){
+
+
+                    var elSample = document.getElementById("sample");
+                    let cmOptions = {lineNumbers:true,lineWrapping:true}
+
+                    let cmSample = CodeMirror.fromTextArea(elSample,cmOptions);
+                    console.log(cmSample);
+                    cmSample.on('change',function(evt,changeobj){
+                        //console.log(cmSample.getValue())
+                        $scope.input.isDirty = true;
+                        $scope.input.inputJson = cmSample.getValue();
+                        $scope.$digest();
+                    });
+
+                    var elMap = document.getElementById("map");
+                    var cmMap = CodeMirror.fromTextArea(elMap,cmOptions);
+                    cmMap.on('change',function(evt){
+                        $scope.input.isDirty = true;
+                        $scope.input.mappingFile = cmMap.getValue();
+                        $scope.$digest();
+                    })
+                },500)
+
                 makeDownload(map)
 
             }
@@ -208,6 +224,25 @@ angular.module("sampleApp")
                         loadMap(id)
                     }
                 })
+            };
+
+            $scope.copyMap = function() {
+                return;
+                let clone = angular.copy($scope.currentSM);
+                clone.publisher = $scope.user.email;
+
+                $scope.input.inputJson = $scope.sample.inputJson;
+                $scope.input.mappingFile = $scope.sample.mappingFile;
+
+                //create the actual StructureMap resource
+                $scope.currentSM = {resourceType:'StructureMap',id:vo.id,name:vo.name,description:vo.description,publisher:$scope.user.email}
+                $scope.updateStructureMap(function(map){
+                    //after the map has been created, we add it to the list of maps and make it current...
+                    $scope.maps.push(map);
+                    //$scope.input.model = map;   //for the dropdown
+                    //$scope.currentSM = map;
+                });
+
             };
 
             function loadMap(id) {
@@ -301,7 +336,7 @@ angular.module("sampleApp")
                         $scope.input.inputJson = $scope.sample.inputJson;
                         $scope.input.mappingFile = $scope.sample.mappingFile;
                         //create the actual StructureMap resource
-                        $scope.currentSM = {resourceType:'StructureMap',id:vo.id,name:vo.name,description:vo.description}
+                        $scope.currentSM = {resourceType:'StructureMap',id:vo.id,name:vo.name,description:vo.description,publisher:$scope.user.email}
                         $scope.updateStructureMap(function(map){
                             //after the map has been created, we add it to the list of maps and make it current...
                             $scope.maps.push(map);
@@ -312,7 +347,7 @@ angular.module("sampleApp")
                         //this has no sample data. It won't be saved until a mapping text has been entered & updated...
                         delete $scope.input.inputJson;
                         delete $scope.input.mappingFile;
-                        $scope.currentSM = {resourceType:'StructureMap',id:vo.id,name:vo.name,description:vo.description}
+                        $scope.currentSM = {resourceType:'StructureMap',id:vo.id,name:vo.name,description:vo.description,publisher:$scope.user.email}
                         $scope.maps.push($scope.currentSM);
                     }
                 })
@@ -384,6 +419,11 @@ angular.module("sampleApp")
 
                 if (! $scope.input.mappingFile) {
                     alert("There must be some text in the mapping file before the StructureMap can be created")
+                    return;
+                }
+
+                if ($scope.currentSM.publisher !== $scope.user.email) {
+                    alert("Only the publisher ("+$scope.currentSM.publisher+") can update the map. You can make a copy using the 'Copy Map' button.")
                     return;
                 }
 
@@ -550,7 +590,7 @@ angular.module("sampleApp")
                     return
                 }
 
-                let options = {bundle:bundle,hashErrors: {},serverRoot:"https://vonk.fire.ly/"}
+                let options = {bundle:bundle,hashErrors: {},serverRoot:$scope.serverRoot}
                 let vo = v2ToFhirSvc.makeGraph(options)
 
                 var container = document.getElementById('resourceGraph');

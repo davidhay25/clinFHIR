@@ -12,11 +12,11 @@
     <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
 
     <script src="js/libs/moment.min.js"></script>
-<!--
+
     <script src="js/libs/codemirror.js"></script>
 
     <link rel="stylesheet" type="text/css" href="css/codemirror.css"/>
--->
+
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
     <link rel="stylesheet" type="text/css" href="css/main.css"/>
 
@@ -37,7 +37,7 @@
         angular.module("sampleApp").config(['$compileProvider', function ($compileProvider) {
             $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|blob):/);
         }]);
-        
+
     </script>
 
 
@@ -135,21 +135,23 @@
             <div class="col-md-1 col-sm-1">
                 <div class="navbar-text">
                     <button btn class="btn btn-primary" ng-click="addMap()">New Map</button>
-                    <!-- <i class="glyphicon glyphicon-plus-sign clickable" ng-click="addMap()"></i>-->
+
                 </div>
             </div>
 
             <div class="col-md-1 col-sm-1">
                 <div class="navbar-text">
                     <button btn class="btn btn-primary" ng-click="openMap()">Open Map</button>
-                    <!-- <i class="glyphicon glyphicon-plus-sign clickable" ng-click="addMap()"></i>-->
+
                 </div>
             </div>
 
 
             <div class="col-md-1 col-sm-1">
                 <div class="navbar-text">
-                  <!--  <button class="btn btn-success" ng-click="generateShortCut()">Share</button>-->
+                    <button btn class="btn btn-primary"
+                            ng-show="currentSM && (currentSM.publisher !== user.email)"
+                            ng-click="copyMap()">Copy Map</button>
                 </div>
             </div>
 
@@ -194,13 +196,7 @@
         </div>
     </nav>
 
-<!--
-    <div class="row">
-        <div class="col-md-4">
-            <textarea id="te"></textarea>
-        </div>
-    </div>
--->
+
 
     <div ng-hide="user">
         Only logged in users can view or create maps. To log in click the <span><i class="glyphicon glyphicon-log-in"></i></span> icon in the navbar.
@@ -210,6 +206,19 @@
         There are no maps currently defined for this user. To create a new map, click the 'New Map' button
         in the navbar and add a new map.
     </div>
+
+
+
+<!--
+    <div class="row">
+        <div class="col-md-6 col-sm-6">
+            <textarea id="cm1"></textarea>
+        </div>
+        <div class="col-md-6  col-sm-6">
+            <textarea id="cm2"></textarea>
+        </div>
+    </div>
+-->
 
     <div ng-show="showHelp">
         <p>This clinFHIR module allows you to create and execute maps that use the
@@ -306,13 +315,21 @@
                     </div>
                     <hr/>
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-4 col-sm-4">
                             <div class="alert alert-warning" ng-show="validateSampleMessage">
                                 {{validateSampleMessage}}
                             </div>
-                            <textarea id="sample" rows = "25" class="form-control editor"
-                                      ng-blur="checkSample()"
-                                      ng-change="input.isDirty = true" ng-model="input.inputJson"></textarea>
+                            <!-- <textarea id="sample" ></textarea>-->
+
+                             <textarea id="sample" rows = "25" class="form-control editor"
+                                       ng-model="input.inputJson"></textarea>
+
+<!-- <textarea id="sample" rows = "25" class="form-control editor"
+                                       ng-blur="checkSample()"
+                                       ng-change="input.isDirty = true" ng-model="input.inputJson"></textarea>
+
+-->
+
                         </div>
                         <div class="col-md-8">
 
@@ -321,8 +338,11 @@
                                     Error: {{iss.details.text}} {{iss.diagnostics}}
                                 </div>
                             </div>
+                                <!-- <textarea id="map" rows = "25" class="form-control editor" ng-change="input.isDirty = true" ng-model="input.mappingFile"></textarea>
+                        -->
+                            <textarea id="map" rows = "25" class="form-control editor" ng-change="input.isDirty = true" ng-model="input.mappingFile"></textarea>
 
-                            <textarea rows = "25" class="form-control editor" ng-change="input.isDirty = true" ng-model="input.mappingFile"></textarea>
+
                         </div>
                     </div>
 
@@ -436,6 +456,15 @@
                                         <div class="col-md-9">
                                             <input class="form-control" disabled="disabled" ng-model="currentSM.id"/>
 
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-bottom: 10px">
+                                        <div class="col-md-3">
+                                            <strong>Publisher</strong>
+                                        </div>
+                                        <div class="col-md-9">
+
+                                            <input class="form-control" disabled="disabled" ng-model="currentSM.publisher"/>
                                         </div>
                                     </div>
                                     <div class="row" style="margin-bottom: 10px">
