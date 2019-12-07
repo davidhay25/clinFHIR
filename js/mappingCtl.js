@@ -7,11 +7,11 @@ angular.module("sampleApp")
             $scope.adminRoot = "https://vonk.fire.ly/administration/";        //where custom SD's are found
             $scope.confServer = "http://fhirtest.uhn.ca/baseDstu3/";            //where the CF models are found
 
-
+/*
             $scope.serverRoot = "https://vonk.fire.ly/R4/";
             $scope.adminRoot = "https://vonk.fire.ly/administration/R4/";        //where custom SD's are found
             $scope.confServer = "http://fhirtest.uhn.ca/baseR4/";            //where the CF models are found
-
+*/
             $scope.input.isDirty = false;
 
             //todo - should these move to app config svc???
@@ -265,6 +265,7 @@ angular.module("sampleApp")
                 delete $scope.convertError;
                 delete $scope.transformError;
                 delete $scope.transformMessage;
+                $('#lmTreeView').jstree('destroy');
                 console.log(map)
                 selectMap(map)
 
@@ -449,7 +450,7 @@ angular.module("sampleApp")
                         addStringExtension(structureMapResource,extMapUrl,$scope.input.mappingFile);
                         addStringExtension(structureMapResource,extExampleUrl,$scope.input.inputJson);
 
-                        console.log(data.data)
+                        //console.log(data.data)
 
 
                         makeDownload(structureMapResource)
@@ -727,22 +728,35 @@ angular.module("sampleApp")
             }
 
             $scope.showLM = function(canonicalUrl) {
+                delete $scope.lmTreeViewError;
                 let url = $scope.adminRoot + "StructureDefinition?url="+ canonicalUrl;
                 $scope.showWaiting=true;
                 $http.get(url).then(
                     function(data) {
                         if (data.data && data.data.entry && data.data.entry.length > 0) {
-                            let resource = data.data.entry[0].resource;
 
-                            if (!resource.snapshot) {
-                                resource.snapshot = resource.differential;
+                            let resource;
+                            data.data.entry.forEach(function (ent){
+                                if (ent.resource && ent.resource.resourceType == 'StructureDefinition') {
+                                    resource = ent.resource;
+                                }
+                            } )
+
+                            if (resource) {
+                                if (!resource.snapshot) {
+                                    resource.snapshot = resource.differential;
+                                }
+
+                                $scope.selectedLM = resource;
+                                let treeData = logicalModelSvc.createTreeArrayFromSD(resource);
+
+
+                                drawTree(treeData)
+                            } else {
+                                $scope.lmTreeViewError = "The model with the url: "+canonicalUrl +" was not located on the Mapping Server"
                             }
 
-                            $scope.selectedLM = resource;
-                            let treeData = logicalModelSvc.createTreeArrayFromSD(resource);
 
-
-                            drawTree(treeData)
                         }
                     },
                     function(err) {

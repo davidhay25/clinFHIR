@@ -298,12 +298,13 @@
                         </div>
                         <div class="col-md-4">
                             <div style="text-align: center">
-                            <button ng-hide="transformMessage || input.isDirty" class="btn btn-danger" ng-click="transform()">Execute transform</button>
+                                <button ng-hide="transformMessage || input.isDirty" class="btn btn-danger" ng-click="transform()">Execute transform</button>
 
-                            <button ng-show="input.isDirty" class="btn btn-primary"
+                                <button ng-show="input.isDirty" class="btn btn-primary"
                                         ng-click="updateStructureMap()">Update StructureMap resource</button>
 
                                 <span ng-hide="input.isDirty">{{transformMessage}}</span>
+                                <div ng-show="output"><em>Results in tab above</em></div>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -313,7 +314,7 @@
 
                         </div>
                     </div>
-                    <hr/>
+
                     <div class="row">
                         <div class="col-md-4 col-sm-4">
                             <div class="alert alert-warning" ng-show="validateSampleMessage">
@@ -347,7 +348,7 @@
                     </div>
 
 
-                    <hr/>
+
 
                     <div class="alert alert-danger" ng-show="transformError">
                         <div ng-repeat = "iss in transformError.issue">
@@ -356,6 +357,7 @@
                     </div>
                     <br/>
 
+                    <!--
                     <button class="btn btn-link pull-right" ng-show="output"
                             ng-click="copyToClipboard()">Copy to Clipboard</button>
 
@@ -377,10 +379,6 @@
                                     </div>
                                 </div>
                             </div>
-
-
-
-
                         </uib-tab>
                         <uib-tab ng-show="output.resourceType=='Bundle'" heading="Bundle entries">
                             <div class="row">
@@ -431,6 +429,86 @@
 
                         </uib-tab>
                     </uib-tabset>
+
+                    -->
+                </uib-tab>
+
+
+                <uib-tab ng-show="output">
+                    <uib-tab-heading><strong>Results</strong></uib-tab-heading>
+                    <button class="btn btn-link pull-right" ng-show="output"
+                            ng-click="copyToClipboard()">Copy to Clipboard</button>
+
+                    <pre ng-show="transformError">{{transformError | json}}</pre>
+
+                    <uib-tabset ng-show="output">
+                        <uib-tab heading="Json">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="scrollOutput">
+                                        <pre>{{output | json}}</pre>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <button class="btn btn-link" ng-show="output"
+                                            ng-click="validate()">Validate</button>
+                                    <div class="scrollOutput">
+                                        <pre>{{validateResult | json}}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </uib-tab>
+                        <uib-tab ng-show="output.resourceType=='Bundle'" heading="Bundle entries">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <div class="list-group">
+                                        <div ng-class="{'list-group-item':1,'listItemSelected':entry==selectedEntry}"
+                                             ng-repeat="entry in output.entry"
+                                             ng-click = "selectEntryFromBundle(entry)">
+                                            {{entry.resource.resourceType}}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-10">
+                                    <uib-tabset>
+                                        <uib-tab heading="Json">
+                                            <pre>{{selectedEntry | json}}</pre>
+
+                                        </uib-tab>
+                                    </uib-tabset>
+
+                                </div>
+
+
+
+                            </div>
+
+                        </uib-tab>
+                        <uib-tab heading="Graph"  select="fitSingleGraph()">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div id="resourceGraph"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="col-md-12">
+                                        <uib-tabset>
+                                            <uib-tab heading="Json">
+                                                <pre>{{selectedEntry | json}}</pre>
+
+                                            </uib-tab>
+                                        </uib-tabset>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+
+                        </uib-tab>
+                    </uib-tabset>
+
+
                 </uib-tab>
 
                 <uib-tab heading="Project">
@@ -503,6 +581,7 @@
                                     <uib-tabset>
                                         <uib-tab heading="Tree">
                                             <br/>
+                                            <div ng-show="lmTreeViewError" class="alert alert-warning">{{lmTreeViewError}}</div>
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div id="lmTreeView"></div>
