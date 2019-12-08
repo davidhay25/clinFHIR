@@ -15,7 +15,16 @@
 
     <script src="js/libs/codemirror.js"></script>
 
+    <script src="js/libs/matchbrackets.js"></script>
+    <script src="js/libs/foldcode.js"></script>
+    <script src="js/libs/foldgutter.js"></script>
+    <script src="js/libs/brace-fold.js"></script>
+    <script src="js/libs/comment-fold.js"></script>
+    <script src="js/libs/javascript.js"></script>
+
+
     <link rel="stylesheet" type="text/css" href="css/codemirror.css"/>
+    <link rel="stylesheet" type="text/css" href="css/foldgutter.css"/>
 
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
     <link rel="stylesheet" type="text/css" href="css/main.css"/>
@@ -288,366 +297,400 @@
 
     <uib-tabset ng-show="currentSM && !showHelp">
 
-                <uib-tab heading="Workspace">
-                    <br/>
-                    <div class="row">
-                        <div class="col-md-2">
-                            <div style="text-align: center">
-                            <div class="alert alert-warning">Sample Input</div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div style="text-align: center">
-                                <button ng-hide="transformMessage || input.isDirty" class="btn btn-danger" ng-click="transform()">Execute transform</button>
+        <uib-tab heading="Workspace">
+            <br/>
+            <div class="row">
+                <div class="col-md-2">
+                    <div style="text-align: center">
+                    <div class="alert alert-warning">Sample Input</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div style="text-align: center">
+                        <button ng-hide="transformMessage || input.isDirty" class="btn btn-danger" ng-click="transform()">Execute transform</button>
 
-                                <button ng-show="input.isDirty" class="btn btn-primary"
-                                        ng-click="updateStructureMap()">Update StructureMap resource</button>
+                        <button ng-show="input.isDirty" class="btn btn-primary"
+                                ng-click="updateStructureMap()">Update StructureMap resource</button>
 
-                                <span ng-hide="input.isDirty">{{transformMessage}}</span>
-                                <div ng-show="output"><em>Results in tab above</em></div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div style="text-align: center">
-                                <div class="alert alert-warning">Mapping file</div>
-                            </div>
-
-                        </div>
+                        <span ng-hide="input.isDirty">{{transformMessage}}</span>
+                        <div ng-show="output"><em>Results in tab above</em></div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div style="text-align: center">
+                        <div class="alert alert-warning">Mapping file</div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-4 col-sm-4">
-                            <div class="alert alert-warning" ng-show="validateSampleMessage">
-                                {{validateSampleMessage}}
-                            </div>
-                            <!-- <textarea id="sample" ></textarea>-->
+                </div>
+            </div>
 
-                             <textarea id="sample" rows = "25" class="form-control editor"
-                                       ng-model="input.inputJson"></textarea>
+            <div class="row">
+                <div class="col-md-4 col-sm-4">
+                    <div class="alert alert-danger" ng-show="validateSampleMessage">
+                        {{validateSampleMessage}}
+                    </div>
+                    <!-- <textarea id="sample" ></textarea>-->
 
-<!-- <textarea id="sample" rows = "25" class="form-control editor"
-                                       ng-blur="checkSample()"
-                                       ng-change="input.isDirty = true" ng-model="input.inputJson"></textarea>
+                     <textarea id="sample" rows = "25" class="form-control editor"
+
+                               ng-model="input.inputJson"></textarea>
+
+<!-- <textarea id="sample" rows = "25" class="form-control editor"ng-blur="checkSample()"
+                               ng-blur="checkSample()"
+                               ng-change="input.isDirty = true" ng-model="input.inputJson"></textarea>
 
 -->
 
-                        </div>
-                        <div class="col-md-8">
+                </div>
+                <div class="col-md-8">
 
-                            <div class="alert alert-danger" ng-show="convertError">
-                                <div ng-repeat = "iss in convertError.issue">
-                                    Error: {{iss.details.text}} {{iss.diagnostics}}
-                                </div>
-                            </div>
-                                <!-- <textarea id="map" rows = "25" class="form-control editor" ng-change="input.isDirty = true" ng-model="input.mappingFile"></textarea>
-                        -->
-                            <textarea id="map" rows = "25" class="form-control editor" ng-change="input.isDirty = true" ng-model="input.mappingFile"></textarea>
-
-
-                        </div>
-                    </div>
-
-
-
-
-                    <div class="alert alert-danger" ng-show="transformError">
-                        <div ng-repeat = "iss in transformError.issue">
+                    <div class="alert alert-danger" ng-show="convertError">
+                        <div ng-repeat = "iss in convertError.issue">
                             Error: {{iss.details.text}} {{iss.diagnostics}}
                         </div>
                     </div>
-                    <br/>
+                        <!-- <textarea id="map" rows = "25" class="form-control editor" ng-change="input.isDirty = true" ng-model="input.mappingFile"></textarea>
+                -->
+                    <textarea id="map" rows = "25" class="form-control editor" ng-change="input.isDirty = true" ng-model="input.mappingFile"></textarea>
 
-                    <!--
-                    <button class="btn btn-link pull-right" ng-show="output"
-                            ng-click="copyToClipboard()">Copy to Clipboard</button>
 
-                    <pre ng-show="transformError">{{transformError | json}}</pre>
+                </div>
+            </div>
 
-                    <uib-tabset ng-show="output">
-                        <uib-tab heading="Json">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="scrollOutput">
-                                        <pre>{{output | json}}</pre>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <button class="btn btn-link" ng-show="output"
-                                            ng-click="validate()">Validate</button>
-                                    <div class="scrollOutput">
-                                        <pre>{{validateResult | json}}</pre>
-                                    </div>
-                                </div>
+
+
+
+            <div class="alert alert-danger" ng-show="transformError">
+                <div ng-repeat = "iss in transformError.issue">
+                    Error: {{iss.details.text}} {{iss.diagnostics}}
+                </div>
+            </div>
+            <br/>
+
+            <!--
+            <button class="btn btn-link pull-right" ng-show="output"
+                    ng-click="copyToClipboard()">Copy to Clipboard</button>
+
+            <pre ng-show="transformError">{{transformError | json}}</pre>
+
+            <uib-tabset ng-show="output">
+                <uib-tab heading="Json">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="scrollOutput">
+                                <pre>{{output | json}}</pre>
                             </div>
-                        </uib-tab>
-                        <uib-tab ng-show="output.resourceType=='Bundle'" heading="Bundle entries">
-                            <div class="row">
-                                <div class="col-md-2">
-                                    <div class="list-group">
-                                        <div ng-class="{'list-group-item':1,'listItemSelected':entry==selectedEntry}"
-                                             ng-repeat="entry in output.entry"
-                                             ng-click = "selectEntryFromBundle(entry)">
-                                            {{entry.resource.resourceType}}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-10">
-                                    <uib-tabset>
-                                        <uib-tab heading="Json">
-                                            <pre>{{selectedEntry | json}}</pre>
-
-                                        </uib-tab>
-                                    </uib-tabset>
-
-                                </div>
-
-
-
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-link" ng-show="output"
+                                    ng-click="validate()">Validate</button>
+                            <div class="scrollOutput">
+                                <pre>{{validateResult | json}}</pre>
                             </div>
-
-                        </uib-tab>
-                        <uib-tab heading="Graph"  select="fitSingleGraph()">
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <div id="resourceGraph"></div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="col-md-12">
-                                        <uib-tabset>
-                                            <uib-tab heading="Json">
-                                                <pre>{{selectedEntry | json}}</pre>
-
-                                            </uib-tab>
-                                        </uib-tabset>
-
-                                    </div>
-                                </div>
-                            </div>
-
-
-
-
-                        </uib-tab>
-                    </uib-tabset>
-
-                    -->
+                        </div>
+                    </div>
                 </uib-tab>
-
-
-                <uib-tab ng-show="output">
-                    <uib-tab-heading><strong>Results</strong></uib-tab-heading>
-                    <button class="btn btn-link pull-right" ng-show="output"
-                            ng-click="copyToClipboard()">Copy to Clipboard</button>
-
-                    <pre ng-show="transformError">{{transformError | json}}</pre>
-
-                    <uib-tabset ng-show="output">
-                        <uib-tab heading="Json">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="scrollOutput">
-                                        <pre>{{output | json}}</pre>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <button class="btn btn-link" ng-show="output"
-                                            ng-click="validate()">Validate</button>
-                                    <div class="scrollOutput">
-                                        <pre>{{validateResult | json}}</pre>
-                                    </div>
-                                </div>
-                            </div>
-                        </uib-tab>
-                        <uib-tab ng-show="output.resourceType=='Bundle'" heading="Bundle entries">
-                            <div class="row">
-                                <div class="col-md-2">
-                                    <div class="list-group">
-                                        <div ng-class="{'list-group-item':1,'listItemSelected':entry==selectedEntry}"
-                                             ng-repeat="entry in output.entry"
-                                             ng-click = "selectEntryFromBundle(entry)">
-                                            {{entry.resource.resourceType}}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-10">
-                                    <uib-tabset>
-                                        <uib-tab heading="Json">
-                                            <pre>{{selectedEntry | json}}</pre>
-
-                                        </uib-tab>
-                                    </uib-tabset>
-
-                                </div>
-
-
-
-                            </div>
-
-                        </uib-tab>
-                        <uib-tab heading="Graph"  select="fitSingleGraph()">
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <div id="resourceGraph"></div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="col-md-12">
-                                        <uib-tabset>
-                                            <uib-tab heading="Json">
-                                                <pre>{{selectedEntry | json}}</pre>
-
-                                            </uib-tab>
-                                        </uib-tabset>
-
-                                    </div>
-                                </div>
-                            </div>
-
-
-
-
-                        </uib-tab>
-                    </uib-tabset>
-
-
-                </uib-tab>
-
-                <uib-tab heading="Project">
-                    <br/>
-
-
-                    <a class="btn btn-link pull-right" download="{{downloadMapName}}"
-                       href="{{downloadMapContent}}" title="{{downloadMapName}}" >
-                        Download StructureMap resource
-                    </a>
-
-
-                    <uib-tabset>
-                        <uib-tab heading="Summary">
-                            <br/>
-                            <div class="row">
-                                <div class="col-md-6" >
-
-                                    <div class="row" style="margin-bottom: 10px">
-                                        <div class="col-md-3">
-                                            <strong>StructureMap Id</strong>
-                                        </div>
-                                        <div class="col-md-9">
-                                            <input class="form-control" disabled="disabled" ng-model="currentSM.id"/>
-
-                                        </div>
-                                    </div>
-                                    <div class="row" style="margin-bottom: 10px">
-                                        <div class="col-md-3">
-                                            <strong>Publisher</strong>
-                                        </div>
-                                        <div class="col-md-9">
-
-                                            <input class="form-control" disabled="disabled" ng-model="currentSM.publisher"/>
-                                        </div>
-                                    </div>
-                                    <div class="row" style="margin-bottom: 10px">
-                                        <div class="col-md-3">
-                                            <strong>Name</strong>
-                                        </div>
-                                        <div class="col-md-9">
-
-                                            <input class="form-control" ng-model="currentSM.name"/>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-3">
-                                            <strong>Description</strong>
-                                        </div>
-                                        <div class="col-md-9">
-                                                <textarea class="form-control"
-                                              ng-change="input.isDirty = true"
-                                              ng-model="currentSM.description"></textarea>
-
-                                        </div>
-                                    </div>
-                                    <h4>Structure Definitions</h4>
-                                    <table class="table table-bordered">
-                                        <tr><th>Url</th><th>Mode</th></tr>
-                                        <tr ng-repeat="struct in currentSM.structure">
-                                            <td><div class="clickable" ng-click="showLM(struct.url)">{{struct.url}}</div> </td>
-                                            <td>{{struct.mode}}</td>
-                                            <td><span class="clickable" ng-click="importModel(struct.url)">Import</span></td>
-                                        </tr>
-                                    </table>
-
-
-                                </div>
-                                <div class="col-md-6">
-                                    <uib-tabset>
-                                        <uib-tab heading="Tree">
-                                            <br/>
-                                            <div ng-show="lmTreeViewError" class="alert alert-warning">{{lmTreeViewError}}</div>
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <div id="lmTreeView"></div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <pre>{{selectedNodeED | json}}</pre>
-                                                </div>
-                                            </div>
-
-                                        </uib-tab>
-                                        <uib-tab heading="Json">
-                                            <pre>{{selectedLM | json}}</pre>
-                                        </uib-tab>
-                                    </uib-tabset>
-
-                                </div>
-                            </div>
-
-
-
-
-                        </uib-tab>
-                        <uib-tab heading="Json">
-                            <pre>{{currentSM | json}}</pre>
-                        </uib-tab>
-
-
-                    </uib-tabset>
-
-
-                </uib-tab>
-
-                <uib-tab heading="History">
-
-                    <button class="btn btn-link" ng-click="refreshHistory()">Refresh</button>
-
+                <uib-tab ng-show="output.resourceType=='Bundle'" heading="Bundle entries">
                     <div class="row">
                         <div class="col-md-2">
                             <div class="list-group">
-                                <div ng-class="{'list-group-item':true,'listItemSelected':hx == hxItem}"
-                                     style="cursor: pointer"
-                                     ng-repeat="hx in history" ng-click="showHistoryItem(hx)">
-                                    {{hx.date | getPrettyDate}}
-                                    <div>({{hx.date | getAgeSeconds}})</div>
+                                <div ng-class="{'list-group-item':1,'listItemSelected':entry==selectedEntry}"
+                                     ng-repeat="entry in output.entry"
+                                     ng-click = "selectEntryFromBundle(entry)">
+                                    {{entry.resource.resourceType}}
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-10">
-                            <div class="row" ng-show="hxItem">
-                                <div class="col-md-6">
-                                    <pre >{{hxItem.example}}</pre>
-                                </div>
-                                <div class="col-md-6">
-                                    <pre>{{hxItem.map}}</pre>
+                            <uib-tabset>
+                                <uib-tab heading="Json">
+                                    <pre>{{selectedEntry | json}}</pre>
+
+                                </uib-tab>
+                            </uib-tabset>
+
+                        </div>
+
+
+
+                    </div>
+
+                </uib-tab>
+                <uib-tab heading="Graph"  select="fitSingleGraph()">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div id="resourceGraph"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="col-md-12">
+                                <uib-tabset>
+                                    <uib-tab heading="Json">
+                                        <pre>{{selectedEntry | json}}</pre>
+
+                                    </uib-tab>
+                                </uib-tabset>
+
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+                </uib-tab>
+            </uib-tabset>
+
+            -->
+        </uib-tab>
+
+
+        <uib-tab ng-show="output">
+            <uib-tab-heading><strong>Results</strong></uib-tab-heading>
+            <button class="btn btn-link pull-right" ng-show="output"
+                    ng-click="copyToClipboard()">Copy to Clipboard</button>
+
+            <pre ng-show="transformError">{{transformError | json}}</pre>
+
+            <uib-tabset ng-show="output">
+                <uib-tab heading="Json">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="scrollOutput">
+                                <pre>{{output | json}}</pre>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-link" ng-show="output"
+                                    ng-click="validate()">Validate</button>
+                            <div class="scrollOutput">
+                                <pre>{{validateResult | json}}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </uib-tab>
+                <uib-tab ng-show="output.resourceType=='Bundle'" heading="Bundle entries">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="list-group">
+                                <div ng-class="{'list-group-item':1,'listItemSelected':entry==selectedEntry}"
+                                     ng-repeat="entry in output.entry"
+                                     ng-click = "selectEntryFromBundle(entry)">
+                                    {{entry.resource.resourceType}}
                                 </div>
                             </div>
+                        </div>
+                        <div class="col-md-10">
+                            <uib-tabset>
+                                <uib-tab heading="Json">
+                                    <pre>{{selectedEntry | json}}</pre>
 
+                                </uib-tab>
+                            </uib-tabset>
+
+                        </div>
+
+
+
+                    </div>
+
+                </uib-tab>
+                <uib-tab heading="Graph"  select="fitSingleGraph()">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div id="resourceGraph"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="col-md-12">
+                                <uib-tabset>
+                                    <uib-tab heading="Json">
+                                        <pre>{{selectedEntry | json}}</pre>
+
+                                    </uib-tab>
+                                </uib-tabset>
+
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+                </uib-tab>
+            </uib-tabset>
+
+
+        </uib-tab>
+
+        <uib-tab heading="Project">
+            <br/>
+
+
+            <a class="btn btn-link pull-right" download="{{downloadMapName}}"
+               href="{{downloadMapContent}}" title="{{downloadMapName}}" >
+                Download StructureMap resource
+            </a>
+
+
+            <uib-tabset>
+                <uib-tab heading="Summary">
+                    <br/>
+                    <div class="row">
+                        <div class="col-md-6" >
+
+                            <div class="row" style="margin-bottom: 10px">
+                                <div class="col-md-3">
+                                    <strong>StructureMap Id</strong>
+                                </div>
+                                <div class="col-md-9">
+                                    <input class="form-control" disabled="disabled" ng-model="currentSM.id"/>
+
+                                </div>
+                            </div>
+                            <div class="row" style="margin-bottom: 10px">
+                                <div class="col-md-3">
+                                    <strong>Publisher</strong>
+                                </div>
+                                <div class="col-md-9">
+
+                                    <input class="form-control" disabled="disabled" ng-model="currentSM.publisher"/>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-bottom: 10px">
+                                <div class="col-md-3">
+                                    <strong>Name</strong>
+                                </div>
+                                <div class="col-md-9">
+
+                                    <input class="form-control" ng-model="currentSM.name"/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <strong>Description</strong>
+                                </div>
+                                <div class="col-md-9">
+                                        <textarea class="form-control"
+                                      ng-change="input.isDirty = true"
+                                      ng-model="currentSM.description"></textarea>
+
+                                </div>
+                            </div>
+                            <h4>Structure Definitions</h4>
+                            <table class="table table-bordered">
+                                <tr><th>Url</th><th>Mode</th></tr>
+                                <tr ng-repeat="struct in currentSM.structure">
+                                    <td><div class="clickable" ng-click="showLM(struct.url)">{{struct.url}}</div> </td>
+                                    <td>{{struct.mode}}</td>
+                                    <td><span class="clickable" ng-click="importModel(struct.url)">Import</span></td>
+                                </tr>
+                            </table>
+
+
+                        </div>
+                        <div class="col-md-6">
+                            <uib-tabset>
+                                <uib-tab heading="Tree">
+                                    <br/>
+                                    <div ng-show="lmTreeViewError" class="alert alert-warning">{{lmTreeViewError}}</div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div id="lmTreeView"></div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <pre>{{selectedNodeED | json}}</pre>
+                                        </div>
+                                    </div>
+
+                                </uib-tab>
+                                <uib-tab heading="Json">
+                                    <pre>{{selectedLM | json}}</pre>
+                                </uib-tab>
+                            </uib-tabset>
 
                         </div>
                     </div>
 
 
 
+
+                </uib-tab>
+                <uib-tab heading="Json">
+                    <pre>{{currentSM | json}}</pre>
                 </uib-tab>
 
 
+            </uib-tabset>
+
+
+        </uib-tab>
+
+        <uib-tab heading="History">
+
+            <button class="btn btn-link" ng-click="refreshHistory()">Refresh</button>
+
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="list-group">
+                        <div ng-class="{'list-group-item':true,'listItemSelected':hx == hxItem}"
+                             style="cursor: pointer"
+                             ng-repeat="hx in history" ng-click="showHistoryItem(hx)">
+                            {{hx.date | getPrettyDate}}
+                            <div>({{hx.date | getAgeSeconds}})</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-10">
+                    <div class="row" ng-show="hxItem">
+                        <div class="col-md-6">
+                            <pre >{{hxItem.example}}</pre>
+                        </div>
+                        <div class="col-md-6">
+                            <pre>{{hxItem.map}}</pre>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+
+
+
+        </uib-tab>
+
+        <uib-tab heading="Configuration">
+            <br/>
+            <div class="row">
+                <div class="col-md-2">
+                    Mapping server
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control"/>
+                </div>
+                <div class="col-md-6">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-2">
+                    Conformance server
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control"/>
+                </div>
+                <div class="col-md-6">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-2">
+                    Backup server
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control"/>
+                </div>
+                <div class="col-md-6">
+                </div>
+            </div>
+
+        </uib-tab>
 <!--
 
                 <uib-tab heading="Example input" ng-show="1==2">

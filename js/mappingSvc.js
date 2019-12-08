@@ -11,11 +11,11 @@ angular.module("sampleApp")
             //http://docs.simplifier.net/mappingengine/transformsetup/logicalmodel.html
 
             importModel: function (canUrl,confServerUrl,mapServerUrl) {
+
                 var deferred = $q.defer();
                 let name = $filter('referenceType')(canUrl);
                 let fakeUrl = confServerUrl + "StructureDefinition/"+name;             //assume the url is the same as the server...
                 let url = confServerUrl + "StructureDefinition?url="+fakeUrl;
-
 
                 $http.get(url).then(
                     function(data){

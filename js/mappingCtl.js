@@ -140,23 +140,53 @@ angular.module("sampleApp")
 
             }
 
+            let cmSample;
+            let cmMap;
             function wireCodeMirror() {
+
+                if (cmSample) {
+                    cmSample.toTextArea()
+                }
+                if (cmMap) {
+                    cmMap.toTextArea()
+                }
+
                 $timeout(function(){
 
                     var elSample = document.getElementById("sample");
-                    let cmOptions = {lineNumbers:true,lineWrapping:true}
+                    let cmOptions = {lineNumbers:true,lineWrapping:true,matchBrackets:true,
+                        foldGutter: true,
+                        gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]};
 
-                    let cmSample = CodeMirror.fromTextArea(elSample,cmOptions);
+
+                    cmSample = CodeMirror.fromTextArea(elSample,cmOptions);
                     console.log(cmSample);
+                    //cmSample.foldCode(CodeMirror.Pos(13, 0));
+
                     cmSample.on('change',function(evt,changeobj){
-                        //console.log(cmSample.getValue())
                         $scope.input.isDirty = true;
                         $scope.input.inputJson = cmSample.getValue();
                         $scope.$digest();
                     });
 
+                    cmSample.on("blur", function(){
+
+
+                        delete $scope.validateSampleMessage;
+                        try {
+                            let json = angular.fromJson(cmSample.getValue());
+                            if (! json.resourceType) {
+                                $scope.validateSampleMessage = "This is valid Json, but there is no resourceType so the transform will likely fail (this is a current requirement of this implementation)"
+                            }
+                        } catch (ex) {
+                            $scope.validateSampleMessage = "This is not valid Json, which is required at the moment"
+                        }
+                        $scope.$digest();
+                    });
+
+
                     var elMap = document.getElementById("map");
-                    var cmMap = CodeMirror.fromTextArea(elMap,cmOptions);
+                    cmMap = CodeMirror.fromTextArea(elMap,cmOptions);
                     cmMap.on('change',function(evt){
                         $scope.input.isDirty = true;
                         $scope.input.mappingFile = cmMap.getValue();
@@ -285,7 +315,6 @@ angular.module("sampleApp")
                 )
             }
 
-
             //when a map is selected from the drop down list for this user
             $scope.selectMapFromDD = function(map){
                 delete $scope.convertError;
@@ -294,7 +323,6 @@ angular.module("sampleApp")
                 $('#lmTreeView').jstree('destroy');
                 console.log(map)
                 selectMap(map)
-
             };
 
             $scope.addMap = function(){
@@ -368,12 +396,13 @@ angular.module("sampleApp")
                             $scope.maps.push(map);
                             //$scope.input.model = map;   //for the dropdown
                             //$scope.currentSM = map;
+                            wireCodeMirror();
                         });
                     } else {
                         //this has no sample data. It won't be saved until a mapping text has been entered & updated...
                         $scope.input.inputJson = "";
                         $scope.input.mappingFile = "";
-                        wireCodeMirror()
+                        wireCodeMirror();
 
                         $scope.currentSM = {resourceType:'StructureMap',id:vo.id,name:vo.name,description:vo.description,publisher:$scope.user.email}
                         $scope.maps.push($scope.currentSM);
@@ -413,7 +442,7 @@ angular.module("sampleApp")
                 //alert('validate not yet enabled')
             };
 
-            $scope.checkSample = function() {
+            $scope.checkSampleDEP = function() {
                 delete $scope.validateSampleMessage;
                 try {
                     let json = angular.fromJson($scope.input.inputJson);
@@ -797,6 +826,7 @@ angular.module("sampleApp")
 
             $scope.importModel = function(url) {
                 $scope.showWaiting=true;
+                $scope.importMessage = "Importing model"
                 mappingSvc.importModel(url,$scope.confServer,$scope.adminRoot).then(
                     function(data) {
                         alert('Model has been imported')
