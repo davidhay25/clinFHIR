@@ -42,6 +42,7 @@ angular.module("sampleApp")
 
             */
             //https://stackoverflow.com/questions/6637341/use-tab-to-indent-in-textarea
+            /*
             $timeout(function(){
                 var textareas = document.getElementsByTagName('textarea');
                 var count = textareas.length;
@@ -59,7 +60,7 @@ angular.module("sampleApp")
                 }
             },1000);
 
-
+*/
 
 /*
             $scope.generateShortCutDEP = function() {
@@ -110,10 +111,9 @@ angular.module("sampleApp")
                 }
 
 
-/* */
-
+                wireCodeMirror();
+/*
                 $timeout(function(){
-
 
                     var elSample = document.getElementById("sample");
                     let cmOptions = {lineNumbers:true,lineWrapping:true}
@@ -135,10 +135,36 @@ angular.module("sampleApp")
                         $scope.$digest();
                     })
                 },500)
-
+*/
                 makeDownload(map)
 
             }
+
+            function wireCodeMirror() {
+                $timeout(function(){
+
+                    var elSample = document.getElementById("sample");
+                    let cmOptions = {lineNumbers:true,lineWrapping:true}
+
+                    let cmSample = CodeMirror.fromTextArea(elSample,cmOptions);
+                    console.log(cmSample);
+                    cmSample.on('change',function(evt,changeobj){
+                        //console.log(cmSample.getValue())
+                        $scope.input.isDirty = true;
+                        $scope.input.inputJson = cmSample.getValue();
+                        $scope.$digest();
+                    });
+
+                    var elMap = document.getElementById("map");
+                    var cmMap = CodeMirror.fromTextArea(elMap,cmOptions);
+                    cmMap.on('change',function(evt){
+                        $scope.input.isDirty = true;
+                        $scope.input.mappingFile = cmMap.getValue();
+                        $scope.$digest();
+                    })
+                },500)
+            }
+
 
             $scope.maps = [];
             firebase.auth().onAuthStateChanged(function(user) {
@@ -271,7 +297,7 @@ angular.module("sampleApp")
 
             };
 
-            $scope.addMap = function(map){
+            $scope.addMap = function(){
                 $uibModal.open({
                     backdrop: 'static',      //means can't close by clicking on the backdrop.
                     keyboard: false,       //same as above.
@@ -330,8 +356,7 @@ angular.module("sampleApp")
                         }
                     }
                 }).result.then(function(vo){
-                    console.log(vo)
-                   // $scope.structureMapId = vo.id;      //the id of the current map
+
                     if (vo.sample) {
                         //set the sample data
                         $scope.input.inputJson = $scope.sample.inputJson;
@@ -346,8 +371,10 @@ angular.module("sampleApp")
                         });
                     } else {
                         //this has no sample data. It won't be saved until a mapping text has been entered & updated...
-                        delete $scope.input.inputJson;
-                        delete $scope.input.mappingFile;
+                        $scope.input.inputJson = "";
+                        $scope.input.mappingFile = "";
+                        wireCodeMirror()
+
                         $scope.currentSM = {resourceType:'StructureMap',id:vo.id,name:vo.name,description:vo.description,publisher:$scope.user.email}
                         $scope.maps.push($scope.currentSM);
                     }
