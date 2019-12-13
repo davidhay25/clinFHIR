@@ -566,8 +566,6 @@ angular.module("sampleApp")
 
             },
 
-
-
             getResource: function(artifact,asXml) {
                 //get the resource references by the artifact
 

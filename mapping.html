@@ -21,7 +21,7 @@
     <script src="js/libs/brace-fold.js"></script>
     <script src="js/libs/comment-fold.js"></script>
     <script src="js/libs/javascript.js"></script>
-
+    <script src="js/libs/fhirpath.min.js"></script>
 
     <link rel="stylesheet" type="text/css" href="css/codemirror.css"/>
     <link rel="stylesheet" type="text/css" href="css/foldgutter.css"/>
@@ -112,6 +112,11 @@
         height: 550px;
         border: 1px solid lightgray;
     }
+    .help {
+        text-decoration: underline;
+        text-decoration-style: dashed;
+        text-decoration-color: #0000FF;
+    }
 </style>
 
 
@@ -122,7 +127,7 @@
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
 
         <div class="container-fluid">
-            <div class="col-md-4 col-sm-4">
+            <div class="col-md-3 col-sm-3">
                 <span>
                     <a class="navbar-brand" href="#" ng-click="showVersion()">
                         Mapping language designer
@@ -144,17 +149,14 @@
             <div class="col-md-1 col-sm-1">
                 <div class="navbar-text">
                     <button btn class="btn btn-primary" ng-click="addMap()">New Map</button>
-
                 </div>
             </div>
 
             <div class="col-md-1 col-sm-1">
                 <div class="navbar-text">
                     <button btn class="btn btn-primary" ng-click="openMap()">Open Map</button>
-
                 </div>
             </div>
-
 
             <div class="col-md-1 col-sm-1">
                 <div class="navbar-text">
@@ -164,22 +166,29 @@
                 </div>
             </div>
 
-
-
-
-
-            <div class="col-md-2 col-sm-2">
+            <div class="col-md-1 col-sm-1">
                 <span class="navbar-text clickable" style="font-size:1.8em" uib-popover="Toggle help"
                       popover-placement="left"
                       popover-trigger="'mouseenter'">
                     <i class="glyphicon glyphicon-question-sign" ng-click="showHelp = ! showHelp"></i>
                 </span>
-
-                <img style="margin-top: 12px" ng-show="showWaiting" src="css/ajax_loader_blue_32.gif"/>
-
             </div>
 
             <div class="col-md-1 col-sm-1">
+                <span class="navbar-text clickable" style="font-size:1.8em" uib-popover="Toggle configuration screen"
+                      popover-placement="left"
+                      popover-trigger="'mouseenter'">
+                    <i class="glyphicon glyphicon-cog" ng-click="showConfig = ! showConfig"></i>
+                </span>
+
+
+
+            </div>
+
+            <div class="col-md-2 col-sm-2">
+
+                <img style="margin-top: 12px" ng-show="showWaiting" src="css/ajax_loader_blue_32.gif"/>
+
 
                 <div class="nav navbar-form navbar-right" ng-hide="user">
                     <span style="font-size:1.8em; cursor: pointer" uib-popover="Click to log in"
@@ -205,8 +214,6 @@
         </div>
     </nav>
 
-
-
     <div ng-hide="user">
         Only logged in users can view or create maps. To log in click the <span><i class="glyphicon glyphicon-log-in"></i></span> icon in the navbar.
     </div>
@@ -217,17 +224,6 @@
     </div>
 
 
-
-<!--
-    <div class="row">
-        <div class="col-md-6 col-sm-6">
-            <textarea id="cm1"></textarea>
-        </div>
-        <div class="col-md-6  col-sm-6">
-            <textarea id="cm2"></textarea>
-        </div>
-    </div>
--->
 
     <div ng-show="showHelp">
         <p>This clinFHIR module allows you to create and execute maps that use the
@@ -295,7 +291,115 @@
 
     </div>
 
-    <uib-tabset ng-show="currentSM && !showHelp">
+    <div ng-show="showConfig">
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Current server configuration</h3>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class='help' uib-popover="The endpoint where the $convert and $transform operations are hosted"
+                             popover-placement="right"
+                             popover-trigger="'mouseenter'">Mapping server</div>
+                    </div>
+                    <div class="col-md-7">
+                        <input type="text" ng-model="displayServer.mappingServerUrl" ng-change="configChanged=true" class="form-control"/>
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-default" ng-click="selectServer('mappingServerUrl')">...</button>
+                    </div>
+                </div>
+                <br/>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div  class='help' uib-popover="The endpoint where the Logical models are saved so that the mapping engine can access them. This will often be the same as the endpoint for $convert
+                    and $transform, but may not be (eg for Vonk they are different). When a Logical Model is imported, it will be read from the
+                    conformance server, and saved to this endpoint. There are number of customizations made to the model before being saved."
+                             popover-placement="right"
+                             popover-trigger="'mouseenter'">Mapping server conformance</div>
+                    </div>
+                    <div class="col-md-7">
+                        <input type="text" ng-model="displayServer.adminRoot" ng-change="configChanged=true" class="form-control"/>
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-default" ng-click="selectServer('adminRoot')">...</button>
+                    </div>
+                </div>
+                <br/>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div  class='help' uib-popover="The server where Logical Models needed by maps can be found. They need to be read from this location and saved to the mapping server - a
+                    process called importing the maps. There are number of customizations made to the model before being saved."
+                             popover-placement="right"
+                             popover-trigger="'mouseenter'">Conformance server</div>
+                    </div>
+                    <div class="col-md-7">
+                        <input type="text" ng-model="displayServer.confServer" ng-change="configChanged=true" class="form-control"/>
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-default" ng-click="selectServer('confServer')">...</button>
+                    </div>
+
+                </div>
+                <br/>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div  class='help' uib-popover="The server used to validate the result of the transform."
+                             popover-placement="right"
+                             popover-trigger="'mouseenter'">Validate server</div>
+                    </div>
+                    <div class="col-md-7">
+                        <input type="text" ng-model="displayServer.validate" class="form-control" ng-change="configChanged=true"/>
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-default" ng-click="selectServer('validate')">...</button>
+                    </div>
+
+                </div>
+                <br/>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class='help' uib-popover="The server where a copy of the StructureMap resource (which includes the sample and map file) is saved to during a backup."
+                             popover-placement="right"
+                             popover-trigger="'mouseenter'">Backup server</div>
+                    </div>
+                    <div class="col-md-7">
+                        <input type="text" ng-model="displayServer.backup" class="form-control" ng-change="configChanged=true"/>
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-default" ng-click="selectServer('backup')">...</button>
+                    </div>
+
+                </div>
+                <br/>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class='help' uib-popover="The server where an output can be sent to."
+                             popover-placement="right"
+                             popover-trigger="'mouseenter'">Target server</div>
+                    </div>
+                    <div class="col-md-7">
+                        <input type="text" ng-model="displayServer.target" class="form-control" ng-change="configChanged=true"/>
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-default" ng-click="selectServer('target')">...</button>
+                    </div>
+
+                </div>
+
+                <button class="btn btn-danger pull-right" style="margin-top: 8px" ng-click="updateConfig()" ng-show="configChanged">Save changes</button>
+
+            </div>
+            <div class="col-md-6">
+
+            </div>
+        </div>
+
+
+    </div>
+
+
+
+    <uib-tabset ng-show="currentSM && !showHelp && !showConfig">
 
         <uib-tab heading="Workspace">
             <br/>
@@ -309,8 +413,9 @@
                     <div style="text-align: center">
                         <button ng-hide="transformMessage || input.isDirty" class="btn btn-danger" ng-click="transform()">Execute transform</button>
 
-                        <button ng-show="input.isDirty" class="btn btn-primary"
+                        <button ng-show="input.isDirty" class="btn btn-primary" nh-hide="updateMessage"
                                 ng-click="updateStructureMap()">Update StructureMap resource</button>
+                        {{updateMessage}}
 
                         <span ng-hide="input.isDirty">{{transformMessage}}</span>
                         <div ng-show="output"><em>Results in tab above</em></div>
@@ -443,31 +548,73 @@
             -->
         </uib-tab>
 
-
         <uib-tab ng-show="output">
             <uib-tab-heading><strong>Results</strong></uib-tab-heading>
+
             <button class="btn btn-link pull-right" ng-show="output"
                     ng-click="copyToClipboard()">Copy to Clipboard</button>
 
+            <button class="btn btn-link pull-right"
+                    ng-click="validate()">Validate ({{server.validate}}) </button>
+<!--
+            <button class="btn btn-link pull-right" ng-show="server.target && (output.type=='transaction' || output.type=='batch')"
+                    ng-click="sendBundle()">Send to server  ({{server.target}})</button>
+-->
             <pre ng-show="transformError">{{transformError | json}}</pre>
-
+            <br/>
             <uib-tabset ng-show="output">
                 <uib-tab heading="Json">
+                    <br/>
                     <div class="row">
                         <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    FHIRPath query
+                                </div>
+                                <div class="col-md-7">
+                                    <input class="form-control" ng-model="input.fhirpathQuery"/>
+                                </div>
+                                <div class="col-md-3">
+
+                                    <i class="glyphicon glyphicon-flash" ng-click="executeFHIRPath(input.fhirpathQuery,output)"></i>
+                                    <i class="glyphicon glyphicon-arrow-up"
+                                       ng-show="input.fhirpathQuery"
+                                       ng-click="upFHIRPath(input.fhirpathQuery,output)"></i>
+                                    <i class="glyphicon glyphicon-refresh"
+                                       ng-show="input.fhirpathQuery"
+                                       ng-click="clearFHIRPath()"></i>
+                                    <!--
+                                    <button class="btn btn-link" ng-click="executeFHIRPath(input.fhirpathQuery,output)">Execute</button>
+
+                                    <button class="btn btn-link pull-right" ng-click="clearFHIRPath">Clear</button>  -->
+                                </div>
+                            </div>
                             <div class="scrollOutput">
-                                <pre>{{output | json}}</pre>
+                                <pre ng-show="fhirpathResult">{{fhirpathResult | json}}</pre>
+                                <pre ng-hide="fhirpathResult">{{output | json}}</pre>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <button class="btn btn-link" ng-show="output"
-                                    ng-click="validate()">Validate</button>
                             <div class="scrollOutput">
-                                <pre>{{validateResult | json}}</pre>
+                                <table class="table">
+                                    <tr ng-repeat="iss in validateResult.data.issue"
+                                        ng-class="{warning:iss.severity=='warning',danger:iss.severity=='error',info:iss.severity=='information'}">
+                                        <td>{{iss.severity}}</td>
+                                        <td>
+                                            <div>{{iss.details.text}}</div>
+                                            <div>{{iss.diagnostics}}</div>
+                                            <div ng-repeat = "loc in iss.location">
+                                                <div class="clickable" ng-click="executeFHIRPath(loc,output)"> {{loc}}</div>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                </table>
                             </div>
                         </div>
                     </div>
                 </uib-tab>
+
                 <uib-tab ng-show="output.resourceType=='Bundle'" heading="Bundle entries">
                     <div class="row">
                         <div class="col-md-2">
@@ -475,11 +622,11 @@
                                 <div ng-class="{'list-group-item':1,'listItemSelected':entry==selectedEntry}"
                                      ng-repeat="entry in output.entry"
                                      ng-click = "selectEntryFromBundle(entry)">
-                                    {{entry.resource.resourceType}}
+                                    {{$index+1}} {{entry.resource.resourceType}}
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-10">
+                        <div class="col-md-4">
                             <uib-tabset>
                                 <uib-tab heading="Json">
                                     <pre>{{selectedEntry | json}}</pre>
@@ -487,6 +634,31 @@
                                 </uib-tab>
                             </uib-tabset>
 
+                        </div>
+                        <div class="col-md-6">
+                            <uib-tabset ng-show="output">
+                                <uib-tab heading="All outcomes">
+                                    <table class="table">
+                                        <tr ng-repeat="iss in validateResult.data.issue"
+                                            ng-class="{warning:iss.severity=='warning',danger:iss.severity=='error',info:iss.severity=='information'}">
+                                            <td>{{iss.severity}}</td>
+                                            <td>
+                                                <div>{{iss.details.text}}</div>
+                                                <div>{{iss.diagnostics}}</div>
+                                                <div ng-repeat = "loc in iss.location">
+                                                    <div class="clickable" ng-click="executeFHIRPath(loc,output)"> {{loc}}</div>
+                                                </div>
+
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </uib-tab>
+                                <uib-tab heading="Json">
+                                    <div class="scrollOutput">
+                                        <pre>{{validateResult.data | json}}</pre>
+                                    </div>
+                                </uib-tab>
+                            </uib-tabset>
                         </div>
 
 
@@ -512,6 +684,27 @@
                         </div>
                     </div>
 
+
+
+
+                </uib-tab>
+
+                <uib-tab heading="Send to target server" ng-show="server.target && (output.type=='transaction' || output.type=='batch')">
+                    <p>This will send the Bundle as a transaction or batch to the target server - {{server.target}}</p>
+
+                    <button class="btn btn-danger" ng-click="sendBundle()">POST transaction</button>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h3>Source</h3>
+                            <pre>{{output | json}}</pre>
+                        </div>
+                        <div class="col-md-6">
+                            <h3>Response</h3>
+
+                            <pre>{{transactionResponse.data | json}}</pre>
+                        </div>
+                    </div>
 
 
 
@@ -577,11 +770,18 @@
                             </div>
                             <h4>Structure Definitions</h4>
                             <table class="table table-bordered">
-                                <tr><th>Url</th><th>Mode</th></tr>
+                                <tr><th>Url</th><th>Mode</th><th>Action</th></tr>
                                 <tr ng-repeat="struct in currentSM.structure">
                                     <td><div class="clickable" ng-click="showLM(struct.url)">{{struct.url}}</div> </td>
                                     <td>{{struct.mode}}</td>
-                                    <td><span class="clickable" ng-click="importModel(struct.url)">Import</span></td>
+                                    <td>
+                                        <span class="clickable" ng-click="importModel(struct.url)">Import</span>
+
+                                        <div><a target="_blank" ng-href={{makeEditLink(struct.url)}}>{{model.name}}Edit</a></div>
+<!--
+                                        <div class="clickable" ng-click="editModel(struct.url)">Edit</div>
+                                        -->
+                                    </td>
                                 </tr>
                             </table>
 
@@ -589,6 +789,7 @@
                         </div>
                         <div class="col-md-6">
                             <uib-tabset>
+                                <div class="alert alert-info" ng-show="importingModel">Importing model...</div>
                                 <uib-tab heading="Tree">
                                     <br/>
                                     <div ng-show="lmTreeViewError" class="alert alert-warning">{{lmTreeViewError}}</div>
@@ -657,143 +858,7 @@
 
         </uib-tab>
 
-        <uib-tab heading="Configuration">
-            <br/>
-            <div class="row">
-                <div class="col-md-2">
-                    Mapping server
-                </div>
-                <div class="col-md-4">
-                    <input type="text" class="form-control"/>
-                </div>
-                <div class="col-md-6">
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-2">
-                    Conformance server
-                </div>
-                <div class="col-md-4">
-                    <input type="text" class="form-control"/>
-                </div>
-                <div class="col-md-6">
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-2">
-                    Backup server
-                </div>
-                <div class="col-md-4">
-                    <input type="text" class="form-control"/>
-                </div>
-                <div class="col-md-6">
-                </div>
-            </div>
-
-        </uib-tab>
-<!--
-
-                <uib-tab heading="Example input" ng-show="1==2">
-                    <br/>
-                    <textarea rows = "30" class="form-control" ng-change="input.isDirty = true" ng-model="input.inputJson"></textarea>
-                </uib-tab>
-                <uib-tab heading="Mapping File"  ng-show="1==2">
-                    <br/>
-                    <div class="alert alert-danger" ng-show="convertError">
-                        <div ng-repeat = "iss in convertError.issue">
-                            Error: {{iss.details.text}}
-                        </div>
-                    </div>
-
-                    <textarea rows = "30" class="form-control editor" ng-change="input.isDirty = true" ng-model="input.mappingFile"></textarea>
-                </uib-tab>
-
-
-                <uib-tab heading="Transform" ng-display="1==2">
-                    <br/>
-                    <div class="alert alert-danger" ng-show="transformError">
-                        <div ng-repeat = "iss in transformError.issue">
-                            Error: {{iss.details.text}}
-                        </div>
-                    </div>
-                    <br/>
-                    <button class="btn btn-link pull-right" ng-show="output"
-                            ng-click="copyToClipboard()">Copy to Clipboard</button>
-
-                    <button class="btn btn-link pull-right" ng-show="output"
-                            ng-click="validate()">Validate</button>
-
-                    <div>
-                        <button class="btn btn-primary" ng-click="transform()">Execute transform</button>
-                        <span class="pull-right">{{transformMessage}}</span>
-                    </div>
-                    <br/>
-
-                    <pre ng-show="transformError">{{transformError | json}}</pre>
-
-
-
-                    <uib-tabset ng-hide="transformError">
-                        <uib-tab heading="Json">
-                            <pre>{{output | json}}</pre>
-
-                        </uib-tab>
-                        <uib-tab ng-show="output.resourceType=='Bundle'" heading="Bundle entries">
-                            <div class="row">
-                                <div class="col-md-2">
-                                    <div class="list-group">
-                                        <div ng-class="{'list-group-item':1,'listItemSelected':entry==selectedEntry}"
-                                             ng-repeat="entry in output.entry"
-                                             ng-click = "selectEntryFromBundle(entry)">
-                                            {{entry.resource.resourceType}}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-10">
-                                    <uib-tabset>
-                                        <uib-tab heading="Json">
-                                            <pre>{{selectedEntry | json}}</pre>
-
-                                        </uib-tab>
-                                    </uib-tabset>
-
-                                </div>
-
-
-
-                            </div>
-
-                        </uib-tab>
-                        <uib-tab heading="Graph"  select="fitSingleGraph()">
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <div id="resourceGraphXXXX"></div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="col-md-12">
-                                        <uib-tabset>
-                                            <uib-tab heading="Json">
-                                                <pre>{{selectedEntry | json}}</pre>
-
-                                            </uib-tab>
-                                        </uib-tabset>
-
-                                    </div>
-                                </div>
-                            </div>
-
-
-                        </uib-tab>
-
-                    </uib-tabset>
-
-
-
-                </uib-tab>
--->
-            </uib-tabset>
-
-
+        </uib-tabset>
 
     </div>
 

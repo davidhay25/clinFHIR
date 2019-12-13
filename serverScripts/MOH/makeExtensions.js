@@ -68,10 +68,11 @@ IG.definition.resource.forEach(function (item) {
 });
 
 
-arModels = ["HpiPractitioner"];
+
 arModels = ["HpiOrganization"];
 arModels = ["HpiLocation"];
 arModels = ["HpiPractitionerRole"];
+arModels = ["HpiPractitioner"];
 
 //arModels = ["NzNHIPatient"];
 //arModels = ["Nzulm"];

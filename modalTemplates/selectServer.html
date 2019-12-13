@@ -1,0 +1,52 @@
+
+<div>
+
+
+    <style>
+
+
+        .scrollList {
+            height: 400px;
+            overflow-y: scroll;
+        }
+
+    </style>
+
+    <!--<div ng-controller="newResourceCtrl">-->
+    <div class="modal-header">
+        <div class="row">
+            <div class="col-md-6 col-sm-6">
+                <h3 class="modal-title">Select server</h3>
+
+            </div>
+            <div class="col-md-6 col-sm-6">
+                <div class="pull-right " ">
+                    <button class="btn-link" ng-click="$dismiss()">Cancel</button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+    <div class="modal-body">
+
+        <div class="scrollList">
+
+            <table class="table">
+                <tr ng-repeat="server in servers">
+                    <td>{{server.name}}</td>
+                    <td>{{server.url}}</td>
+                    <td><button class="btn btn-link" ng-click="$close(server)">Select</button> </td>
+                </tr>
+            </table>
+        </div>
+
+
+</div>
+
+    <div class="modal-header">
+    </div>
+
+
+
+</div>

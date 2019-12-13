@@ -111,7 +111,6 @@ angular.module("sampleApp")
 
             };
 
-
             $scope.showValueSet = function(vs,filter) {
 
                 if (!filter) {

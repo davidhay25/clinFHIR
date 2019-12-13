@@ -1,22 +1,147 @@
 angular.module("sampleApp")
     .controller('mappingCtrl',
-        function ($scope,$http,v2ToFhirSvc,$uibModal,$timeout,$window,$location,
-                  modalService,logicalModelSvc,mappingSvc) {
+        function ($scope,$http,v2ToFhirSvc,$uibModal,$timeout,$window,$location,$filter,
+                  modalService,logicalModelSvc,mappingSvc,appConfigSvc,$localStorage) {
             $scope.input = {};
-            $scope.serverRoot = "https://vonk.fire.ly/";
-            $scope.adminRoot = "https://vonk.fire.ly/administration/";        //where custom SD's are found
-            $scope.confServer = "http://fhirtest.uhn.ca/baseDstu3/";            //where the CF models are found
 
-/*
-            $scope.serverRoot = "https://vonk.fire.ly/R4/";
-            $scope.adminRoot = "https://vonk.fire.ly/administration/R4/";        //where custom SD's are found
-            $scope.confServer = "http://fhirtest.uhn.ca/baseR4/";            //where the CF models are found
-*/
-            $scope.input.isDirty = false;
-
+            //extension urls
             //todo - should these move to app config svc???
             let extMapUrl = "https://vonk.fire.ly/StructureDefinition/mappingMap";
             let extExampleUrl = "https://vonk.fire.ly/StructureDefinition/mappingExample";
+
+            $http.post('/stats/login',{module:"Mapping"}).then(
+                function(data){
+                    //console.log(data);
+                },
+                function(err){
+                    console.log('error accessing clinfhir to register access',err)
+                }
+            );
+
+           /*
+            $scope.mappingServerUrl = "https://vonk.fire.ly/";
+            $scope.adminRoot = "https://vonk.fire.ly/administration/";        //where custom SD's are found
+            $scope.confServer = "http://fhirtest.uhn.ca/baseDstu3/";            //where the CF models are found
+
+           */
+
+            $scope.server = {};
+            $scope.configChanged = false;
+            //default configuration
+
+            if ( $localStorage.mappingConfig) {
+                $scope.server = $localStorage.mappingConfig;
+            } else {
+                $scope.server.mappingServerUrl = "https://vonk.fire.ly/";
+                $scope.server.adminRoot = "https://vonk.fire.ly/administration/";        //where custom SD's are found
+                $scope.server.confServer = "http://fhirtest.uhn.ca/baseDstu3/";            //where the CF models are found
+                $scope.server.validate = "https://vonk.fire.ly/";       //the va.lidation server
+            }
+
+            //needed for the logical model integration
+            appConfigSvc.setServerType('conformance',$scope.server.confServer);
+            $scope.displayServer = angular.copy($scope.server)
+
+
+            $scope.executeFHIRPath = function(fpath,source){
+                let json = angular.toJson(source)
+                $scope.fhirpathResult = fhirpath.evaluate(source, fpath);
+                $scope.input.fhirpathQuery = fpath;
+                //console.log(result)
+            };
+
+            $scope.upFHIRPath = function(fpath) {
+                let ar = fpath.split('.')
+                ar.splice(ar.length-1,1);
+                $scope.input.fhirpathQuery = ar.join('.')
+                $scope.executeFHIRPath($scope.input.fhirpathQuery,$scope.output)
+            }
+
+            $scope.clearFHIRPath = function(){
+                delete $scope.input.fhirpathQuery;
+                delete $scope.fhirpathResult;
+            }
+
+            $scope.makeEditLink = function(canUrl){
+                //load the Logical Modeller with this model. assume that the id is the same as end of the url...
+                let id = $filter('referenceType')(canUrl);
+                let url = 'logicalModeller.html#$$$'+id;
+                return url;
+
+            };
+
+
+            $scope.updateConfig = function() {
+                angular.forEach($scope.displayServer,function(ele,key) {
+                    console.log(ele)
+                    if (ele[ele.length-1] !== '/') {
+                        ele += '/';
+                        $scope.displayServer[key] = ele
+                    }
+                });
+
+                //mapping server changed, re-load required...
+                let msg = "Servers updated in local cache.";
+                if ($scope.displayServer.mappingServerUrl !== $scope.server.mappingServerUrl) {
+                    msg += "Loading maps for this user...";
+                    getMapsForUser($scope.user);
+                }
+                $scope.server = $scope.displayServer;
+                $localStorage.mappingConfig = $scope.server;
+                modalService.showModal({}, {bodyText: msg}).then().finally(function(){
+                    $scope.showConfig = false;
+                })
+
+                $scope.configChanged = false;
+
+            };
+
+            $scope.selectServer = function(role) {
+
+                $uibModal.open({
+                    backdrop: 'static',      //means can't close by clicking on the backdrop.
+                    keyboard: false,       //same as above.
+                    size:'lg',
+                    templateUrl: 'modalTemplates/selectServer.html',
+                    controller: function ($scope,servers) {
+                        $scope.servers = angular.copy(servers);
+                        try {
+                            $scope.servers.sort(function (a,b) {
+                                if (a.name.toLowerCase() > b.name.toLowerCase()) {
+                                    return 1
+                                } else {
+                                    return -1
+                                }
+                            })
+                        } catch (ex) {}
+
+
+                    },
+                    resolve : {
+                        servers: function () {          //the default config
+                            return appConfigSvc.getAllServers()
+
+                        }
+                    },
+
+                }).result.then(function(server){
+                    console.log(role, server)
+                    if (server) {
+                        //$scope.newServer = $scope.newServer || {}
+                        $scope.displayServer[role] = server.url;
+                        $scope.configChanged = true;
+                    }
+
+                })
+            };
+
+
+            /*
+                        $scope.serverRoot = "https://vonk.fire.ly/R4/";
+                        $scope.adminRoot = "https://vonk.fire.ly/administration/R4/";        //where custom SD's are found
+                        $scope.confServer = "http://fhirtest.uhn.ca/baseR4/";            //where the CF models are found
+            */
+            $scope.input.isDirty = false;
 
             var hash = $location.hash();
 
@@ -84,14 +209,16 @@ angular.module("sampleApp")
 
             */
 
-
-
             function clearInputs() {
                 delete $scope.input.mappingFile;
                 delete $scope.input.inputJson;
             }
 
             function selectMap(map) {
+                if (!map) {
+                    alert('null map')
+                    return;
+                }
                 clearInputs();
                 delete $scope.selectedEntry;
                 delete $scope.output;
@@ -160,7 +287,6 @@ angular.module("sampleApp")
 
 
                     cmSample = CodeMirror.fromTextArea(elSample,cmOptions);
-                    console.log(cmSample);
                     //cmSample.foldCode(CodeMirror.Pos(13, 0));
 
                     cmSample.on('change',function(evt,changeobj){
@@ -170,8 +296,6 @@ angular.module("sampleApp")
                     });
 
                     cmSample.on("blur", function(){
-
-
                         delete $scope.validateSampleMessage;
                         try {
                             let json = angular.fromJson(cmSample.getValue());
@@ -198,15 +322,22 @@ angular.module("sampleApp")
 
             $scope.maps = [];
             firebase.auth().onAuthStateChanged(function(user) {
-                if (user) {
-                    $scope.user = user;
-                    console.log(user)
+                $scope.user = user;
+                getMapsForUser(user);
 
-                    let dUrl = $scope.serverRoot + "StructureMap?publisher="+user.email
+                if (! user) {
+                    delete $scope.user
+                }
+            });
+
+            function getMapsForUser(user) {
+                if (user) {
+                    $scope.maps.length = 0;
+                    let dUrl = $scope.server.mappingServerUrl + "StructureMap?publisher="+user.email
                     $scope.showWaiting = true;
                     $http.get(dUrl).then(
                         function(data) {
-                            console.log(data.data);
+
                             if (data.data && data.data.entry) {
                                 data.data.entry.forEach(function (entry) {
                                     if (entry.resource && entry.resource.resourceType == 'StructureMap') {
@@ -215,9 +346,7 @@ angular.module("sampleApp")
                                 })
                             }
 
-                            //$scope.input.mappingFile = getStringExtension($scope.currentSM,extMapUrl)[0];
-                            //$scope.input.inputJson = getStringExtension($scope.currentSM,extExampleUrl)[0];
-                            console.log($scope.maps)
+
                             if ($scope.maps.length > 0) {
                                 $scope.currentSM = $scope.maps[0];
                                 //modelSpecified is set when the model is specified as a hash...
@@ -232,12 +361,11 @@ angular.module("sampleApp")
                     ).finally(function () {
                         $scope.showWaiting = false;
                     });
-
-                } else {
-                    delete $scope.user
                 }
 
-            });
+
+            }
+
             $scope.login=function(){
                 $uibModal.open({
                     backdrop: 'static',      //means can't close by clicking on the backdrop.
@@ -262,16 +390,12 @@ angular.module("sampleApp")
                     keyboard: false,       //same as above.
                     //size:'lg',
                     templateUrl: 'modalTemplates/openMap.html',
-                    controller: function($scope,$http,serverRoot){
+                    controller: function($scope){
                         $scope.validId = false;
                         $scope.open = function(){
                             $scope.$close({id:$scope.id})
                         }
 
-                    },resolve : {
-                        serverRoot: function () {          //the default config
-                            return $scope.serverRoot;
-                        }
                     }
                 }).result.then(function(vo){
                     console.log(vo)
@@ -283,6 +407,7 @@ angular.module("sampleApp")
             };
 
             $scope.copyMap = function() {
+                alert ('not yet enabled');
                 return;
                 let clone = angular.copy($scope.currentSM);
                 clone.publisher = $scope.user.email;
@@ -302,7 +427,7 @@ angular.module("sampleApp")
             };
 
             function loadMap(id) {
-                let url = $scope.serverRoot + "StructureMap/"+ id
+                let url = $scope.server.mappingServerUrl + "StructureMap/"+ id
                 $http.get(url).then(
                     function(data) {
                         let map = data.data;
@@ -379,7 +504,7 @@ angular.module("sampleApp")
 
                     },resolve : {
                         serverRoot: function () {          //the default config
-                            return $scope.serverRoot;
+                            return $scope.server.mappingServerUrl;
 
                         }
                     }
@@ -419,7 +544,7 @@ angular.module("sampleApp")
                 }
             );
 
-            //get the message to transform
+            //get the sample message to transform
             let urlInput = "artifacts/mapping/fakemedChart.json";
             $http.get(urlInput).then(
                 function(data) {
@@ -427,19 +552,30 @@ angular.module("sampleApp")
                 }
             );
 
+            //get the sample message to transform
+            let urlServers = "artifacts/mapping/serverConfig.json";
+            $http.get(urlServers).then(
+                function(data) {
+                    $scope.servers = data.data
+                }
+            );
+
+
             $scope.validate = function() {
                 delete $scope.validateResult;
-                let url = $scope.serverRoot + "Bundle/$validate";
+                let url = $scope.server.validate + "Bundle/$validate";
+                $scope.showWaiting = true;
                 $http.post(url,$scope.output).then(
                     function(data) {
                         console.log(data)
-                        $scope.validateResult = data.data;
+                        $scope.validateResult = data;
                     }, function (err) {
+                        $scope.validateResult = err;
                         console.log(err)
                     }
-                )
-
-                //alert('validate not yet enabled')
+                ).finally(function(){
+                    delete $scope.showWaiting;
+                })
             };
 
             $scope.checkSampleDEP = function() {
@@ -471,6 +607,7 @@ angular.module("sampleApp")
             //convert the map into an SM resource using $convert, then update the SM resource if the conversion was successful...
             $scope.updateStructureMap = function(cb) {
 
+                $scope.updateMessage = 'Converting...'
                 delete $scope.transformMessage;         //if set, transformMessage hides the transform button
                 delete $scope.convertError;
 
@@ -487,12 +624,13 @@ angular.module("sampleApp")
                 $scope.showWaiting = true;
 
 
-                let url = $scope.serverRoot + "StructureMap/$convert";
+                let url = $scope.server.mappingServerUrl + "StructureMap/$convert";
                 let options = {headers:{}};
                 options.headers['content-type'] = 'text/fhir-mapping;charset=utf-8';
 
                 $http.post(url,$scope.input.mappingFile,options).then(
                     function(data) {
+                        $scope.updateMessage = 'Saving...'
                         let structureMapResource = data.data;
                         console.log(structureMapResource)
                         //structureMapResource.id = $scope.structureMapId;
@@ -511,7 +649,7 @@ angular.module("sampleApp")
 
                         makeDownload(structureMapResource)
 
-                        let url = $scope.serverRoot + "StructureMap/" + $scope.currentSM.id;
+                        let url = $scope.server.mappingServerUrl + "StructureMap/" + $scope.currentSM.id;
                         //let url = $scope.serverRoot + "StructureMap/" + $scope.structureMapId;
                         $http.put(url,structureMapResource).then(
                             function() {
@@ -546,7 +684,9 @@ angular.module("sampleApp")
                         $scope.showWaiting = false;
 
                     }
-                )
+                ).finally(function () {
+                    delete $scope.updateMessage;
+                })
             };
 
             $scope.copyToClipboard = function(){
@@ -589,7 +729,7 @@ angular.module("sampleApp")
                 $scope.transformMessage = "Executing map on server, please wait...";
                 //https://vonk.fire.ly/StructureMap/dh/$transform
                 //let url = $scope.serverRoot + "StructureMap/" + $scope.structureMapId + "/$transform";
-                let url = $scope.serverRoot + "StructureMap/" + $scope.currentSM.id + "/$transform";
+                let url = $scope.server.mappingServerUrl + "StructureMap/" + $scope.currentSM.id + "/$transform";
 
                 //if the inpput is a resource then post directly. Otherwise must use a Paramaters
 
@@ -647,7 +787,7 @@ angular.module("sampleApp")
                     return
                 }
 
-                let options = {bundle:bundle,hashErrors: {},serverRoot:$scope.serverRoot}
+                let options = {bundle:bundle,hashErrors: {},serverRoot:$scope.server.mappingServerUrl}
                 let vo = v2ToFhirSvc.makeGraph(options)
 
                 var container = document.getElementById('resourceGraph');
@@ -691,7 +831,7 @@ angular.module("sampleApp")
 
             $scope.refreshHistory = function() {
                 $scope.history = [];
-                let url = $scope.serverRoot + "StructureMap/"+$scope.currentSM.id + "/_history";
+                let url = $scope.server.mappingServerUrl + "StructureMap/"+$scope.currentSM.id + "/_history";
                 $scope.waiting = true;
                 $http.get(url).then(
                     function(data) {
@@ -738,7 +878,7 @@ angular.module("sampleApp")
                     {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
 
                 ).on('changed.jstree', function (e, data) {
-                    //seems to be the node selection event...
+
 
                     if (data.node) {
                         let selectedNode = data.node;
@@ -783,9 +923,25 @@ angular.module("sampleApp")
                 });*/
             }
 
+            $scope.sendBundle = function () {
+
+                    let url = $scope.server.target;
+                    delete $scope.transactionResponse;
+                    $http.post(url,$scope.output).then(
+                        function(data){
+                            $scope.transactionResponse = data;
+                        },function(err){
+                            $scope.transactionResponse = err;
+                        }
+                    ).finally(function () {
+
+                    })
+
+            };
+
             $scope.showLM = function(canonicalUrl) {
                 delete $scope.lmTreeViewError;
-                let url = $scope.adminRoot + "StructureDefinition?url="+ canonicalUrl;
+                let url = $scope.server.adminRoot + "StructureDefinition?url="+ canonicalUrl;
                 $scope.showWaiting=true;
                 $http.get(url).then(
                     function(data) {
@@ -796,18 +952,10 @@ angular.module("sampleApp")
                                 if (ent.resource && ent.resource.resourceType == 'StructureDefinition') {
                                     resource = ent.resource;
                                 }
-                            } )
+                            } );
 
                             if (resource) {
-                                if (!resource.snapshot) {
-                                    resource.snapshot = resource.differential;
-                                }
-
-                                $scope.selectedLM = resource;
-                                let treeData = logicalModelSvc.createTreeArrayFromSD(resource);
-
-
-                                drawTree(treeData)
+                                drawModelTree(resource)
                             } else {
                                 $scope.lmTreeViewError = "The model with the url: "+canonicalUrl +" was not located on the Mapping Server"
                             }
@@ -824,17 +972,30 @@ angular.module("sampleApp")
 
             };
 
+            function drawModelTree(SD) {
+                if (!SD.snapshot) {
+                    SD.snapshot = SD.differential;
+                }
+                $scope.selectedLM = SD;
+                let treeData = logicalModelSvc.createTreeArrayFromSD(SD);
+                drawTree(treeData)
+            }
+
             $scope.importModel = function(url) {
+                $('#lmTreeView').jstree('destroy');     //clear any current tree being displayed
+                delete $scope.selectedNodeED;
                 $scope.showWaiting=true;
-                $scope.importMessage = "Importing model"
-                mappingSvc.importModel(url,$scope.confServer,$scope.adminRoot).then(
-                    function(data) {
-                        alert('Model has been imported')
+                $scope.importingModel = true;
+                $scope.importMessage = "Importing model";
+                mappingSvc.importModel(url,$scope.server.confServer,$scope.server.adminRoot).then(
+                    function(SD) {
+                        //alert('Model has been imported')
+                        drawModelTree(SD)
                     },
                     function(err) {
                         alert('There was an error: ' + angular.toJson(err))
                     }
-                ).finally(function(){ $scope.showWaiting=false;})
+                ).finally(function(){ $scope.showWaiting=false;$scope.importingModel = false;})
             }
         }
     );

@@ -3,9 +3,6 @@ angular.module("sampleApp")
 
 
     .service('mappingSvc', function($http,$filter,$q) {
-
-
-
         return {
             //imports logical model from CF and converts to vonk format
             //http://docs.simplifier.net/mappingengine/transformsetup/logicalmodel.html
@@ -46,7 +43,7 @@ angular.module("sampleApp")
                             let mapUrl = mapServerUrl + "StructureDefinition/"+name;
                             $http.put(mapUrl,SD).then(
                                 function (data) {
-                                    deferred.resolve(data)
+                                    deferred.resolve(SD)
                                 },
                                 function(err) {
                                     deferred.reject(err)
