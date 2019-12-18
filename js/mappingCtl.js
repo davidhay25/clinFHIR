@@ -70,10 +70,9 @@ angular.module("sampleApp")
 
             };
 
-
             $scope.updateConfig = function() {
                 angular.forEach($scope.displayServer,function(ele,key) {
-                    console.log(ele)
+
                     if (ele[ele.length-1] !== '/') {
                         ele += '/';
                         $scope.displayServer[key] = ele
@@ -82,15 +81,24 @@ angular.module("sampleApp")
 
                 //mapping server changed, re-load required...
                 let msg = "Servers updated in local cache.";
-                if ($scope.displayServer.mappingServerUrl !== $scope.server.mappingServerUrl) {
+                let serverChanged = ($scope.displayServer.mappingServerUrl !== $scope.server.mappingServerUrl);
+                $scope.server = $scope.displayServer;
+                if (serverChanged) {
+                //if ($scope.displayServer.mappingServerUrl !== $scope.server.mappingServerUrl) {
                     msg += "Loading maps for this user...";
-                    getMapsForUser($scope.user);
+
+
+
                 }
                 $scope.server = $scope.displayServer;
                 $localStorage.mappingConfig = $scope.server;
                 modalService.showModal({}, {bodyText: msg}).then().finally(function(){
                     $scope.showConfig = false;
-                })
+                    //need to do this after the dialog has closed...
+                    if (serverChanged) {
+                        getMapsForUser($scope.user);
+                    }
+                });
 
                 $scope.configChanged = false;
 
@@ -406,6 +414,42 @@ angular.module("sampleApp")
                 })
             };
 
+            $scope.deleteCurrentMap = function() {
+                //delete the current map
+                let url = $scope.server.mappingServerUrl + "StructureMap/"+$scope.currentSM.id;
+
+                if ( $scope.user && $scope.currentSM.publisher == $scope.user.email) {
+                    var modalOptions = {
+                        closeButtonText: "No, I've changed my mind",
+                        actionButtonText: 'Yes, please remove',
+                        headerText: 'Delete map',
+                        bodyText: "Are you sure you wish to delete this map: "+ $scope.currentSM.id
+                    };
+
+                    modalService.showModal({}, modalOptions).then(function (result) {
+                            //this is the 'yes'
+                            //let url = $scope.server.mappingServerUrl + "StructureMap/"+scope.currentSM.id
+                            $http.delete(url).then(
+                                function() {
+                                    getMapsForUser($scope.user);
+                                    alert('The map has been deleted.')
+
+                                },function(err) {
+                                    alert("Sorry, there was an error trying to delete the map: "+angular.toJson(err))
+                                }
+                            )
+
+
+                        },
+                        function(){
+                            alert("Ok, map was NOT removed")
+                        });
+                } else {
+                    alert("You cannot delete this map")
+                }
+
+            };
+
             $scope.copyMap = function() {
                 alert ('not yet enabled');
                 return;
@@ -442,12 +486,15 @@ angular.module("sampleApp")
 
             //when a map is selected from the drop down list for this user
             $scope.selectMapFromDD = function(map){
-                delete $scope.convertError;
-                delete $scope.transformError;
-                delete $scope.transformMessage;
-                $('#lmTreeView').jstree('destroy');
-                console.log(map)
-                selectMap(map)
+                if (map) {
+                    delete $scope.convertError;
+                    delete $scope.transformError;
+                    delete $scope.transformMessage;
+                    $('#lmTreeView').jstree('destroy');
+                    console.log(map)
+                    selectMap(map)
+                }
+
             };
 
             $scope.addMap = function(){
@@ -477,10 +524,6 @@ angular.module("sampleApp")
                                 modalService.showModal({},{bodyText:"The Id cannot be blank. Try again."})
                                 return;
                             }
-
-
-
-
 
                             let url = serverRoot+"StructureMap/"+$scope.id
                             $http.get(url).then(
@@ -638,6 +681,7 @@ angular.module("sampleApp")
                         structureMapResource.publisher = $scope.user.email;
                         structureMapResource.description = $scope.currentSM.description;
                         structureMapResource.name = $scope.currentSM.name;
+                        structureMapResource.experimental = true;
                         //now add the map and the example file/s to the resource as extensions
 
                         //todo need to add sdefs to server...
@@ -653,11 +697,12 @@ angular.module("sampleApp")
                         //let url = $scope.serverRoot + "StructureMap/" + $scope.structureMapId;
                         $http.put(url,structureMapResource).then(
                             function() {
-                                ///alert("StructureMap updated")
+
                                 $scope.input.isDirty = false;
                                 //$scope.currentSM = structureMapResource;
 
                                 //update the maps array
+                                //let found = fal
                                 for (var i=0; i < $scope.maps.length-1; i++) {
                                     if ($scope.maps[i].id == structureMapResource.id) {
                                         $scope.maps[i] = structureMapResource;
@@ -744,13 +789,23 @@ angular.module("sampleApp")
                     alert("The sample is not valid Json. Please correct and retry...");
                     delete $scope.transformMessage;
                     return;
-                    //console.log("Invalid Json as input...")
+
                 }
 
                 $http.post(url,content).then(
                     function(data) {
                         $scope.output = data.data;
                         $scope.transformMessage = 'Transform succeeded'
+
+                        console.log($scope.output)
+                        let oo = $scope.output.entry[1].resource;
+                        let iss = oo.issue[0].diagnostics;
+                        let g = iss.indexOf('{')
+                        let s = iss.substr(g);
+                        let a = angular.fromJson(s)
+                        console.log(a)
+                        console.log(s)
+
                         //delete $scope.transformMessage;
                         makeGraph($scope.output)
                     },
@@ -889,38 +944,7 @@ angular.module("sampleApp")
 
                     $scope.$digest();       //as the event occurred outside of angular...
 
-                })/*
-                    .on('redraw.jstree', function (e, data) {
-
-                    //ensure the selected node remains so after a redraw...
-                    if ($scope.treeIdToSelect) {
-                        $("#lmTreeView").jstree("select_node", "#"+$scope.treeIdToSelect);
-                        delete $scope.treeIdToSelect
-                    }
-
                 })
-                    .on('open_node.jstree',function(e,data){
-
-                    //set the opened status of the scope property to the same as the tree node so we can remember the state...
-                    $scope.treeData.forEach(function(node){
-                        if (node.id == data.node.id){
-                            node.state.opened = data.node.state.opened;
-                        }
-                    });
-
-
-                    $scope.$digest();
-                })
-                    .on('close_node.jstree',function(e,data){
-
-                    //set the opened status of the scope propert to the same as the tree node so we can remember the state...
-                    $scope.treeData.forEach(function(node){
-                        if (node.id == data.node.id){
-                            node.state.opened = data.node.state.opened;
-                        }
-                    })
-                    $scope.$digest();
-                });*/
             }
 
             $scope.sendBundle = function () {

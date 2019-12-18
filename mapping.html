@@ -463,9 +463,14 @@
             </div>
 
 
+            <br/>
+
+            <div class="alert alert-danger" ng-show="transformError && ! transformError.resourceType ">
+                {{transformError}}
+            </div>
 
 
-            <div class="alert alert-danger" ng-show="transformError">
+            <div class="alert alert-danger" ng-show="transformError && transformError.resourceType">
                 <div ng-repeat = "iss in transformError.issue">
                     Error: {{iss.details.text}} {{iss.diagnostics}}
                 </div>
@@ -593,6 +598,9 @@
                                 <pre ng-show="fhirpathResult">{{fhirpathResult | json}}</pre>
                                 <pre ng-hide="fhirpathResult">{{output | json}}</pre>
                             </div>
+
+                            <p ng-bind-html="output"></p>
+
                         </div>
                         <div class="col-md-6">
                             <div class="scrollOutput">
@@ -718,10 +726,15 @@
             <br/>
 
 
+            <button class="btn btn-danger pull-right" ng-click="deleteCurrentMap()">Delete map</button>
             <a class="btn btn-link pull-right" download="{{downloadMapName}}"
                href="{{downloadMapContent}}" title="{{downloadMapName}}" >
                 Download StructureMap resource
             </a>
+
+
+
+
 
 
             <uib-tabset>
