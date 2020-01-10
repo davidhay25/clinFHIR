@@ -2201,7 +2201,7 @@ angular.module("sampleApp")
                 logicalModelSvc.openTopLevelOnly($scope.treeData);
 
 
-                var baseType = $scope.treeData[0].data.header.baseType
+                //var baseType = $scope.treeData[0].data.header.baseType
 
 
                 setAllMappings();       //find all the mapping identities that have been used..

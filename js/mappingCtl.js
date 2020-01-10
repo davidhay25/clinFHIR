@@ -50,6 +50,18 @@ angular.module("sampleApp")
                 //console.log(result)
             };
 
+            $scope.executeFHIRPathTool = function(fpath,source){
+                let json = angular.fromJson(source)
+                try {
+                    $scope.fhirpathResultTool = fhirpath.evaluate(json, fpath);
+                } catch (ex) {
+                    alert(ex.message)
+                }
+
+                $scope.input.fhirpathQueryTool = fpath;
+                //console.log(result)
+            };
+
             $scope.upFHIRPath = function(fpath) {
                 let ar = fpath.split('.')
                 ar.splice(ar.length-1,1);
@@ -71,13 +83,22 @@ angular.module("sampleApp")
             };
 
             $scope.updateConfig = function() {
+
+                if ($scope.displayServer.adminRoot == $scope.displayServer.confServer) {
+                    alert("The conformance and mapping server conformance cannot be the same")
+                    return;
+
+                }
+
                 angular.forEach($scope.displayServer,function(ele,key) {
 
-                    if (ele[ele.length-1] !== '/') {
+                    if (ele.length > 0 &&  ele[ele.length-1] !== '/') {
                         ele += '/';
                         $scope.displayServer[key] = ele
                     }
                 });
+
+
 
                 //mapping server changed, re-load required...
                 let msg = "Servers updated in local cache.";
@@ -242,11 +263,33 @@ angular.module("sampleApp")
                 }
                 let ex = getStringExtension(map,extExampleUrl);
                 if (ex.length > 0) {
-                    $scope.input.inputJson = ex[0]
+                    $scope.input.inputJson = ex[0];
+                    $scope.input.inputFP = ex[0]
                 }
 
 
                 wireCodeMirror();
+
+                $scope.FPCheckSelect = function(){
+//console.log('ff')
+                    $timeout(function(){
+                        if (cmFP) {
+                            cmFP.toTextArea()
+                        }
+                        let cmOptions = {lineNumbers:true,lineWrapping:true,matchBrackets:true,
+                            foldGutter: true,
+                            gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]};
+
+                        let elFP = document.getElementById("fhirpathInput");
+                        cmFP = CodeMirror.fromTextArea(elFP,cmOptions);
+                        cmFP.on('change',function(evt){
+                            //  $scope.input.isDirty = true;
+                            //  $scope.input.mappingFile = cmMap.getValue();
+                            // $scope.$digest();
+                        })
+                    },500)
+
+                }
 /*
                 $timeout(function(){
 
@@ -277,6 +320,7 @@ angular.module("sampleApp")
 
             let cmSample;
             let cmMap;
+            let cmFP
             function wireCodeMirror() {
 
                 if (cmSample) {
@@ -285,6 +329,10 @@ angular.module("sampleApp")
                 if (cmMap) {
                     cmMap.toTextArea()
                 }
+
+              //  if (cmFP) {
+                //    cmFP.toTextArea()
+              //  }
 
                 $timeout(function(){
 
@@ -317,13 +365,24 @@ angular.module("sampleApp")
                     });
 
 
-                    var elMap = document.getElementById("map");
+                    let elMap = document.getElementById("map");
                     cmMap = CodeMirror.fromTextArea(elMap,cmOptions);
                     cmMap.on('change',function(evt){
                         $scope.input.isDirty = true;
                         $scope.input.mappingFile = cmMap.getValue();
                         $scope.$digest();
                     })
+
+/*
+                    let elFP = document.getElementById("fhirpathInput");
+                    cmFP = CodeMirror.fromTextArea(elFP,cmOptions);
+                    cmFP.on('change',function(evt){
+                      //  $scope.input.isDirty = true;
+                      //  $scope.input.mappingFile = cmMap.getValue();
+                        // $scope.$digest();
+                    })
+*/
+
                 },500)
             }
 
@@ -674,6 +733,7 @@ angular.module("sampleApp")
                 $http.post(url,$scope.input.mappingFile,options).then(
                     function(data) {
                         $scope.updateMessage = 'Saving...'
+
                         let structureMapResource = data.data;
                         console.log(structureMapResource)
                         //structureMapResource.id = $scope.structureMapId;
@@ -721,16 +781,18 @@ angular.module("sampleApp")
                             }
                         ).finally(function () {
                             $scope.showWaiting = false;
+                            delete $scope.updateMessage;
                         })
                     },
                     function(err) {
                         console.log(err);
                         $scope.convertError = err.data
                         $scope.showWaiting = false;
+                        delete $scope.updateMessage;
 
                     }
                 ).finally(function () {
-                    delete $scope.updateMessage;
+                   // delete $scope.updateMessage;
                 })
             };
 
@@ -771,6 +833,8 @@ angular.module("sampleApp")
                 delete $scope.output;
                 delete $scope.convertError;
                 delete $scope.transformError;
+                delete $scope.transactionResponse;
+
                 $scope.transformMessage = "Executing map on server, please wait...";
                 //https://vonk.fire.ly/StructureMap/dh/$transform
                 //let url = $scope.serverRoot + "StructureMap/" + $scope.structureMapId + "/$transform";

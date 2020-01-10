@@ -9,13 +9,13 @@ angular.module("sampleApp")
         let extIGEntryType = "http://clinfhir.com/StructureDefinition/igEntryType";
         let extIGMoreInfo = "http://clinfhir.com/StructureDefinition/igMoreInfo";
         let extModelBaseType = "http://clinfhir.com/fhir/StructureDefinition/baseTypeForModel";
-        let extProfileForLM = "http://clinfhir.com/StructureDefinition/profileForLM";
+        let extProfileForLM = "http://clinfhir.com/fhir/StructureDefinition/profileForLM";
         let extExtensionUrl = "http://clinfhir.com/fhir/StructureDefinition/simpleExtensionUrl";
+        let extFSHUrl = "http://clinfhir.com/fhir/StructureDefinition/fshUrl";
 
         let docKey = "http://clinfhir.com/StructureDefinition/docKey";
 
         var pathExtUrl = appConfigSvc.config().standardExtensionUrl.path;
-
 
         //the code for tasks that correstond to notes against the model
         let taskCode =  {system:"http://loinc.org",code:"48767-8"};
@@ -135,7 +135,30 @@ angular.module("sampleApp")
 
         return {
 
-            getArtifact : function(url) {
+            getResourceById : function(type,id){
+                let url = serverUrl + type + "/" + id;
+
+                let deferred = $q.defer();
+                //get an artifact by direct url (not canonocal). cache the SD
+                if (cache[url]) {
+                    deferred.resolve(cache[url])
+                } else {
+                    $http.get(url).then(
+                        function(data) {
+                            cache[url] = data.data;
+                            deferred.resolve(cache[url])
+                        },
+                        function(err) {
+                            deferred.reject(err)
+                        }
+                    )
+                }
+
+                return deferred.promise;
+
+            },
+
+            getArtifactDEP : function(url) {
                 //note - nott actually using this ATM
                 let deferred = $q.defer();
                 //get an artifact by direct url (not canonocal). cache the SD
@@ -155,6 +178,7 @@ angular.module("sampleApp")
 
                 return deferred.promise;
             },
+
 
             getCapabilityStatement : function(code) {
                 let deferred = $q.defer();
@@ -577,10 +601,6 @@ angular.module("sampleApp")
                     }
                     $http.get(url).then(
                         function(data) {
-
-
-
-
                             deferred.resolve(data.data)
                         }, function(err) {
                             deferred.reject();
@@ -601,8 +621,6 @@ angular.module("sampleApp")
                 let fullUrl = serverUrl + "ImplementationGuide/" + igCode;
                 let tabs = [];  //will return a set of tabs. These are the equivalent to the formal IG tool
 
-
-               // let url = "http://home.clinfhir.com:8054/baseR4/ImplementationGuide/nhip";
                 $http.get(fullUrl).then(
                     function (data) {
                         let IG = data.data;
@@ -612,25 +630,18 @@ angular.module("sampleApp")
                         }
 
                         //get the pages.
-                        //let thereArePages = false;
                         let queries = [];
-
                         if (IG.definition.page) {
                             let topPage = IG.definition.page
-                            //thereArePages = true;
 
                             let firstTab = {title:topPage.title};
                             tabs.push(firstTab)
-                            //tabs.push({url:url,title:title,contents:data.data})
                             queries.push(getContentFile(firstTab,topPage.nameUrl));
-
-                            //queries.push(getContentFile(topPage.title,topPage.nameUrl));
 
                             if (topPage.page) {
                                 topPage.page.forEach(function (page) {
                                     let tab = {title:page.title};
                                     tabs.push(tab)
-                                    //tabs.push({url:url,title:title,contents:data.data})
                                     queries.push(getContentFile(tab,page.nameUrl));
                                 })
                             }
@@ -663,18 +674,44 @@ angular.module("sampleApp")
 
                                 });
 
+
                                 //is there an extension for the profile that defines the LM?
                                 let prof = getExtension(res, extProfileForLM);
                                 if (prof && prof.length > 0) {
-                                    res.profileForLM = prof[0].valueUrl;
+                                    res.profileForLM = prof[0].valueString;
 
                                 }
 
 
+                                //what short of entry is it in the IG - Logical, profile, valueset etc
                                 let typ = getExtension(res, extIGEntryType);
+
+                                //if the sort is a logical model, then add to the Logical  Model hash
                                 if (typ && typ.length > 0) {
                                     let code = typ[0].valueCode;
                                     artifacts[code] = artifacts[code] || [];
+
+                                    //if the entry has an extension that references an FSH file, then retrieve the FSH fiel and add to the entry
+                                    var ext = getExtension(res,extFSHUrl);
+                                    if (ext && ext.length > 0 && ext[0].valueString) {
+                                        console.log(ext[0].valueString)
+                                        let url = serverUrl + "Binary/"+ext[0].valueString
+                                        $http.get(url).then(
+                                            function(data) {
+                                                res.fsh = data.data;     //for Binary, the content is directly returned
+                                            },
+                                            function(err) {
+                                                console.log(err)
+                                            }
+                                        )
+                                    }
+
+                                    //if there's a reference to a profile, then save it as a property of the item
+                                    var ext = getExtension(res,extProfileForLM);
+                                    if (ext && ext.length > 0 && ext[0].valueString) {
+                                        res.profileId = ext[0].valueString;
+                                    }
+
                                     artifacts[code].push(res)
 
                                 } else {
@@ -710,9 +747,9 @@ angular.module("sampleApp")
                     let url = "content/nhip/"+ nameUrl;
                     return $http.get(url).then(
                         function (data) {
-                            //console.log(data)
+
                             tab.contents = data.data;
-                           // tabs.push({url:url,title:title,contents:data.data})
+
 
                         },
                         function(err) {

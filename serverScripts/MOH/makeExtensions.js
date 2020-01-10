@@ -9,6 +9,7 @@ let syncRequest = require('sync-request');
 
 
 
+
 let IGEntryType = 'http://clinfhir.com/StructureDefinition/igEntryType';
 let canonicalUrl = 'http://clinfhir.com/fhir/StructureDefinition/canonicalUrl';
 
@@ -390,23 +391,6 @@ function makeSimpleExtDef (item) {
     //let sd = {resourceType:'StructureDefinition', url:url};
     let sd = makeSDHeader(item)
     let ed = item.ed[0];
-/*
-    let ele1 = {id:'Extension',path:'Extension',short:'Extension',min:0,max:'*',base:{path:'Extension',min:0,max:'*'}};
-    ele1.definition = ed.definition;
-    sd.snapshot.element.push(ele1);
-
-    let ele2 = {id:'Extension.id',path:'Extension.id',short:'Extension id',min:0,max:'1',base:{path:'Extension.id',min:0,max:'1'}};
-    ele2.definition = "Unique id for referencing"
-    ele2.type = [{code:'string'}]
-    sd.snapshot.element.push(ele2);
-
-    let ele3 = {id:'Extension.extension',path:'Extension.extension',short:'Extension extension',min:0,max:'*',base:{path:'Extension.extension',min:0,max:'*'}}
-    ele3.type = [{code:'Extension'}]
-    ele3.slicing = {discriminator:[{type:'value',path:'url'}],rules:"open"};
-    ele3.definition = 'extension on extension'
-    sd.snapshot.element.push(ele3);
-*/
-
     let ele4 = {id:'Extension.url',path:'Extension.url',short:'Extension url',min:1,max:'1',base:{path:'Extension.url',min:1,max:'1'}};
     ele4.type = [{code:'uri'}];
     ele4.fixedUri = url;

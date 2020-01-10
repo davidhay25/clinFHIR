@@ -180,9 +180,9 @@ angular.module("sampleApp")
                 delete $scope.analysis;
                 nhipSvc.getIG(igCode).then(
                     function(data) {
-                        $scope.artifacts = data.artifacts;
+                        $scope.artifacts = data.artifacts; //artifacts are the resources in the IG. Also returns pages.
 
-                        $scope.analyse()
+                        $scope.analyse();   //pull out extensions and terminology
 
 
                         $scope.tabs = data.tabs;
@@ -206,9 +206,8 @@ angular.module("sampleApp")
                         });
                         console.log($scope.hashTabs)
 
-                        //add the dynamic tabs...
+                        //insert the dynamic tabs...
                         $scope.tabs.splice(3,0,{title:'Resources',includeUrl:"/includes/oneModel.html"});
-                        //$scope.tabs.splice(7,0,{title:'Identifier Systems',includeUrl:"/includes/identifierSystems.html",hideContents:"/includes/identifierSystems.html"})
                         $scope.tabs.splice(8,0,{title:'Sample Queries',includeUrl:"/includes/queryBuilder.html"})
 
                         $scope.showTabsInView = true;
@@ -234,9 +233,6 @@ angular.module("sampleApp")
                    }
                )
             };
-
-
-
 
             //functions for query builder
 
@@ -362,9 +358,8 @@ angular.module("sampleApp")
 
             $scope.analyse = function(){
                 console.log($scope.artifacts);
+                //pulls out coded data & extensions
                 nhipSvc.analyseIG($scope.artifacts).then(
-
-
 
                     function (vo) {
                         //this gets called before all the Valuesets have been located - but as it's a reference, it 'catches up'
@@ -524,6 +519,8 @@ angular.module("sampleApp")
             function clearDetail() {
                 delete $scope.selectedArtifact;
                 delete $scope.selectedResource;
+                delete $scope.selectedProfile;
+                delete $scope.selectedProfileHeader;
                 delete $scope.selectedNode;
                 delete $scope.selectedED;
                 delete $scope.tasks;
@@ -539,7 +536,9 @@ angular.module("sampleApp")
             $scope.selectItem = function(typ,art) {
                 clearDetail();
 
+               // $scope.selectedArtifact = art;
 
+                //not using this right now, but may be useful in the future...
                 nhipSvc.getDocsForItem(art).then(
                     function(arDocs) {
                         console.log(arDocs);
@@ -547,6 +546,25 @@ angular.module("sampleApp")
                     }
                 );
 
+                //if there's a profile against this artifact (which must be a logical model), then retrieve it
+                if (art.profileId) {
+
+
+                    nhipSvc.getResourceById("StructureDefinition",art.profileId).then(
+                        function(data) {
+                            $scope.selectedProfile = data;
+                            $scope.selectedProfileHeader = angular.copy(data);
+                            delete $scope.selectedProfileHeader.snapshot;
+                            delete $scope.selectedProfileHeader.differential;
+                            delete $scope.selectedProfileHeader.extension;
+                            delete $scope.selectedProfileHeader.mapping;
+                            delete $scope.selectedProfileHeader.contact;
+                            makeProfileTree(data);
+
+                        }
+                    )
+
+                }
 
                 //$scope.mi={url:'about:blank'}
                 $scope.showWaiting = true;
@@ -682,6 +700,82 @@ angular.module("sampleApp")
                 });
 
 
+            }
+
+            $scope.selectProfileElement = function(ele) {
+                $scope.selectedProfileElement = ele
+                delete $scope.selectedProfileElement.constraint;
+                delete $scope.selectedProfileElement.mapping;
+
+            }
+
+            function makeProfileTree(SD) {
+                return;
+              /*  $scope.arV2 = profileDiffSvc.generateV2MapFromSD(SD);
+
+
+                createGraphOfIG($scope.currentIG);
+
+
+                delete $scope.errorsInLM;
+                //-------- logical model
+                profileDiffSvc.makeLMFromProfile(angular.copy(SD)).then(
+                    function(vo) {
+
+                        //display any errors...
+                        if (vo.errors.length) {
+                            $scope.errorsInLM = vo.errors;
+                        }
+
+                        $('#logicalTree').jstree('destroy');
+                        $('#logicalTree').jstree(
+                            {
+                                'core': {
+                                    'multiple': false,
+                                    'data': vo.treeData,
+                                    'themes': {name: 'proton', responsive: true}
+                                }
+                            }
+                        ).on('select_node.jstree', function (e, data) {
+                            if (data.node && data.node.data) {
+
+
+                                $scope.selectedElementInLM = data.node.data.ed;
+
+                                //create a display version of the element, removing the stuff I added...
+                                $scope.selectedElementInLMDisplay = angular.copy(data.node.data.ed);
+                                delete $scope.selectedElementInLMDisplay.myMeta;
+                                $scope.selectedED1 = data.node.data.ed;
+
+                                $scope.$broadcast("LMElementSelected",data.node.data.ed);
+
+
+                                $scope.$digest();       //as the event occurred outside of angular...
+
+                            }
+                        })
+                    }
+                );
+*/
+                //------- raw model
+                var treeData = logicalModelSvc.createTreeArrayFromSD(angular.copy(SD))
+
+
+
+                $('#profileTree').jstree('destroy');
+                $('#profileTree').jstree(
+                    {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
+                ).on('changed.jstree', function (e, data) {
+                    //seems to be the node selection event...
+                    delete $scope.selectedED;
+
+                    if (data.node) {
+
+                        $scope.selectedED = data.node.data.ed;
+                        $scope.$digest();       //as the event occurred outside of angular...
+
+                    }
+                })
             }
 
         }

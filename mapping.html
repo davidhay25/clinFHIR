@@ -223,8 +223,6 @@
         in the navbar and add a new map.
     </div>
 
-
-
     <div ng-show="showHelp">
         <p>This clinFHIR module allows you to create and execute maps that use the
             <a href="http://hl7.org/fhir/mapping-language.html" target="_blank"> FHIR mapping language</a>.</p>
@@ -397,8 +395,6 @@
 
     </div>
 
-
-
     <uib-tabset ng-show="currentSM && !showHelp && !showConfig">
 
         <uib-tab heading="Workspace">
@@ -477,80 +473,7 @@
             </div>
             <br/>
 
-            <!--
-            <button class="btn btn-link pull-right" ng-show="output"
-                    ng-click="copyToClipboard()">Copy to Clipboard</button>
 
-            <pre ng-show="transformError">{{transformError | json}}</pre>
-
-            <uib-tabset ng-show="output">
-                <uib-tab heading="Json">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="scrollOutput">
-                                <pre>{{output | json}}</pre>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <button class="btn btn-link" ng-show="output"
-                                    ng-click="validate()">Validate</button>
-                            <div class="scrollOutput">
-                                <pre>{{validateResult | json}}</pre>
-                            </div>
-                        </div>
-                    </div>
-                </uib-tab>
-                <uib-tab ng-show="output.resourceType=='Bundle'" heading="Bundle entries">
-                    <div class="row">
-                        <div class="col-md-2">
-                            <div class="list-group">
-                                <div ng-class="{'list-group-item':1,'listItemSelected':entry==selectedEntry}"
-                                     ng-repeat="entry in output.entry"
-                                     ng-click = "selectEntryFromBundle(entry)">
-                                    {{entry.resource.resourceType}}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-10">
-                            <uib-tabset>
-                                <uib-tab heading="Json">
-                                    <pre>{{selectedEntry | json}}</pre>
-
-                                </uib-tab>
-                            </uib-tabset>
-
-                        </div>
-
-
-
-                    </div>
-
-                </uib-tab>
-                <uib-tab heading="Graph"  select="fitSingleGraph()">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div id="resourceGraph"></div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="col-md-12">
-                                <uib-tabset>
-                                    <uib-tab heading="Json">
-                                        <pre>{{selectedEntry | json}}</pre>
-
-                                    </uib-tab>
-                                </uib-tabset>
-
-                            </div>
-                        </div>
-                    </div>
-
-
-
-
-                </uib-tab>
-            </uib-tabset>
-
-            -->
         </uib-tab>
 
         <uib-tab ng-show="output">
@@ -598,9 +521,9 @@
                                 <pre ng-show="fhirpathResult">{{fhirpathResult | json}}</pre>
                                 <pre ng-hide="fhirpathResult">{{output | json}}</pre>
                             </div>
-
+<!--
                             <p ng-bind-html="output"></p>
-
+-->
                         </div>
                         <div class="col-md-6">
                             <div class="scrollOutput">
@@ -720,6 +643,61 @@
             </uib-tabset>
 
 
+        </uib-tab>
+
+        <uib-tab heading="Tools" select="FPCheckSelect()">
+            <br/>
+            <uib-tabset>
+                <uib-tab heading="FHIRPath Checker" >
+                    <br/>
+                    <div class="row">
+                        <div class="col-md-4">
+                             <textarea id="fhirpathInput" rows = "25" class="form-control editor"
+
+                                       ng-model="input.inputFP"></textarea>
+                        </div>
+                        <div class="col-md-6">
+
+
+
+
+                            <div class="row">
+                                <div class="col-md-2">
+                                    FHIRPath query
+                                </div>
+                                <div class="col-md-7">
+                                    <input class="form-control" ng-model="input.fhirpathQueryTool"/>
+                                </div>
+                                <div class="col-md-3">
+
+                                    <i class="glyphicon glyphicon-flash"
+                                       ng-click="executeFHIRPathTool(input.fhirpathQueryTool,input.inputFP)"></i>
+                                 <!--   <i class="glyphicon glyphicon-arrow-up"
+                                       ng-show="input.fhirpathQueryTool"
+                                       ng-click="upFHIRPath(input.fhirpathQueryTool,output)"></i>
+                                    <i class="glyphicon glyphicon-refresh"
+                                       ng-show="input.fhirpathQueryTool"
+                                       ng-click="clearFHIRPath()"></i>
+                                    -->
+                                    <!--
+                                    <button class="btn btn-link" ng-click="executeFHIRPath(input.fhirpathQuery,output)">Execute</button>
+
+                                    <button class="btn btn-link pull-right" ng-click="clearFHIRPath">Clear</button>  -->
+                                </div>
+                            </div>
+                            <div class="scrollOutput">
+                                <pre ng-show="fhirpathResultTool">{{fhirpathResultTool | json}}</pre>
+
+                            </div>
+
+
+
+
+
+                        </div>
+                    </div>
+                </uib-tab>
+            </uib-tabset>
         </uib-tab>
 
         <uib-tab heading="Project">
