@@ -94,6 +94,7 @@
     <script src="resourceBuilder/vsBrowser.js"></script>
 
     <script src="js/libs/vis.min.js"></script>
+    <script src="js/sendComment.js"></script>
 
 <!--
     <script src="js/profileCreatorSvc.js"></script>
@@ -138,8 +139,16 @@
     </nav>
 
 
+    <div class="pull-right">
+        <input type="checkbox" ng-model="clinicalView"
+               uib-popover="Clinical view hides technical tabs to de-clutter the display"
+               popover-placement="left"
+               popover-trigger="'mouseenter'"
+        > Clinical View
+    </div>
+
     <uib-tabset ng-if="showTabsInView" active="activeTabIndex">
-        <uib-tab ng-repeat = "tab in tabs">
+        <uib-tab ng-repeat = "tab in tabs" >
             <uib-tab-heading>{{tab.title}}</uib-tab-heading>
             <br/>
             <p ng-if="tab.contents" ng-bind-html="tab.contents | markDown"></p>
@@ -148,7 +157,7 @@
             <ng-include src="tab.includeUrl"></ng-include>
         </uib-tab>
 
-        <uib-tab ng-if="tabs.length > 0" heading="Downloads">
+        <uib-tab ng-if="tabs.length > 0 && ! clinicalView" heading="Downloads">
             <p>Download of all artifacts - Profiles, Extension Definitions, Terminology</p>
 
             CapabilityStatement

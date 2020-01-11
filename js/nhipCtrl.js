@@ -22,7 +22,8 @@ angular.module("sampleApp")
                 }
             );
 
-
+            $scope.clinicalView = false;    //if true then some tabs hidden
+            $scope.rootForDataType = "http://hl7.org/fhir/datatypes.html#"
             //the capability statement (that has the search's supported). Not sure if there should only be a single one or not...
             $http.get("http://home.clinfhir.com:8054/baseR4/CapabilityStatement/nhip-capstmt").then(
                 function(data) {
@@ -172,6 +173,25 @@ angular.module("sampleApp")
 
             };
 
+            $scope.sendComment = function(type){
+                $uibModal.open({
+                    templateUrl: "/modalTemplates/sendComment.html",
+                    //size : 'lg',
+                    controller: 'sendCommentCtrl',
+                    resolve: {
+                        vo : function() {
+                            return {
+                                resourceType: $scope.resourceType
+                            }
+                        },
+                        profileUrl : function() {
+                            //if this is a profiled reference...
+                            return $scope.profileUrlInReference;
+                        }
+                    }
+                });
+            };
+
             $scope.selectIG = function(igCode) {
                 clearDetail();
                 $scope.showTabsInView = false;
@@ -315,12 +335,13 @@ angular.module("sampleApp")
                     return;
                 }
                 let options = {bundle:bundle,hashErrors:{}};//,centralResourceId:id}
-
+                options.serverRoot =  appConfigSvc.getCurrentConformanceServer().url;//  "http://home.clinfhir.com:8054/baseR4/"
 
                // options.showInRef = $scope.input.showInRef;
                 //options.showOutRef = $scope.input.showOutRef;
 
                 let vo = v2ToFhirSvc.makeGraph(options);
+
                 let container = document.getElementById(id);
                 let graphOptions = {
                     physics: {

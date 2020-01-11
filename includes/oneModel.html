@@ -360,14 +360,20 @@
                                                 <div ng-hide = "typ.code == 'Reference'">
 
 
-                                                    <a ng-hide="typ.code == 'Dosage'" ng-href="{{rootForDataType}}{{typ.code}}" target="_blank">
+                                                    <a ng-hide="typ.code == 'Dosage'"
+                                                       uib-popover="Will open a new tab with the description of this datatype"
+                                                       popover-placement="top"
+                                                       popover-trigger="'mouseenter'"
+                                                       ng-href="{{rootForDataType}}{{typ.code}}" target="_blank">
                                                         <i class="glyphicon glyphicon-eye-open clickable"></i>
                                                     </a>
 
 
                                                     {{typ.code}}
+                                                    <!--
                                                     <span class="clickable pull-right"
                                                           ng-click="viewDataType(typ.code)">View elements</span>
+                                                    -->
                                                 </div>
 
 
@@ -576,7 +582,7 @@
 
                 </uib-tab>
 
-                <uib-tab heading="Extensions">
+                <uib-tab heading="Extensions" ng-hide="clinicalView">
                     <br/>
                     <table class="table table-bordered">
                         <tr><th>Path
@@ -626,7 +632,7 @@
                     <!-- <pre>{{analysis.extensions | json}}</pre>-->
                 </uib-tab>
 
-                <uib-tab heading="Shorthand">
+                <uib-tab heading="Shorthand"  ng-hide="clinicalView">
                     <br/>
                     <p>The FHIR shorthand definition that generated the formal profile for this model.
                     This indicates the difference from the core resource</p>
@@ -637,7 +643,7 @@
 
                 </uib-tab>
 
-                <uib-tab heading="Profile">
+                <uib-tab heading="Profile"  ng-hide="clinicalView">
                     <br/>
 
 
@@ -701,7 +707,7 @@
 
                 </uib-tab>
 
-                <uib-tab heading="Examples">
+                <uib-tab heading="Examples"  ng-hide="clinicalView">
 
                     <br/>
                     <div class="row">
@@ -755,7 +761,7 @@
                     </div>
                 </uib-tab>
 
-                <uib-tab heading="Server API / Search">
+                <uib-tab heading="Server API / Search"  ng-hide="clinicalView">
                     <br/>
 
                     <div class="alert alert-info">

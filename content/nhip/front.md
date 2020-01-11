@@ -1,5 +1,5 @@
 
-This is the design tool for the [HL7&reg; FHIR&copy;](http://hl7.org/fhir/) interface to the New Zealand HPI - Health Practitioner Index and
+This is the design page for the [HL7&reg; FHIR&copy;](http://hl7.org/fhir/) interface to the New Zealand HPI - Health Practitioner Index and
  NHI - National Health Identifier. It brings together all the artifacts that are necessary to  understand and use the FHIR API. Once complete, the artifacts will be assembled into a formal publication using the official tooling.
 
 The HPI ([Health Practitioner Index](https://www.health.govt.nz/our-work/health-identity/health-provider-index)) is a national registry service that holds information about the providers of healthcare in New Zealand, including the organizations where they work and the facilities that they work from. The key entities that are supported are:

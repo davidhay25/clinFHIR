@@ -27,12 +27,7 @@
   {"title": "Find location by name",
     "url": "http://home.clinfhir.com:8054/baseR4/Location?name=East end",
     "type" : "Location",
-    "description" : ""
-  },
-  {"title": "",
-    "type" : "Practitioner",
-    "url": "",
-    "description" : ""
+    "description" : "Find location by name"
   }
 
 ]

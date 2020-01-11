@@ -25,12 +25,18 @@
             <div class="row">
                 <div class="col-md-3">
                     <div class="list-group">
-                        <div ng-class="{'list-group-item':true,'listItemSelected':sample == selectedSample}" ng-repeat ="sample in samples"
+                        <div ng-class="{'list-group-item':true,'listItemSelected':sample == selectedSample}"
+                             ng-repeat ="sample in samples"
                              style="cursor: pointer" ng-click="selectSample(sample)">
                             {{sample.title}}
                         </div>
+                        <div class="list-group-item clickable">
+                            <div ng-click = sendComment('query')>Suggest a query</div>
+                        </div>
                     </div>
                 </div>
+
+
                 <div class="col-md-9">
 
                     <div class="row">
@@ -62,6 +68,24 @@
                             </div>
 
 
+                        </uib-tab>
+                        <uib-tab heading="List">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="list-group">
+                                        <div ng-repeat = "entry in sampleResult.data.entry"
+                                             ng-class="{'list-group-item':true,'listItemSelected':entry.resource.id==input.selectedResourceInList.id}"
+                                             style="cursor:pointer;"
+                                             ng-click="input.selectedResourceInList = entry.resource">
+                                            {{entry.resource.resourceType}}
+                                            <div>{{entry.resource.id}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <pre>{{input.selectedResourceInList | json}}</pre>
+                                </div>
+                            </div>
                         </uib-tab>
                     </uib-tabset>
 
