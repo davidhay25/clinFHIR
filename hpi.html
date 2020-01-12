@@ -141,6 +141,7 @@
 
     <div class="pull-right">
         <input type="checkbox" ng-model="clinicalView"
+               ng-change="setClinicalView(clinicalView)"
                uib-popover="Clinical view hides technical tabs to de-clutter the display"
                popover-placement="left"
                popover-trigger="'mouseenter'"

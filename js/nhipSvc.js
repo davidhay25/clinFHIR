@@ -12,6 +12,7 @@ angular.module("sampleApp")
         let extProfileForLM = "http://clinfhir.com/fhir/StructureDefinition/profileForLM";
         let extExtensionUrl = "http://clinfhir.com/fhir/StructureDefinition/simpleExtensionUrl";
         let extFSHUrl = "http://clinfhir.com/fhir/StructureDefinition/fshUrl";
+        let extCanUrl = "http://clinfhir.com/fhir/StructureDefinition/canonicalUrl";
 
         let docKey = "http://clinfhir.com/StructureDefinition/docKey";
 
@@ -108,6 +109,7 @@ angular.module("sampleApp")
         }
 
         let hashResource = {}
+        //get a resource based on its url (to the resource NOT the canonical url)
         function getResourceAsync(url) {
             let deferred = $q.defer();
             if (hashResource[url]) {
@@ -125,17 +127,50 @@ angular.module("sampleApp")
                 )
             }
 
-
             return deferred.promise
 
         }
 
 
-        let cache = {}
+        let cache = {}, termCache = {}
 
         return {
 
+            getTerminologyResourceByCanUrl : function(type,canUrl){
+
+                //get a  terminology resource based on the type and canonical url. cached.
+                let deferred = $q.defer();
+                if (termCache[canUrl]) {
+                    deferred.resolve(termCache[canUrl])
+                } else {
+                    let url = termServerUrl + type + "?url=" + canUrl;
+                    $http.get(url).then(
+                        function(data) {
+                            if (data.data && data.data.entry && data.data.entry.length > 0) {
+                                let resource = data.data.entry[0].resource;
+                                termCache[canUrl] = resource;
+                                deferred.resolve(termCache[canUrl])
+
+                            } else {
+                                deferred.reject({msg:"Resource not found"})
+                            }
+
+
+
+                        },
+                        function(err) {
+                            deferred.reject(err)
+                        }
+                    )
+                }
+
+                return deferred.promise;
+
+            },
+
+
             getResourceById : function(type,id){
+                //get a resource based on the type and Id. cached.
                 let url = serverUrl + type + "/" + id;
 
                 let deferred = $q.defer();
@@ -210,7 +245,7 @@ angular.module("sampleApp")
                 //retrieve documentation files
                 let ar = getExtension(art,docKey);      //all the extensions with document keys in it
                 let arDocs = [];                        //will contain the retrieve docs
-                console.log(ar);
+
                 let arQuery = [];
                 ar.forEach(function (ext) {
                     //todo - for now, assume that all the docs are in the cf tree...
@@ -227,7 +262,7 @@ angular.module("sampleApp")
                     let url = "content/nhip/"+ ext.valueString;
                     return $http.get(url).then(
                         function (data) {
-                            console.log(data)
+
                             arDocs.push({url:url,contents:data.data})
 
                         },
@@ -319,7 +354,7 @@ angular.module("sampleApp")
                 let arWork = [];
 
 
-                let arExtension = [], arValueSet=[];
+                let arExtension = [], arValueSet=[], quality = {arCoded:[]};
 
                 artifacts.logical.forEach(function (art) {
                     arWork.push(lookForExtensions(art)) //can do this in a single call as at most one HTTP call is needed
@@ -329,7 +364,7 @@ angular.module("sampleApp")
 
                     getResourceAsync(url).then(
                         function(SD) {
-                            //console.log(SD)
+
                             SD.snapshot.element.forEach(function (ed) {
                                 if (ed.binding) {
                                     arWork.push(processCoded(url,ed));
@@ -348,9 +383,7 @@ angular.module("sampleApp")
                     $q.all(arWork).then(
                         function () {
 
-
-
-                            deferred.resolve({extensions:arExtension,valueSets:arValueSet})
+                            deferred.resolve({extensions:arExtension,valueSets:arValueSet,quality:quality})
                         }
                     )
 
@@ -363,17 +396,18 @@ angular.module("sampleApp")
                 //--------------------------------------------
                 
                 
-                //look for coded data in an ed
+                //look for coded data in an element definition
                 function processCoded(url,ed) {
                     let deferred = $q.defer();
                     let item = {url:url,ed:ed};
                     if (! ed.binding) {
+                        quality.arCoded.push({display:ed.path + ' has no binding'})
                         item.note = "There was no binding";
                         deferred.resolve();
                         return;
                     }
 
-                    item.valueSetUrl=ed.binding.valueSet
+                    item.valueSetUrl=ed.binding.valueSet;
                     item.strength= ed.binding.strength;
 
                     if (ed.binding.valueSet) {
@@ -388,7 +422,7 @@ angular.module("sampleApp")
                                     item.valueSet = ValueSet
 
 
-                                    //get the codesystems in use
+                                    //get the codesystems in use by the ValueSet
                                     item.codeSystems = []
                                     let hash = {}
                                     if (ValueSet.compose && ValueSet.compose.include) {
@@ -402,13 +436,12 @@ angular.module("sampleApp")
                                         });
                                     }
 
-
-
                                     if (data.data.entry.length > 1) {
                                         item.note = "There was more than one VS with this url on the term server"
                                     }
                                 } else {
                                     //The VS was not found on the term server...
+                                    quality.arCoded.push({display:'The valueSet ' + ar[0] + ' was not found on the Terminology server'})
                                     item.note = "The VS was not found on the Terminology server"
                                 }
 
@@ -426,11 +459,6 @@ angular.module("sampleApp")
                         deferred.resolve();
                     }
 
-
-
-
-
-
                     return deferred.promise;
                     
                 }
@@ -444,7 +472,7 @@ angular.module("sampleApp")
 
                     getResourceAsync(url).then(
                         function(SD) {
-                            //console.log(SD)
+
                             let currentItem = {}
                             SD.snapshot.element.forEach(function (ed) {
                                 //look for extension mapping...
@@ -456,8 +484,26 @@ angular.module("sampleApp")
 
                                             let item = {url:url,ed:ed,elements:[]};
                                             let arExt = getExtension(ed,extExtensionUrl);
+
                                             if (arExt.length > 0) {
                                                 item.extensionUrl = arExt[0].valueString;
+
+                                                //If there's an FSH file, then it will be at the Binary endpoint with an id of extension-{id}
+                                                //where id is the last element in the url
+                                                let ar = item.extensionUrl.split('/');
+                                                let id = ar[ar.length-1];
+                                                let url = serverUrl + "Binary/extension-"+id;
+                                                $http.get(url).then(
+                                                    function(data) {
+                                                        item.fsh = data.data;
+                                                       // console.log(item.fsh)
+                                                    },
+                                                    function (err) {
+                                                        item.fsh = "No FSH file found"
+                                                    }
+                                                )
+
+
                                             }
                                             //add the element details unless a backbone element
                                             if (ed.type && ed.type.length > 0) {
@@ -471,6 +517,8 @@ angular.module("sampleApp")
                                             if (map.map.indexOf('odifierExtension')>-1) {
                                                 item.isModifier=true;
                                             }
+
+
 
                                             arExtension.push(item);
 
@@ -486,7 +534,7 @@ angular.module("sampleApp")
                                                 let elementName = $filter('getLastInPath')(ed.path);
                                                 let elementType = ed.type[0].code
                                                 currentItem.elements.push({name:elementName,type:elementType,short:ed.short});
-                                                //console.log()
+
                                             }
 
                                         }
@@ -538,14 +586,14 @@ angular.module("sampleApp")
                 let hash = {};  //hash of current path to original path
                 if (treeData) {
                     treeData.forEach(function(item){
-                        //console.log(item)
+
                         let originalPath = item.data.idFromSD;
                         let currentPath = item.id;
                         hash[originalPath] = currentPath;
                     })
                 }
 
-                //console.log('loading tasks for model...')
+
 
                 let url = serverUrl + "Task";    //from parent controller
 
@@ -556,7 +604,7 @@ angular.module("sampleApp")
                 performQueryFollowingPaging(url).then(
                     function(bundle) {
                         if (bundle && bundle.entry) {
-                            //console.log(bundle)
+
                             bundle.entry.forEach(function (entry) {
                                 let resource = entry.resource;      //the fhir Task
 
@@ -573,7 +621,7 @@ angular.module("sampleApp")
                                 }
 
                             });
-                            //console.log(tasks)
+
                             deferred.resolve(tasks)
 
                         }
@@ -656,7 +704,6 @@ angular.module("sampleApp")
                                 //get the moreinfo, if any
                                 //todo - moreinfo is deprecated (I think) - but keep it as it does allow a reference to an external link so may be halpful
                                 let moreInfo = getExtension(res, extIGMoreInfo);
-                                //console.log(res,moreInfo);
                                 moreInfo.forEach(function (ext) {
                                     let moreInfo = {};
                                     ext.extension.forEach(function (child) {
@@ -675,18 +722,24 @@ angular.module("sampleApp")
                                 });
 
 
-                                //is there an extension for the profile that defines the LM?
+                                //is there an extension for the profile that is derived from the LM?
                                 let prof = getExtension(res, extProfileForLM);
                                 if (prof && prof.length > 0) {
                                     res.profileForLM = prof[0].valueString;
 
                                 }
 
+                                //is there a canonical url set in the IG resource? If so, add it to the resource / artifact
+                                //just to make it easier to get later
+                                let canUrl = getExtension(res, extCanUrl);
+                                if (canUrl.length > 0) {
+                                    res.canUrl = canUrl[0].valueUrl;
+                                }
 
                                 //what short of entry is it in the IG - Logical, profile, valueset etc
                                 let typ = getExtension(res, extIGEntryType);
 
-                                //if the sort is a logical model, then add to the Logical  Model hash
+                                //add the IG resource to the hash hash
                                 if (typ && typ.length > 0) {
                                     let code = typ[0].valueCode;
                                     artifacts[code] = artifacts[code] || [];
@@ -694,7 +747,7 @@ angular.module("sampleApp")
                                     //if the entry has an extension that references an FSH file, then retrieve the FSH fiel and add to the entry
                                     var ext = getExtension(res,extFSHUrl);
                                     if (ext && ext.length > 0 && ext[0].valueString) {
-                                        console.log(ext[0].valueString)
+
                                         let url = serverUrl + "Binary/"+ext[0].valueString
                                         $http.get(url).then(
                                             function(data) {

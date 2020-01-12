@@ -124,7 +124,6 @@
                 <div class="col-md-2">
                     <div class="btn-group">
                         <label style="margin:3px" class="btn btn-default" ng-model="input.qType" uib-btn-radio="'search'">Search</label>
-
                         <label style="margin:3px" class="btn btn-default" ng-model="input.qType" uib-btn-radio="'read'">Read</label>
 
 
@@ -181,7 +180,7 @@
                 <uib-tab heading="Json">
                     <pre>{{qResult.data | json}}</pre>
                 </uib-tab>
-                <uib-tab heading="Graph" select="fitGraph(adhocGraph)">
+                <uib-tab heading="Graph" select="fitGraph(adhocGraph)" ng-show="qResult.data.resourceType == 'Bundle'">
 
                     <div class="row">
                         <div class="col-md-8">

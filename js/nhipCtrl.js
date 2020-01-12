@@ -1,7 +1,7 @@
 angular.module("sampleApp")
     .controller('nhipCtrl',
         function ($scope,$firebaseAuth,$uibModal,modalService,nhipSvc,logicalModelSvc,$http,
-                  v2ToFhirSvc,$sce,appConfigSvc,v2ToFhirSvc,$timeout,$location) {
+                  v2ToFhirSvc,$sce,appConfigSvc,$localStorage,$timeout,$location) {
 
             $scope.selectedGroup = 'logical';       //initial group to display
             $scope.input = {};
@@ -15,14 +15,22 @@ angular.module("sampleApp")
 
             $http.post('/stats/login',{module:"HPI"}).then(
                 function(data){
-                    //console.log(data);
+
                 },
                 function(err){
                     console.log('error accessing clinfhir to register access',err)
                 }
             );
 
-            $scope.clinicalView = false;    //if true then some tabs hidden
+
+
+
+            $scope.clinicalView = $localStorage.clinicalView ;//false;    //if true then some tabs hidden
+            $scope.setClinicalView = function(state) {
+                $localStorage.clinicalView = state
+            }
+
+
             $scope.rootForDataType = "http://hl7.org/fhir/datatypes.html#"
             //the capability statement (that has the search's supported). Not sure if there should only be a single one or not...
             $http.get("http://home.clinfhir.com:8054/baseR4/CapabilityStatement/nhip-capstmt").then(
@@ -30,6 +38,31 @@ angular.module("sampleApp")
                     $scope.nhipCapStmt = data.data;
                 }
             );
+
+
+            $scope.getExtensionFSH = function(id) {
+                console.log(id)
+            }
+
+            $scope.selectCodeSystem = function(res) {
+                delete $scope.selectedCodeSystem;
+
+                if (res.canUrl) {
+                    nhipSvc.getTerminologyResourceByCanUrl('CodeSystem',res.canUrl).then(
+                        function(resource){
+                            $scope.selectedCodeSystem = resource
+                        },
+                        function(err) {
+                            alert ("This Code system ("+res.canUrl+") is not on the terminology server")
+                        }
+                    )
+                } else {
+                    alert("There is no canonical Url in the ImplementationGuide resource")
+                }
+
+
+                console.log(res)
+            }
 
             //get all the NamingSystem resources off the server. May want a more elegant way...
             $http.get("http://home.clinfhir.com:8054/baseR4/NamingSystem?_count=100").then(
@@ -72,7 +105,7 @@ angular.module("sampleApp")
                         */
                     })
 
-                    console.log($scope.namingSystem)
+
                 }
             );
             $scope.showNamingSystem = function(ns,filter) {
@@ -99,7 +132,7 @@ angular.module("sampleApp")
                        // ns.uniqueId.forEach(function (id) {
                         for (var i=0; i < ns.uniqueId.length; i++) {
                             let v = ns.uniqueId[i].value.toLowerCase();
-//console.log(v,f,v.indexOf(f))
+
                             if (v.indexOf(f) > -1) {
                                 return true
                                 break;
@@ -137,38 +170,6 @@ angular.module("sampleApp")
 
                     }
 
-                    console.log(vs)
-
-
-                    /*
-
-
-                    if (ns.usage) {
-                        let u = ns.usage.toLowerCase()
-                        if (u.indexOf(f) > -1) {
-                            return true
-                        }
-                    }
-
-                    if (ns.description) {
-                        let d = ns.description.toLowerCase()
-                        if (d.indexOf(f) > -1) {
-                            return true
-                        }
-                    }
-                    if (ns.uniqueId) {
-                        // ns.uniqueId.forEach(function (id) {
-                        for (var i=0; i < ns.uniqueId.length; i++) {
-                            let v = ns.uniqueId[i].value.toLowerCase();
-//console.log(v,f,v.indexOf(f))
-                            if (v.indexOf(f) > -1) {
-                                return true
-                                break;
-                            }
-
-                        }
-                    }
-*/
                 }
 
             };
@@ -202,7 +203,7 @@ angular.module("sampleApp")
                     function(data) {
                         $scope.artifacts = data.artifacts; //artifacts are the resources in the IG. Also returns pages.
 
-                        $scope.analyse();   //pull out extensions and terminology
+                        analyse();   //pull out extensions and terminology
 
 
                         $scope.tabs = data.tabs;
@@ -224,7 +225,7 @@ angular.module("sampleApp")
 
                             }
                         });
-                        console.log($scope.hashTabs)
+
 
                         //insert the dynamic tabs...
                         $scope.tabs.splice(3,0,{title:'Resources',includeUrl:"/includes/oneModel.html"});
@@ -247,7 +248,7 @@ angular.module("sampleApp")
                //neet separate capability statement & IG...
                nhipSvc.getCapabilityStatement('hpi').then(
                    function(data) {
-                       console.log(data)
+
                        $scope.capStmt = data.capStmt;
                        $scope.resourceDef = data.resourceDef;
                    }
@@ -268,7 +269,7 @@ angular.module("sampleApp")
                 $http.get(url).then(
                     function(data) {
                         $scope.sampleResult = data
-                        console.log(data)
+
 
 
                         $scope.sampleGraph = makeGraph (data.data,'resourcesGraph')
@@ -278,7 +279,7 @@ angular.module("sampleApp")
                     },
                     function(err) {
                         $scope.sampleResult = err
-                        console.log(err)
+
                     }
                 )
             };
@@ -317,14 +318,14 @@ angular.module("sampleApp")
                 $http.get(url).then(
                     function(data) {
                         $scope.qResult = data
-                        console.log(data)
+
                         $scope.adhocGraph = makeGraph (data.data,'adHocRresourcesGraph')
 
 
                     },
                     function(err) {
                         $scope.qResult = err
-                        console.log(err)
+
                     }
                 )
 
@@ -354,21 +355,21 @@ angular.module("sampleApp")
                 let graph=new vis.Network(container, vo.graphData, graphOptions);
 
                 graph.on("click", function (obj) {
-                     //console.log(obj.edges[0])
+
                     let nodeId = obj.nodes[0];  //get the first node
                     if (nodeId) {
                         let node = vo.visNodes.get(nodeId);
-                        //console.log(node)
+
                         $scope.selectedResource = $scope.selectedResource || {}
                         $scope.selectedResource[id] = node.resource;
                     } else {
                         let edgeId = obj.edges[0];
                         if (edgeId) {
                             let edge = vo.visEdges.get(edgeId);
-                            //console.log(edge)
+
                         }
                     }
-                    //console.log(nodeId)
+
 
                     $scope.$digest();
                 })
@@ -377,21 +378,22 @@ angular.module("sampleApp")
 
             }
 
-            $scope.analyse = function(){
-                console.log($scope.artifacts);
+            let analyse = function(){
+
                 //pulls out coded data & extensions
                 nhipSvc.analyseIG($scope.artifacts).then(
 
                     function (vo) {
                         //this gets called before all the Valuesets have been located - but as it's a reference, it 'catches up'
-
+                        // {extensions: valueSets}
                         if (! $scope.selectedArtifact) {
                             $scope.input.showAllAnalysis = true;
                         }
 
 
                         $scope.analysis = vo;
-                        console.log(vo)
+                        console.log(vo.quality)
+
 
                         //wait a second before sorting. This is a  bit scruffy...
                         $timeout(function(){
@@ -414,7 +416,7 @@ angular.module("sampleApp")
 
                             makeVSDownload()
 
-                            console.log(vo)
+
                         },3000)
                 })
             }
@@ -445,7 +447,7 @@ angular.module("sampleApp")
 
 
             $scope.selectExample = function(art) {
-                console.log(art);
+
                 delete $scope.selectedExampleXml;
                 delete $scope.selectedExampleJson;
                 $scope.selectedArtifact = art;
@@ -454,7 +456,7 @@ angular.module("sampleApp")
 
                 nhipSvc.getResource(art).then(
                     function(resource) {
-                        console.log(resource)
+
                         $scope.selectedExampleJson = resource;
 
                         $scope.exampleTreeData = v2ToFhirSvc.buildResourceTree(resource);
@@ -487,9 +489,9 @@ angular.module("sampleApp")
                 $('#exampleTree').jstree(
                     {'core': {'multiple': false, 'data': $scope.exampleTreeData, 'themes': {name: 'proton', responsive: true}}}
                 ).on('changed.jstree', function (e, data) {
-                    //seems to be the node selection event...
 
-                    //console.log(data)
+
+
                     if (data.node) {
 
                         //opens or closes the node and all children on select
@@ -547,6 +549,7 @@ angular.module("sampleApp")
                 delete $scope.tasks;
                 delete $scope.mi;
                 delete $scope.arDocs;
+                delete $scope.input.selectedExtFSH;
 
                 delete $scope.selectedExampleJson;
                 $('#exampleTree').jstree('destroy');
@@ -562,7 +565,7 @@ angular.module("sampleApp")
                 //not using this right now, but may be useful in the future...
                 nhipSvc.getDocsForItem(art).then(
                     function(arDocs) {
-                        console.log(arDocs);
+
                         $scope.arDocs = arDocs;
                     }
                 );
@@ -642,14 +645,14 @@ angular.module("sampleApp")
                 ).finally(
                     function () {
                         $scope.showWaiting = false;
-                     //   $scope.analyse()
+
                     }
                 )
             };
 
 
             $scope.showTableElement = function(row){
-                //console.log(row);
+
                 if (row.data && row.data.edStatus == 'excluded') {
                     return false
                 } else {
@@ -660,7 +663,7 @@ angular.module("sampleApp")
 
             $scope.showAccordianGroup = function(group){
                 $scope.selectedGroup = group;
-                //console.log(group)
+
             };
 
             $scope.showVSBrowserDialog = {};
@@ -686,8 +689,7 @@ angular.module("sampleApp")
                     if (data.node) {
                         $scope.selectedNode = data.node;
                         $scope.selectedED = logicalModelSvc.getEDForPath($scope.selectedResource,data.node)
-                        console.log($scope.selectedED)
-                        console.log(data.node)
+
                     }
 
                     $scope.$digest();       //as the event occurred outside of angular...
