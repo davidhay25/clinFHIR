@@ -150,8 +150,13 @@ angular.module("sampleApp")
                 if (!filter) {
                     return true
                 } else {
-                    let f = filter.toLowerCase()
+                    let f = filter.toLowerCase();
+                    /*
                     if (vs.url && vs.url.toLowerCase().indexOf(filter) >-1) {
+                        return true;
+                    }
+                */
+                    if (vs.valueSetUrl && vs.valueSetUrl.toLowerCase().indexOf(filter) >-1) {
                         return true;
                     }
 
@@ -229,7 +234,9 @@ angular.module("sampleApp")
 
                         //insert the dynamic tabs...
                         $scope.tabs.splice(3,0,{title:'Resources',includeUrl:"/includes/oneModel.html"});
+                        $scope.tabs.splice(8,0,{title:'Quality',includeUrl:"/includes/quality.html"})
                         $scope.tabs.splice(8,0,{title:'Sample Queries',includeUrl:"/includes/queryBuilder.html"})
+
 
                         $scope.showTabsInView = true;
 
@@ -392,6 +399,7 @@ angular.module("sampleApp")
 
 
                         $scope.analysis = vo;
+                       // $scope.quality = quality;
                         console.log(vo.quality)
 
 
@@ -571,6 +579,7 @@ angular.module("sampleApp")
                 );
 
                 //if there's a profile against this artifact (which must be a logical model), then retrieve it
+
                 if (art.profileId) {
 
 

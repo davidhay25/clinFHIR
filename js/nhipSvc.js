@@ -131,13 +131,44 @@ angular.module("sampleApp")
 
         }
 
+        function getConformanceResourceByCanUrl(canUrl,type){
+            //get a  conformance resource based on the type and canonical url. cached.
+            //todo refactor to include getTerminologyResourceByCanUrl
+            type = type || "StructureDefinition";
+            let deferred = $q.defer();
+            if (confCache[canUrl]) {
+                deferred.resolve(confCache[canUrl])
+            } else {
+                let url = serverUrl + type + "?url=" + canUrl;
+                $http.get(url).then(
+                    function(data) {
+                        if (data.data && data.data.entry && data.data.entry.length > 0) {
+                            let resource = data.data.entry[0].resource;
+                            confCache[canUrl] = resource;
+                            deferred.resolve(confCache[canUrl])
 
-        let cache = {}, termCache = {}
+                        } else {
+                            deferred.reject({msg:"Resource not found"})
+                        }
+                    },
+                    function(err) {
+                        deferred.reject(err)
+                    }
+                )
+            }
+            return deferred.promise;
+
+        }
+
+
+        let cache = {}, termCache = {}, confCache = {}
 
         return {
 
-            getTerminologyResourceByCanUrl : function(type,canUrl){
 
+
+
+            getTerminologyResourceByCanUrl : function(type,canUrl){
                 //get a  terminology resource based on the type and canonical url. cached.
                 let deferred = $q.defer();
                 if (termCache[canUrl]) {
@@ -154,16 +185,12 @@ angular.module("sampleApp")
                             } else {
                                 deferred.reject({msg:"Resource not found"})
                             }
-
-
-
                         },
                         function(err) {
                             deferred.reject(err)
                         }
                     )
                 }
-
                 return deferred.promise;
 
             },
@@ -353,22 +380,58 @@ angular.module("sampleApp")
                 let deferred = $q.defer();
                 let arWork = [];
 
-
-                let arExtension = [], arValueSet=[], quality = {arCoded:[]};
+                let arExtension = [], arValueSet=[], quality = {arCoded:[],arExtension:[],arModel:[]};
 
                 artifacts.logical.forEach(function (art) {
+
                     arWork.push(lookForExtensions(art)) //can do this in a single call as at most one HTTP call is needed
 
-                    //now look for Valuesets. Need to do this here as there can be multiple per model
                     let url = art.reference.reference;
+
+                    //is there a reference to a profile? (This was set when the IG was first loaded and parsed...
+                    if (! art.profileForLM) {
+                        let modelName =  $filter('getLastInPath')(url);
+                        quality.arModel.push({type:'noProfile',display:'There is no Profile for this model',ed:{path:modelName}})
+                    }
+
+                    //now look for Valuesets. Need to do this here as there can be multiple per model
+
 
                     getResourceAsync(url).then(
                         function(SD) {
 
-                            SD.snapshot.element.forEach(function (ed) {
-                                if (ed.binding) {
-                                    arWork.push(processCoded(url,ed));
+                            SD.snapshot.element.forEach(function (ed,inx) {
+
+                                //is there a FHIR mapping
+                                if (inx > 0) {      //don't look at the model root...
+                                    if (ed.mapping) {
+                                        let hasMapping = false;
+                                        ed.mapping.forEach(function (map) {
+                                            if (map.identity == 'fhir') {
+                                                hasMapping = true;
+                                            }
+                                        });
+
+                                        if (!hasMapping) {
+                                            quality.arModel.push({type:'noMap',display:'The path ' + ed.path + ' has no FHIR mapping',ed:ed})
+                                        }
+                                    } else {
+                                        quality.arModel.push({type:'noMap',display:'The path ' + ed.path + ' has no FHIR mapping',ed:ed})
+                                    }
+
+
+                                    //is this a coded element type
+                                    if (ed.type) {
+                                        let typ = ed.type[0].code;
+                                        let isCoded = typ=='CodeableConcept' || typ=='Coding' || typ=='code';
+
+                                        if (isCoded) {
+                                            arWork.push(processCoded(url,ed));
+                                        }
+                                    }
                                 }
+
+
                             })
                         }, function(err) {
                             console.log(err)
@@ -401,7 +464,8 @@ angular.module("sampleApp")
                     let deferred = $q.defer();
                     let item = {url:url,ed:ed};
                     if (! ed.binding) {
-                        quality.arCoded.push({display:ed.path + ' has no binding'})
+                        //quality.arCoded.push({display:ed.path + ' has no binding'})
+                        quality.arCoded.push({type:'noBinding',display:'The path ' + ed.path + ' has a coded type, but no ValueSet binding',ed:ed})
                         item.note = "There was no binding";
                         deferred.resolve();
                         return;
@@ -432,7 +496,6 @@ angular.module("sampleApp")
                                                 item.codeSystems.push(sys)
                                                 hash[sys] = 'x'
                                             }
-
                                         });
                                     }
 
@@ -441,7 +504,7 @@ angular.module("sampleApp")
                                     }
                                 } else {
                                     //The VS was not found on the term server...
-                                    quality.arCoded.push({display:'The valueSet ' + ar[0] + ' was not found on the Terminology server'})
+                                    quality.arCoded.push({type:'missingVS',display:'The valueSet ' + ar[0] + ' was not found on the Terminology server',ed:ed})
                                     item.note = "The VS was not found on the Terminology server"
                                 }
 
@@ -455,6 +518,7 @@ angular.module("sampleApp")
                         })
                     } else {
                         //There is no valueSet
+                        quality.arCoded.push({type:'noBinding',display:'The path ' + ed.path + ' has a coded type, but no ValueSet binding',ed:ed})
                         item.note = "There was no ValueSet in the binding";
                         deferred.resolve();
                     }
@@ -468,11 +532,8 @@ angular.module("sampleApp")
 
                     let url = art.reference.reference;  //the reference to to the LM
 
-
-
                     getResourceAsync(url).then(
                         function(SD) {
-
                             let currentItem = {}
                             SD.snapshot.element.forEach(function (ed) {
                                 //look for extension mapping...
@@ -486,24 +547,22 @@ angular.module("sampleApp")
                                             let arExt = getExtension(ed,extExtensionUrl);
 
                                             if (arExt.length > 0) {
-                                                item.extensionUrl = arExt[0].valueString;
+                                                item.extensionUrl = arExt[0].valueString;   //the url of the extension
 
                                                 //If there's an FSH file, then it will be at the Binary endpoint with an id of extension-{id}
                                                 //where id is the last element in the url
                                                 let ar = item.extensionUrl.split('/');
                                                 let id = ar[ar.length-1];
-                                                let url = serverUrl + "Binary/extension-"+id;
-                                                $http.get(url).then(
+                                                let binUrl = serverUrl + "Binary/extension-"+id;
+                                                $http.get(binUrl).then(
                                                     function(data) {
                                                         item.fsh = data.data;
-                                                       // console.log(item.fsh)
                                                     },
                                                     function (err) {
-                                                        item.fsh = "No FSH file found"
+                                                        item.fsh = "No FSH file found";
+                                                        //quality.arModel.push({type:'noFSH',ed: {path:url},display:'The model has no FSH mapping - and therefore no profile'})
                                                     }
                                                 )
-
-
                                             }
                                             //add the element details unless a backbone element
                                             if (ed.type && ed.type.length > 0) {
@@ -522,8 +581,29 @@ angular.module("sampleApp")
 
                                             arExtension.push(item);
 
+                                            //see if the extension definition is on the conformance server...
+                                            if (item.extensionUrl) {
+                                                getConformanceResourceByCanUrl(item.extensionUrl).then(
+                                                    function(){
+                                                        //do nothing - the conformance resource was retrieved and is in the cache...
+                                                    }, function() {
+                                                        //the resource was not found...
+                                                        quality.arExtension.push({type:'noDefFound',display:'The path ' + ed.path + ' is an extension, but the definition (SD) is not on the Conformance server',ed:ed})
+
+                                                    }
+                                                );
+                                            } else {
+                                                quality.arExtension.push({type:'noDefInModel',display:'The path ' + ed.path + ' is an extension, but there is no binding to a Definition',ed:ed})
+
+                                            }
+
+
+
+
                                             currentItem = item;
                                         } else {
+                                            //this was not an extesnion...
+
                                            // lastElementWasExtension = false;
                                         }
 
@@ -542,13 +622,12 @@ angular.module("sampleApp")
                                     })
                                 }
                                 //now for any bound ValueSets. Even if it is an extension, the logical model should still have the ValueSet binding...
+
                                 if (ed.binding) {
                                     let item = {valueSet:ed.binding.valueSet,ed:ed}
                                     item.strength = ed.binding.strength;
                                     
                                 }
-
-
 
                             })
 
@@ -558,12 +637,7 @@ angular.module("sampleApp")
                         function (err) {
                             console.log(err)
                         }
-                    )
-
-
-
-
-
+                    );
 
                     return deferred.promise;
                 }
@@ -722,12 +796,7 @@ angular.module("sampleApp")
                                 });
 
 
-                                //is there an extension for the profile that is derived from the LM?
-                                let prof = getExtension(res, extProfileForLM);
-                                if (prof && prof.length > 0) {
-                                    res.profileForLM = prof[0].valueString;
 
-                                }
 
                                 //is there a canonical url set in the IG resource? If so, add it to the resource / artifact
                                 //just to make it easier to get later
@@ -738,8 +807,7 @@ angular.module("sampleApp")
 
                                 //what short of entry is it in the IG - Logical, profile, valueset etc
                                 let typ = getExtension(res, extIGEntryType);
-
-                                //add the IG resource to the hash hash
+                                //add the IG resource to the artifacts hash
                                 if (typ && typ.length > 0) {
                                     let code = typ[0].valueCode;
                                     artifacts[code] = artifacts[code] || [];
@@ -748,7 +816,7 @@ angular.module("sampleApp")
                                     var ext = getExtension(res,extFSHUrl);
                                     if (ext && ext.length > 0 && ext[0].valueString) {
 
-                                        let url = serverUrl + "Binary/"+ext[0].valueString
+                                        let url = serverUrl + "Binary/"+ext[0].valueString;
                                         $http.get(url).then(
                                             function(data) {
                                                 res.fsh = data.data;     //for Binary, the content is directly returned
@@ -757,6 +825,14 @@ angular.module("sampleApp")
                                                 console.log(err)
                                             }
                                         )
+                                    }
+
+                                    //-----
+                                    //is there an extension for the profile that is derived from the LM?
+                                    let prof = getExtension(res, extProfileForLM);
+                                    if (prof && prof.length > 0) {
+                                        res.profileForLM = prof[0].valueString;
+
                                     }
 
                                     //if there's a reference to a profile, then save it as a property of the item
