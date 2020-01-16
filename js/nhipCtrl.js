@@ -558,6 +558,7 @@ angular.module("sampleApp")
                 delete $scope.mi;
                 delete $scope.arDocs;
                 delete $scope.input.selectedExtFSH;
+                delete $scope.baseTypeForModel
 
                 delete $scope.selectedExampleJson;
                 $('#exampleTree').jstree('destroy');
@@ -568,7 +569,6 @@ angular.module("sampleApp")
             $scope.selectItem = function(typ,art) {
                 clearDetail();
 
-               // $scope.selectedArtifact = art;
 
                 //not using this right now, but may be useful in the future...
                 nhipSvc.getDocsForItem(art).then(
@@ -698,6 +698,9 @@ angular.module("sampleApp")
                     if (data.node) {
                         $scope.selectedNode = data.node;
                         $scope.selectedED = logicalModelSvc.getEDForPath($scope.selectedResource,data.node)
+
+                        //console.log($scope.selectedED)
+
 
                     }
 

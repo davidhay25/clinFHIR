@@ -14,7 +14,8 @@
 
     </style>
 <div class="row">
-    <div class="col-md-2">
+    <div class="col-md-2 col-sm-2">
+
         <!--
                     <div class="btn-group" ng-click="selectIG(input.igCode)">
                         <label class="btn btn-default" ng-model="input.igCode" uib-btn-radio="'nzRegistry'">Identity</label>
@@ -23,11 +24,8 @@
 
         -->
 
-
-
         <h3>Models</h3>
         <div class="list-group">
-
             <div class="designerScroll">
                 <div ng-class="{'list-group-item':true,'listItemSelected':art==selectedArtifact}"
                      style="cursor: pointer"
@@ -44,124 +42,11 @@
         <em>Each model is a single resource. Elements in the model map to Resource elements via the profile.</em>
 
 
-        <!--
 
-                            <uib-accordion>
-                                <div uib-accordion-group class="panel-default" is-open="true">
-                                    <uib-accordion-heading>
-                                <span ng-click="showAccordianGroup('logical')">
-                                    <div class="text-center text-info">
-                                        <strong>Logical Models</strong>
-                                    </div>
-                                </span>
-                                    </uib-accordion-heading>
-                                    <div class="list-group">
-
-                                        <div class="designerScroll">
-                                            <div ng-class="{'list-group-item':true,'listItemSelected':art==selectedArtifact}"
-                                                 style="cursor: pointer"
-                                                 ng-repeat="art in artifacts.logical">
-                                                <div ng-click="selectItem('logical',art)">
-                                                    <div>{{art.reference.reference | referenceType}}</div>
-                                                    {{art.name}}
-                                                    <div>{{art.title}}</div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                    </div>
-
-
-                                </div>
-
-                                <div uib-accordion-group class="panel-default">
-                                    <uib-accordion-heading>
-                                <span ng-click="showAccordianGroup('valueset')">
-                                    <div class="text-center text-info">
-                                        <strong>ValueSets</strong>
-                                    </div>
-                                </span>
-
-                                    </uib-accordion-heading>
-                                    <div class="list-group">
-                                        <div ng-class="{'list-group-item':true}"
-                                             style="cursor: pointer"
-                                             ng-repeat="art in artifacts.valueset">
-                                            <div ng-click="selectItem('valueset',art)">
-                                                {{art.name}}
-                                                <div>{{art.title}}</div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-
-                                </div>
-
-
-                                <div uib-accordion-group class="panel-default">
-                                    <uib-accordion-heading>
-                                <span ng-click="showAccordianGroup('namingsystem')">
-                                    <div class="text-center text-info">
-                                        <strong>Naming Systems</strong>
-                                    </div>
-                                </span>
-
-                                    </uib-accordion-heading>
-                                    <div class="list-group">
-                                        <div ng-class="{'list-group-item':true}"
-                                             style="cursor: pointer"
-                                             ng-repeat="art in artifacts.namingsystem">
-                                            <div ng-click="selectItem('namingsystem',art)">
-                                                {{art.name}}
-                                                <div>{{art.title}}</div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-
-                                </div>
-
-                                <div uib-accordion-group class="panel-default">
-                                    <uib-accordion-heading>
-                            <span ng-click="showAccordianGroup('example')">
-                                    <div class="text-center text-info">
-                                        <strong>Examples</strong>
-                                    </div>
-                                </span>
-                                    </uib-accordion-heading>
-                                </div>
-
-                                <div uib-accordion-group class="panel-default">
-                                    <uib-accordion-heading>
-                            <span ng-click="showAccordianGroup('graph')">
-                                    <div class="text-center text-info">
-                                        <strong>Graphs</strong>
-                                    </div>
-                                </span>
-                                    </uib-accordion-heading>
-                                </div>
-
-                                <div uib-accordion-group class="panel-default">
-                                    <uib-accordion-heading>
-                        <span ng-click="showAccordianGroup('analysis')">
-                                <div class="text-center text-info">
-                                    <strong>Analysis</strong>
-                                </div>
-                            </span>
-                                    </uib-accordion-heading>
-                                    <button class="btn btn-link" ng-click="analyse()">Refresh</button>
-                                </div>
-
-                            </uib-accordion>
-
-
-                           -->
 
 
     </div>
-    <div class="col-md-10">
+    <div class="col-md-10 col-sm-10">
 
 
         <div ng-show="selectedGroup == 'logical' && selectedResource">
@@ -222,11 +107,11 @@
                 <uib-tab heading="Tree view">
                     <br/>
                     <div class="row">
-                        <div class="col-md-3">
+                        <div class="col-md-3 col-sm-3">
                             <div class="designerScroll" id="lmTreeView"></div>
 
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-9 col-sm-9">
                             <div ng-show="selectedNode">
                                 <div class="row">
                                     <div class="col-md-8 col-sm-8">
@@ -245,16 +130,17 @@
 
                                 <table class="table table-bordered">
 
-                                    <tr>
-                                        <td width="20%">Name</td>
-                                        <td>{{selectedNode.data.name}}
 
 
-                                        </td>
+                                    <tr  ng-show="selectedNode.parent == '#'">
+                                        <td width="20%">Base type</td>
+                                        <td>{{baseTypeForModel}} </td>
                                     </tr>
 
-
-
+                                    <tr>
+                                        <td width="20%">Name</td>
+                                        <td>{{selectedNode.data.name}} </td>
+                                    </tr>
 
                                     <tr ng-show = "selectedNode.data.edStatus && (selectedNode.data.edStatus !== 'included')" class="required">
                                         <td>Status</td><td>{{selectedNode.data.edStatus}}
@@ -709,11 +595,6 @@
                     </div>
 
                     <uib-tabset ng-show="selectedProfile">
-                        <!--
-                        <uib-tab heading="Tree" ng-show="false">
-                            <div id="profileTree"></div>
-                        </uib-tab>
-                        -->
 
                         <uib-tab heading="Profile header">
                             <pre>{{selectedProfileHeader | json}}</pre>

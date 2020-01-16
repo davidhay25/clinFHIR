@@ -586,6 +586,9 @@ angular.module("sampleApp")
                                                 getConformanceResourceByCanUrl(item.extensionUrl).then(
                                                     function(){
                                                         //do nothing - the conformance resource was retrieved and is in the cache...
+
+
+
                                                     }, function() {
                                                         //the resource was not found...
                                                         quality.arExtension.push({type:'noDefFound',display:'The path ' + ed.path + ' is an extension, but the definition (SD) is not on the Conformance server',ed:ed})
@@ -629,7 +632,7 @@ angular.module("sampleApp")
                                     
                                 }
 
-                            })
+                            });
 
                             deferred.resolve();
 
