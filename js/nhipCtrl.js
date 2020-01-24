@@ -5,6 +5,7 @@ angular.module("sampleApp")
 
             $scope.selectedGroup = 'logical';       //initial group to display
             $scope.input = {};
+            $scope.input.mustSupportOnly = false;
 
             appConfigSvc.setServerType('conformance','http://home.clinfhir.com:8054/baseR4/');
             appConfigSvc.setServerType('data','http://home.clinfhir.com:8054/baseR4/');       //set the data server to the same as the conformance for the comments
@@ -62,53 +63,12 @@ angular.module("sampleApp")
 
 
                 console.log(res)
-            }
-
-            //get all the NamingSystem resources off the server. May want a more elegant way...
-            $http.get("http://home.clinfhir.com:8054/baseR4/NamingSystem?_count=100").then(
-                function(data) {
-                    $scope.namingSystem = [];
-                    data.data.entry.forEach(function (entry) {
-                        $scope.namingSystem.push(entry.resource)
-                    });
-
-                    $scope.namingSystem.sort(function(a,b){
-                        if (a.description > b.description) {
-                            return 1
-                        } else {
-                            return -1
-                        }
+            };
 
 
-/*
-                        let url1 = getUrl(a)
-                        let url2 = getUrl(b)
-                        if (url1 > url2) {
-                            return 1
-                        } else {
-                            return -1
-                        }
 
 
-                        function getUrl(ns) {
-                            let url = "";
-                            if (ns.uniqueId) {
-
-                                ns.uniqueId.forEach(function(id){
-                                    if (id.type='uri') {
-                                        url = id.value
-                                    }
-                                })
-                            }
-                            return url;
-                        }
-                        */
-                    })
-
-
-                }
-            );
-            $scope.showNamingSystem = function(ns,filter) {
+            $scope.showNamingSystemFilter = function(ns,filter) {
 
                 if (!filter) {
                     return true
@@ -151,11 +111,7 @@ angular.module("sampleApp")
                     return true
                 } else {
                     let f = filter.toLowerCase();
-                    /*
-                    if (vs.url && vs.url.toLowerCase().indexOf(filter) >-1) {
-                        return true;
-                    }
-                */
+
                     if (vs.valueSetUrl && vs.valueSetUrl.toLowerCase().indexOf(filter) >-1) {
                         return true;
                     }
@@ -232,13 +188,52 @@ angular.module("sampleApp")
                         });
 
 
-                        //insert the dynamic tabs...
-                        $scope.tabs.splice(3,0,{title:'Resources',includeUrl:"/includes/oneModel.html"});
+                        //todo - add an extension to the IG to insert the dynamic tabs...
+                        $scope.tabs.splice(3,0,{title:'Models / Profiles',includeUrl:"/includes/oneModel.html"});
                         $scope.tabs.splice(8,0,{title:'Quality',includeUrl:"/includes/quality.html"})
                         $scope.tabs.splice(8,0,{title:'Sample Queries',includeUrl:"/includes/queryBuilder.html"})
 
 
                         $scope.showTabsInView = true;
+
+
+                        //get all the NamingSystem resources off the server.
+                        //We do need the full NS for the display, so read them all, then filter to the ones in the IG
+                        // May want a more elegant way...
+
+                        //first, create a hash of the NS in the IG
+                        let hashNS = {};
+                        $scope.artifacts.namingsystem.forEach(function (res) {
+                            if (res.reference && res.reference.reference) {
+                                let ar = res.reference.reference.split('/')
+                                let id = ar[ar.length-1]
+                                hashNS[id] = 'x'
+                            }
+
+                        })
+
+                        $http.get("http://home.clinfhir.com:8054/baseR4/NamingSystem?_count=100").then(
+                            function(data) {
+                                $scope.namingSystem = [];
+
+                                data.data.entry.forEach(function (entry) {
+                                    if (hashNS[entry.resource.id]) {
+                                        $scope.namingSystem.push(entry.resource)
+                                    }
+
+                                });
+
+                                $scope.namingSystem.sort(function(a,b){
+                                    if (a.description > b.description) {
+                                        return 1
+                                    } else {
+                                        return -1
+                                    }
+                                })
+                            }
+                        );
+
+
 
                         //todo note that we may want to dynamically set the url in the samples...
                         nhipSvc.getSamples().then(
@@ -665,7 +660,16 @@ angular.module("sampleApp")
                 if (row.data && row.data.edStatus == 'excluded') {
                     return false
                 } else {
-                    return true;
+                    if ($scope.input.mustSupportOnly) {
+                        if (row.data.mustSupport) {
+                            return true
+                        } else {
+                            return false
+                        }
+                    } else {
+                        return true;
+                    }
+
                 }
 
             }

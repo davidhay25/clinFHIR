@@ -541,7 +541,6 @@ angular.module("sampleApp")
                                     ed.mapping.forEach(function (map) {
                                         if (map.identity == 'fhir' && map.map.indexOf('xtension')>-1) {
                                             //this is mapped to an extension
-                                            //let ar = url.split('/')
 
                                             let item = {url:url,ed:ed,elements:[]};
                                             let arExt = getExtension(ed,extExtensionUrl);
@@ -564,13 +563,28 @@ angular.module("sampleApp")
                                                     }
                                                 )
                                             }
+
                                             //add the element details unless a backbone element
                                             if (ed.type && ed.type.length > 0) {
                                                 if (ed.type[0].code !== 'BackboneElement') {
                                                     let elementName = $filter('getLastInPath')(ed.path);
                                                     let elementType = ed.type[0].code
+
+                                                    //console.log(elementType);
+
+                                                    if (elementType == 'CodeableConcept') {
+
+                                                       // processCoded("urlhere",ed)
+                                                    }
+
+
                                                     item.elements.push({name:elementName,type:elementType,short:ed.short});
                                                 }
+
+
+
+
+
                                             }
 
                                             if (map.map.indexOf('odifierExtension')>-1) {
@@ -844,14 +858,39 @@ angular.module("sampleApp")
                                         res.profileId = ext[0].valueString;
                                     }
 
+
+
                                     artifacts[code].push(res)
 
                                 } else {
-                                    //this might be an extension
+                                    //this might be an example
                                     if (res.exampleBoolean || res.exampleCanonical) {
                                         artifacts.example = artifacts.example || []
                                         let ar = res.reference.reference.split('/');
                                         res.baseType = ar[0]
+                                        res.fsh = "No FSH defined. This example was manually generated.";
+                                        var ext = getExtension(res,extFSHUrl);
+                                        if (ext && ext.length > 0 && ext[0].valueString) {
+                                           // res.fsh = ext[0].valueString;
+
+
+                                            let binUrl = serverUrl + "Binary/"+ext[0].valueString;
+                                            $http.get(binUrl).then(
+                                                function(data) {
+                                                    res.fsh = data.data;
+
+                                                },
+                                                function (err) {
+                                                    res.fsh = "No FSH file found";
+                                                    //quality.arModel.push({type:'noFSH',ed: {path:url},display:'The model has no FSH mapping - and therefore no profile'})
+                                                }
+                                            )
+
+
+                                            console.log(res.fsh)
+                                        }
+
+
                                         artifacts.example.push(res)
                                     }
                                 }

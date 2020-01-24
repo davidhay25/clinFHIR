@@ -8,10 +8,7 @@
         </uib-tab>
         <uib-tab heading="All Identifier systems in this guide">
             <div>The following are the naming systems that are used by the HPI</div>
-
-
             <br/>
-
             <div class="row">
                 <div class="col-md-1">
                     Filter:
@@ -29,7 +26,7 @@
 
             <table class="table table-bordered">
                 <tr><th>Description</th><th>Url (in <em>system</em> element)</th><th>Other identifiers for this entity</th><th>Usage Notes</th></tr>
-                <tr ng-repeat="ns in namingSystem" ng-show="showNamingSystem(ns,filter)">
+                <tr ng-repeat="ns in namingSystem" ng-show="showNamingSystemFilter(ns,filter)">
                     <td>{{ns.description}}</td>
                     <td>
                         <div ng-repeat="id in ns.uniqueId">
@@ -51,7 +48,7 @@
                 </tr>
             </table>
 
-            <em>This table is generated from NamingSystem resources on the conformance server.</em>
+            <em>This table is generated from NamingSystem resources on the conformance server, referenced by the IG.</em>
 
             <em>Note that the URLs in this page will not actually resolve. Rather they are globally unique identifiers</em>
         </uib-tab>

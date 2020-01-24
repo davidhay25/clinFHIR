@@ -142,6 +142,8 @@
                                         <td>{{selectedNode.data.name}} </td>
                                     </tr>
 
+                                    <tr><td>Must Support</td><td>{{selectedNode.data.mustSupport}}</td></tr>
+
                                     <tr ng-show = "selectedNode.data.edStatus && (selectedNode.data.edStatus !== 'included')" class="required">
                                         <td>Status</td><td>{{selectedNode.data.edStatus}}
 
@@ -169,6 +171,9 @@
                                             </ul>
                                         </td>
                                     </tr>
+
+
+
 
 
                                     <tr><td>Short</td><td>{{selectedNode.data.short}}</td></tr>
@@ -353,17 +358,26 @@
 
                 <uib-tab heading="Table view">
                     <br/>
+                    <div class="pull-right">
+                        <input type="checkbox" ng-model="input.mustSupportOnly"/> Show 'must support' only
+                    </div>
+                    <br/>
                     <table class="table table-bordered table-condensed">
                         <tr>
 
-                            <th>Element</th><th>DataType</th><th>Mult.</th><th>Description & Comments</th><th>Element Specific</th></tr>
-                        <tr ng-class="{isModifierExtension:row.data.isModifierExtension}" ng-show="showTableElement(row)" ng-repeat="row in treeData">
+                            <th>Element</th><th>Must Support</th><th>DataType</th><th>Mult.</th><th>Description & Comments</th><th>Element Specific</th></tr>
+                            <tr ng-class="{isModifierExtension:row.data.isModifierExtension}" ng-show="showTableElement(row)"
+                            ng-repeat="row in treeData">
 
                             <td>
 
                                 <div  ng-style="{ 'padding-left': (row.data.path | pathindent) }"
                                       ng-click="selectNodeFromTable(row.data.path)" >{{row.data.path| lastInPath}}</div>
                             </td>
+
+                            <td>{{row.data.mustSupport}}</td>
+
+
                             <td>
                                 <div ng-repeat="type in row.data.type">
                                     {{type.code}}
@@ -664,6 +678,22 @@
                                 </div>
 
                                 <uib-tabset ng-show="selectedExampleJson">
+
+
+                                    <uib-tab heading="Shorthand (wrapped)">
+                                        <div hljs hljs-source="selectedArtifact.fsh">
+
+                                        </div>
+
+
+                                    </uib-tab>
+
+                                    <uib-tab heading="Shorthand (scrolling)">
+
+                                        <pre>{{selectedArtifact.fsh}}</pre>
+                                    </uib-tab>
+
+
                                     <uib-tab heading="Json">
                                         <pre>{{selectedExampleJson | json}}</pre>
                                     </uib-tab>

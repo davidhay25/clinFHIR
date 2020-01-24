@@ -712,6 +712,7 @@ angular.module("sampleApp")
                 $scope.updateMessage = 'Converting...'
                 delete $scope.transformMessage;         //if set, transformMessage hides the transform button
                 delete $scope.convertError;
+                delete $scope.transformError;
 
                 if (! $scope.input.mappingFile) {
                     alert("There must be some text in the mapping file before the StructureMap can be created")
@@ -786,7 +787,7 @@ angular.module("sampleApp")
                     },
                     function(err) {
                         console.log(err);
-                        $scope.convertError = err.data
+                        $scope.convertError = err.data || err.statusText;
                         $scope.showWaiting = false;
                         delete $scope.updateMessage;
 
@@ -835,12 +836,12 @@ angular.module("sampleApp")
                 delete $scope.transformError;
                 delete $scope.transactionResponse;
 
-                $scope.transformMessage = "Executing map on server, please wait...";
+                $scope.transformMessage = "Executing map on server with the sample data, please wait...";
                 //https://vonk.fire.ly/StructureMap/dh/$transform
                 //let url = $scope.serverRoot + "StructureMap/" + $scope.structureMapId + "/$transform";
                 let url = $scope.server.mappingServerUrl + "StructureMap/" + $scope.currentSM.id + "/$transform";
 
-                //if the inpput is a resource then post directly. Otherwise must use a Paramaters
+                //if the input is a resource then post directly. Otherwise must use a Paramaters
 
                 let content = $scope.input.inputJson;
                 try {
@@ -858,20 +859,61 @@ angular.module("sampleApp")
 
                 $http.post(url,content).then(
                     function(data) {
-                        $scope.output = data.data;
-                        $scope.transformMessage = 'Transform succeeded'
+                        //this can return either a bundle with the results, or a bundle that contains the results bundle plus an OO
+                        let returnBundle = data.data;
+                        if (returnBundle.entry && returnBundle.entry.length > 0) {
+                            //does this bundle have a contained results bundle?
 
-                        console.log($scope.output)
-                        let oo = $scope.output.entry[1].resource;
-                        let iss = oo.issue[0].diagnostics;
-                        let g = iss.indexOf('{')
-                        let s = iss.substr(g);
-                        let a = angular.fromJson(s)
-                        console.log(a)
-                        console.log(s)
+                            let bundle = false;
+                            for (const entry of returnBundle.entry) {
 
-                        //delete $scope.transformMessage;
-                        makeGraph($scope.output)
+                            //returnBundle.entry.forEach(function (entry) {
+                                if (entry.resource && entry.resource.resourceType == 'Bundle') {
+                                    $scope.output = entry.resource;
+                                    break;
+                                }
+                            };
+
+                            $scope.output = $scope.output || data.data;
+                            /*
+                            if (containsBundle) {
+                                $scope.output = data.data;
+                            } else {
+
+                            }
+*/
+
+
+
+                            $scope.transformMessage = 'Transform succeeded';
+/*
+
+                            console.log($scope.output)
+                            let oo = $scope.output.entry[1].resource;
+                            let iss = oo.issue[0].diagnostics;
+                            let g = iss.indexOf('{')
+                            let s = iss.substr(g);
+                            let a = angular.fromJson(s)
+                            console.log(a)
+                            console.log(s)
+*/
+                            //delete $scope.transformMessage;
+                            makeGraph($scope.output)
+
+                            //iterate through the bundle to ensure that all fullUrl are absolute. todo This is a temporayy hach
+                            for (const entry of returnBundle.entry) {
+                                if (entry.resource && entry.resource.fullUrl) {
+                                    if (entry.resource.fullUrl.substring(0,4) !== 'http') {}
+                                        entry.resource.fullUrl = $scope.server.mappingServerUrl + entry.resource.fullUrl;
+                                }
+                            }
+
+                        }
+
+
+
+
+
                     },
                     function (err) {
                         $scope.transformMessage = "There was an error";
@@ -907,6 +949,8 @@ angular.module("sampleApp")
                 }
 
                 let options = {bundle:bundle,hashErrors: {},serverRoot:$scope.server.mappingServerUrl}
+                //let options = {bundle:bundle,hashErrors: {}}
+
                 let vo = v2ToFhirSvc.makeGraph(options)
 
                 var container = document.getElementById('resourceGraph');

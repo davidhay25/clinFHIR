@@ -567,6 +567,11 @@
 
                         </div>
                         <div class="col-md-6">
+
+                            <div ng-hide="validateResult.data">
+                                <em>Click the Validate link above to validate the Bundle</em>
+                            </div>
+
                             <uib-tabset ng-show="output">
                                 <uib-tab heading="All outcomes">
                                     <table class="table">
