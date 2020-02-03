@@ -24,12 +24,28 @@ angular.module("sampleApp")
             );
 
 
+            //get the help pages
+            $scope.help = {};
+            let arHelp = ['IGHelp']
+
+            arHelp.forEach(function (fileName) {
+                let url = 'content/nhip/'+fileName + '.md'
+                $http.get(url).then(
+                    function(data) {
+                        $scope.help[fileName] = data.data;
+                    }, function(err) {
+                        console.log(err)
+                    }
+
+                )
+
+            })
 
 
             $scope.clinicalView = $localStorage.clinicalView ;//false;    //if true then some tabs hidden
             $scope.setClinicalView = function(state) {
                 $localStorage.clinicalView = state
-            }
+            };
 
 
             $scope.rootForDataType = "http://hl7.org/fhir/datatypes.html#"
@@ -190,9 +206,11 @@ angular.module("sampleApp")
 
                         //todo - add an extension to the IG to insert the dynamic tabs...
                         $scope.tabs.splice(3,0,{title:'Models / Profiles',includeUrl:"/includes/oneModel.html"});
-                        $scope.tabs.splice(8,0,{title:'Quality',includeUrl:"/includes/quality.html"})
-                        $scope.tabs.splice(8,0,{title:'Sample Queries',includeUrl:"/includes/queryBuilder.html"})
+                        $scope.tabs.splice(5,0,{title:'Extensions',includeUrl:"/includes/nhipExtensions.html"});
+                        $scope.tabs.splice(8,0,{title:'Quality',includeUrl:"/includes/quality.html"});
+                        $scope.tabs.splice(8,0,{title:'Sample Queries',includeUrl:"/includes/queryBuilder.html"});
 
+                        //$scope.tabs.push({title:'Help',includeUrl:"/includes/igReviewerHelp.html"});
 
                         $scope.showTabsInView = true;
 
@@ -266,13 +284,31 @@ angular.module("sampleApp")
             };
 
             $scope.executeSample = function(url) {
+                delete $scope.selectedResourceInList;
+                delete $scope.executeMessage;
+                $("#resourcesGraph").empty();
+
+               // container.emp
                // delete $scope.sampleResult;
                 //let url = "http://home.clinfhir.com:8054/baseR4/"+ sample.url
+                //add _count to the query
+                if (url.indexOf('?') > -1) {
+                    url += "&_count=100"
+                } else {
+                    url += "?_count=100"
+                }
+
+
                 $http.get(url).then(
                     function(data) {
-                        $scope.sampleResult = data
-
-
+                        $scope.sampleResult = data;
+                        if (data.data.link) {
+                            data.data.link.forEach(function (link) {
+                                if (link.relation == 'next') {
+                                    $scope.executeMessage = "The result set was too large to download completely. Refine your search for a complete list"
+                                }
+                            })
+                        }
 
                         $scope.sampleGraph = makeGraph (data.data,'resourcesGraph')
 
@@ -354,6 +390,7 @@ angular.module("sampleApp")
                         }
                     }
                 };
+
                 let graph=new vis.Network(container, vo.graphData, graphOptions);
 
                 graph.on("click", function (obj) {

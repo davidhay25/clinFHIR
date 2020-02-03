@@ -163,6 +163,12 @@ angular.module("sampleApp")
                 //makeGraph: function (bundle,hashErrors,serverRoot,hidePatient,centralResourceId) {
 
                 let bundle = options.bundle;
+
+                if (!bundle || ! bundle.entry) {
+                    return {graphData : {}, allReferences:[], nodes: {}, visNodes:{},visEdges:{}};
+                }
+
+
                 let hashErrors = options.hashErrors;
                 let serverRoot = options.serverRoot;
                 let hidePatient = options.hidePatient;

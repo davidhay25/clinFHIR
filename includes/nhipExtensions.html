@@ -1,0 +1,62 @@
+<div>
+
+
+        <br/>
+        <table class="table table-bordered">
+            <tr><th>Path
+                <span class="pull-right">
+                                <i class="glyphicon glyphicon-question-sign"
+                                   popover-class="plain"
+                                   uib-popover="Where in the model the extension is found. In a resource instance, it will be in an extension element."
+                                   popover-trigger="'mouseenter'"
+                                   popover-placement="right"></i>
+                            </span>
+            </th><th>Elements</th>
+                <th>Extension Url
+                    <span class="pull-right">
+                                <i class="glyphicon glyphicon-question-sign"
+                                   popover-class="plain"
+                                   uib-popover="The extension definition does not yet resolve, but it will do so"
+                                   popover-trigger="'mouseenter'"
+                                   popover-placement="right"></i>
+                            </span>
+
+                </th><th>Definition</th>
+            </tr>
+            <tr ng-repeat="ext in analysis.extensions"
+                ng-class="{isModifierBackground:ext.isModifier}">
+
+                <td><div>{{ext.ed.path}}</div></td>
+                <td>
+                    <table class="table table-bordered table-condensed">
+                        <tr ng-repeat = "ele in ext.elements">
+                            <td width="30%">{{ele.name}}</td>
+                            <td>{{ele.type}}
+                                <div ng-show="ele.valueSet">
+                                <span class="clickable" ng-click="viewVS(ele.valueSet)">
+                                            ({{ele.valueSet}})
+                                         </span>
+
+                                </div>
+
+
+                            </td>
+
+                        </tr>
+                    </table>
+
+                </td>
+                <td>{{ext.extensionUrl}}</td>
+                <td>{{ext.ed.definition}}</td>
+
+            </tr>
+        </table>
+        <em>These are all the extensions that have been defined for this IG. They represent new elements in the Logical Model, and are used by the profile.
+            lines in <span class="isModifierBackground">Red</span> are modifier extensions (ie their value can change the meaning of the resource
+            so must be understood by the client.
+            The information is derived from the Logical Model</em>
+        <!-- <pre>{{analysis.extensions | json}}</pre>-->
+
+
+
+</div>

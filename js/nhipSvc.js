@@ -462,7 +462,7 @@ angular.module("sampleApp")
                 //look for coded data in an element definition
                 function processCoded(url,ed) {
                     let deferred = $q.defer();
-                    let item = {url:url,ed:ed};
+                    let item = {url:url,ed:ed}; //todo - URL is redundant...
                     if (! ed.binding) {
                         //quality.arCoded.push({display:ed.path + ' has no binding'})
                         quality.arCoded.push({type:'noBinding',display:'The path ' + ed.path + ' has a coded type, but no ValueSet binding',ed:ed})
@@ -476,6 +476,7 @@ angular.module("sampleApp")
 
                     if (ed.binding.valueSet) {
                         let ar = ed.binding.valueSet.split('|')
+                        item.url = ar[0]
 
                         let url = termServerUrl + "ValueSet?url="+ar[0];
                         $http.get(url).then(
@@ -532,9 +533,9 @@ angular.module("sampleApp")
 
                     let url = art.reference.reference;  //the reference to to the LM
 
-                    getResourceAsync(url).then(
-                        function(SD) {
-                            let currentItem = {}
+                    getResourceAsync(url).then(     //get the Logical Model
+                        function(SD) {      //SD is the LM...
+                            let currentItem = {};
                             SD.snapshot.element.forEach(function (ed) {
                                 //look for extension mapping...
                                 if (ed.mapping) {
@@ -547,6 +548,7 @@ angular.module("sampleApp")
 
                                             if (arExt.length > 0) {
                                                 item.extensionUrl = arExt[0].valueString;   //the url of the extension
+
 
                                                 //If there's an FSH file, then it will be at the Binary endpoint with an id of extension-{id}
                                                 //where id is the last element in the url
@@ -570,19 +572,18 @@ angular.module("sampleApp")
                                                     let elementName = $filter('getLastInPath')(ed.path);
                                                     let elementType = ed.type[0].code
 
-                                                    //console.log(elementType);
-
+                                                    let vo = {name:elementName,type:elementType,short:ed.short}
                                                     if (elementType == 'CodeableConcept') {
 
-                                                       // processCoded("urlhere",ed)
+                                                        //check that there is a binding
+                                                        if (ed.binding) {
+                                                            vo.valueSet = ed.binding.valueSet
+                                                        }
+                                                        //will only work for coded simple extensions...
+                                                        processCoded("urlhere",ed)
                                                     }
-
-
-                                                    item.elements.push({name:elementName,type:elementType,short:ed.short});
+                                                    item.elements.push(vo);
                                                 }
-
-
-
 
 
                                             }
@@ -600,8 +601,6 @@ angular.module("sampleApp")
                                                 getConformanceResourceByCanUrl(item.extensionUrl).then(
                                                     function(){
                                                         //do nothing - the conformance resource was retrieved and is in the cache...
-
-
 
                                                     }, function() {
                                                         //the resource was not found...
@@ -630,7 +629,24 @@ angular.module("sampleApp")
                                             if (ed.type && ed.type.length > 0) {
                                                 let elementName = $filter('getLastInPath')(ed.path);
                                                 let elementType = ed.type[0].code
-                                                currentItem.elements.push({name:elementName,type:elementType,short:ed.short});
+
+
+
+                                                let vo = {name:elementName,type:elementType,short:ed.short}
+                                                if (elementType == 'CodeableConcept') {
+                                                    if (ed.binding) {
+                                                        vo.valueSet = ed.binding.valueSet
+
+                                                        //will only work for coded simple extensions...
+                                                        //processCoded("urlhere",ed)
+                                                    }
+                                                    //this is a coded child element, so need to check the ValueSet as well...
+                                                    processCoded("urlhere",ed)
+                                                }
+
+                                                //currentItem.elements.push({name:elementName,type:elementType,short:ed.short});
+
+                                                currentItem.elements.push(vo);
 
                                             }
 

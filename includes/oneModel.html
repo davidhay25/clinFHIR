@@ -12,19 +12,27 @@
             font-weight: bold;
         }
 
+
     </style>
 <div class="row">
     <div class="col-md-2 col-sm-2">
 
         <!--
-                    <div class="btn-group" ng-click="selectIG(input.igCode)">
-                        <label class="btn btn-default" ng-model="input.igCode" uib-btn-radio="'nzRegistry'">Identity</label>
-
-                    </div>
+            <div class="btn-group" ng-click="selectIG(input.igCode)">
+                <label class="btn btn-default" ng-model="input.igCode" uib-btn-radio="'nzRegistry'">Identity</label>
+            </div>
 
         -->
 
-        <h3>Models</h3>
+        <div class="row">
+            <div class="col-sm-10 col-md-10">
+                <strong style="font-size: large">Models</strong>
+            </div>
+            <div class="col-sm-2 col-md-2">
+                <i class="glyphicon glyphicon-question-sign clickable" ng-click = "input.showModelHelp = ! input.showModelHelp"></i>
+            </div>
+        </div>
+
         <div class="list-group">
             <div class="designerScroll">
                 <div ng-class="{'list-group-item':true,'listItemSelected':art==selectedArtifact}"
@@ -41,15 +49,39 @@
         </div>
         <em>Each model is a single resource. Elements in the model map to Resource elements via the profile.</em>
 
-
-
-
-
     </div>
     <div class="col-md-10 col-sm-10">
 
 
-        <div ng-show="selectedGroup == 'logical' && selectedResource">
+        <div ng-show="input.showModelHelp || ! selectedResource">
+            <div class="row">
+                <div class="col-md-4" style="margin-top: 30px">
+                    <p>Each model in the list to the left represents a single resource type that has been 'profiled' for
+                        a particular purpose - such as adding the extra elements needed for a Patient in a particular
+                        country. </p>
+
+                    <p>This is a design artifact, and does not repesent the format used to actually share the resource. The model
+                        is then converted into the formal artifacts - a profile and one or more extension definitions as shown
+                        in the image to the right. </p>
+                    <p>The profile adjusts the base elements of the resource type (eg it might
+                        remove an element) and the extension definition describes the additional elements that are not present on the base.</p>
+
+                    <p>It's quite possible for a single resource type to have multiple models - for example this is quite common
+                        with Observations. It's also common (in fact preferred) for the same Extension Definition to be used in
+                        multiple models if they mean the same thing.</p>
+                </div>
+                <div class="col-md-6">
+                    <img src="/content/nhip/lm2profile.png"/>
+                </div>
+            </div>
+        <hr/>
+
+
+
+
+        </div>
+
+        <div ng-show="selectedGroup == 'logical' && selectedResource ">
 
 
 
@@ -493,16 +525,7 @@
                                    popover-trigger="'mouseenter'"
                                    popover-placement="right"></i>
                             </span>
-
-
-                        </th><th>Elements
-
-
-
-
-                        </th>
-
-
+                        </th><th>Elements</th>
                             <th>Extension Url
                             <span class="pull-right">
                                 <i class="glyphicon glyphicon-question-sign"
@@ -535,7 +558,8 @@
                         </tr>
                     </table>
                     <em>These are the extensions that have been defined for this resource. They represent new elements in the Logical Model, and are used by the profile.
-                        lines in <span class="isModifierBackground">Red</span> are modifier extensions.
+                        lines in <span class="isModifierBackground">Red</span> are modifier extensions (ie their value can change the meaning of the resource
+                        so must be understood by the client.
                         The information is derived from the Logical Model</em>
                     <!-- <pre>{{analysis.extensions | json}}</pre>-->
                 </uib-tab>
@@ -556,7 +580,13 @@
                             <p ng-hide="selectedArtifact.fsh">This will show the FHIR shorthand definition that generates the formal profile for this model.
                                 This will show the difference from the core resource</p>
 -->
+
+                            <div hljs hljs-source="selectedArtifact.fsh">
+
+                            </div>
+                            <!--
                             <pre ng-show="selectedArtifact.fsh">{{selectedArtifact.fsh}}</pre>
+                            -->
                         </uib-tab>
                         <uib-tab heading="Extensions">
                             <br/>
@@ -575,7 +605,13 @@
 
                                 </div>
                                 <div class="col-md-9">
+                                    <!--
                                     <pre>{{input.selectedExtFSH.fsh}}</pre>
+                                    -->
+                                    <div hljs hljs-source="input.selectedExtFSH.fsh">
+
+                                    </div>
+
                                     <em>The 'XXX' suffixes on some elements are a temporary measure to resolve issues
                                     with the generation process. They will be removed.</em>
                                 </div>
@@ -656,7 +692,7 @@
                     <div class="row">
                         <div class="col-md-3">
                             <div class="list-group">
-                                <div class="list-group-item" ng-repeat="art in artifacts.example"
+                                <div ng-class="{'list-group-item':true,listItemSelected:art.name == selectedArtifact.name}" ng-repeat="art in artifacts.example"
                                      style="cursor: pointer"
                                      ng-show="baseTypeForModel == art.baseType">
                                     <div ng-click="selectExample(art)">{{art.name}}</div>
@@ -689,7 +725,6 @@
                                     </uib-tab>
 
                                     <uib-tab heading="Shorthand (scrolling)">
-
                                         <pre>{{selectedArtifact.fsh}}</pre>
                                     </uib-tab>
 

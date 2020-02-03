@@ -37,7 +37,7 @@ Here is an example of an identifier:
 
 The [NamingSystem](http://hl7.org/fhir/namingsystem.html) resource is used to describe the meaning of an identifier system. 
 Because it's possible that a single entity can have more than one identifier (In healthcare it was common to use OID's 
-but this is changing in favour of urls), each entity has a single resource, and the systems that are associated with it are
+but this is changing in favour of urls), each entity has a single NamingSystem resource, and the systems that are associated with it are
 held in the _uniqueId_ element. The NamingSystem resource does not have an identifier (as this would be meaningless).
 
 In this guide, there is a NamingSystem for each system - they are used to generate the list on the next tab.

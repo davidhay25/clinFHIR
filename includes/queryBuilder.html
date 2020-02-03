@@ -12,13 +12,7 @@
 
     <uib-tabset>
 
-        <div class="alert alert-info">
-            This page is designed to allow you to send queries to the proposed HPI interface and view the results. The
-            Sample page has a number of 'pre-set' queries that will be commonly be used - the query is displayed in
-            the page and can be altered. The Ad Hoc tab supports user crafted queries (though limited to the resources
-            that wll be supported by the HPI). Note that the resources returned may not be compliant with the models
-            defined for the HPI (Correcting these is a work in progress). The example resources for each resource type are compliant.
-        </div>
+
 
         <uib-tab heading="Sample queries">
             <br/>
@@ -41,6 +35,21 @@
 
                 <div class="col-md-9">
 
+
+                    <div ng-show="! selectedSample">
+                        <p>This page is designed to allow you to send queries to the proposed HPI interface and view the results. The
+                        Sample page has a number of 'pre-set' queries that will be commonly be used - the query is displayed in
+                        the page and can be altered. The Ad Hoc tab supports user crafted queries (though limited to the resources
+                            that wll be supported by the HPI).</p>
+                            <p>
+                            Note that the resources returned may not be compliant with the models
+                        defined for the HPI as the Data Server has many different resources. The ones that are compliant
+
+
+                                The example resources for each resource type are compliant.
+                            </p>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-10">
                             {{selectedSample.description}}
@@ -54,6 +63,11 @@
                         </div>
                     </div>
                     <hr/>
+
+                    <div ng-show="executeMessage">
+                        <div class="alert alert-warning">{{executeMessage}}</div>
+                    </div>
+
                     <div ng-show="sampleResult">Status: {{sampleResult.status}}</div>
                     <uib-tabset ng-show="sampleResult">
                         <uib-tab heading="Json">

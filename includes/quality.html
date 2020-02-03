@@ -9,8 +9,8 @@
             color: red;
         }
     </style>
-    <em><strong>These are quality issues with the Implementation Guide. Mostly of interest to the ID designer</strong></em>
-    <b/><b/>
+    <em><strong>These are quality issues with the Implementation Guide. Mostly of interest to the Implementation Guide author</strong></em>
+    <br/><br/>
 
     <uib-tabset>
         <uib-tab heading="Issues found during loading">
@@ -19,7 +19,15 @@
 
             <h3>Model issues</h3>
 
-            <table class="table table-condensed table-bordered">
+            <p>These are issues found with elements in models, such missing mappings to the FHIR resource
+                type elements, or models for which a Profile could not be found.</p>
+
+            <p ng-show="analysis.quality.arModel.length == 0">
+                No issues detected!
+            </p>
+
+
+            <table ng-show="analysis.quality.arModel.length > 0" class="table table-condensed table-bordered">
                 <tr><th>Issue type</th><th>Path</th><th>Description</th></tr>
                 <tr ng-repeat="iss in analysis.quality.arModel">
                     <td width="10%">{{iss.type}}</td>
@@ -30,7 +38,14 @@
 
             <h3>Terminology issues</h3>
 
-            <table class="table table-condensed table-bordered">
+            <p>These are issues found specifically with the coded elements in models, such as binding issues for ValueSets
+                or Valuesets not found on the Terminology server</p>
+
+            <p ng-show="analysis.quality.arCoded.length == 0">
+                No issues detected!
+            </p>
+
+            <table  ng-show="analysis.quality.arCoded.length > 0" class="table table-condensed table-bordered">
                 <tr><th>Issue type</th><th>Path</th><th>Description</th></tr>
                 <tr ng-repeat="iss in analysis.quality.arCoded">
                     <td width="10%">{{iss.type}}</td>
@@ -41,7 +56,13 @@
 
             <h3>Conformance resource issues</h3>
 
-            <table class="table table-condensed table-bordered">
+            <p>These are issues found with the 'definitional' conformance resource - most commonly extensions</p>
+
+            <p ng-show="analysis.quality.arExtension.length == 0">
+                No issues detected!
+            </p>
+
+            <table ng-show="analysis.quality.arExtension.length > 0" class="table table-condensed table-bordered">
                 <tr><th>Issue type</th><th>Path</th><th>Description</th></tr>
                 <tr ng-repeat="iss in analysis.quality.arExtension">
                     <td width="10%">{{iss.type}}</td>
@@ -49,6 +70,9 @@
                     <td>{{iss.display}}</td>
                 </tr>
             </table>
+
+
+
         </uib-tab>
         <uib-tab heading="Deep testing">
             <br/>

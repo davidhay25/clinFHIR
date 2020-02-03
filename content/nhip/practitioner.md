@@ -58,7 +58,7 @@ There are 2 elements within the qualification element that are related to the Re
 *   _qualification.issuer_ is a reference to the Organization resource that represents the asserter
 *   _qualification.identifier.system_  is a url that represents the namespace of the Registration Authority
 
-
+<!--
 #### Identifier systems
 
 <table>
@@ -272,7 +272,7 @@ _(should really move these out to a separate register (rather than in the IG) - 
  
 
 (Note that every RA will have a unique uri)
-
+-->
 
 ### Search parameters
 
