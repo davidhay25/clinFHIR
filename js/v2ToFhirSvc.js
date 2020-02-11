@@ -205,7 +205,18 @@ angular.module("sampleApp")
 
                     let node = {id: arNodes.length +1, label: resource.resourceType,
                         shape: 'box',url:url,resource:resource, cf : {entry:resource}};
-                    node.title = resource.resourceType ;
+
+                    let label = ""
+                    if (resource.text && resource.text.div) {
+                        label = $filter('cleanTextDiv')(resource.text.div);
+                        if (label) {
+                            label = label.substring(0,40)
+                        }
+                    }
+
+
+
+                    node.label = label + "\n" + resource.resourceType ;
 
                     if (hashErrors && hashErrors[inx]) {
                         node.label += " ("+hashErrors[inx].length +")";
@@ -217,6 +228,16 @@ angular.module("sampleApp")
 
                     if (objColours[resource.resourceType]) {
                         node.color = objColours[resource.resourceType];
+                    }
+
+
+                    let include = false;
+                    if (options.hashShowResourceTypes) {
+                        if (options.hashShowResourceTypes[resource.resourceType]) {
+                            include = true
+                        }
+                    } else {
+                        include = true;
                     }
 
                     arNodes.push(node);

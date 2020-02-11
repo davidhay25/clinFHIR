@@ -23,6 +23,12 @@
 
     <script src="js/libs/handlebars-v4.1.2.js"></script>
 
+    <style>
+        .popover-content {
+            max-width: 400px;
+        }
+    </style>
+
 
     <script>
         angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase','ngSanitize','ui.checkbox']).config(function($locationProvider) {
@@ -140,6 +146,7 @@
         </div>
     </nav>
 
+
     <div class="row">
         <div class="col-md-2">
 
@@ -216,7 +223,7 @@
                         <div ng-class="{'list-group-item':1,'listItemSelected':query==selectedQuery}"
                              ng-repeat="query in queries"
                              ng-click = "selectQuery(query)"
-                             uib-popover="{{query.query}}   ({{query.description}})"
+                             uib-popover-html =queryPopover(query)
                              popover-placement="right"
                              popover-trigger="'mouseenter'">
                             {{query.display}}
@@ -285,111 +292,157 @@
                             </div>
                         </uib-tab>
                         <uib-tab>
+                            <br/>
                             <uib-tab-heading>
                                 Bundle entries <span class="badge">{{fhir.entry.length}}</span>
                             </uib-tab-heading>
+
+
+
                             <div class="row">
-                                <div class="col-md-4">
-                                    <div class="entryListScroll">
+                                        <div class="col-md-4">
+
+                                            <uib-tabset>
+                                                <uib-tab heading="Bundle Order">
+
+                                                    <div class="entryListScroll">
 
 
-                                        <div class="list-group">
-                                        <div ng-class="{'list-group-item':true,'listItemSelected':selectedBundleEntry == entry}" ng-repeat="entry in fhir.entry"
-                                        ng-click="selectBundleEntry(entry,hashErrors[$index])">
-                                            <strong>{{entry.resource.resourceType}}</strong>
-                                            <span class="pull-right badge">{{hashErrors[$index].length}}</span>
+                                                        <div class="list-group">
+                                                            <div ng-class="{'list-group-item':true,'listItemSelected':selectedBundleEntry == entry}" ng-repeat="entry in fhir.entry"
+                                                                 ng-click="selectBundleEntry(entry,hashErrors[$index])">
+
+                                                                <strong>{{entry.resource.resourceType}}</strong>
+
+                                                                <span class="pull-right badge">{{hashErrors[$index].length}}</span>
+                                                                <div>{{entry.resource.text.div | cleanTextDiv | limitTo:50}}</div>
+<!--
+                                                                <div><em>{{entry.fullUrl}}</em></div>
+                                                                -->
+                                                                <div style="padding-left: 10px"><em>Id: {{entry.resource.id}}</em></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </uib-tab>
+                                                <uib-tab heading="Resource Type">
+                                                    <div class="entryListScroll">
+                                                        <div ng-repeat="(k,v) in hashEntries">
+                                                            <div><strong>{{k}}</strong></div>
+                                                            <div ng-repeat = "entry in v">
+                                                                <div style="padding-left: 10px; cursor: pointer"
+                                                                     ng-click="selectBundleEntry(entry,hashErrors[$index])">
+                                                                    <div> {{entry.resource.text.div | cleanTextDiv | limitTo:50}}</div>
+                                                                    <div style="padding-left: 10px"><em>Id: {{entry.resource.id}}</em></div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </uib-tab>
+                                            </uib-tabset>
 
 
-                                            <!-- if (hashErrors && hashErrors[inx]) {
-                        node.label += " ("+hashErrors[inx].length +")"
-                        node.issues = hashErrors[inx];
-                    }-->
-                                            <div><em>{{entry.fullUrl}}</em></div>
+
                                         </div>
-                                    </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-8">
 
 
-                                    <uib-tabset>
-                                        <uib-tab heading="Json">
-                                            <pre>{{selectedBundleEntry | json}}</pre>
-                                        </uib-tab>
 
-                                        <uib-tab heading="Tree">
-                                            <br/>
 
-                                            <div id="builderResourceTree"></div>
+                                        <div class="col-md-8">
 
-                                        </uib-tab>
 
-                                        <uib-tab heading="References"  select="fitSingleGraph()">
-                                            <br/>
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <div uib-popover="If checked will include all resources that have a reference to the selected one."
-                                                         popover-placement="top"
-                                                         popover-trigger="'mouseenter'">
-                                                        Show inward references <checkbox ng-model="input.showInRef" ng-change="createGraphOneEntry()"></checkbox>
-                                                    </div>
+                                            <uib-tabset>
+                                                <uib-tab heading="Json">
 
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div uib-popover="If checked will include all resources that are references by the selected one."
-                                                         popover-placement="top"
-                                                         popover-trigger="'mouseenter'">
-                                                        Show outward references <checkbox ng-model="input.showOutRef" ng-change="createGraphOneEntry()"></checkbox>
-                                                    </div>
 
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div  uib-popover="If checked will include all resources connected to the selected resource, and all references between them."
-                                                          popover-placement="top"
-                                                          popover-trigger="'mouseenter'">
-                                                        Recursive references <checkbox ng-model="input.recursiveRef" ng-change="createGraphOneEntry()"></checkbox>
 
-                                                    </div>
-                                                 </div>
-                                            </div>
-                                            <br/>
-                                            <div id="singleResourceGraph"></div>
-                                        </uib-tab>
-                                        <uib-tab ng-show="selectedBundleEntryErrors.length > 0">
-                                            <uib-tab-heading>
-                                                Errors <span class="badge">{{selectedBundleEntryErrors.length}}</span>
-                                            </uib-tab-heading>
-                                            <div uib-alert class="alert-warning">
-                                                <table class="table">
-                                                    <tr ng-repeat="err in selectedBundleEntryErrors">
-                                                        <td>{{err.severity}}</td>
-                                                        <td>
-                                                            {{err.diagnostics}}
-                                                            {{err.details.text}}
-                                                            <div ng-repeat = "ex in err.expression">
-                                                                {{ex}}
+
+                                                    <pre>{{selectedBundleEntry | json}}</pre>
+                                                </uib-tab>
+                                                <uib-tab heading="Text">
+                                                    <p ng-bind-html="selectedBundleEntry.resource.text.div"></p>
+
+
+                                                </uib-tab>
+
+
+                                                <uib-tab heading="Tree">
+                                                    <br/>
+
+                                                    <div id="builderResourceTree"></div>
+
+                                                </uib-tab>
+
+                                                <uib-tab heading="References"  select="fitSingleGraph()">
+                                                    <br/>
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div uib-popover="If checked will include all resources that have a reference to the selected one."
+                                                                 popover-placement="top"
+                                                                 popover-trigger="'mouseenter'">
+                                                                Show inward references <checkbox ng-model="input.showInRef" ng-change="createGraphOneEntry()"></checkbox>
                                                             </div>
-                                                        </td>
-                                                        <td>
-                                                            <div ng-repeat="location in err.location">
-                                                                {{location}}
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                            </div>
-                                        </uib-tab>
-                                    </uib-tabset>
-                                </div>
 
-                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div uib-popover="If checked will include all resources that are references by the selected one."
+                                                                 popover-placement="top"
+                                                                 popover-trigger="'mouseenter'">
+                                                                Show outward references <checkbox ng-model="input.showOutRef" ng-change="createGraphOneEntry()"></checkbox>
+                                                            </div>
+
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div  uib-popover="If checked will include all resources connected to the selected resource, and all references between them."
+                                                                  popover-placement="top"
+                                                                  popover-trigger="'mouseenter'">
+                                                                Recursive references <checkbox ng-model="input.recursiveRef" ng-change="createGraphOneEntry()"></checkbox>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <br/>
+                                                    <div id="singleResourceGraph"></div>
+                                                </uib-tab>
+                                                <uib-tab ng-show="selectedBundleEntryErrors.length > 0">
+                                                    <uib-tab-heading>
+                                                        Errors <span class="badge">{{selectedBundleEntryErrors.length}}</span>
+                                                    </uib-tab-heading>
+                                                    <div uib-alert class="alert-warning">
+                                                        <table class="table">
+                                                            <tr ng-repeat="err in selectedBundleEntryErrors">
+                                                                <td>{{err.severity}}</td>
+                                                                <td>
+                                                                    {{err.diagnostics}}
+                                                                    {{err.details.text}}
+                                                                    <div ng-repeat = "ex in err.expression">
+                                                                        {{ex}}
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div ng-repeat="location in err.location">
+                                                                        {{location}}
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </uib-tab>
+                                            </uib-tabset>
+                                        </div>
+
+                                    </div>
+
+
                         </uib-tab>
+
+
                         <uib-tab heading="Graph" select="fitGraph()">
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-8">
                                     <div id="resourceGraph"></div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-4">
 
 <!-- todo - selectedBundleEntryErrors not being created on graph select-->
                                     <!--

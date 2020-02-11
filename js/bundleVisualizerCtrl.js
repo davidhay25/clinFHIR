@@ -31,6 +31,19 @@ angular.module("sampleApp")
                 $scope.queries = $localStorage.bvQueries
             }
 
+            $scope.uploadFiles = function(){
+                console.log($scope.input.selectedFiles)
+            };
+
+            $scope.queryPopover = function(query) {
+                let result = query.query
+                if (query.description) {
+                    result += " ("+query.description + ")"
+                }
+                return result
+
+            }
+
             $scope.hbDoc = function() {
                 $scope.hbTemplate = "artifacts/templates/dischargeSummary.html";
 
@@ -149,6 +162,7 @@ console.log(doc)
 
             $scope.dataServer = $localStorage.dataServer || appConfigSvc.getCurrentDataServer();
             $scope.validationServer = $localStorage.validationServer || appConfigSvc.getCurrentConformanceServer();
+
 
             $scope.changeServer = function(type) {
                 $uibModal.open({
@@ -422,25 +436,7 @@ console.log(doc)
 
                 $scope.createGraphOneEntry();
 
-/*
-                //console.log(entry)
-                let id = entry.resource.id || entry.fullUrl;
-                let options = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:$scope.serverRoot,centralResourceId:id}
-                let vo = v2ToFhirSvc.makeGraph(options);
-                //let vo = v2ToFhirSvc.makeGraph($scope.fhir,$scope.hashErrors,$scope.serverRoot,false,id)
-                //console.log(vo);
 
-                let container = document.getElementById('singleResourceGraph');
-                let graphOptions = {
-                    physics: {
-                        enabled: true,
-                        barnesHut: {
-                            gravitationalConstant: -10000,
-                        }
-                    }
-                };
-                $scope.singleResourceChart = new vis.Network(container, vo.graphData, graphOptions);
-*/
                 let treeData = v2ToFhirSvc.buildResourceTree(entry.resource);
 
                 //show the tree structure of this resource (adapted from scenario builder)
@@ -528,20 +524,6 @@ console.log(doc)
                 $scope.selectedEntry = entry;
                 processBundle(entry.resource);
 
-/*
-                GetDataFromServer.adHocFHIRQueryFollowingPaging($scope.dataServer.url + query.query).then(
-                    function(data) {
-                        console.log(data)
-
-                        let newBundle = deDupeBundle(data.data)
-                        console.log(newBundle)
-                        processBundle(newBundle);
-                    },
-                    function(err) {
-                        console.log(err);
-                    }
-                )
-                */
             };
 
             $scope.selectQuery = function(query) {
@@ -555,28 +537,58 @@ console.log(doc)
                     url = $scope.dataServer.url + url;
                 }
 
-                GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
-                    function(data) {
-                        console.log(data)
+               // let config = {bodyText:"Do you want to execute the query: " + url};
 
-                        let newBundle = deDupeBundle(data.data)
-console.log(newBundle)
-                        processBundle(newBundle);
-                    },
-                    function(err) {
-                        console.log(err);
+                var config = {
+                    closeButtonText: "No thankyou",
+                    actionButtonText: 'Yes please',
+                    headerText: 'Execute query',
+                    bodyText: "Do you want to execute the query: " + url
+                };
+
+
+                modalService.showModal({}, config).then(
+                    function() {
+                        $scope.showWaiting = true;
+                        GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
+                            function(data) {
+                                console.log(data)
+
+                                let newBundle = deDupeBundle(data.data)
+                                console.log(newBundle)
+                                processBundle(newBundle);
+                            },
+                            function(err) {
+                                console.log(err);
+                            }
+                        ).finally(function(){
+                            $scope.showWaiting = false;
+                        })
                     }
-                ).finally(function(){
-                    $scope.showWaiting = false;
-                })
+                );
+
+
+
             };
-
-
 
             //validate the resources in the bundle, then draw the graph (which needs the errors to display)
             let processBundle = function(oBundle) {
                 delete $scope.serverRoot;
                 $scope.fhir = oBundle;
+
+                //create hash by type
+                $scope.hashEntries = {}
+                if (oBundle.entry) {
+                    oBundle.entry.forEach(function(entry) {
+                        let resource = entry.resource;
+                        if (resource) {
+                            let type = resource.resourceType;
+                            $scope.hashEntries[type] = $scope.hashEntries[type] || []
+                            $scope.hashEntries[type].push(entry)
+                        }
+                    })
+                }
+
 
 
 
@@ -587,11 +599,12 @@ console.log(hashErrors)
                     $scope.validationResult = hashErrors
 
                     //the serverRoot is needed to figure out the references when the reference is relative
-                    //we assume that all the resoruces are from the same server, so figure out the server root
+                    //we assume that all the resources are from the same server, so figure out the server root
                     //by looking at the first fullUrl (remove the /{type}/{id} at the end of the url
 
                     let serverRoot = "";
                     if ($scope.fhir && $scope.fhir.entry) {
+                        //work out the server root from the first entry
                         let first = $scope.fhir.entry[0]
                         if (first && first.fullUrl) {
                             console.log(first.fullUrl)
@@ -603,11 +616,14 @@ console.log(hashErrors)
                             $scope.serverRoot = serverRoot;
 
                         } else {
-                            alert('All entries need the fullUrl for the graph generation to work properly. The graph may be incomplete..')
+                            //todo - do we really need the fullUrl
+                           // alert('All entries need the fullUrl for the graph generation to work properly. The graph may be incomplete..')
                         }
                     }
 
                     let options = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:serverRoot}
+
+
                     let vo = v2ToFhirSvc.makeGraph(options)
 
                     var container = document.getElementById('resourceGraph');
@@ -627,6 +643,9 @@ console.log(hashErrors)
                         var node = vo.graphData.nodes.get(nodeId);
                         $scope.selectedNode = node;
 
+                        //this is the entry that is selected from the 'bundle entries' tab...
+                        $scope.selectedBundleEntry = node.entry;
+
                         $scope.$digest();
                     });
 
@@ -644,7 +663,7 @@ console.log(hashErrors)
                     let arComposition = [];
 
                     //create a hash by type & id - to find document references
-                    let hash = {}
+                    let hash = {};
 
                     bundle.entry.forEach(function (entry) {
                         if (entry.resource) {
@@ -657,23 +676,6 @@ console.log(hashErrors)
                             } else {
                                 key = entry.resource.resourceType + "/" + entry.resource.id
                             }
-                            /*
-                            if (entry.resource.id) {
-                                key = entry.resource.resourceType + "/" + entry.resource.id
-                            } else {
-                                key = entry.fullUrl
-                            }
-*/
-                            /*if (entry.resource.id) {
-                                key = entry.resource.resourceType + "/" + entry.resource.id
-                            } else {
-                                key = entry.fullUrl
-                            }*/
-
-                            //let id = entry.resource.id || entry.fullUrl;
-                            //let key = entry.resource.resourceType + "/" + id;
-
-
 
                             hash[key] = entry.resource;
                             if (entry.resource.resourceType == 'Composition') {
@@ -822,13 +824,16 @@ console.log(hashErrors)
                         function(err){
                             hash[inx] = err.data.issue
 
-                            err.data.issue.forEach(function(iss){
-                                if (iss.severity == 'error') {
-                                    $scope.valErrors++
-                                } else {
-                                    $scope.valWarnings++
-                                }
-                            })
+                            if (err.data) {
+                                err.data.issue.forEach(function(iss){
+                                    if (iss.severity == 'error') {
+                                        $scope.valErrors++
+                                    } else {
+                                        $scope.valWarnings++
+                                    }
+                                })
+                            }
+
 
 
                             deferred.resolve();
