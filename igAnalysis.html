@@ -100,7 +100,7 @@
                         <div class="col-md-3">
                             <div class="myScroll">
                                 <div ng-class="{'list-group-item':true,'listItemSelected':IG==selectedIG}"
-                                     ng-repeat="IG in allIGs"
+                                     ng-repeat="IG in allIGs track by $index"
                                      ng-click="selectIG(IG)" style="cursor: pointer">
                                     {{IG.url}}
                                     <!-- <span class="badge pull-right">
@@ -197,7 +197,7 @@
                                             <tr ng-repeat="row in selectedIG.ig.extensions">
                                                 <td>{{row.title}}</td>
                                                 <td>
-                                                    <div ng-repeat="type in row.types">
+                                                    <div ng-repeat="type in row.types track by $index">
                                                         {{type}}
                                                     </div>
                                                 </td>
