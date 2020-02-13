@@ -1,0 +1,38 @@
+{
+
+
+
+  
+  "profiles" : [
+    {"name":"CoreResource","url":"CoreResource","description":"The core resource defined in the spec","node": {"colour": "red"}},
+
+    {"name":"CorePatient","url":"CorePatient","baseProfile":"CoreResource", "description":"The core patient defined in the spec"},
+    {"name":"NzCorePatient","url":"http://hl7.org.nz/fhir/StructureDefinition/NzPatient","baseProfile":"CorePatient","description":"Adds NZ specific items - NHI, ethnicity"},
+    {"name":"NzNHIPatient","url":"http://hl7.org.nz/fhir/StructureDefinition/NhiPatient","baseProfile":"NzCorePatient","description":"Adds NHI specific items - source of data"},
+
+    {"name":"CorePractitioner","url":"CorePractitioner","baseProfile":"CoreResource", "description":"The core practitioner defined in the spec"},
+    {"name":"NzCorePractitioner","url":"NzCorePractitioner","baseProfile":"CorePractitioner","description":"Adds NZ specific items - HPI, ethnicity"},
+    {"name":"NzHPIPractitioner","url":"http://hl7.org.nz/fhir/StructureDefinition/HpiPractitioner","baseProfile":"NzCorePractitioner","description":"Adds HPI specific items - source of data"},
+
+    {"name":"CoreMedicationDispense","url":"CorePractitioner","baseProfile":"CoreResource", "description":"The core practitioner MedicationRequest in the spec"},
+    {"name":"NzMedicationDispense","url":"CorePractitioner","baseProfile":"CoreMedicationDispense",
+      "description":"Fixes the drug code"}
+
+  ],
+  "IGs" : [
+    {"name": "HPI","url": "http://hl7.org.nz/fhir/ImplementationGuide/registry",
+      "description":"The IG that describes the HPI and NHI services",
+      "profiles": [
+        {"url": "http://hl7.org.nz/fhir/StructureDefinition/NhiPatient"},
+        {"url":"http://hl7.org.nz/fhir/StructureDefinition/HpiPractitioner"},
+        {"url":"http://hl7.org.nz/fhir/StructureDefinition/HpiPractitionerRole"},
+        {"url": "http://hl7.org.nz/fhir/StructureDefinition/HpiLocation"},
+        {"url":"http://hl7.org.nz/fhir/StructureDefinition/HpiOrganization"}
+      ]}
+  ]
+}
+
+
+
+
+

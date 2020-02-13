@@ -1,0 +1,93 @@
+{
+  "profiles": [
+    {
+      "name": "Resource",
+      "description": "Core Resource"
+    },
+    {
+      "name": "HpiEndpoint",
+      "description": "Endpoints used by the HPI.",
+      "baseProfile": "Endpoint"
+    },
+    {
+      "name": "Endpoint",
+      "description": "Core profile for Endpoint",
+      "baseProfile": "Resource"
+    },
+    {
+      "name": "HpiLocation",
+      "description": "Locations used by the HPI.",
+      "baseProfile": "NzLocation"
+    },
+    {
+      "name": "HpiOrganization",
+      "description": "Organizations used by the HPI.",
+      "baseProfile": "NzOrganization"
+    },
+    {
+      "name": "HpiPractitioner",
+      "description": "The practitioner exposed by the HPI.",
+      "baseProfile": "NzPractitioner"
+    },
+    {
+      "name": "HpiPractitionerRole",
+      "description": "The practitioner role exposed by the HPI.",
+      "baseProfile": "NzPractitionerRole"
+    },
+    {
+      "name": "NhiPatient",
+      "description": "The Patient resource exposed by the NHI.",
+      "baseProfile": "NzPatient"
+    },
+    {
+      "name": "NzLocation",
+      "description": "NZ base Location",
+      "baseProfile": "Location"
+    },
+    {
+      "name": "Location",
+      "description": "Core profile for Location",
+      "baseProfile": "Resource"
+    },
+    {
+      "name": "NzOrganization",
+      "description": "NZ Organizations",
+      "baseProfile": "Organization"
+    },
+    {
+      "name": "Organization",
+      "description": "Core profile for Organization",
+      "baseProfile": "Resource"
+    },
+    {
+      "name": "NzPatient",
+      "description": "The base Patient resource in NZ",
+      "baseProfile": "Patient"
+    },
+    {
+      "name": "Patient",
+      "description": "Core profile for Patient",
+      "baseProfile": "Resource"
+    },
+    {
+      "name": "NzPractitioner",
+      "description": "The New Zeanand base practitioner. Sets common elements and extensions that all users should support.",
+      "baseProfile": "Practitioner"
+    },
+    {
+      "name": "Practitioner",
+      "description": "Core profile for Practitioner",
+      "baseProfile": "Resource"
+    },
+    {
+      "name": "NzPractitionerRole",
+      "description": "The practitioner role used in HPI.",
+      "baseProfile": "PractitionerRole"
+    },
+    {
+      "name": "PractitionerRole",
+      "description": "Core profile for PractitionerRole",
+      "baseProfile": "Resource"
+    }
+  ]
+}
