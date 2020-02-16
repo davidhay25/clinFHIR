@@ -801,7 +801,7 @@ angular.module("sampleApp")
 
 
                     }
-                )
+                );
 
                 return deferred.promise;
 
