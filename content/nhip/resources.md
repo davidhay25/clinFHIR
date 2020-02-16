@@ -38,26 +38,20 @@ This design allows an implementer to retrieve a resource from the HPI and save i
 
 Extract the value of the identifier where the value of use is ‘official’, and use that as the id for a direct read from the server. 
 
-
-FHIRPath: Practitioner.identifier.where(use='official').value (_todo is this useful?)_
-
-
 Example: [http://hpi.moh.nz/fhir/Practitioner](http://hpi.moh.nz/fhir/Practitioner/prac-X)/96ZZZZ
 
 
 #### Query resource
 
-
-    Use the identifier in a search query. 
+Use the identifier in a search query. 
 
 
     Example: [http://hpi.moh.nz/fhir/Practitioner?](http://hpi.moh.nz/fhir/Practitioner/prac-X)identifier=https://standards.digital.health.nz/id/hpi|96ZZZZ
 
 
-    (Note that both system and value are included in the query, with values separated by a ‘|’. When making the query, the ‘|’ needs to be url-escaped)
+(Note that both system and value are included in the query, with values separated by a ‘|’. When making the query, the ‘|’ needs to be url-escaped)
 
-
-    This will return a bundle of Practitioner resources with only a single entry. 
+This will return a bundle of Practitioner resources with only a single entry. 
 
 
 ### References between resources
@@ -101,7 +95,7 @@ This is a relative reference (ie the target is on the same server as the source)
 ```
 
 
-This is a reference from a property called ‘practitioner’ to a Practitioner resource that has the identifier _prac-X_ 
+This is a reference from a property called ‘practitioner’ to a Practitioner resource that has the identifier _96ZZZZ_ 
 in the system _https://standards.digital.health.nz/id/hpi_  It has the disadvantage that if the client wishes to
 retrieve the target resource, then it must do a query by identifier. There are also a number of search queries
 that require a direct reference rather than an identifier.

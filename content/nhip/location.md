@@ -18,7 +18,13 @@ The <a href="http://hl7.org/fhir/location.html" target="_blank">Location</a> res
 
 As with the Practitioner resource, the id of the Location resource will be assigned by the HPI, and will also be present as an identifier.
 
+#### Identifier structure
 
+The format of the HPI facility identifier is FXXNNN-C, where F is a constant character, ‘X’ is an alphanumeric character, ‘N’ is a number, and C is a check digit . <link to standards.digital page for check digit formula>
+All alpha characters can be used except I and O, which can be confused with the number one ‘1’ and number zero ‘0’.
+
+
+<!--
 #### Identifier systems
 There are currently 2 identifier systems that are used in Location resources (others may appear later).
 
@@ -46,4 +52,4 @@ There are currently 2 identifier systems that are used in Location resources (ot
   </tr>
 </table>
 
-
+-->

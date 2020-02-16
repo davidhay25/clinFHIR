@@ -589,104 +589,6 @@
       ]
     },
     {
-      "name": "VendorPatient",
-      "description": "An example of a Patient resource further specialized by a Vendor.",
-      "url": "http://hl7.org.nz/fhir/StructureDefinition/NhiVendorPatientPatient",
-      "baseProfile": "NzPatient",
-      "extensions": [
-        {
-          "url": "http://hl7.org.nz/fhir/StructureDefinition/ethnicity",
-          "path": "Patient.extension"
-        },
-        {
-          "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-birthPlace",
-          "path": "Patient.extension"
-        },
-        {
-          "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-iwi",
-          "path": "Patient.extension"
-        },
-        {
-          "url": "http://hl7.org.nz/fhir/StructureDefinition/EyeColour",
-          "path": "Patient.extension"
-        }
-      ],
-      "bindings": [
-        {
-          "binding": {
-            "strength": "preferred",
-            "description": "A human language.",
-            "valueSet": "http://hl7.org/fhir/ValueSet/languages"
-          },
-          "path": "Patient.language"
-        },
-        {
-          "binding": {
-            "strength": "required",
-            "description": "Identifies the purpose for this identifier, if known .",
-            "valueSet": "http://hl7.org/fhir/ValueSet/identifier-use|4.0.1"
-          },
-          "path": "Patient.identifier.use"
-        },
-        {
-          "binding": {
-            "strength": "extensible",
-            "description": "A coded type for an identifier that can be used to determine which identifier to use for a specific purpose.",
-            "valueSet": "http://hl7.org/fhir/ValueSet/identifier-type"
-          },
-          "path": "Patient.identifier.type"
-        },
-        {
-          "binding": {
-            "strength": "required",
-            "description": "The gender of a person used for administrative purposes.",
-            "valueSet": "http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1"
-          },
-          "path": "Patient.gender"
-        },
-        {
-          "binding": {
-            "strength": "extensible",
-            "description": "The domestic partnership status of a person.",
-            "valueSet": "http://hl7.org/fhir/ValueSet/marital-status"
-          },
-          "path": "Patient.maritalStatus"
-        },
-        {
-          "binding": {
-            "strength": "extensible",
-            "description": "The nature of the relationship between a patient and a contact person for that patient.",
-            "valueSet": "http://hl7.org/fhir/ValueSet/patient-contactrelationship"
-          },
-          "path": "Patient.contact.relationship"
-        },
-        {
-          "binding": {
-            "strength": "required",
-            "description": "The gender of a person used for administrative purposes.",
-            "valueSet": "http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1"
-          },
-          "path": "Patient.contact.gender"
-        },
-        {
-          "binding": {
-            "strength": "preferred",
-            "description": "A human language.",
-            "valueSet": "http://hl7.org/fhir/ValueSet/languages"
-          },
-          "path": "Patient.communication.language"
-        },
-        {
-          "binding": {
-            "strength": "required",
-            "description": "The type of link between this patient resource and another patient resource.",
-            "valueSet": "http://hl7.org/fhir/ValueSet/link-type|4.0.1"
-          },
-          "path": "Patient.link.type"
-        }
-      ]
-    },
-    {
       "name": "NzLocation",
       "description": "NZ base Location",
       "url": "http://hl7.org.nz/fhir/StructureDefinition/NzLocation",
@@ -1050,6 +952,104 @@
       "description": "Core profile for PractitionerRole",
       "baseProfile": "DomainResource",
       "url": "http://hl7.org/fhir/StructureDefinition/PractitionerRole"
+    },
+    {
+      "name": "VendorPatient",
+      "description": "An example of a Patient resource further specialized by a Vendor.",
+      "url": "http://hl7.org.nz/fhir/StructureDefinition/VendorPatient",
+      "baseProfile": "NzPatient",
+      "extensions": [
+        {
+          "url": "http://hl7.org.nz/fhir/StructureDefinition/ethnicity",
+          "path": "Patient.extension"
+        },
+        {
+          "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-birthPlace",
+          "path": "Patient.extension"
+        },
+        {
+          "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-iwi",
+          "path": "Patient.extension"
+        },
+        {
+          "url": "http://hl7.org.nz/fhir/StructureDefinition/EyeColour",
+          "path": "Patient.extension"
+        }
+      ],
+      "bindings": [
+        {
+          "binding": {
+            "strength": "preferred",
+            "description": "A human language.",
+            "valueSet": "http://hl7.org/fhir/ValueSet/languages"
+          },
+          "path": "Patient.language"
+        },
+        {
+          "binding": {
+            "strength": "required",
+            "description": "Identifies the purpose for this identifier, if known .",
+            "valueSet": "http://hl7.org/fhir/ValueSet/identifier-use|4.0.1"
+          },
+          "path": "Patient.identifier.use"
+        },
+        {
+          "binding": {
+            "strength": "extensible",
+            "description": "A coded type for an identifier that can be used to determine which identifier to use for a specific purpose.",
+            "valueSet": "http://hl7.org/fhir/ValueSet/identifier-type"
+          },
+          "path": "Patient.identifier.type"
+        },
+        {
+          "binding": {
+            "strength": "required",
+            "description": "The gender of a person used for administrative purposes.",
+            "valueSet": "http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1"
+          },
+          "path": "Patient.gender"
+        },
+        {
+          "binding": {
+            "strength": "extensible",
+            "description": "The domestic partnership status of a person.",
+            "valueSet": "http://hl7.org/fhir/ValueSet/marital-status"
+          },
+          "path": "Patient.maritalStatus"
+        },
+        {
+          "binding": {
+            "strength": "extensible",
+            "description": "The nature of the relationship between a patient and a contact person for that patient.",
+            "valueSet": "http://hl7.org/fhir/ValueSet/patient-contactrelationship"
+          },
+          "path": "Patient.contact.relationship"
+        },
+        {
+          "binding": {
+            "strength": "required",
+            "description": "The gender of a person used for administrative purposes.",
+            "valueSet": "http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1"
+          },
+          "path": "Patient.contact.gender"
+        },
+        {
+          "binding": {
+            "strength": "preferred",
+            "description": "A human language.",
+            "valueSet": "http://hl7.org/fhir/ValueSet/languages"
+          },
+          "path": "Patient.communication.language"
+        },
+        {
+          "binding": {
+            "strength": "required",
+            "description": "The type of link between this patient resource and another patient resource.",
+            "valueSet": "http://hl7.org/fhir/ValueSet/link-type|4.0.1"
+          },
+          "path": "Patient.link.type"
+        }
+      ]
     }
   ],
   "extensions": [

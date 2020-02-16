@@ -1,16 +1,15 @@
 
 
-The PractitionerRole (PR) resource is a ‘linking’ resource that represents a Practitioner resource working for an Organization at a Location in some particular role. The following diagram shows the relationships (Note that there can be multiple Location resources, but only a single Practitioner or Organization)
+The PractitionerRole (PR) resource is a ‘linking’ resource that represents a Practitioner resource working for an Organization at a Location in some particular role. 
+The following diagram shows the relationships:
 
 
 ### Key differences from spec
 
+*   There is a creator extension that is a reference to the Organization and person (as a Practitioner) that created the resource. 
+In the image below, the 2 resources to the left indicate the person and organization that created the record.
 
-
-*   There is a creator extension that is a reference to the Organization and person (as a Practitioner) that created the resource. In the image below, the 2 resources to the right indicate the person and organization that created the record.
-
-
-> todo insert image here
+![relationships](content/nhip/resources.png) 
 
 ### Resource Identifiers
 
@@ -20,15 +19,25 @@ GET [http://home.clinfhir.com:8054/baseR4/PractitionerRole?practitioner=prac3](h
 
 Where prac3 is the CPN (person id) number. (This works because the id of the practitioner resource is set to be the same as the CPN. )
 
- Generally this will return only one active record because in general people work at one location at a time. However, this is not always the case - for example doctors working in public and private practices, locums working across many locations, practitioners supporting clinics at different locations. 
+ When a person works in a single location this will return only one active record.
+ However, doctors working in public and private practices, locums working across many locations, practitioners supporting clinics at different locations
+ will all have multiple practitioner records. 
 
 One of the envisaged uses for the PR resource is as an identifier that indicates a Practitioner at a given location and potentially for a specific role.  This supports a single identifier where multiple might otherwise have been needed, and can simply be the id of the PractitionerRole resource. This is further discussed in the Laboratory Ordering Use Case.
 
 As with the Practitioner resource, the id of the PR resource will be assigned by the HPI, and will also be present as an identifier.
 
-There may be other identifiers in the PR resource - an example being an ‘employee number’ assigned by the organization creating the resource. Each of these must have a distinct system value. The HPI will not attempt to validate the systems, though may/will not allow the HPI identifier to be changed by a client system.
+There may be other identifiers in the PR resource - an example being an ‘employee number’ assigned by the organization 
+creating the resource. Each of these must have a distinct system value. 
+For an organisation to add an identifier like employee number to a PR resource they must first apply to HISO for a system. The HPI will validate the system to ensure only HISO approved systems are updated on the HPI. HISO will require the organisation to have completed a Privacy impact assessment of the inclusion of the new identifier in the HPI.
 
+#### practitionerRole identifier 
 
+The format of the Practitioner role identifier is RXXNNNNNN-C, where R is a constant character, ‘X’ is an alphanumeric character, 
+‘N’ is a number, and C is a check digit <link to check digit formula page>.  ‘I‘ and ‘O’ are excluded from the alpha character set because they can be confused with the number one ‘1’ and number zero ‘0’. 
+
+<!--
+Known identifier systems are shown in the top level Identifiers tab.
 #### Identifier systems
 
 
@@ -50,10 +59,13 @@ There may be other identifiers in the PR resource - an example being an ‘emplo
    </td>
   </tr>
 </table>
-
+-->
 
 
 ### Search parameters
+
+
+>Todo move all the comments to the API tab
 
 The following search parameters are supported.
 
@@ -180,13 +192,14 @@ They only work in the context of a search (not a read of a resource by id)
 </table>
 
 
-(Note that one of the examples uses this. If we decide not to support I’ll change the example)
+>(Note that one of the examples uses this. If we decide not to support I’ll change the example)
 
 
 ### Creating and Updating
 
 PractitionerRole resources can be created by end users who have the authority to do so (managed outside of the FHIR API). When a PR resource is created, the creator elements (and their referenced resources) are created by the system from information about the person creating it
 
-_(todo: need to think about how a user can specify the organization / location in the PR resource - ie does there need to be a list of which ones they can use? One possibility might be that the person creating the resource must have a PR themselves (maybe with a role of ‘system updater’) - and the organization/location is copied from that - though - who creates that? A system function?_
+The PractitionerRole resource can be updated by the user who created it
+or by the organisation that is the subject of the role. This is done using a standard PUT operation.
 
-The PractitionerRole resource can be updated by the user who created it. This is done using a standard PUT operation.
+>todo: need to add the security aspects of creating & updating

@@ -22,6 +22,13 @@ An organization is a grouping of people for some purpose. Examples in the HPI in
 As with the Practitioner resource, the id of the Organisation resource will be assigned by the HPI, and will also be present as an identifier with a system value of ‘https://standards.digital.health.nz/id/hpi-organisation’.
 
 
+#### Identifier structure
+The format of the HPI Organisation identifier is  GXXNNN-C, where G is a constant character, 
+‘X’ is an alphanumeric character, ‘N’ is a number, and C is a check digit. 
+
+> todo link to a standards.digital page for check digit formula>
+
+
 #### Identifier systems
 
 

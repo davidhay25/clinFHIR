@@ -18,7 +18,9 @@ The [NHI](https://www.health.govt.nz/our-work/health-identity/national-health-in
 The HPI and NHI serve 2 primary purposes:
 
 * A **unique identifier** for each individual or entity
-* The **source of truth** for the key information about that entity. Note that the HPI itself is not necessarily that actual source of information (eg Practitioners are supplied by a registration authority) but it is the place to go to find the information.
+* The **source of truth** for the key information about that entity. 
+Note that the HPI and HPI are not necessarily the actual source of information (eg Practitioners are supplied by a registration authority,
+healthcare workers are supplied by their employing organisation, patient details are supplied by GP practices and hospitals) but it is the place to go to find the information.
 
 
 
