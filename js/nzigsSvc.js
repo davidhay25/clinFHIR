@@ -368,7 +368,6 @@ angular.module("sampleApp")
                 let igs = [];
                 igs.push({name:"Ipa",url:'Ipa',description:"The international patient access IG"})
                 igs.push({name:"NzMeds",url:'NzMeds',description:"Access to medications information captures through NzEPS"})
-
             },
             makeLogicalModel : function(vo) {
                 let that = this;
@@ -385,22 +384,23 @@ angular.module("sampleApp")
                 let excluded = [];      //elements excluded by setting max to 0
 
                 var newElementArray = [];
-                SD.snapshot.element.forEach(function (el) {
+                SD.snapshot.element.forEach(function (ed) {
+                    //let ed = angular.copy(el);      //something is updating the element...
                     let item = {};
-                    item.ed = el;
-                    item.path = $filter('dropFirstInPath')(el.path)
-                    item.description = el.short || el.definition ;
+                    item.ed = ed;
+                    item.path = $filter('dropFirstInPath')(ed.path)
+                    item.description = ed.short || ed.definition ;
 
                     let include = true;
-                    let arPath = el.path.split('.');
+                    let arPath = ed.path.split('.');
 
                     if (elementsToIgnore.indexOf(arPath[arPath.length-1]) !== -1) {
                         include = false;
                     }
 
-                    if ( el.path.indexOf('xtension') > -1) {
-                        if (el.type) {
-                            el.type.forEach(function (typ) {
+                    if ( ed.path.indexOf('xtension') > -1) {
+                        if (ed.type) {
+                            ed.type.forEach(function (typ) {
                                 if (typ.profile) {
 
                                     //stu2/3 difference
@@ -419,26 +419,26 @@ angular.module("sampleApp")
                         }
                     } else {
                         //when slicing - not for an extension
-                        if (el.sliceName) {
-                            item.description = el.sliceName + " " + item.description;
+                        if (ed.sliceName) {
+                            item.description = ed.sliceName + " " + item.description;
                         }
                     }
 
                     
-                    if (el.slicing) {
+                    if (ed.slicing) {
                         //don't show the discriminator element
                         include = false;
                     }
 
                     //if max is 0 (or any of the parents) then don't include
-                    if (el.max == '0') {
-                        excluded.push(el.path)
+                    if (ed.max == '0') {
+                        excluded.push(ed.path)
                         include = false;
                     }
 
                     //check is any of the parents have
                     excluded.forEach(function(excl){
-                        if (el.path.indexOf(excl)> -1) {
+                        if (ed.path.indexOf(excl)> -1) {
                             include = false;
                         }
                     })
@@ -461,7 +461,8 @@ angular.module("sampleApp")
                 );
 
 
-                SD.snapshot.element = newElementArray;
+              //  SD.snapshot.element = newElementArray;  ?? why did I do thos????
+
                 return deferred.promise;
                 //==============================================
 
