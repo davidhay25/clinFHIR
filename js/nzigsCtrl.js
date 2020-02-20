@@ -9,7 +9,9 @@ angular.module("sampleApp")
                 function(data) {
                     $scope.profiles = data.data.profiles;
                     $scope.IGs = data.data.IGs;
+
                     $scope.extensions = data.data.extensions;
+
                     decorateProfileExtensions();
                     makeProfilesGraph($scope.profiles)
                 }

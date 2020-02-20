@@ -196,11 +196,41 @@
                             <table class="table table-bordered">
                                 <tr><th>Url / Path</th><th>Description</th></tr>
                                 <tr ng-repeat="ext in selectedProfile.extensions">
-                                    <td>{{ext.url}}
-                                        <div>{{ext.path | dropFirstInPath}}</div>
+                                    <td>
+                                        {{ext.url}}
+                                        <div>Path: {{ext.path | dropFirstInPath}}</div>
                                     </td>
                                     <td>
                                         {{ext.description}}
+                                        <div ng-show ="ext.analysis.style == 'simple'">
+                                            <div>
+                                                <span>Type/s: </span>
+                                                <span ng-repeat = "type in ext.analysis.type">{{type.code}} </span>
+                                            </div>
+                                            <div ng-show = "ext.analysis.binding.valueSet">
+                                                Binding: <em>{{ext.analysis.binding.valueSet}}</em> ({{ext.analysis.binding.strength}})
+                                            </div>
+
+                                        </div>
+                                        <div ng-show ="ext.analysis.style == 'complex'">
+                                            <ul>
+                                                <li ng-repeat="child in ext.analysis.children">
+
+                                                    <div>
+                                                        <span>{{child.name}} </span>
+                                                        <span> (</span>
+                                                        <span ng-repeat = "type in child.type">{{type.code}} </span>
+                                                        <span> )</span>
+                                                    </div>
+                                                    <div ng-show = "child.binding.valueSet">
+                                                        Binding: <em>{{child.binding.valueSet}}</em> ({{child.binding.strength}})
+                                                    </div>
+                                                </li>
+                                            </ul>
+
+                                        </div>
+
+
                                     </td>
                                 </tr>
                             </table>
@@ -245,7 +275,7 @@
             </div>
 
             <table class="table table-bordered">
-                <tr><th>Url</th><th>Description</th><th>Profile & path</th></tr>
+                <tr><th>Url</th><th>Description</th><th>Profile & path</th><th>Types & children</th></tr>
                 <tr ng-repeat = "ext in extensions">
                     <td>{{ext.url}}</td>
                     <td>{{ext.description}}</td>
@@ -253,6 +283,37 @@
 
                         <div ng-repeat = "profile in ext.profiles">
                             {{profile.profile.name}} ({{profile.path}})
+                        </div>
+                    </td>
+                    <td>
+                        <div ng-show ="ext.analysis.style == 'simple'">
+                            Simple Extension
+                            <div>
+                                <span>Type/s: </span>
+                                <span ng-repeat = "type in ext.analysis.type">{{type.code}} </span>
+                            </div>
+                            <div ng-show = "ext.analysis.binding.valueSet">
+                                Binding: <em>{{ext.analysis.binding.valueSet}}</em> ({{ext.analysis.binding.strength}})
+                            </div>
+
+                        </div>
+                        <div ng-show ="ext.analysis.style == 'complex'">
+                            Complex Extension
+                            <ul>
+                                <li ng-repeat="child in ext.analysis.children">
+
+                                    <div>
+                                        <span>{{child.name}} </span>
+                                        <span> (</span>
+                                        <span ng-repeat = "type in child.type">{{type.code}} </span>
+                                        <span> )</span>
+                                    </div>
+                                    <div ng-show = "child.binding.valueSet">
+                                        Binding: <em>{{child.binding.valueSet}}</em> ({{child.binding.strength}})
+                                    </div>
+                                </li>
+                            </ul>
+
                         </div>
                     </td>
                 </tr>

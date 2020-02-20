@@ -74,15 +74,50 @@
       "extensions": [
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/hpiLocation-established",
-          "path": "Location.extension"
+          "path": "Location.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/hpiLocation-established",
+            "style": "simple",
+            "type": [
+              {
+                "code": "Period"
+              }
+            ]
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/hpiLocation-dhb",
-          "path": "Location.extension"
+          "path": "Location.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/hpiLocation-dhb",
+            "style": "simple",
+            "type": [
+              {
+                "code": "CodeableConcept"
+              }
+            ],
+            "binding": {
+              "strength": "preferred",
+              "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/dhb"
+            }
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/organization-aliasType",
-          "path": "Location.alias.extension"
+          "path": "Location.alias.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/organization-aliasType",
+            "style": "simple",
+            "type": [
+              {
+                "code": "CodeableConcept"
+              }
+            ],
+            "binding": {
+              "strength": "preferred",
+              "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/aliasType"
+            }
+          }
         }
       ],
       "bindings": [
@@ -184,11 +219,33 @@
       "extensions": [
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/organization-period",
-          "path": "Organization.extension"
+          "path": "Organization.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/organization-period",
+            "style": "simple",
+            "type": [
+              {
+                "code": "Period"
+              }
+            ]
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/organization-aliasType",
-          "path": "Organization.alias.extension"
+          "path": "Organization.alias.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/organization-aliasType",
+            "style": "simple",
+            "type": [
+              {
+                "code": "CodeableConcept"
+              }
+            ],
+            "binding": {
+              "strength": "preferred",
+              "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/aliasType"
+            }
+          }
         }
       ],
       "bindings": [
@@ -258,31 +315,153 @@
       "extensions": [
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/nzethnicity",
-          "path": "Practitioner.extension"
+          "path": "Practitioner.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/nzethnicity",
+            "style": "simple",
+            "type": [
+              {
+                "code": "CodeableConcept"
+              }
+            ],
+            "binding": {
+              "strength": "preferred",
+              "valueSet": "https://standards.digital.health.nz/valueset/ethnic-group-level-4"
+            }
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/practitioner-deathdate",
-          "path": "Practitioner.extension"
+          "path": "Practitioner.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/practitioner-deathdate",
+            "style": "simple",
+            "type": [
+              {
+                "code": "date"
+              }
+            ]
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/practitioner-qualification-status",
-          "path": "Practitioner.qualification.extension"
+          "path": "Practitioner.qualification.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/practitioner-qualification-status",
+            "style": "simple",
+            "type": [
+              {
+                "code": "CodeableConcept"
+              }
+            ],
+            "binding": {
+              "strength": "preferred",
+              "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/qualificationStatus"
+            }
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/practitioner-additional-authorizations",
-          "path": "Practitioner.qualification.extension"
+          "path": "Practitioner.qualification.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/practitioner-additional-authorizations",
+            "style": "complex",
+            "children": [
+              {
+                "name": "codeXXX",
+                "type": [
+                  {
+                    "code": "CodeableConcept"
+                  }
+                ],
+                "binding": {
+                  "strength": "preferred",
+                  "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/practitioner-additional-auth"
+                }
+              },
+              {
+                "name": "periodXXX",
+                "type": [
+                  {
+                    "code": "Period"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/practitioner-scope-of-practice",
-          "path": "Practitioner.qualification.extension"
+          "path": "Practitioner.qualification.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/practitioner-scope-of-practice",
+            "style": "complex",
+            "children": [
+              {
+                "name": "codeXXX",
+                "type": [
+                  {
+                    "code": "CodeableConcept"
+                  }
+                ]
+              },
+              {
+                "name": "description",
+                "type": [
+                  {
+                    "code": "string"
+                  }
+                ]
+              },
+              {
+                "name": "periodXXX",
+                "type": [
+                  {
+                    "code": "Period"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/practitioner-conditions-on-practice",
-          "path": "Practitioner.qualification.extension"
+          "path": "Practitioner.qualification.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/practitioner-conditions-on-practice",
+            "style": "complex",
+            "children": [
+              {
+                "name": "description",
+                "type": [
+                  {
+                    "code": "string"
+                  }
+                ]
+              },
+              {
+                "name": "periodXXX",
+                "type": [
+                  {
+                    "code": "Period"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/practitioner-qualification-initialDate",
-          "path": "Practitioner.qualification.extension"
+          "path": "Practitioner.qualification.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/practitioner-qualification-initialDate",
+            "style": "simple",
+            "type": [
+              {
+                "code": "date"
+              }
+            ]
+          }
         }
       ],
       "bindings": [
@@ -368,11 +547,61 @@
       "extensions": [
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/practitionerRole-status",
-          "path": "PractitionerRole.extension"
+          "path": "PractitionerRole.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/practitionerRole-status",
+            "style": "complex",
+            "children": [
+              {
+                "name": "active",
+                "type": [
+                  {
+                    "code": "boolean"
+                  }
+                ]
+              },
+              {
+                "name": "reasonXXX",
+                "type": [
+                  {
+                    "code": "CodeableConcept"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/practitionerRole-creator",
-          "path": "PractitionerRole.extension"
+          "path": "PractitionerRole.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/practitionerRole-creator",
+            "style": "complex",
+            "children": [
+              {
+                "name": "person",
+                "type": [
+                  {
+                    "code": "Reference",
+                    "targetProfile": [
+                      "http://hl7.org/fhir/StructureDefinition/Practitioner"
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "organization",
+                "type": [
+                  {
+                    "code": "Reference",
+                    "targetProfile": [
+                      "http://hl7.org/fhir/StructureDefinition/Organization"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
         }
       ],
       "bindings": [
@@ -418,31 +647,160 @@
       "extensions": [
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/ethnicity",
-          "path": "Patient.extension"
+          "path": "Patient.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/ethnicity",
+            "style": "simple",
+            "type": [
+              {
+                "code": "CodeableConcept"
+              }
+            ],
+            "binding": {
+              "strength": "extensible",
+              "valueSet": "https://standards.digital.health.nz/valueset/ethnic-group-level-4"
+            }
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-birthPlace",
-          "path": "Patient.extension"
+          "path": "Patient.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-birthPlace",
+            "style": "complex",
+            "children": [
+              {
+                "name": "countryXXX",
+                "type": [
+                  {
+                    "code": "CodeableConcept"
+                  }
+                ],
+                "binding": {
+                  "strength": "preferred",
+                  "valueSet": "http://hl7.org/fhir/ValueSet/iso3166-1-2"
+                }
+              },
+              {
+                "name": "placeOfBirth",
+                "type": [
+                  {
+                    "code": "string"
+                  }
+                ]
+              },
+              {
+                "name": "source",
+                "type": [
+                  {
+                    "code": "CodeableConcept"
+                  }
+                ],
+                "binding": {
+                  "strength": "required",
+                  "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/nzinfosource"
+                }
+              }
+            ]
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-iwi",
-          "path": "Patient.extension"
+          "path": "Patient.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-iwi",
+            "style": "simple",
+            "type": [
+              {
+                "code": "CodeableConcept"
+              }
+            ],
+            "binding": {
+              "strength": "preferred",
+              "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/nziwi"
+            }
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-citizenship",
-          "path": "Patient.extension"
+          "path": "Patient.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-citizenship",
+            "style": "complex",
+            "children": [
+              {
+                "name": "statusXXX",
+                "type": [
+                  {
+                    "code": "CodeableConcept"
+                  }
+                ],
+                "binding": {
+                  "strength": "preferred",
+                  "valueSet": "https://standards.digital.health.nz/valueset/NzCitizenship"
+                }
+              },
+              {
+                "name": "source",
+                "type": [
+                  {
+                    "code": "CodeableConcept"
+                  }
+                ],
+                "binding": {
+                  "strength": "preferred",
+                  "valueSet": "http://hl7.org.nz/fhir/StructureDefinition/informationsource"
+                }
+              }
+            ]
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/dhb",
-          "path": "Patient.extension"
+          "path": "Patient.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/dhb",
+            "style": "simple",
+            "type": [
+              {
+                "code": "Reference"
+              }
+            ]
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-maoriDescent",
-          "path": "Patient.extension"
+          "path": "Patient.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-maoriDescent",
+            "style": "simple",
+            "type": [
+              {
+                "code": "CodeableConcept"
+              }
+            ],
+            "binding": {
+              "strength": "preferred",
+              "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/nzmaoridescent"
+            }
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/informationsource",
-          "path": "Patient.name.extension"
+          "path": "Patient.name.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/informationsource",
+            "style": "simple",
+            "type": [
+              {
+                "code": "CodeableConcept"
+              }
+            ],
+            "binding": {
+              "strength": "preferred",
+              "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/dodinfosource"
+            }
+          }
         },
         {
           "url": "http://hl7.org/fhir/StructureDefinition/iso21090-preferred",
@@ -450,27 +808,135 @@
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/originalValue",
-          "path": "Patient.gender.extension"
+          "path": "Patient.gender.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/originalValue",
+            "style": "simple",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/informationsource",
-          "path": "Patient.birthDate.extension"
+          "path": "Patient.birthDate.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/informationsource",
+            "style": "simple",
+            "type": [
+              {
+                "code": "CodeableConcept"
+              }
+            ],
+            "binding": {
+              "strength": "preferred",
+              "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/dodinfosource"
+            }
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/informationsource",
-          "path": "Patient.deceased[x].extension"
+          "path": "Patient.deceased[x].extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/informationsource",
+            "style": "simple",
+            "type": [
+              {
+                "code": "CodeableConcept"
+              }
+            ],
+            "binding": {
+              "strength": "preferred",
+              "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/dodinfosource"
+            }
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/buildingName",
-          "path": "Patient.address.extension"
+          "path": "Patient.address.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/buildingName",
+            "style": "simple",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/nzGeocode",
-          "path": "Patient.address.extension"
+          "path": "Patient.address.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/nzGeocode",
+            "style": "complex",
+            "children": [
+              {
+                "name": "latitude",
+                "type": [
+                  {
+                    "code": "decimal"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-addressDerived",
-          "path": "Patient.address.extension"
+          "path": "Patient.address.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-addressDerived",
+            "style": "complex",
+            "children": [
+              {
+                "name": "meshblock",
+                "type": [
+                  {
+                    "code": "string"
+                  }
+                ]
+              },
+              {
+                "name": "depdecile",
+                "type": [
+                  {
+                    "code": "string"
+                  }
+                ]
+              },
+              {
+                "name": "depquintile",
+                "type": [
+                  {
+                    "code": "string"
+                  }
+                ]
+              },
+              {
+                "name": "domcode",
+                "type": [
+                  {
+                    "code": "CodeableConcept"
+                  }
+                ],
+                "binding": {
+                  "strength": "preferred",
+                  "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/nzdomcode"
+                }
+              },
+              {
+                "name": "said",
+                "type": [
+                  {
+                    "code": "string"
+                  }
+                ]
+              }
+            ]
+          }
         }
       ],
       "bindings": [
@@ -738,15 +1204,79 @@
       "extensions": [
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/ethnicity",
-          "path": "Patient.extension"
+          "path": "Patient.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/ethnicity",
+            "style": "simple",
+            "type": [
+              {
+                "code": "CodeableConcept"
+              }
+            ],
+            "binding": {
+              "strength": "extensible",
+              "valueSet": "https://standards.digital.health.nz/valueset/ethnic-group-level-4"
+            }
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-birthPlace",
-          "path": "Patient.extension"
+          "path": "Patient.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-birthPlace",
+            "style": "complex",
+            "children": [
+              {
+                "name": "countryXXX",
+                "type": [
+                  {
+                    "code": "CodeableConcept"
+                  }
+                ],
+                "binding": {
+                  "strength": "preferred",
+                  "valueSet": "http://hl7.org/fhir/ValueSet/iso3166-1-2"
+                }
+              },
+              {
+                "name": "placeOfBirth",
+                "type": [
+                  {
+                    "code": "string"
+                  }
+                ]
+              },
+              {
+                "name": "source",
+                "type": [
+                  {
+                    "code": "CodeableConcept"
+                  }
+                ],
+                "binding": {
+                  "strength": "required",
+                  "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/nzinfosource"
+                }
+              }
+            ]
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-iwi",
-          "path": "Patient.extension"
+          "path": "Patient.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-iwi",
+            "style": "simple",
+            "type": [
+              {
+                "code": "CodeableConcept"
+              }
+            ],
+            "binding": {
+              "strength": "preferred",
+              "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/nziwi"
+            }
+          }
         }
       ],
       "bindings": [
@@ -838,7 +1368,20 @@
       "extensions": [
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/nzethnicity",
-          "path": "Practitioner.extension"
+          "path": "Practitioner.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/nzethnicity",
+            "style": "simple",
+            "type": [
+              {
+                "code": "CodeableConcept"
+              }
+            ],
+            "binding": {
+              "strength": "preferred",
+              "valueSet": "https://standards.digital.health.nz/valueset/ethnic-group-level-4"
+            }
+          }
         }
       ],
       "bindings": [
@@ -961,19 +1504,92 @@
       "extensions": [
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/ethnicity",
-          "path": "Patient.extension"
+          "path": "Patient.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/ethnicity",
+            "style": "simple",
+            "type": [
+              {
+                "code": "CodeableConcept"
+              }
+            ],
+            "binding": {
+              "strength": "extensible",
+              "valueSet": "https://standards.digital.health.nz/valueset/ethnic-group-level-4"
+            }
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-birthPlace",
-          "path": "Patient.extension"
+          "path": "Patient.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-birthPlace",
+            "style": "complex",
+            "children": [
+              {
+                "name": "countryXXX",
+                "type": [
+                  {
+                    "code": "CodeableConcept"
+                  }
+                ],
+                "binding": {
+                  "strength": "preferred",
+                  "valueSet": "http://hl7.org/fhir/ValueSet/iso3166-1-2"
+                }
+              },
+              {
+                "name": "placeOfBirth",
+                "type": [
+                  {
+                    "code": "string"
+                  }
+                ]
+              },
+              {
+                "name": "source",
+                "type": [
+                  {
+                    "code": "CodeableConcept"
+                  }
+                ],
+                "binding": {
+                  "strength": "required",
+                  "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/nzinfosource"
+                }
+              }
+            ]
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-iwi",
-          "path": "Patient.extension"
+          "path": "Patient.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-iwi",
+            "style": "simple",
+            "type": [
+              {
+                "code": "CodeableConcept"
+              }
+            ],
+            "binding": {
+              "strength": "preferred",
+              "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/nziwi"
+            }
+          }
         },
         {
           "url": "http://hl7.org.nz/fhir/StructureDefinition/EyeColour",
-          "path": "Patient.extension"
+          "path": "Patient.extension",
+          "analysis": {
+            "url": "http://hl7.org.nz/fhir/StructureDefinition/EyeColour",
+            "style": "simple",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          }
         }
       ],
       "bindings": [
@@ -1055,119 +1671,604 @@
   "extensions": [
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/address-isPrimary",
-      "description": "Indicates this is the primary residential address - each patient must have one and only one"
+      "description": "Indicates this is the primary residential address - each patient must have one and only one",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/address-isPrimary",
+        "style": "simple",
+        "type": [
+          {
+            "code": "boolean"
+          }
+        ]
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/buildingName",
-      "description": "No description"
+      "description": "No description",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/buildingName",
+        "style": "simple",
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/dhb",
-      "description": "The District Health Board the patient resides in. It is derived from the patient's primary residential address. Not updated directly."
+      "description": "The District Health Board the patient resides in. It is derived from the patient's primary residential address. Not updated directly.",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/dhb",
+        "style": "simple",
+        "type": [
+          {
+            "code": "Reference"
+          }
+        ]
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/ethnicity",
-      "description": "The ethnicity of the patient. One to six level 4 codes."
+      "description": "The ethnicity of the patient. One to six level 4 codes.",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/ethnicity",
+        "style": "simple",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "binding": {
+          "strength": "extensible",
+          "valueSet": "https://standards.digital.health.nz/valueset/ethnic-group-level-4"
+        }
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/EyeColour",
-      "description": "The patients eye coulor. A simple string."
+      "description": "The patients eye coulor. A simple string.",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/EyeColour",
+        "style": "simple",
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/geolocation",
-      "description": "The geolocation of the address. datum = NZVD2016"
+      "description": "The geolocation of the address. datum = NZVD2016",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/geolocation",
+        "style": "complex",
+        "children": [
+          {
+            "name": "latitude",
+            "type": [
+              {
+                "code": "decimal"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/hpiLocation-dhb",
-      "description": "The District Health Board where this facility is located"
+      "description": "The District Health Board where this facility is located",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/hpiLocation-dhb",
+        "style": "simple",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "binding": {
+          "strength": "preferred",
+          "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/dhb"
+        }
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/hpiLocation-established",
-      "description": "The period over which the location is open"
+      "description": "The period over which the location is open",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/hpiLocation-established",
+        "style": "simple",
+        "type": [
+          {
+            "code": "Period"
+          }
+        ]
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/informationsource",
-      "description": "The source of the information"
+      "description": "The source of the information",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/informationsource",
+        "style": "simple",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "binding": {
+          "strength": "preferred",
+          "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/dodinfosource"
+        }
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/location-aliasType",
-      "description": "Indicates the type of alias name"
+      "description": "Indicates the type of alias name",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/location-aliasType",
+        "style": "simple",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "binding": {
+          "strength": "preferred",
+          "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/aliasType"
+        }
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/notValidatedReason",
-      "description": "The reason why the address has not been validated"
+      "description": "The reason why the address has not been validated",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/notValidatedReason",
+        "style": "simple",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "binding": {
+          "strength": "preferred",
+          "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/addressnotvalidated"
+        }
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/nzGeocode",
-      "description": "A geocode that uses the NZ datum (rather than the one specified for .position) We are currently unable to convert to WGS84"
+      "description": "A geocode that uses the NZ datum (rather than the one specified for .position) We are currently unable to convert to WGS84",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/nzGeocode",
+        "style": "complex",
+        "children": [
+          {
+            "name": "latitude",
+            "type": [
+              {
+                "code": "decimal"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/nzethnicity",
-      "description": "Self-identified ethnicity of the person."
+      "description": "Self-identified ethnicity of the person.",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/nzethnicity",
+        "style": "simple",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "binding": {
+          "strength": "preferred",
+          "valueSet": "https://standards.digital.health.nz/valueset/ethnic-group-level-4"
+        }
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/organization-aliasType",
-      "description": "eg abbreviated, maori..."
+      "description": "eg abbreviated, maori...",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/organization-aliasType",
+        "style": "simple",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "binding": {
+          "strength": "preferred",
+          "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/aliasType"
+        }
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/organization-period",
-      "description": "The period over which the Organization is active"
+      "description": "The period over which the Organization is active",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/organization-period",
+        "style": "simple",
+        "type": [
+          {
+            "code": "Period"
+          }
+        ]
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/originalValue",
-      "description": "when 'other'; was specified in a form this is what they said"
+      "description": "when 'other'; was specified in a form this is what they said",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/originalValue",
+        "style": "simple",
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-addressDerived",
-      "description": "Additional address elements exposed by the NHI and calculated from the address"
+      "description": "Additional address elements exposed by the NHI and calculated from the address",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-addressDerived",
+        "style": "complex",
+        "children": [
+          {
+            "name": "meshblock",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },
+          {
+            "name": "depdecile",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },
+          {
+            "name": "depquintile",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },
+          {
+            "name": "domcode",
+            "type": [
+              {
+                "code": "CodeableConcept"
+              }
+            ],
+            "binding": {
+              "strength": "preferred",
+              "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/nzdomcode"
+            }
+          },
+          {
+            "name": "said",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-birthPlace",
-      "description": "The country where the person was born"
+      "description": "The country where the person was born",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-birthPlace",
+        "style": "complex",
+        "children": [
+          {
+            "name": "countryXXX",
+            "type": [
+              {
+                "code": "CodeableConcept"
+              }
+            ],
+            "binding": {
+              "strength": "preferred",
+              "valueSet": "http://hl7.org/fhir/ValueSet/iso3166-1-2"
+            }
+          },
+          {
+            "name": "placeOfBirth",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },
+          {
+            "name": "source",
+            "type": [
+              {
+                "code": "CodeableConcept"
+              }
+            ],
+            "binding": {
+              "strength": "required",
+              "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/nzinfosource"
+            }
+          }
+        ]
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-citizenship",
-      "description": "New Zealand citizenship"
+      "description": "New Zealand citizenship",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-citizenship",
+        "style": "complex",
+        "children": [
+          {
+            "name": "statusXXX",
+            "type": [
+              {
+                "code": "CodeableConcept"
+              }
+            ],
+            "binding": {
+              "strength": "preferred",
+              "valueSet": "https://standards.digital.health.nz/valueset/NzCitizenship"
+            }
+          },
+          {
+            "name": "source",
+            "type": [
+              {
+                "code": "CodeableConcept"
+              }
+            ],
+            "binding": {
+              "strength": "preferred",
+              "valueSet": "http://hl7.org.nz/fhir/StructureDefinition/informationsource"
+            }
+          }
+        ]
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-iwi",
-      "description": "Details related to maori ancestry"
+      "description": "Details related to maori ancestry",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-iwi",
+        "style": "simple",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "binding": {
+          "strength": "preferred",
+          "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/nziwi"
+        }
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-maoriDescent",
-      "description": "Is the person of maori descent - yes, no, unknown, notanswered"
+      "description": "Is the person of maori descent - yes, no, unknown, notanswered",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/patient-maoriDescent",
+        "style": "simple",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "binding": {
+          "strength": "preferred",
+          "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/nzmaoridescent"
+        }
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/practitioner-additional-authorizations",
-      "description": "Additional authorizations that a practitioner is authorized to perform"
+      "description": "Additional authorizations that a practitioner is authorized to perform",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/practitioner-additional-authorizations",
+        "style": "complex",
+        "children": [
+          {
+            "name": "codeXXX",
+            "type": [
+              {
+                "code": "CodeableConcept"
+              }
+            ],
+            "binding": {
+              "strength": "preferred",
+              "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/practitioner-additional-auth"
+            }
+          },
+          {
+            "name": "periodXXX",
+            "type": [
+              {
+                "code": "Period"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/practitioner-conditions-on-practice",
-      "description": "A full description of the conditions the health practitioner is subject to in relation to their scope of practice."
+      "description": "A full description of the conditions the health practitioner is subject to in relation to their scope of practice.",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/practitioner-conditions-on-practice",
+        "style": "complex",
+        "children": [
+          {
+            "name": "description",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },
+          {
+            "name": "periodXXX",
+            "type": [
+              {
+                "code": "Period"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/practitioner-deathdate",
-      "description": "The date the person died."
+      "description": "The date the person died.",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/practitioner-deathdate",
+        "style": "simple",
+        "type": [
+          {
+            "code": "date"
+          }
+        ]
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/practitioner-qualification-initialDate",
-      "description": "The date the practitioner first became registered with the Responsible Authority or professional body"
+      "description": "The date the practitioner first became registered with the Responsible Authority or professional body",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/practitioner-qualification-initialDate",
+        "style": "simple",
+        "type": [
+          {
+            "code": "date"
+          }
+        ]
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/practitioner-qualification-status",
-      "description": "An indicator of the practicing status of the practitioner as supplied by their Responsible Authority or professional body."
+      "description": "An indicator of the practicing status of the practitioner as supplied by their Responsible Authority or professional body.",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/practitioner-qualification-status",
+        "style": "simple",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "binding": {
+          "strength": "preferred",
+          "valueSet": "http://standards.digital.health.nz/fhir/ValueSet/qualificationStatus"
+        }
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/practitioner-scope-of-practice",
-      "description": "The type or range of health services a practitioner is authorized to perform, as determined by the Responsible Authority or professional body."
+      "description": "The type or range of health services a practitioner is authorized to perform, as determined by the Responsible Authority or professional body.",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/practitioner-scope-of-practice",
+        "style": "complex",
+        "children": [
+          {
+            "name": "codeXXX",
+            "type": [
+              {
+                "code": "CodeableConcept"
+              }
+            ]
+          },
+          {
+            "name": "description",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },
+          {
+            "name": "periodXXX",
+            "type": [
+              {
+                "code": "Period"
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/practitionerRole-creator",
-      "description": "The organisation and person that created this role"
+      "description": "The organisation and person that created this role",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/practitionerRole-creator",
+        "style": "complex",
+        "children": [
+          {
+            "name": "person",
+            "type": [
+              {
+                "code": "Reference",
+                "targetProfile": [
+                  "http://hl7.org/fhir/StructureDefinition/Practitioner"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "organization",
+            "type": [
+              {
+                "code": "Reference",
+                "targetProfile": [
+                  "http://hl7.org/fhir/StructureDefinition/Organization"
+                ]
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "url": "http://hl7.org.nz/fhir/StructureDefinition/practitionerRole-status",
-      "description": "The status of the role - active,ended"
+      "description": "The status of the role - active,ended",
+      "analysis": {
+        "url": "http://hl7.org.nz/fhir/StructureDefinition/practitionerRole-status",
+        "style": "complex",
+        "children": [
+          {
+            "name": "active",
+            "type": [
+              {
+                "code": "boolean"
+              }
+            ]
+          },
+          {
+            "name": "reasonXXX",
+            "type": [
+              {
+                "code": "CodeableConcept"
+              }
+            ]
+          }
+        ]
+      }
     }
   ]
 }
