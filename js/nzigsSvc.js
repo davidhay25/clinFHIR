@@ -469,6 +469,8 @@ angular.module("sampleApp")
                 //retrieve the Extension Definition to populate child nodes
                 function checkExtensionDef(extUrl, item) {
                     console.log('checking '+ extUrl)
+
+                    item.extUrl = extUrl;
                     var deferred = $q.defer();
                     let qry = confServer + "StructureDefinition?url=" + extUrl;
 

@@ -709,7 +709,7 @@ angular.module("sampleApp")
 
                 }
 
-            }
+            };
 
             $scope.showAccordianGroup = function(group){
                 $scope.selectedGroup = group;

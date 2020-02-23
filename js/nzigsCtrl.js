@@ -1,10 +1,14 @@
 angular.module("sampleApp")
     .controller('nzigsCtrl',
-        function ($scope,$http,nzigsSvc) {
+        function ($scope,$http,nzigsSvc,$uibModal) {
 
             let confServer = "http://home.clinfhir.com:8054/baseR4/";
 
-            $scope.input = {}
+            //$scope.termServer = "https://r4.ontoserver.csiro.au/fhir/";
+
+            $scope.termServer = "https://ontoserver.csiro.au/stu3-latest/";
+
+            $scope.input = {};
             nzigsSvc.getProfiles().then(
                 function(data) {
                     $scope.profiles = data.data.profiles;
@@ -18,6 +22,122 @@ angular.module("sampleApp")
             );
 
             //$timeout()
+
+            //$scope.showVSBrowserDialog = {};
+
+            $scope.showRow = function(row) {
+                if ($scope.input.showHelp) {
+                    return false;
+                }
+
+                if ($scope.input.filterText) {
+                    let filter = $scope.input.filterText.toLowerCase();
+
+                    if (isMatch(filter,row.description)) {
+                        return true;
+                    }
+                    if (isMatch(filter,row.url)) {
+                        return true;
+                    }
+
+                    for (let i=0; i < row.profiles.length; i++) {
+                        let profile = row.profiles[i]
+                        if (profile.profile) {
+                            let name = profile.profile.name
+                            if (isMatch(filter,name)) {
+                                return true;
+                                break
+                            }
+                        }
+                        
+                    }
+                    /*
+
+                    if (row.description) {
+                        let description = row.description.toLowerCase();
+                        if (description.indexOf(filter) > -1) {
+                            return true
+                        }
+                    }
+                    if (row.url) {
+                        let url = row.url.toLowerCase()
+                        if (url.indexOf(filter) > -1) {
+                            return true
+                        }
+                    }
+
+*/
+
+                    return false
+
+                } else {
+                    return true;
+                }
+
+
+                function isMatch(filter,text) {
+                    if (text) {
+                        let lText = text.toLowerCase()
+                        if (lText.indexOf(filter) > -1) {
+                            return true
+                        } else {
+                            return false;
+                        }
+                    }
+                }
+
+            }
+
+
+            //load the valueset browser. Pass in the url of the vs - the expectation is that the terminology server
+            //can use the $expand?url=  syntax
+            $scope.viewVS = function(uri) {
+                if (uri) {
+                    var ar = uri.split('|')
+
+                    $uibModal.open({
+                        templateUrl: "/modalTemplates/vsDisplay.html",
+                        //size : 'lg',
+                        controller: function($scope,uri,termServer,$http) {
+                            let url =  termServer +  "ValueSet/$expand?url="+uri;
+                            $scope.uri = uri;
+                            $scope.showWaiting = true;
+                            $http.get(url).then(
+                                function(data){
+                                    var expandedVs = data.data;
+                                    if (expandedVs.expansion) {
+                                        $scope.data = expandedVs.expansion.contains;
+                                        if (! expandedVs.expansion.contains) {
+                                            alert('The expansion worked fine, but no expanded data was returned')
+                                        }
+                                        console.log(expandedVs.expansion)
+                                    } else {
+                                        alert('Sorry, no expansion occurred');
+                                    }
+                                },
+                                function(err) {
+                                    alert(angular.toJson(err))
+                                    console.log(err);
+                                }).finally(
+                                    function(){
+                                        $scope.showWaiting = false;
+                                    }
+                            )
+
+                        },
+                        resolve: {
+                            uri : function() {
+                                return ar[0]
+                            },
+                            termServer : function() {
+                                //if this is a profiled reference...
+                                return $scope.termServer
+                            }
+                        }
+                    });
+                }
+
+            };
 
             function decorateProfileExtensions() {
                 let hash = {};

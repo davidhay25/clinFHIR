@@ -323,13 +323,6 @@ angular.module("sampleApp")
                         }
 
 
-                        /*
-                        if (vs.valueSet && vs.valueSet.compose && vs.valueSet.compose.include) {
-                            vs.valueSet.compose.include.forEach(function (inc) {
-                                lne += inc.system + " ";
-                            });
-                        }
-                        */
 
 
                         lne += ",";
@@ -342,9 +335,6 @@ angular.module("sampleApp")
 
 
                 return download;
-
-
-
 
                 function getStringExtensionValue(ed,url) {
                     var ext = Utilities.getSingleExtensionValue(ed,url); //in case this is an extension
@@ -369,11 +359,7 @@ angular.module("sampleApp")
                     } else {
                         return "";
                     }
-
-
                 }
-
-
             },
 
             analyseIG : function(artifacts) {

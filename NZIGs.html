@@ -33,6 +33,13 @@
     <script src="js/nzigsSvc.js"></script>
     <script src="js/filters.js"></script>
 
+<!-- needed for vs viewer
+    <script src="js/appConfigSvc.js"></script>
+    <script src="resourceBuilder/rbServices.js"></script>
+    <script src="js/appConfigSvc.js"></script>
+
+    <script src="resourceBuilder/vsBrowser.js"></script>
+-->
 
     <style>
         #profilesGraph {
@@ -62,9 +69,17 @@
 
                 </a>
             </div>
-            <div class="col-md-6" >
+            <div class="col-md-1" >
                 <i class="navbar-text clickable glyphicon glyphicon-question-sign" ng-click = "input.showHelp = ! input.showHelp"></i>
             </div>
+
+            <div class="col-md-2"  ng-show="input.showHelp">
+                <div class="navbar-text">
+                    <a href="https://docs.google.com/document/d/1EnselYdjxO_wdu51vtmjOf0pYi8tPjeHz-ffQqSpm0g/edit" target="_blank">More docs</a>
+                </div>
+
+            </div>
+
 
 
 
@@ -100,10 +115,17 @@
                     <ul>
                         <li>The <strong>Shorthand</strong> tab shows the FHIR shorthand script used to define the profile. This is only found in the
                             profiles not defined in the spec - ie the blue profiles.</li>
-                        <li><strong>All elements</strong> is a table with all the elements defined for that profile in a summary display</li>
+                        <li><strong>All elements</strong> is a table with all the elements defined for that profile in a summary display. Each row contains:
+                        <ul>
+                            <li>Path - indented</li>
+                            <li>Must Support (MS). True if the client app must have support for that element - eg be able to store or display it</li>
+                            <li>Description</li>
+                        </ul>
+
+                        </li>
                         <li><strong>Raw profile json</strong> is the actual StructureDefinition resource that represnennts the profile. You don't generally need this</li>
                         <li><strong>Raw profile elements</strong> is a slighlyy more structured version of the StructureDefinition, making it easier to see the individual elements.
-                        Like the raw json viewm=, it is really fo reference only</li>
+                        Like the raw json view, it is really for reference only</li>
                         <li><strong>Extensions</strong> has all the extensions used by this profile.</li>
                     </ul>
 
@@ -135,8 +157,11 @@
 
                         <uib-tab heading = "All Elements">
                             <table class="table table-bordered">
+                                <tr><th>Path</th><th>MS</th><th>Mult.</th><th>Description</th></tr>
                                 <tr ng-repeat="row in allElements">
                                     <td  ng-style="{ 'padding-left': (row.path | pathindent) }">{{row.path}}</td>
+                                    <td>{{row.ed.mustSupport}}</td>
+                                    <td>{{row.ed.min}}..{{row.ed.max}}</td>
                                     <td>
                                         <div>{{row.description}}</div>
                                         <ul>
@@ -144,6 +169,7 @@
                                                 <!--<pre>{{child | json}}</pre>-->
                                                 <div ng-show = "child.sliceName">
                                                     {{child.sliceName}} ({{child.definition}})
+
                                                 </div>
                                                 <div ng-show = "child.err">
                                                     {{child.err}}
@@ -154,6 +180,8 @@
                                             </li>
                                         </ul>
                                         <div><em>{{row.err}}</em></div>
+                                        <div ng-show="row.extUrl">URL:<em >{{row.extUrl}}</em></div>
+                                        <div><span class="clickable" ng-click="viewVS(row.ed.binding.valueSet)">{{row.ed.binding.valueSet}}</span> </div>
 
                                     </td>
                                 </tr>
@@ -176,7 +204,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-8">
-                                    <pre>{{input.selectedElement.ed | json}}</pre>
+                                    <pre>{{input.selectedElement | json}}</pre>
                                 </div>
 
                             </div>
@@ -274,9 +302,25 @@
                 <p>The profiles that use them, and the path within the profile, are also displayed.</p>
             </div>
 
+
+            <div class="row">
+                <div class="col-md-1">
+                    <strong>Filter</strong>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" placeholder="Filter text for Url, description or profile name" class="form-control" ng-model="input.filterText" />
+                </div>
+            </div>
+            <br/>
             <table class="table table-bordered">
                 <tr><th>Url</th><th>Description</th><th>Profile & path</th><th>Types & children</th></tr>
-                <tr ng-repeat = "ext in extensions">
+                <tr ng-show="input.showHelp">
+                    <td>The canonical Url for this extension</td>
+                    <td>The description of the extension</td>
+                    <td>Profiles that use this extension</td>
+                    <td>If a simple extension, then the datatype and binding. If a complex extension, then the child elements with type and binding</td>
+                </tr>
+                <tr ng-repeat = "ext in extensions" ng-show="showRow(ext)">
                     <td>{{ext.url}}</td>
                     <td>{{ext.description}}</td>
                     <td>
@@ -293,7 +337,8 @@
                                 <span ng-repeat = "type in ext.analysis.type">{{type.code}} </span>
                             </div>
                             <div ng-show = "ext.analysis.binding.valueSet">
-                                Binding: <em>{{ext.analysis.binding.valueSet}}</em> ({{ext.analysis.binding.strength}})
+                                Binding: <em class = 'clickable' ng-click="viewVS(ext.analysis.binding.valueSet)">
+                                {{ext.analysis.binding.valueSet}}</em> ({{ext.analysis.binding.strength}})
                             </div>
 
                         </div>
@@ -309,7 +354,8 @@
                                         <span> )</span>
                                     </div>
                                     <div ng-show = "child.binding.valueSet">
-                                        Binding: <em>{{child.binding.valueSet}}</em> ({{child.binding.strength}})
+                                        Binding: <em class = 'clickable' ng-click="viewVS(child.binding.valueSet)">{{child.binding.valueSet}}</em>
+                                        ({{child.binding.strength}})
                                     </div>
                                 </li>
                             </ul>
@@ -322,9 +368,12 @@
     </uib-tabset>
 
 
-
+    <vs-browser trigger="showVSBrowserDialog" hidesearch="true"
+                vs-selected="vsSelected"></vs-browser>
 
 </div>
+
+
 
 </body>
 </html>

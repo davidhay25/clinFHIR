@@ -243,8 +243,6 @@ angular.module("sampleApp").directive( 'vsBrowser', function (Utilities,GetDataF
                                     //assume the syntax is http://snomed.info/ValueSet/{refsetid}
                                     var ar = $scope.vsUrl.split('/');
 
-
-
                                     url = "http://its.patientsfirst.org.nz/RestService.svc/Terminz/ValueSet/$expand?url="
                                     url += "http://snomed.info/sct?fhir_vs=refset/" + ar[ar.length -1]
 
