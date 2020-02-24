@@ -474,6 +474,11 @@
                         </a>
                     </div>
 
+<!--
+                    {{selectedArtifact.reference.reference}}
+-->
+
+
                     <table class="table table-bordered">
                         <tr><th>Path
                             <span class="pull-right">
@@ -495,9 +500,11 @@
 
                         </th><th>Description</th><th>Strength</th><th>CodeSystem Urls</th><th>Note</th></tr>
                         <tr ng-repeat="vs in analysis.valueSets"
-                            ng-show="selectedArtifact.reference.reference == vs.url || input.showAllAnalysis">
+                            ng-show="selectedArtifact.reference.reference == vs.modelUrl || input.showAllAnalysis">
                            <!-- <td>{{vs.url | referenceType}}</td> -->
-                            <td>{{vs.ed.path | dropFirstInPath}}</td>
+                            <td>
+                               
+                                {{vs.ed.path | dropFirstInPath}}</td>
                             <td>
                                          <span class="clickable" ng-click="viewVS(vs.valueSetUrl)">
                                             {{vs.valueSetUrl}}

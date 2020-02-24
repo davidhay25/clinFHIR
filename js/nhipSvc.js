@@ -381,9 +381,7 @@ angular.module("sampleApp")
                     }
 
                     //now look for Valuesets. Need to do this here as there can be multiple per model
-
-
-                    getResourceAsync(url).then(
+                    getResourceAsync(url).then(         //retrieve the Logical model
                         function(SD) {
 
                             SD.snapshot.element.forEach(function (ed,inx) {
@@ -406,10 +404,10 @@ angular.module("sampleApp")
                                     }
 
 
-                                    //is this a coded element type
+                                    //is this a coded element type - includes inside extensions as well...
                                     if (ed.type) {
                                         let typ = ed.type[0].code;
-                                        let isCoded = typ=='CodeableConcept' || typ=='Coding' || typ=='code';
+                                        let isCoded = (typ=='CodeableConcept' || typ=='Coding' || typ=='code');
 
                                         if (isCoded) {
                                             arWork.push(processCoded(url,ed));
@@ -447,8 +445,10 @@ angular.module("sampleApp")
                 
                 //look for coded data in an element definition
                 function processCoded(url,ed) {
+                    console.log(ed.path)
                     let deferred = $q.defer();
                     let item = {url:url,ed:ed}; //todo - URL is redundant...
+                    item.modelUrl = url;
                     if (! ed.binding) {
                         //quality.arCoded.push({display:ed.path + ' has no binding'})
                         quality.arCoded.push({type:'noBinding',display:'The path ' + ed.path + ' has a coded type, but no ValueSet binding',ed:ed})
@@ -527,7 +527,7 @@ angular.module("sampleApp")
                                 if (ed.mapping) {
                                     ed.mapping.forEach(function (map) {
                                         if (map.identity == 'fhir' && map.map.indexOf('xtension')>-1) {
-                                            //this is mapped to an extension
+                                            //this is mapped to an extension. Either a simple one, or a complex one
 
                                             let item = {url:url,ed:ed,elements:[]};
                                             let arExt = getExtension(ed,extExtensionUrl);
@@ -566,12 +566,11 @@ angular.module("sampleApp")
                                                             vo.valueSet = ed.binding.valueSet
                                                         }
                                                         //will only work for coded simple extensions...
-                                                        processCoded("urlhere",ed)
+                                                        //not needed as the ValueSet will have been picked up in the original element scan...
+                                                        //processCoded("urlhere",ed)
                                                     }
                                                     item.elements.push(vo);
                                                 }
-
-
                                             }
 
                                             if (map.map.indexOf('odifierExtension')>-1) {
@@ -609,14 +608,13 @@ angular.module("sampleApp")
                                            // lastElementWasExtension = false;
                                         }
 
-                                        //now look for children
+                                        //now look to see if this is a child element of an extension BBE
                                         if (map.identity == 'fhir' && map.map.indexOf('#')>-1) {
-                                            //this is a child element of the extension
+                                            //this is a child element of the extension - assume that # is only used here...
+
                                             if (ed.type && ed.type.length > 0) {
                                                 let elementName = $filter('getLastInPath')(ed.path);
                                                 let elementType = ed.type[0].code
-
-
 
                                                 let vo = {name:elementName,type:elementType,short:ed.short}
                                                 if (elementType == 'CodeableConcept') {
@@ -627,7 +625,8 @@ angular.module("sampleApp")
                                                         //processCoded("urlhere",ed)
                                                     }
                                                     //this is a coded child element, so need to check the ValueSet as well...
-                                                    processCoded("urlhere",ed)
+                                                    //not needed as the ValueSet will have been picked up in the original element scan...
+                                                    //processCoded("urlhere",ed)
                                                 }
 
                                                 //currentItem.elements.push({name:elementName,type:elementType,short:ed.short});
@@ -792,7 +791,7 @@ angular.module("sampleApp")
                         let artifacts = {};
                         IG.definition.resource.forEach(function (res) {
                             if (res.reference && res.reference.reference) {
-
+/* - not current using, but don't delete...
 
                                 //get the moreinfo, if any
                                 //todo - moreinfo is deprecated (I think) - but keep it as it does allow a reference to an external link so may be halpful
@@ -813,7 +812,7 @@ angular.module("sampleApp")
                                     res.moreInfo.push(moreInfo)
 
                                 });
-
+*/
 
 
 

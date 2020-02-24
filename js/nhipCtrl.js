@@ -179,7 +179,7 @@ angular.module("sampleApp")
                 nhipSvc.getIG(igCode).then(
                     function(data) {
                         $scope.artifacts = data.artifacts; //artifacts are the resources in the IG. Also returns pages.
-
+console.log($scope.artifacts)
                         analyse();   //pull out extensions and terminology
 
 
@@ -223,13 +223,14 @@ angular.module("sampleApp")
                         let hashNS = {};
                         $scope.artifacts.namingsystem.forEach(function (res) {
                             if (res.reference && res.reference.reference) {
-                                let ar = res.reference.reference.split('/')
-                                let id = ar[ar.length-1]
+                                let ar = res.reference.reference.split('/');
+                                let id = ar[ar.length-1];
                                 hashNS[id] = 'x'
                             }
 
-                        })
+                        });
 
+                        //get all the naming systems.
                         $http.get("http://home.clinfhir.com:8054/baseR4/NamingSystem?_count=100").then(
                             function(data) {
                                 $scope.namingSystem = [];
@@ -238,7 +239,6 @@ angular.module("sampleApp")
                                     if (hashNS[entry.resource.id]) {
                                         $scope.namingSystem.push(entry.resource)
                                     }
-
                                 });
 
                                 $scope.namingSystem.sort(function(a,b){
@@ -432,7 +432,7 @@ angular.module("sampleApp")
 
                         $scope.analysis = vo;
                        // $scope.quality = quality;
-                        console.log(vo.quality)
+                        console.log(vo)
 
 
                         //wait a second before sorting. This is a  bit scruffy...
