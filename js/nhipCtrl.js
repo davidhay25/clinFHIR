@@ -613,8 +613,6 @@ console.log($scope.artifacts)
                 //if there's a profile against this artifact (which must be a logical model), then retrieve it
 
                 if (art.profileId) {
-
-
                     nhipSvc.getResourceById("StructureDefinition",art.profileId).then(
                         function(data) {
                             $scope.selectedProfile = data;
@@ -625,13 +623,12 @@ console.log($scope.artifacts)
                             delete $scope.selectedProfileHeader.mapping;
                             delete $scope.selectedProfileHeader.contact;
                             makeProfileTree(data);
-
                         }
                     )
-
                 }
 
-                //$scope.mi={url:'about:blank'}
+
+                //get the actual Resource
                 $scope.showWaiting = true;
                 let resource = nhipSvc.getResource(art).then(
                     function(resource) {
@@ -652,6 +649,8 @@ console.log($scope.artifacts)
                                 $scope.input.showAllAnalysis = false;
                                 $scope.baseTypeForModel = nhipSvc.getModelBaseType($scope.selectedResource);
                                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD($scope.selectedResource);  //create a new tree
+
+                                //if tg
 
                                 //let canonicalUrl = $scope.selectedResource.url;
                                 //let capStmtElement

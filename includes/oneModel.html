@@ -96,7 +96,9 @@
                                 Purpose
                             </div>
                             <div class="col-md-10">
+
                                 <p ng-bind-html="selectedResource.purpose | markDown"></p>
+
                             </div>
                         </div>
                         <div class="row">
@@ -503,7 +505,7 @@
                             ng-show="selectedArtifact.reference.reference == vs.modelUrl || input.showAllAnalysis">
                            <!-- <td>{{vs.url | referenceType}}</td> -->
                             <td>
-                               
+
                                 {{vs.ed.path | dropFirstInPath}}</td>
                             <td>
                                          <span class="clickable" ng-click="viewVS(vs.valueSetUrl)">

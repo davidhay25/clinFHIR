@@ -269,6 +269,19 @@ angular.module("sampleApp")
 
             getDocsForItem : function(art){
                 let deferred = $q.defer();
+
+                /* todo change to retrieve from server
+                1. create intro and noted md files in FSH repo (ie in ig-data folder)
+
+                2. have a upload script to save them to /Binary
+                    naming convention = {ig name}-{intro | notes}-{SD name}
+                    (ig-name is the name from package.json - dots (.) are allowed in the id)
+                    
+                3. this routine retrieves those 2 resources from /Binary and returns them in arDocs
+
+                */
+
+
                 //retrieve documentation files
                 let ar = getExtension(art,docKey);      //all the extensions with document keys in it
                 let arDocs = [];                        //will contain the retrieve docs
@@ -281,7 +294,7 @@ angular.module("sampleApp")
 
                 $q.all(arQuery).then(function(){
                     deferred.resolve(arDocs);
-                })
+                });
 
                 return deferred.promise;
 
