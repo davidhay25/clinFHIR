@@ -9,21 +9,18 @@ angular.module("sampleApp")
             $scope.termServer = "https://ontoserver.csiro.au/stu3-latest/";
 
             $scope.input = {};
-            nzigsSvc.getProfiles().then(
-                function(data) {
-                    $scope.profiles = data.data.profiles;
-                    $scope.IGs = data.data.IGs;
 
-                    $scope.extensions = data.data.extensions;
+            nzigsSvc.getProfiles().then(
+                function(igSummary) {
+                    $scope.profiles = igSummary.profiles;
+                    $scope.IGs = igSummary.IGs;
+
+                    $scope.extensions = igSummary.extensions;
 
                     decorateProfileExtensions();
                     makeProfilesGraph($scope.profiles)
                 }
             );
-
-            //$timeout()
-
-            //$scope.showVSBrowserDialog = {};
 
             $scope.showRow = function(row) {
                 if ($scope.input.showHelp) {
@@ -174,7 +171,9 @@ angular.module("sampleApp")
                 var graphOptions = {
                     layout: {
                         hierarchical: {
-                            direction: "UD"
+                            direction: "LR",
+                            levelSeparation: 200,
+                            nodeSpacing : 100
                         }
                     }
                 };
@@ -224,19 +223,22 @@ angular.module("sampleApp")
                                         $scope.selectedSD.snapshot.element.forEach(function (ele) {
                                             delete ele.mapping;
                                             delete ele.constraint;
-                                        })
-                                    }
+                                        });
 
-                                    let vo = {SD: $scope.selectedSD, confServer: confServer};
-                                    nzigsSvc.makeLogicalModel(vo).then(
-                                        function (arLines) {
-                                            //console.log(arLines)
-                                            $scope.allElements = arLines;
-                                        }, function (vo) {
-                                            console.log(vo)
-                                            $scope.allElements = vo.allElements;
-                                        }
-                                    )
+                                        let vo = {SD: $scope.selectedSD, confServer: confServer};
+
+                                        nzigsSvc.makeLogicalModel(vo).then(
+                                            function (arLines) {
+                                                //console.log(arLines)
+                                                $scope.allElements = arLines;
+                                            }, function (vo) {
+                                                console.log(vo)
+                                                $scope.allElements = vo.allElements;
+                                            }
+                                        )
+                                    } else {
+                                        alert('The profile with the url: ' + url + " was not found on the server")
+                                    }
 
                                 }
                             )

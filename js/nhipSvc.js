@@ -260,7 +260,7 @@ angular.module("sampleApp")
                         deferred.resolve({'capStmt':capStmt,'resourceDef':resourceDef})
 
                     }
-                )
+                );
 
 
                 return deferred.promise;
@@ -276,7 +276,7 @@ angular.module("sampleApp")
                 2. have a upload script to save them to /Binary
                     naming convention = {ig name}-{intro | notes}-{SD name}
                     (ig-name is the name from package.json - dots (.) are allowed in the id)
-                    
+
                 3. this routine retrieves those 2 resources from /Binary and returns them in arDocs
 
                 */
@@ -318,10 +318,12 @@ angular.module("sampleApp")
                 //make a csv download for a valueset or extension analyis
                let download = "";
                if (typ == 'valueSet') {
-                   download ="Model,Path,ValueSetUrl,Description,Strength,CodeSystem Urls,Note\n";
+                   download ="Path,ValueSetUrl,Description,Strength,CodeSystem Urls,Note\n";
                     ar.forEach(function (vs) {
-                        let lne = $filter("referenceType")(vs.url)+ ',';
-                        lne += $filter('dropFirstInPath')(vs.ed.path)+ ',';
+                        //let lne = $filter("referenceType")(vs.url)+ ',';
+                        //let lne = $filter("referenceType")(vs.url)+ ',';
+                        let lne = vs.ed.path + ',';
+                        //lne += $filter('dropFirstInPath')(vs.ed.path)+ ',';
                         lne += vs.valueSetUrl + ',';
                         if (vs.valueSet) {
                             lne += makeSafe(vs.valueSet.description);

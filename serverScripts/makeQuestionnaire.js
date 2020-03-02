@@ -12,8 +12,8 @@ let remoteFhirServer = "http://home.clinfhir.com:8054/baseR4/"; //the server whe
 
 
 //if the url is null, then no upload
-let uploadServer = "http://home.clinfhir.com:8054/baseR4/";     //the server to upload the Questionnaire to...
-//let uploadServer = null;
+//let uploadServer = "http://home.clinfhir.com:8054/baseR4/";     //the server to upload the Questionnaire to...
+let uploadServer = null;
 
 
 //where a copy of the questionnaire is placed
@@ -62,12 +62,12 @@ model.snapshot.element.forEach(function(ed,inx) {
         ar.pop();
 
         //let parentPath = ar.splice(0,1)
-        let parentPath = ar.join('.')
-        let parent =  hashItem[parentPath]
+        let parentPath = ar.join('.');
+        let parent =  hashItem[parentPath];
         //console.log(path,parent)
         if (parent) {
-            parent.item = parent.item || []
-            parent.item.push(item)
+            parent.item = parent.item || [];
+            parent.item.push(item);
             // Is it a group - then need to set it up to have children and a
             if (item.type == 'group') {
 
@@ -137,7 +137,7 @@ function getQtype(datatype) {
     let qtype = 'string';
     switch (datatype) {
         case 'boolean' :
-            qtype = 'boolean'
+            qtype = 'boolean';
             break;
         case 'date' :
             qtype = 'date';
@@ -145,7 +145,7 @@ function getQtype(datatype) {
         case 'dateTime' :
             qtype = 'dateTime';
             break;
-        case 'backboneElement':
+        case 'BackboneElement':
             qtype = 'group';
             break;
     }

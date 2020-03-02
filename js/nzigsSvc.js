@@ -195,9 +195,9 @@ angular.module("sampleApp")
                             if (resource && resource.meta && resource.meta.lastUpdated) {
                                 // let diff = moment().diff(resource.meta.lastUpdated,'minutes');
                                 let diff = moment(resource.meta.lastUpdated).diff();
-                                if (diff)
+                                //if (diff)
 
-                                    console.log(resource.meta.lastUpdated,diff)
+                                    //console.log(resource.meta.lastUpdated,diff)
                             }
                             vo.resource = resource
                             //confCache[canUrl] = resource;
@@ -309,7 +309,23 @@ angular.module("sampleApp")
 
             getProfiles : function() {
                 //to avoid having to read all the IGs, the summary document is assembled - via a separate script from those resources.
-                return $http.get("content/nhip/nzigs.json");
+                var deferred = $q.defer();
+
+                let url = "http://home.clinfhir.com:8054/baseR4/Binary/igSummary";
+                $http.get(url).then(
+                    function(data) {
+                        let igSummary = data.data
+                        console.log(igSummary)
+                        deferred.resolve(igSummary)
+                    }
+                )
+
+
+                return deferred.promise;
+
+               // return $http.get("content/nhip/nzigs.json");
+
+                //return $http.get("content/nhip/nzigs.json");
 
             },
 

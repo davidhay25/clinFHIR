@@ -365,6 +365,26 @@
                 </tr>
             </table>
         </uib-tab>
+
+        <uib-tab heading="Implementation Guides">
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="list-group">
+                        <div ng-class="{'list-group-item':true}" ng-repeat="IG in IGs">
+                            <div ng-click="input.selectedIG = IG">{{IG.name}}</div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-md-10">
+
+                    <pre>{{input.selectedIG.yaml}}</pre>
+
+                </div>
+            </div>
+        </uib-tab>
+
+
     </uib-tabset>
 
 
