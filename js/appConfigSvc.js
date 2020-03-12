@@ -266,6 +266,7 @@ angular.module("sampleApp")
                 //if here, then not in allservers - add it
                 let svr = {url:url}
                 svr.name = name || url
+                svr.version = 4;        //todo - not necessarily right...
                 $localStorage.config.allKnownServers.push(svr)
 
 
