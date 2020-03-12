@@ -757,10 +757,6 @@ angular.module("sampleApp")
 
 
 
-               // $scope.allResources = allResources;
-
-
-
                 $scope.singleBundle = {resourceType:'Bundle','type':'bundle',entry:[]}
 
                 //all conditions is used by the timeline display to

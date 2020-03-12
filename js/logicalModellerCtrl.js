@@ -231,10 +231,18 @@ angular.module("sampleApp")
                     let modelId = hash.substr(3);
                     if (modelId) {
                         //if there is a modelId, then load it
-                        let conformanceServer = appConfigSvc.getCurrentConformanceServer();     //set by the project app...
+                        let url;        //the url to the model (not the cononical url
+                        if (modelId.substr(0,4) == 'http'){
+                            //the full url to the model was passed across...
+                            url = modelId;
+                        } else {
+                            let conformanceServer = appConfigSvc.getCurrentConformanceServer();     //set by the project app...
 
-                        //get the model from the server...
-                        var url = conformanceServer.url + 'StructureDefinition/'+modelId;
+                            //get the model from the server...
+                            url = conformanceServer.url + 'StructureDefinition/'+modelId;
+                        }
+
+
                         $scope.showWaiting = true;
                         projectSvc.smartGet(url).then(
                             //GetDataFromServer.adHocFHIRQuery(url).then(
