@@ -235,6 +235,15 @@ angular.module("sampleApp")
                         if (modelId.substr(0,4) == 'http'){
                             //the full url to the model was passed across...
                             url = modelId;
+                            //need to update the confioemance server...
+                            let g = url.indexOf('StructureDefinition')
+                            let serverUrl = url.substr(0,g-1);
+                            console.log(serverUrl);
+                            appConfigSvc.setServerType('conformance',serverUrl)
+
+                            $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();  //as it's cached...
+
+
                         } else {
                             let conformanceServer = appConfigSvc.getCurrentConformanceServer();     //set by the project app...
 
