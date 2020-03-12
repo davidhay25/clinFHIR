@@ -237,7 +237,7 @@ angular.module("sampleApp")
                             url = modelId;
                             //need to update the confioemance server...
                             let g = url.indexOf('StructureDefinition')
-                            let serverUrl = url.substr(0,g-1);
+                            let serverUrl = url.substr(0,g);
                             console.log(serverUrl);
                             appConfigSvc.setServerType('conformance',serverUrl)
 
