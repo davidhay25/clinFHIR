@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <base href="/" />
+    <meta charset="UTF-8">
+    <script src="js/libs/jquery-1.9.0.min.js"></script>
+    <script src="js/libs/angular.min1-5.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+
+    <script src="js/libs/moment.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+
+    <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
+    <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
+
+
+    <script src="js/libs/angular-sanitize.js"></script>
+
+    <script>
+        angular.module("sampleApp",['ui.bootstrap','ngStorage','ui.checkbox']).config(function($locationProvider) {
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+        });
+        angular.module("sampleApp").constant("moment", moment);
+
+    </script>
+
+    <script src="js/formCtrl.js"></script>
+    <script src="js/formSvc.js"></script>
+    <script src="js/formRenderCtrl.js"></script>
+    <script src="js/libs/jstree.min.js"></script>
+    <script src="js/libs/ngStorage.min.js"></script>
+    <script src="js/libs/angular-bootstrap-checkbox.js"></script>
+    <title>Form</title>
+
+</head>
+
+
+<body style="padding: 8px;padding-top: 80px" >
+
+<div ng-app="sampleApp" ng-controller="formCtrl" class="container-fluid">
+
+
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+
+        <div class="container-fluid">
+            <div class="col-md-4">
+                <span>
+                    <a class="navbar-brand" href="#">
+                        Form Designer: {{QName}}
+                    </a>
+                </span>
+
+            </div>
+
+            <div class="col-md-4">
+
+
+            </div>
+            <div class="col-md-3">
+                <div class="navbar-text">
+                    <button class="btn btn-primary" ng-click="saveForm()">Save</button>
+                    <button class="btn btn-primary" ng-click="loadForm()">Load</button>
+                    <button class="btn btn-primary" ng-click="newForm()">New</button>
+                    <a target="_blank" ng-href="{{renderUrl}}?id={{server}}Questionnaire/{{QName}}">External render</a>
+                    <!--<button class="btn btn-primary" ng-click="externalRender()">External Render</button> -->
+                </div>
+
+            </div>
+
+            <div class="col-md-1">
+                <div class="navbar-text">
+
+
+            </div>
+
+
+            <div class="col-md-1">
+                <form class="navbar-form navbar-left">
+                    <img ng-show="showWaiting" src="css/ajax_loader_blue_32.gif"/>
+                </form>
+            </div>
+
+        </div>
+        </div>
+    </nav>
+
+
+    <uib-tabset>
+        <uib-tab heading="Designer">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="banner">Structure</div>
+                    <div id="tree"></div>
+                </div>
+
+                <div class="col-md-3 col-sm-3">
+
+                    <div ng-show="selectedNode.data.item.type == 'group'">
+                        <div class="banner">Group details</div>
+
+                        <div class="rounded-box">
+                            <div>Text: {{selectedNode.data.item.text}}</div>
+                        </div>
+
+
+                        <!--
+                        <input type="text" class="form-control" ng-model="selectedNode.data.item.text"/>
+-->
+
+                        <div class="pull-right">
+
+                            <button class="btn btn-link pull-right" ng-click="deleteGroup(selectedNode.data.item)">Delete</button>
+                            <button class="btn btn-link pull-right" ng-click="editGroup(selectedNode.data.item)">Edit</button>
+
+                            <button class="btn btn-link pull-right" ng-click="moveGroup(selectedNode.data.item,'up')">Move Up</button>
+                            <button class="btn btn-link pull-right" ng-click="moveGroup(selectedNode.data.item,'dn')">Move Down</button>
+
+                            <button class="btn btn-link" ng-click="addItem()">Add Item</button>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+
+
+                    <div ng-hide="selectedNode.data.item.type == 'group' || selectedNode.data.item.type == 'root' || ! selectedNode.data.item">
+                        <div class="banner">Item details</div>
+
+                        <div class="rounded-box">
+                            <div>Type: {{selectedNode.data.item.type}}</div>
+                            <div>Text: {{selectedNode.data.item.text}}</div>
+                            <div ng-repeat = "code in selectedNode.data.item.code">
+                                Code: {{code.system}} | {{code.code}}
+                            </div>
+                            <div ng-show ="selectedNode.data.item.repeats">Can repeat</div>
+                            <div>ValueSet: {{selectedNode.data.item.answerValueSet}}</div>
+                        </div>
+
+
+
+                        <div>
+                            <button class="btn btn-link pull-right" ng-click="editItem(selectedNode.data.item)">Edit</button>
+                            <button class="btn btn-link pull-right" ng-click="deleteItem(selectedNode.data.item)">Delete</button>
+                            <button class="btn btn-link pull-right" ng-click="moveItem(selectedNode.data.item,'up')">Move Up</button>
+                            <button class="btn btn-link pull-right" ng-click="moveItem(selectedNode.data.item,'dn')">Move Down</button>
+                        </div>
+                    </div>
+
+                    <div ng-show="selectedNode.data.type == 'root'">
+                        <strong>Root</strong>
+                        <p>Information about the form here (from the Q header) </p>
+                        <div class="pull-right">
+                            <button class="btn btn-link" ng-click="addGroup()">Add Group</button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="col-md-5 col-sm-5">
+                    <div class="banner">Rendered form</div>
+                    <uib-tabset>
+                        <uib-tab heading="Sample render">
+                            <div ng-controller="formRenderCtrl">
+                                <ng-include src="'/includes/renderForm.html'"></ng-include>
+                            </div>
+
+                        </uib-tab>
+                        <uib-tab heading="Selected Item">
+                            <pre>{{selectedNode.data | json}}</pre>
+                        </uib-tab>
+                        <uib-tab heading="Questionnaire">
+                            <pre>{{Q | json}}</pre>
+                        </uib-tab>
+
+                        <uib-tab heading="QuestionnaireResponse">
+                            <em>This is a QuestionnaireResponse resource populated with sample daat</em>
+                            <pre>{{sampleQR | json}}</pre>
+                        </uib-tab>
+
+                    </uib-tabset>
+
+                </div>
+            </div>
+            <br/>
+
+        </uib-tab>
+        <uib-tab heading="Summary">
+            <table class="table table-bordered table-condensed">
+                <tr><th>Group</th><th>Item</th><th>Type</th><th>Code</th><th>Can repeat</th></tr>
+                <tr ng-repeat="row in table">
+                    <td>{{row.group}}</td>
+                    <td>{{row.text}}</td>
+                    <td>{{row.type}}</td>
+                    <td>
+                        <div ng-repeat = "code in row.code">
+                            {{code.system}} | {{code.code}}
+                        </div>
+
+                    </td>
+                    <td>{{row.repeats}}</td>
+                </tr>
+            </table>
+
+        </uib-tab>
+        <uib-tab heading="Use">
+
+        </uib-tab>
+        <uib-tab heading="Config">
+            <div class="row">
+                <div class="col-md-3">
+                    Server
+                </div>
+                <div class="col-md-9">
+                    {{server}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+
+                </div>
+                <div class="col-md-9">
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+
+                </div>
+                <div class="col-md-9">
+
+                </div>
+            </div>
+
+
+        </uib-tab>
+    </uib-tabset>
+
+
+
+</div>
+</body>
+</html>

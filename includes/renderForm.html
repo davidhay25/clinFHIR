@@ -1,0 +1,60 @@
+<div>
+   
+
+    <div ng-repeat="item in Q.item">
+        <h4>{{item.text}}</h4>
+
+        <div ng-repeat="child in item.item">
+
+            <div class="row">
+                <div class="col-md-4 col-sm-4">
+                    <p ng-hide="child.type == 'display'">{{child.text}}</p>
+                </div>
+
+                <div class="col-md-8 col-sm-8">
+                    <div ng-switch on="child.type">
+
+                        <div ng-switch-when="string">
+                            <input type="text" ng-change="change()" ng-model="input.form[child.linkId]" class="form-control"/>
+                        </div>
+
+                        <div ng-switch-when="decimal">
+                            <input type="text" ng-change="change()" ng-model="input.form[child.linkId]" class="form-control"/>
+                        </div>
+
+                        <div ng-switch-when="boolean">
+                            <checkbox ng-change="change()" ng-model="input.form[child.linkId]" ></checkbox>
+                        </div>
+
+                        <div ng-switch-when="display">
+                            {{child.text}}
+                        </div>
+
+                        <div ng-switch-when="date">
+                            <p class="input-group">
+                                <input type="text" class="form-control" uib-datepicker-popup="dd-MMMM-yyyy"
+                                       ng-model="input.form[child.linkId]"
+                                       is-open="dateHash[child.linkId].opened"
+                                       datepicker-options="dateOptions"
+                                       close-text="Close" />
+                                <span class="input-group-btn">
+                                     <button type="button" class="btn btn-default" ng-click="open(child.linkId)">
+                                         <i class="glyphicon glyphicon-calendar"></i>
+                                     </button>
+                                </span>
+                            </p>
+
+                        </div>
+
+
+
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>

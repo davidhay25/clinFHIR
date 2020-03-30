@@ -764,7 +764,7 @@ angular.module("sampleApp")
                             }
                         })
                     }
-                })
+                });
                 drawTree();
 
             };
