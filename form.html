@@ -62,7 +62,7 @@
             </div>
             <div class="col-md-3">
                 <div class="navbar-text">
-                    <button class="btn btn-primary" ng-click="saveForm()">Save</button>
+                    <button ng-show="isDirty" class="btn btn-danger" ng-click="saveForm()">Save</button>
                     <button class="btn btn-primary" ng-click="loadForm()">Load</button>
                     <button class="btn btn-primary" ng-click="newForm()">New</button>
                     <a target="_blank" ng-href="{{renderUrl}}?id={{server}}Questionnaire/{{QName}}">External render</a>
@@ -170,6 +170,7 @@
                     <div class="banner">Rendered form</div>
                     <uib-tabset>
                         <uib-tab heading="Sample render">
+                            <br/>
                             <div ng-controller="formRenderCtrl">
                                 <ng-include src="'/includes/renderForm.html'"></ng-include>
                             </div>
@@ -234,6 +235,9 @@
                     </div>
                 </div>
                 <div class="col-md-10">
+                    <em>There can be a significant (10 sec) delay when a Questionnaire is first rendered, as the rendering application needs to start up.
+                    Subsequent renderings will be quick. If you change the underlying Questionnaire, be sure to save it before re-rendering. You may need
+                    to select another Questionnaire then reload.</em>
                     <iframe height = "600px" width="100%" ng-src="{{externalRenderUrl}}"></iframe>
                 </div>
             </div>

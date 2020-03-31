@@ -4,6 +4,7 @@ angular.module("sampleApp")
         $scope.input = {};
         $scope.QName = "CBAC";      //the initial form
         $scope.server = "http://home.clinfhir.com:8054/baseR4/";        //where the Q's are stored
+        $scope.isDirty;
 
         $scope.renderUrl = "http://smartqedit4.azurewebsites.net/Questionnaire/Preview";      //the external rendering app
 
@@ -16,6 +17,7 @@ angular.module("sampleApp")
                     $scope.treeData = makeTreeData($scope.Q);
                     drawTree();
                     makeTable();
+                    $scope.renderQ = makeRenderModel($scope.Q)
                     $scope.expandAll();
                 }
             )
@@ -47,6 +49,7 @@ angular.module("sampleApp")
             let url = $scope.server + "Questionnaire/"+$scope.QName;
             $http.put(url,$scope.Q).then(
                 function(data) {
+                    delete $scope.isDirty;
                     alert('Saved: '+ url)
                 },function(err) {
                     alert(angular.toJson(err.data))
@@ -259,9 +262,10 @@ angular.module("sampleApp")
                 }
 
                 $scope.treeData = makeTreeData($scope.Q);
-                drawTree();
-                makeTable();
-                $scope.expandAll();
+                updateAfterEdit()
+                //drawTree();
+                //makeTable();
+                //$scope.expandAll();
             })
         }
 
@@ -327,8 +331,10 @@ angular.module("sampleApp")
             });
             */
             $scope.treeData = makeTreeData($scope.Q);
-            drawTree();
-            $scope.expandAll();
+            updateAfterEdit()
+
+           // drawTree();
+           // $scope.expandAll();
             //console.log(item);
         };
 
@@ -517,9 +523,11 @@ angular.module("sampleApp")
                 }
 
                 $scope.treeData = makeTreeData($scope.Q);
-                drawTree();
-                makeTable();
-                $scope.expandAll();
+                updateAfterEdit()
+
+                //drawTree();
+                //makeTable();
+                //$scope.expandAll();
             })
         }
 
@@ -553,12 +561,12 @@ angular.module("sampleApp")
 
         function move(item,dirn) {
             let vo = findItemInQ(item.linkId);
-
+/*
             //set the parent to the root if not found. The item will be directly off the root...
             if (!vo.parent) {
                 vo.parent = $scope.Q;
             }
-
+*/
            // if (vo.parent) {
                 if (dirn == 'up' && (vo.index > 0)) {
                     //console.log('move');
@@ -586,9 +594,46 @@ angular.module("sampleApp")
 
 
         function updateAfterEdit(){
+            $scope.isDirty = true;
             $scope.treeData = makeTreeData($scope.Q);
+            $scope.renderQ = makeRenderModel($scope.selectedNode.data.item)
             drawTree();
             $scope.expandAll();
+        }
+
+
+        //make a render tree from the selected item down...
+        function makeRenderModel(item){
+            let ar = [];
+
+            if (!item) {
+                return ar;
+            }
+
+            //this item has no children - ie it isn't a group
+            if (!item.item) {
+                return [item]
+            }
+
+            processGroup(item)
+
+            console.log(ar)
+            return ar;
+
+            //take an item object. If it's
+            function processGroup(item) {
+                ar.push({text:item.text,type:'group'})
+                item.item.forEach(function(child){
+                    if (child.type == 'group') {
+                        processGroup(child)
+                    } else {
+                        ar.push(child)
+                    }
+                })
+
+
+
+            }
         }
 
         //find an item in the Q based on the linkId
@@ -596,7 +641,12 @@ angular.module("sampleApp")
 
             let selectedItem,selectedParent,selectedIndex;
 
-            processItem($scope.Q.item);
+            processItem($scope.Q.item,$scope.Q);
+
+            //if there's no parent, then it will be the Q
+           // if (!vo.parent) {
+             //   vo.parent = $scope.Q;
+           // }
 
             return {item:selectedItem,parent:selectedParent,index:selectedIndex};
 
@@ -620,7 +670,7 @@ angular.module("sampleApp")
         }
 
 
-        //create the tree array from a Questionnaire. Assume 2 level only (for now). Make recursive if gets more complex...
+        //create the tree array from a Questionnaire.
         function makeTreeData (Q) {
             let ar = [];
             let rootNode = {id:'root',text:'root',parent:'#',data:{type:'root'}}
@@ -762,6 +812,15 @@ angular.module("sampleApp")
                     $scope.selectedNode = data.node;
                     console.log($scope.selectedNode)
                     console.log($scope.selectedNode.data)
+
+                    if ($scope.selectedNode.data.type == 'root') {
+                        $scope.renderQ = makeRenderModel($scope.Q)
+                    } else {
+                        $scope.renderQ = makeRenderModel($scope.selectedNode.data.item)
+                    }
+
+
+
                     $scope.$digest();
                 }
             })
