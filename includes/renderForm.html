@@ -1,5 +1,5 @@
 <div>
-   
+
 
     <div ng-repeat="item in Q.item">
         <h4>{{item.text}}</h4>
@@ -46,7 +46,9 @@
 
                         </div>
 
-
+                        <div ng-switch-default>
+                            <input type="text" ng-change="change()" ng-model="input.form[child.linkId]" class="form-control"/>
+                        </div>
 
 
                     </div>

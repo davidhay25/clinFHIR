@@ -1,5 +1,5 @@
 angular.module("sampleApp")
-    .controller('formCtrl', function ($scope,$localStorage,$timeout,$window,$uibModal,$http,formSvc) {
+    .controller('formCtrl', function ($scope,$localStorage,$timeout,$window,$uibModal,$http,formSvc,$sce) {
 
         $scope.input = {};
         $scope.QName = "CBAC";      //the initial form
@@ -19,10 +19,28 @@ angular.module("sampleApp")
                     $scope.expandAll();
                 }
             )
-
         },500);
 
 
+        //load all the forms on the server. todo will need to re-factor this once the number gets large
+        let url = $scope.server + "Questionnaire";
+        $http.get(url).then(
+            function(data) {
+                console.log(data)
+                $scope.allQbundle = data.data;
+
+            }, function(err) {
+                console.log(err)
+            }
+        );
+
+
+        $scope.selectFormForRender = function(resource){
+
+            let url = $scope.renderUrl + "?id="+ $scope.server + "Questionnaire/"+resource.id;
+            $scope.externalRenderUrl = $sce.trustAsResourceUrl(url);
+
+        };
 
         $scope.saveForm = function(){
             $scope.Q.id = $scope.QName;
@@ -43,8 +61,11 @@ angular.module("sampleApp")
                 keyboard: false,       //same as above.
                 size: 'lg',
                 templateUrl: 'modalTemplates/loadForm.html',
-                controller: function ($scope, server,$http) {
+                controller: function ($scope, allQbundle, server,$http) {
+                    $scope.bundle = allQbundle;
+
                     $scope.input = {}
+                    /*
                     let url = server + "Questionnaire";
                     $http.get(url).then(
                         function(data) {
@@ -55,13 +76,16 @@ angular.module("sampleApp")
                             console.log(err)
                         }
                     );
-
+*/
                     $scope.select=function(){
                         let resource = $scope.input.selectedEntry.resource;
                         $scope.$close(resource)
                     }
 
                 }, resolve : {
+                    allQbundle : function(){
+                        return $scope.allQbundle;
+                    },
                     server : function(){
                         return $scope.server;
                     }
@@ -110,7 +134,7 @@ angular.module("sampleApp")
             }
         }
 
-        $scope.externalRender = function(){
+        $scope.externalRenderDEP = function(){
             let url = renderUrl + "id=" + $scope.server + "Questionnaire/" + $scope.QName;
             console.log(url)
         }
@@ -130,6 +154,11 @@ angular.module("sampleApp")
         };
 
         $scope.editItem = function(inItem) {
+            let vo = findItemInQ($scope.selectedNode.data.item.linkId);
+            if (vo.item) {
+                editItem(vo.item);
+            }
+            /*
             for (const groupItem of $scope.Q.item) {
                 if (groupItem.item) {
                     for (const item of groupItem.item) {
@@ -140,10 +169,10 @@ angular.module("sampleApp")
                     }
                 }
             }
+            */
 
 
         };
-
 
         function editItem(item) {
             $uibModal.open({
@@ -159,12 +188,13 @@ angular.module("sampleApp")
 
                     let newItem = {};
                     newItem.linkId = 'id' + new Date().getTime();
+                    $scope.input.newItemType = 'string'
                     //if editing
                     if (currentItem) {
 
                         $scope.input.ValueSet = currentItem.answerValueSet;
 
-
+                        $scope.input.repeats =  currentItem.repeats;
                         $scope.input.newItemType = currentItem.type;
                         $scope.input.newItemText = currentItem.text
                         newItem.linkId = currentItem.linkId;
@@ -208,6 +238,14 @@ angular.module("sampleApp")
 
                 } else {
                     //new
+
+                    let vo = findItemInQ($scope.selectedNode.data.item.linkId);
+                    let parentItem = vo.item;
+                    if (parentItem) {
+                        parentItem.item = parentItem.item || []
+                        parentItem.item.push(newItem);
+                    }
+                    /*
                     $scope.Q.item.forEach(function(qItem){
                         if (qItem.linkId == $scope.selectedNode.data.item.linkId) {
                             // add to the 'parents' items node
@@ -217,6 +255,7 @@ angular.module("sampleApp")
                         }
 
                     })
+                    */
                 }
 
                 $scope.treeData = makeTreeData($scope.Q);
@@ -260,6 +299,13 @@ angular.module("sampleApp")
 
         //delete the indicated item
         $scope.deleteItem = function(deleteItem) {
+
+
+            let vo = findItemInQ(deleteItem.linkId);
+            if (vo.parent && vo.index > -1) {
+                vo.parent.item.splice(vo.index,1)
+            }
+/*
             $scope.Q.item.forEach(function(groupItem){
                 let groupId = groupItem.linkId;
                 if (groupItem.item) {
@@ -279,6 +325,7 @@ angular.module("sampleApp")
 //now see if the deleteInx has been set - if so then we know which one to delete
 
             });
+            */
             $scope.treeData = makeTreeData($scope.Q);
             drawTree();
             $scope.expandAll();
@@ -286,6 +333,23 @@ angular.module("sampleApp")
         };
 
         $scope.moveItem = function(moveItem,dirn) {
+            move(moveItem,dirn)
+           /* let vo = findItemInQ(moveItem.linkId);
+            if (vo.parent) {
+                if (dirn == 'up' && (vo.index > 0)) {
+                    //console.log('move');
+                    let ar = vo.parent.item.splice(vo.index,1);
+                    vo.parent.item.splice(vo.index-1,0,ar[0])
+                }
+
+                if (dirn == 'dn' && (vo.index < vo.parent.item.length -1) ) {
+                    //console.log('move');
+                    let ar = vo.parent.item.splice(vo.index,1);
+                    vo.parent.item.splice(vo.index+1,0,ar[0])
+                }
+
+            }
+
             $scope.Q.item.forEach(function(groupItem){
                 let groupId = groupItem.linkId;
                 if (groupItem.item) {
@@ -313,14 +377,18 @@ angular.module("sampleApp")
 
 
             });
-            $scope.treeData = makeTreeData($scope.Q);
-            drawTree();
-            $scope.expandAll();
+            */
+            updateAfterEdit();
+            //$scope.treeData = makeTreeData($scope.Q);
+           // drawTree();
+           // $scope.expandAll();
             //console.log(item);
         };
 
         //add a new group. I think a modal dialog may be better...
         $scope.addGroup = function() {
+            editGroup();
+            /*
             let name = $window.prompt("What is the group text")
             if (name) {
                 let group = {};
@@ -331,11 +399,27 @@ angular.module("sampleApp")
                 $scope.treeData = makeTreeData($scope.Q);
                 drawTree();
                 $scope.expandAll();
-            }
+                */
+           // }
         };
 
-        $scope.editGroup = function(editGroup) {
-            let text = $window.prompt("What is the new group text")
+        $scope.editGroup = function(group) {
+            for (const groupItem of $scope.Q.item) {
+                if (groupItem.linkId == group.linkId) {
+                    editGroup(groupItem);
+                    break;
+                }
+            }
+
+            $scope.Q.item.forEach(function(groupItem,inx) {
+
+                if (groupItem.linkId == editGroup.linkId) {
+                    groupItem.text = text
+                }
+            });
+
+            /*
+            let text = $window.prompt("What is the new group text",editGroup.text)
             if (text) {
                 $scope.Q.item.forEach(function(groupItem,inx) {
 
@@ -347,10 +431,103 @@ angular.module("sampleApp")
                 drawTree();
                 $scope.expandAll();
             }
+            */
         };
 
+        function editGroup(group) {
+            $uibModal.open({
+                backdrop: 'static',      //means can't close by clicking on the backdrop.
+                keyboard: false,       //same as above.
+                //size: 'lg',
+                templateUrl: 'modalTemplates/qGroup.html',
+                controller: function($scope,currentGroup){
+                    //$scope.newOptionsType = ['display','boolean','decimal','integer','date','datetime','string','text','choice','quantity']
+                    $scope.input = {};
+
+                    console.log(currentGroup)
+
+                    let newGroup = {};
+                    newGroup.linkId = 'id' + new Date().getTime();
+                    newGroup.type = 'group';
+                    //$scope.input.newItemType = 'string'
+                    //if editing
+                    if (currentGroup) {
+
+                        //$scope.input.ValueSet = currentItem.answerValueSet;
+
+                        $scope.input.text = currentGroup.text
+                        newGroup.linkId = currentGroup.linkId;
+                        if (currentGroup.code) {
+                            //assume only 1 code
+                            $scope.input.code = currentGroup.code[0].code;
+                            $scope.input.system = currentGroup.code[0].system;
+
+                        }
+                    }
+                    //$scope.item = currentItem;
+
+                    $scope.save=function(){
+                        newGroup.text = $scope.input.text;
+                        //newGroup.type = $scope.input.newItemType;
+                        newGroup.repeats = $scope.input.repeats;
+
+                        if ($scope.input.code) {
+                            newGroup.code=[{system:$scope.input.system,code:$scope.input.code}]
+                        }
+                        $scope.$close(newGroup)
+                    }
+                }, resolve : {
+                    currentGroup : function(){
+                        return group;
+                    }
+                }
+            }).result.then(function(newGroup){
+                if (group) {
+                    //editing
+                    group.text = newGroup.text;
+                    group.repeats = newGroup.repeats;
+                    group.code = newGroup.code;
+
+                    $scope.selectedNode.data.item = group;  //so the current display is updated
+
+                } else {
+                    //new
+                    //want to add as a child to the currently selected item
+                    let vo = findItemInQ($scope.selectedNode.data.item.linkId);
+                    let parentItem = vo.item    //could also use node.id
+                    if (parentItem) {
+                        parentItem.item = parentItem.item || []
+                        parentItem.item.push(newGroup)
+                    } else {
+                        console.log('item not found with linkId '+$scope.selectedNode.data.item.linkId)
+                    }
+
+
+                    //$scope.Q.item.push(newGroup)
+                    /*
+                    $scope.Q.item.forEach(function(qItem){
+                        if (qItem.linkId == $scope.selectedNode.data.item.linkId) {
+                            // add to the 'parents' items node
+                            qItem.item = qItem.item || []
+                            qItem.item.push(newItem);
+                            console.log($scope.Q)
+                        }
+
+                    }) */
+                }
+
+                $scope.treeData = makeTreeData($scope.Q);
+                drawTree();
+                makeTable();
+                $scope.expandAll();
+            })
+        }
+
         $scope.moveGroup = function(moveGroup,dirn) {
-            let moveInx = -1;
+            move(moveGroup,dirn)
+      /*      let moveInx = -1;
+
+
             $scope.Q.item.forEach(function(groupItem,inx) {
 
                 if (moveGroup.linkId == groupItem.linkId) {
@@ -371,18 +548,154 @@ angular.module("sampleApp")
             $scope.treeData = makeTreeData($scope.Q);
             drawTree();
             $scope.expandAll();
-
+*/
         };
+
+        function move(item,dirn) {
+            let vo = findItemInQ(item.linkId);
+
+            //set the parent to the root if not found. The item will be directly off the root...
+            if (!vo.parent) {
+                vo.parent = $scope.Q;
+            }
+
+           // if (vo.parent) {
+                if (dirn == 'up' && (vo.index > 0)) {
+                    //console.log('move');
+                    let ar = vo.parent.item.splice(vo.index,1);
+                    vo.parent.item.splice(vo.index-1,0,ar[0])
+                }
+
+                if (dirn == 'dn' && (vo.index < vo.parent.item.length -1) ) {
+                    //console.log('move');
+                    let ar = vo.parent.item.splice(vo.index,1);
+                    vo.parent.item.splice(vo.index+1,0,ar[0])
+                }
+
+                updateAfterEdit()
+           // }
+        }
+
+        $scope.deleteGroup = function(deleteGroup){
+            let vo = findItemInQ(deleteGroup.linkId);
+            if (vo.parent && vo.index > -1) {
+                vo.parent.item.splice(vo.index,1)
+                updateAfterEdit()
+            }
+        };
+
+
+        function updateAfterEdit(){
+            $scope.treeData = makeTreeData($scope.Q);
+            drawTree();
+            $scope.expandAll();
+        }
+
+        //find an item in the Q based on the linkId
+        function findItemInQ(linkId) {
+
+            let selectedItem,selectedParent,selectedIndex;
+
+            processItem($scope.Q.item);
+
+            return {item:selectedItem,parent:selectedParent,index:selectedIndex};
+
+            function processItem(item,parent) {
+                var index = -1;
+                for (const child of item) {
+                    index++;
+                    if (child.linkId == linkId) {
+                        selectedItem = child;
+                        selectedParent = parent;
+                        selectedIndex = index;
+                        break;
+                    }
+                    if (child.item) {
+                        processItem(child.item,child)
+                    }
+                }
+            }
+
+
+        }
+
 
         //create the tree array from a Questionnaire. Assume 2 level only (for now). Make recursive if gets more complex...
         function makeTreeData (Q) {
+            let ar = [];
+            let rootNode = {id:'root',text:'root',parent:'#',data:{type:'root'}}
+            ar.push(rootNode);
+
+            processItem(rootNode,Q.item,)
+
+            function processItem(parentNode,inItem) {
+                inItem.forEach(function(item){
+
+                    //this is a top level group node...
+                    let node = {id:item.linkId,text:item.text,parent:parentNode.id,data:{item:item}};
+
+                    if (item.repeats) {
+                        node.text += ' *'
+                    }
+
+                    ar.push(node);
+
+                    //now process any children
+                    if (item.item ) {
+                        processItem(node,item.item)
+                        /*
+                        item.item.forEach(function(child){
+                            let node = {id:child.linkId,text:child.text,parent:item.linkId,data:{item:child}};
+                            ar.push(node)
+                        })
+                        */
+                    }
+
+
+                });
+
+
+            }
+            /*
+            Q.item.forEach(function(item){
+
+                //this is a top level group node...
+                let node = {id:item.linkId,text:item.text,parent:'root',data:{item:item}};
+
+                if (item.repeats) {
+                    node.text += ' *'
+                }
+
+                ar.push(node);
+
+                //now process any children
+                if (item.item ) {
+                    item.item.forEach(function(child){
+                        let node = {id:child.linkId,text:child.text,parent:item.linkId,data:{item:child}};
+                        ar.push(node)
+                    })
+                }
+
+
+            });
+
+            */
+            return ar;
+        }
+
+        function makeTreeDataSAVE (Q) {
             let ar = [];
             ar.push({id:'root',text:'root',parent:'#',data:{type:'root'}});
             Q.item.forEach(function(item){
 
                 //this is a top level group node...
                 let node = {id:item.linkId,text:item.text,parent:'root',data:{item:item}};
-                ar.push(node)
+
+                if (item.repeats) {
+                    node.text += ' *'
+                }
+
+                ar.push(node);
 
                 //now process any children
                 if (item.item ) {
@@ -396,6 +709,7 @@ angular.module("sampleApp")
             });
             return ar;
         }
+
 
         //create a table view of the form - just for display
         function makeTable() {

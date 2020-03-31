@@ -19,7 +19,7 @@
     <script src="js/libs/angular-sanitize.js"></script>
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngStorage','ui.checkbox']).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.bootstrap','ngStorage','ui.checkbox',"ngSanitize"]).config(function($locationProvider) {
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
             $locationProvider.hashPrefix('!');
@@ -104,6 +104,10 @@
 
                         <div class="rounded-box">
                             <div>Text: {{selectedNode.data.item.text}}</div>
+                            <div ng-show ="selectedNode.data.item.repeats">Can repeat</div>
+                            <div ng-repeat = "code in selectedNode.data.item.code">
+                                Code: {{code.system}} | {{code.code}}
+                            </div>
                         </div>
 
 
@@ -121,6 +125,10 @@
 
                             <button class="btn btn-link" ng-click="addItem()">Add Item</button>
                         </div>
+
+                        <hr/>
+                        <button class="btn btn-link" ng-click="addGroup()">Add Group</button>  <!-- temp -->
+
                         <div class="clearfix"></div>
                     </div>
 
@@ -135,10 +143,8 @@
                                 Code: {{code.system}} | {{code.code}}
                             </div>
                             <div ng-show ="selectedNode.data.item.repeats">Can repeat</div>
-                            <div>ValueSet: {{selectedNode.data.item.answerValueSet}}</div>
+                            <div ng-show ="selectedNode.data.item.answerValueSet">ValueSet: {{selectedNode.data.item.answerValueSet}}</div>
                         </div>
-
-
 
                         <div>
                             <button class="btn btn-link pull-right" ng-click="editItem(selectedNode.data.item)">Edit</button>
@@ -146,6 +152,8 @@
                             <button class="btn btn-link pull-right" ng-click="moveItem(selectedNode.data.item,'up')">Move Up</button>
                             <button class="btn btn-link pull-right" ng-click="moveItem(selectedNode.data.item,'dn')">Move Down</button>
                         </div>
+
+
                     </div>
 
                     <div ng-show="selectedNode.data.type == 'root'">
@@ -169,14 +177,24 @@
                         </uib-tab>
                         <uib-tab heading="Selected Item">
                             <pre>{{selectedNode.data | json}}</pre>
+
+                            <pre>{{selectedNode | json}}</pre>
                         </uib-tab>
                         <uib-tab heading="Questionnaire">
                             <pre>{{Q | json}}</pre>
                         </uib-tab>
 
                         <uib-tab heading="QuestionnaireResponse">
-                            <em>This is a QuestionnaireResponse resource populated with sample daat</em>
-                            <pre>{{sampleQR | json}}</pre>
+                            <uib-tabset>
+                                <uib-tab heading="Sample">
+                                    <em>This is a QuestionnaireResponse resource populated with sample data</em>
+                                    <pre>{{sampleQR | json}}</pre>
+                                </uib-tab>
+                                <uib-tab heading="From rendered">
+
+                                </uib-tab>
+                            </uib-tabset>
+
                         </uib-tab>
 
                     </uib-tabset>
@@ -205,7 +223,20 @@
 
         </uib-tab>
         <uib-tab heading="Use">
-
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="list-group">
+                        <div class="list-group-item" ng-repeat="entry in allQbundle.entry"
+                            ng-click="selectFormForRender(entry.resource)">
+                            {{entry.resource.name}}
+                            <div><em>{{entry.resource.id}}</em></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-10">
+                    <iframe height = "600px" width="100%" ng-src="{{externalRenderUrl}}"></iframe>
+                </div>
+            </div>
         </uib-tab>
         <uib-tab heading="Config">
             <div class="row">
