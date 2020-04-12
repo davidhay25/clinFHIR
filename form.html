@@ -104,16 +104,13 @@
 
                         <div class="rounded-box">
                             <div>Text: {{selectedNode.data.item.text}}</div>
+                            <div>Description: {{selectedNode.data.item.description}}</div>
                             <div ng-show ="selectedNode.data.item.repeats">Can repeat</div>
                             <div ng-repeat = "code in selectedNode.data.item.code">
                                 Code: {{code.system}} | {{code.code}}
                             </div>
                         </div>
 
-
-                        <!--
-                        <input type="text" class="form-control" ng-model="selectedNode.data.item.text"/>
--->
 
                         <div class="pull-right">
 
@@ -139,6 +136,7 @@
                         <div class="rounded-box">
                             <div>Type: {{selectedNode.data.item.type}}</div>
                             <div>Text: {{selectedNode.data.item.text}}</div>
+                            <div>Description: {{selectedNode.data.item.description}}</div>
                             <div ng-repeat = "code in selectedNode.data.item.code">
                                 Code: {{code.system}} | {{code.code}}
                             </div>
@@ -153,6 +151,34 @@
                             <button class="btn btn-link pull-right" ng-click="moveItem(selectedNode.data.item,'dn')">Move Down</button>
                         </div>
 
+                        <div class="clearfix"></div>
+                        <div ng-show="selectedNode.data.item.type == 'choice' && selectedNode.data.item.answerValueSet">
+                            <div class="banner">Expand choices</div>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <input type="text" class="form-control" ng-model="input.filter"/>
+
+                                </div>
+                                <div class="col-md-4">
+                                    <button class="btn btn-link" ng-click="expandVS(selectedNode.data.item.answerValueSet,input.filter)">Expand</button>
+                                </div>
+                            </div>
+
+                            <table class="table table-condensed table-bordered">
+                                <tr ng-repeat="concept in expandedVS.expansion.contains">
+                                    <td>{{concept.code}}</td>
+                                    <td>{{concept.display}}</td>
+                                    <td>{{concept.system}}</td>
+                                </tr>
+                            </table>
+
+                            <div class="alert-danger alert" ng-show="expandError">
+                                <div ng-repeat="issue in expandError.issue">
+                                    {{issue.diagnostics}}
+                                </div>
+                            </div>
+
+                        </div>
 
                     </div>
 
@@ -207,11 +233,13 @@
         </uib-tab>
         <uib-tab heading="Summary">
             <table class="table table-bordered table-condensed">
-                <tr><th>Group</th><th>Item</th><th>Type</th><th>Code</th><th>Can repeat</th></tr>
+
+                <tr><th>Group</th><th>Item</th><th>Type</th><th>Description</th><th>Code</th><th>Can repeat</th><th>Other details</th></tr>
                 <tr ng-repeat="row in table">
-                    <td>{{row.group}}</td>
-                    <td>{{row.text}}</td>
-                    <td>{{row.type}}</td>
+                    <td><div ng-show="row.type=='group'">{{row.text}}</div></td>
+                    <td><div ng-hide="row.type=='group'">{{row.text}}</div></td>
+                    <td><div ng-show="row.linkId">{{row.type}}</div></td>
+                    <td><div ng-show="row.linkId">{{row.description}}</div></td>
                     <td>
                         <div ng-repeat = "code in row.code">
                             {{code.system}} | {{code.code}}
@@ -219,6 +247,9 @@
 
                     </td>
                     <td>{{row.repeats}}</td>
+                    <td>
+                        <div>{{row.answerValueSet}}</div>
+                    </td>
                 </tr>
             </table>
 

@@ -383,6 +383,10 @@ angular.module("sampleApp").service('profileDiffSvc',
             var ext = Utilities.getSingleExtensionValue(igResource,igEntryType)
             if (ext && ext.valueCode) {
                 return ext.valueCode;
+            } else if (igResource.sourceReference && igResource.sourceReference.reference && igResource.sourceReference.reference.indexOf("ValueSet") > -1) {
+                //this check added April 13 2020
+                return 'valueset'
+
             } else if (igResource.purpose) {
                 return igResource.purpose
             } else if (igResource.acronym) {
@@ -390,7 +394,19 @@ angular.module("sampleApp").service('profileDiffSvc',
             }
 
         },
+   /*     getPurpose: function(igResource) {
+            //get the purpose from the IG.package.resource node.
+            var ext = Utilities.getSingleExtensionValue(igResource,igEntryType)
+            if (ext && ext.valueCode) {
+                return ext.valueCode;
+            } else if (igResource.purpose) {
+                return igResource.purpose
+            } else if (igResource.acronym) {
+                return igResource.acronym
+            }
 
+        },
+*/
         makeCapStmt : function(cs) {
 
             var extProfileLink = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-profile-link";

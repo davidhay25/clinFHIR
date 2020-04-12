@@ -14,7 +14,14 @@
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
     <link rel="stylesheet" type="text/css" href="css/main.css"/>
     <link rel="stylesheet" type="text/css" href="css/vis.min.css"/>
+<!--
+    <link rel="stylesheet" type="text/css" href="css/prism.css"/>
 
+
+    <script
+            charset="UTF-8"
+            src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.9/languages/go.min.js"></script>
+-->
     <script src="js/libs/angular-sanitize.js"></script>
     <script src="js/libs/firebase.js"></script>
     <script src="js/libs/angularfire.min.js"></script>
@@ -44,7 +51,9 @@
     <script src="js/modalDialogSvc.js"></script>
     <script src="resourceBuilder/rbServices.js"></script>
     <script src="js/libs/angular-bootstrap-checkbox.js"></script>
-
+    <!--
+    <script src="js/libs/prism.js"></script>
+    -->
     <style>
         .myForm {
             padding: 8px;
@@ -174,7 +183,7 @@
 
                     <div ng-show="showBundleHelp" class="rounded-box">
 
-                        These are bundles that were imported to the Visualizer (using thr 'Import' link above) and saved to the current data server.
+                        These are bundles that were imported to the Visualizer (using the 'Import' link above) and saved to the current data server.
                         Selecting them from the list below
                         will download them from the server, then validate and display them.
                     </div>
@@ -288,7 +297,15 @@
                     <uib-tabset>
                         <uib-tab heading="Json">
                             <div>
-                                <pre ng-show="fhir">{{fhir | json}}</pre>
+                                <!--
+
+                                                              <pre><code class="json">  {"code":"test","test":["line1","line2]} </code></pre>
+
+
+                                                                                              <pre ng-show="fhir"><code class="language-json">  {{fhir | json}} </code></pre>
+                                                              -->
+                                <pre ng-show="fhir">  {{fhir | json}} </pre>
+
                             </div>
                         </uib-tab>
                         <uib-tab>

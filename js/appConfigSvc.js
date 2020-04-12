@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2019-10-10';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2020-04-05';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -147,27 +147,25 @@ angular.module("sampleApp")
 
 
         defaultConfig.allKnownServers.push({name:"Vonk STU3 server",url:"http://vonk.fire.ly/",version:3,everythingOperation:false});
-
+        defaultConfig.allKnownServers.push({name:"Vonk R4 server",url:" https://vonk.fire.ly/R4/",version:4,everythingOperation:false});
 
 
         defaultConfig.allKnownServers.push({name:"Telstra Health STU3 server",url:"http://sqlonfhir-stu3.azurewebsites.net/fhir/",version:3,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"Telstra Health R4 server",url:"http://sqlonfhir-stu3.azurewebsites.net/fhir/",version:4,everythingOperation:true});
-
+/*
         defaultConfig.allKnownServers.push({name:"Local HAPI STU2 server",url:"http://localhost:8079/baseDstu2/",version:2,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"Local HAPI STU3 server",url:"http://localhost:8080/baseDstu3/",version:3,everythingOperation:true,isTerminology:true});
-
-
         defaultConfig.allKnownServers.push({name:"HL7 New Zealand STU2 server",url:"http://fhir.hl7.org.nz/baseDstu2/",version:2});
 
-
-        defaultConfig.allKnownServers.push({name:'fhir.org',version:3,url:"http://tx.fhir.org/r3/",isTerminology:true});
+*/
+     //   defaultConfig.allKnownServers.push({name:'fhir.org',version:3,url:"http://tx.fhir.org/r3/",isTerminology:true});
         //defaultConfig.allKnownServers.push({name:'Ontoserver STU3',version:3,url:"http://52.63.0.196:8080/fhir/",isTerminology:true});
-        defaultConfig.allKnownServers.push({name:'MiHIN STU2',version:2,url:"http://52.72.172.54:8080/fhir/baseDstu2/"});
+       // defaultConfig.allKnownServers.push({name:'MiHIN STU2',version:2,url:"http://52.72.172.54:8080/fhir/baseDstu2/"});
         defaultConfig.allKnownServers.push({name:'Simplifier R3',version:3,url:"https://stu3.simplifier.net/open/"});
         defaultConfig.allKnownServers.push({name:'Aegis WildFHIR STU3',version:3,url:" http://wildfhir.aegis.net/fhir3-0-1/"});
 
 
-        defaultConfig.allKnownServers.push({name:'clinFHIR R2' ,version:2,url:"http://snapp.clinfhir.com:8080/baseDstu2/"});
+        //defaultConfig.allKnownServers.push({name:'clinFHIR R2' ,version:2,url:"http://snapp.clinfhir.com:8080/baseDstu2/"});
         defaultConfig.allKnownServers.push({name:'clinFHIR R3',version:3,everythingOperation:true,url:"http://snapp.clinfhir.com:8081/baseDstu3/"});
 
 
@@ -180,16 +178,16 @@ angular.module("sampleApp")
 
         defaultConfig.allKnownServers.push({name:'HSPC Synthea',version:3,url:"https://api3.hspconsortium.org/HSPCplusSynthea/open/"});
 
-        defaultConfig.allKnownServers.push({name:'NHS-UK STU-2',version:2,url:"https://fhir.nhs.uk/"});
-        defaultConfig.allKnownServers.push({name:'HL7-UK STU-2',version:2,url:"https://fhir-test.hl7.org.uk/"});
+       // defaultConfig.allKnownServers.push({name:'NHS-UK STU-2',version:2,url:"https://fhir.nhs.uk/"});
+       // defaultConfig.allKnownServers.push({name:'HL7-UK STU-2',version:2,url:"https://fhir-test.hl7.org.uk/"});
 
         defaultConfig.allKnownServers.push({name:'FHIR Registry',version:3,url:"https://registry-api.fhir.org/open/",everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"OntoserverR3 (terminology)",url:"https://ontoserver.csiro.au/stu3-latest/",version:3,everythingOperation:true,isTerminology:true});
         defaultConfig.allKnownServers.push({name:'OntoserverR4 (terminology)',version:4,url:"https://r4.ontoserver.csiro.au/fhir/",isTerminology:true});
 
-        defaultConfig.allKnownServers.push({name:'hofSmile',version:3,url:"https://hof.smilecdr.com:8000/",smart:true});
+        //defaultConfig.allKnownServers.push({name:'hofSmile',version:3,url:"https://hof.smilecdr.com:8000/",smart:true});
 
-        defaultConfig.allKnownServers.push({name:'eip',version:3,url:"http://eip-fhir.experimental.aimsplatform.com/hapi-fhir/baseDstu3/"});
+        //defaultConfig.allKnownServers.push({name:'eip',version:3,url:"http://eip-fhir.experimental.aimsplatform.com/hapi-fhir/baseDstu3/"});
         defaultConfig.allKnownServers.push({name:'Ontoserver-PC',version:3,url:"https://primarycare.ontoserver.csiro.au/fhir/"});
 
 

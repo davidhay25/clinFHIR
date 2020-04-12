@@ -4,20 +4,21 @@ angular.module("sampleApp")
         $scope.input = {};
         $scope.QName = "CBAC";      //the initial form
         $scope.server = "http://home.clinfhir.com:8054/baseR4/";        //where the Q's are stored
-        $scope.isDirty;
+        $scope.termServer = "https://r4.ontoserver.csiro.au/fhir/";
+        $scope.isDirty = false;
 
         $scope.renderUrl = "http://smartqedit4.azurewebsites.net/Questionnaire/Preview";      //the external rendering app
 
         $timeout(function () {
-            //loadTree();
+
             let url = $scope.server + "Questionnaire/"+$scope.QName;
             $http.get(url).then(
                 function(data) {
-                    $scope.Q = data.data;
+                    $scope.Q = formSvc.makeInternalQ(data.data);
                     $scope.treeData = makeTreeData($scope.Q);
                     drawTree();
                     makeTable();
-                    $scope.renderQ = makeRenderModel($scope.Q)
+                    $scope.renderQ = formSvc.makeFlatModel($scope.Q)
                     $scope.expandAll();
                 }
             )
@@ -45,9 +46,10 @@ angular.module("sampleApp")
         };
 
         $scope.saveForm = function(){
-            $scope.Q.id = $scope.QName;
+            let fhirQ = formSvc.makeFhirQ($scope.Q)
+            fhirQ.id = $scope.QName;
             let url = $scope.server + "Questionnaire/"+$scope.QName;
-            $http.put(url,$scope.Q).then(
+            $http.put(url,fhirQ).then(
                 function(data) {
                     delete $scope.isDirty;
                     alert('Saved: '+ url)
@@ -94,7 +96,8 @@ angular.module("sampleApp")
                     }
                 }
             }).result.then(function(Q){
-                $scope.Q = Q;
+
+                $scope.Q = formSvc.makeInternalQ(Q);
 
                 $scope.treeData = makeTreeData($scope.Q);
                 drawTree();
@@ -157,22 +160,11 @@ angular.module("sampleApp")
         };
 
         $scope.editItem = function(inItem) {
-            let vo = findItemInQ($scope.selectedNode.data.item.linkId);
+            //let vo = findItemInQ($scope.selectedNode.data.item.linkId);
+            let vo = findItemInQ(inItem.linkId);
             if (vo.item) {
                 editItem(vo.item);
             }
-            /*
-            for (const groupItem of $scope.Q.item) {
-                if (groupItem.item) {
-                    for (const item of groupItem.item) {
-                        if (item.linkId == inItem.linkId) {
-                            editItem(item);
-                            break;
-                        }
-                    }
-                }
-            }
-            */
 
 
         };
@@ -200,6 +192,8 @@ angular.module("sampleApp")
                         $scope.input.repeats =  currentItem.repeats;
                         $scope.input.newItemType = currentItem.type;
                         $scope.input.newItemText = currentItem.text
+                        $scope.input.description = currentItem.description;
+
                         newItem.linkId = currentItem.linkId;
                         if (currentItem.code) {
                             //assume only 1 code
@@ -214,6 +208,7 @@ angular.module("sampleApp")
                         newItem.text = $scope.input.newItemText;
                         newItem.type = $scope.input.newItemType;
                         newItem.repeats = $scope.input.repeats;
+                        newItem.description = $scope.input.description;
                         if ($scope.input.ValueSet) {
                             newItem.answerValueSet = $scope.input.ValueSet;
                         }
@@ -231,8 +226,9 @@ angular.module("sampleApp")
                 if (item) {
                     //editing
                     item.text = newItem.text;
-                    item.type - newItem.type;
+                    item.type = newItem.type;
                     item.repeats = newItem.repeats;
+                    item.description = newItem.description;
                     item.answerValueSet = newItem.answerValueSet;
                     item.code = newItem.code;
 
@@ -269,73 +265,41 @@ angular.module("sampleApp")
             })
         }
 
-        //the item is ready to be added to an existing group
-        $scope.addNewItemDEP = function(){
-
-            //let qItem = $scope.selectedNode.data.item;      //the questionnaire item object
-
-            $scope.Q.item.forEach(function(qItem){
-                if (qItem.linkId == $scope.selectedNode.data.item.linkId) {
-
-                    //create the new Q item
-                    let item = {};
-                    item.text = $scope.input.newItemText;
-                    item.type = $scope.input.newItemType;
-                    item.linkId = 'id' + new Date().getTime();
-
-                    //and add to the 'parent' children node
-                    qItem.item = qItem.item || []
-                    qItem.item.push(item);
-                    console.log($scope.Q)
-                    $scope.treeData = makeTreeData($scope.Q);
+        $scope.expandVS = function(url,filter) {
+            delete $scope.expandedVS
+            delete $scope.expandError;
+            let qry = $scope.termServer + "ValueSet/$expand?url=" + url
+            if (filter) {
+                qry += "&filter="+filter;
+            }
+            $http.get(qry).then(
+                function(data) {
+                    console.log(data)
+                    $scope.expandedVS = data.data;
+                }, function(err) {
+                    console.log(err)
+                    $scope.expandError = err.data;
                 }
+            )
 
-            })
-
-
-
-            delete $scope.input.currentAction;
-
-            drawTree();
-            $scope.expandAll();
-
-        };
+        }
 
         //delete the indicated item
         $scope.deleteItem = function(deleteItem) {
 
-
-            let vo = findItemInQ(deleteItem.linkId);
-            if (vo.parent && vo.index > -1) {
-                vo.parent.item.splice(vo.index,1)
-            }
-/*
-            $scope.Q.item.forEach(function(groupItem){
-                let groupId = groupItem.linkId;
-                if (groupItem.item) {
-                    let deleteInx = -1;
-                    groupItem.item.forEach(function (item,inx) {
-                        if (item.linkId == deleteItem.linkId) {
-                            //this is the one to delete
-                            deleteInx = inx;
-                        }
-                    });
-
-                    if (deleteInx > -1) {
-                        console.log('del')
-                        groupItem.item.splice(deleteInx,1)
-                    }
+            if ($window.confirm("Are you sure you wish to remove this item")) {
+                let vo = findItemInQ(deleteItem.linkId);
+                if (vo.parent && vo.index > -1) {
+                    vo.parent.item.splice(vo.index,1)
                 }
-//now see if the deleteInx has been set - if so then we know which one to delete
 
-            });
-            */
-            $scope.treeData = makeTreeData($scope.Q);
-            updateAfterEdit()
+                $scope.treeData = makeTreeData($scope.Q);
+                updateAfterEdit()
 
-           // drawTree();
-           // $scope.expandAll();
-            //console.log(item);
+            }
+
+
+
         };
 
         $scope.moveItem = function(moveItem,dirn) {
@@ -409,7 +373,12 @@ angular.module("sampleApp")
            // }
         };
 
-        $scope.editGroup = function(group) {
+        $scope.editGroup = function(groupItem) {
+            let vo = findItemInQ(groupItem.linkId);
+            if (vo.item) {
+                editGroup(vo.item);
+            }
+            /*
             for (const groupItem of $scope.Q.item) {
                 if (groupItem.linkId == group.linkId) {
                     editGroup(groupItem);
@@ -423,6 +392,8 @@ angular.module("sampleApp")
                     groupItem.text = text
                 }
             });
+
+            */
 
             /*
             let text = $window.prompt("What is the new group text",editGroup.text)
@@ -461,7 +432,8 @@ angular.module("sampleApp")
 
                         //$scope.input.ValueSet = currentItem.answerValueSet;
 
-                        $scope.input.text = currentGroup.text
+                        $scope.input.text = currentGroup.text;
+                        $scope.input.description = currentGroup.description;
                         newGroup.linkId = currentGroup.linkId;
                         if (currentGroup.code) {
                             //assume only 1 code
@@ -474,7 +446,7 @@ angular.module("sampleApp")
 
                     $scope.save=function(){
                         newGroup.text = $scope.input.text;
-                        //newGroup.type = $scope.input.newItemType;
+                        newGroup.description = $scope.input.description;
                         newGroup.repeats = $scope.input.repeats;
 
                         if ($scope.input.code) {
@@ -493,6 +465,8 @@ angular.module("sampleApp")
                     group.text = newGroup.text;
                     group.repeats = newGroup.repeats;
                     group.code = newGroup.code;
+                    group.description = newGroup.description;
+
 
                     $scope.selectedNode.data.item = group;  //so the current display is updated
 
@@ -585,25 +559,28 @@ angular.module("sampleApp")
         }
 
         $scope.deleteGroup = function(deleteGroup){
-            let vo = findItemInQ(deleteGroup.linkId);
-            if (vo.parent && vo.index > -1) {
-                vo.parent.item.splice(vo.index,1)
-                updateAfterEdit()
+            if ($window.confirm("Are you sure you wish to remove this group")) {
+                let vo = findItemInQ(deleteGroup.linkId);
+                if (vo.parent && vo.index > -1) {
+                    vo.parent.item.splice(vo.index,1)
+                    updateAfterEdit()
+                }
             }
+
         };
 
 
         function updateAfterEdit(){
             $scope.isDirty = true;
             $scope.treeData = makeTreeData($scope.Q);
-            $scope.renderQ = makeRenderModel($scope.selectedNode.data.item)
+            $scope.renderQ = formSvc.makeFlatModel($scope.selectedNode.data.item)
             drawTree();
             $scope.expandAll();
         }
 
 
         //make a render tree from the selected item down...
-        function makeRenderModel(item){
+        function makeFlatModelDEP(item){
             let ar = [];
 
             if (!item) {
@@ -763,6 +740,9 @@ angular.module("sampleApp")
 
         //create a table view of the form - just for display
         function makeTable() {
+
+            $scope.table = formSvc.makeFlatModel($scope.Q)
+            /*
             $scope.table = []
             $scope.Q.item.forEach(function(group){
                 let row = {group:group.text}
@@ -777,7 +757,7 @@ angular.module("sampleApp")
             console.log($scope.table)
             //also make the sample QR
             $scope.sampleQR = formSvc.makeQR($scope.Q)
-
+*/
         }
 
         //load tree. THis will retrieve the Questionnaire and construct the internal model
@@ -809,14 +789,17 @@ angular.module("sampleApp")
                 {'core': {'multiple': false, 'data': $scope.treeData, 'themes': {name: 'proton', responsive: true}}}
             ).on('changed.jstree', function (e, data) {
                 if (data.node) {
+
+                    delete $scope.expandedVS;
+                    delete $scope.expandError
                     $scope.selectedNode = data.node;
                     console.log($scope.selectedNode)
                     console.log($scope.selectedNode.data)
 
                     if ($scope.selectedNode.data.type == 'root') {
-                        $scope.renderQ = makeRenderModel($scope.Q)
+                        $scope.renderQ = formSvc.makeFlatModel($scope.Q)
                     } else {
-                        $scope.renderQ = makeRenderModel($scope.selectedNode.data.item)
+                        $scope.renderQ = formSvc.makeFlatModel($scope.selectedNode.data.item)
                     }
 
 

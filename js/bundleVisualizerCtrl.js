@@ -406,6 +406,8 @@ console.log(doc)
                     //the importer will return a resource that is the one to be selected...  (might have been a bundle)
 
                     let newBundle = deDupeBundle(bundle)
+
+
                     console.log(newBundle)
                     processBundle(newBundle);
 

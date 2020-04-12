@@ -32,56 +32,17 @@
                 <div><input type="text" class="form-control" ng-model="input.text" placeholder="Enter the group text"/> </div>
             </div>
         </div>
-        <!--
-
-        <div>
-            <div class="row">
-                <div class="col-sm-2 col-md-2">
-                    Type
-                </div>
-                <div class="col-sm-9 col-md-9">
-                    <select ng-model="input.newItemType" class="form-control"
-                            ng-options = "type for type in newOptionsType">
-
-                    </select>
-                </div>
+        <br/>
+        <div class="row" >
+            <div class="col-sm-2 col-md-2">
+                Description
             </div>
+            <div class="col-sm-9 col-md-9">
+                <div><textarea class="form-control" ng-model="input.description" placeholder="Enter a description about this element"></textarea> </div>
 
-
-
-            <br/>
-
-
-
-            <br/>
-            <div ng-switch on="input.newItemType">
-                <div ng-switch-when="display">
-                    <div class="row">
-                        <div class="col-sm-2 col-md-2">
-                            Text
-                        </div>
-                        <div class="col-sm-9 col-md-9">
-                            <textarea class="form-control" ng-model="input.newItemText" placeholder="Enter the text to display" ></textarea>
-                        </div>
-                    </div>
-
-
-                </div>
-                <div ng-switch-when="choice">
-                    <div class="row">
-                        <div class="col-sm-2 col-md-2">
-                            ValueSet
-                        </div>
-                        <div class="col-sm-9 col-md-9">
-                            <input type="text" ng-model="input.ValueSet" class="form-control" placeholder="Enter the URL of the ValueSet with the possible answers">
-                        </div>
-                    </div>
-
-
-                </div>
             </div>
+        </div>
 
-            -->
             <br/>
             <div class="row">
                 <div class="col-sm-2 col-md-2">
