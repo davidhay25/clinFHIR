@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2020-04-05';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2020-04-29';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -141,7 +141,7 @@ angular.module("sampleApp")
 
         defaultConfig.allKnownServers.push({name:"Public HAPI STU3 server",url:"http://fhirtest.uhn.ca/baseDstu3/",version:3,everythingOperation:true,isTerminology:true});
 
-        defaultConfig.allKnownServers.push({name:"Public HAPI R4 server",url:"http://fhirtest.uhn.ca/baseR4/",version:4,everythingOperation:true,isTerminology:true});
+        defaultConfig.allKnownServers.push({name:"Public HAPI R4 server",url:"http://hapi.fhir.org/baseR4/",version:4,everythingOperation:true,isTerminology:true});
 
 
 
