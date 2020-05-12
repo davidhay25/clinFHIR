@@ -1,0 +1,243 @@
+<div>
+
+    <style>
+        .graph {
+            width:100%;
+            height: 500px;
+            border: solid;
+            border-color: grey;
+            border-width: 1px;
+        }
+    </style>
+
+    <uib-tabset>
+        <br/>
+
+
+        <uib-tab heading="Pre defined queries">
+            <br/>
+            <div class="row">
+                <div class="col-md-2">
+
+                    <uib-accordion close-others="oneAtATime">
+                        <div uib-accordion-group class="panel-default" ng-repeat = "grp in queries"
+                             heading="{{grp.title}}" >
+
+                            <div class="list-group">
+                                <div ng-class="{'list-group-item':true,'listItemSelected':qry == selectedQuery}"
+                                     ng-repeat ="qry in grp.queries"
+                                     style="cursor: pointer" ng-click="selectQuery(qry)">
+                                    {{qry.title}}
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </uib-accordion>
+
+
+
+                </div>
+
+
+                <div class="col-md-9">
+
+
+                    <div ng-show="! selectedQuery">
+                        <p>This page is designed to allow you to send queries compliant with the IG. The
+                        'Pre-defined queries' page has a number of 'pre-set' queries that will be commonly be used - the query is displayed in
+                        the page and can be altered. The Ad Hoc tab supports user crafted queries (though limited to the resources
+                            that wll be supported by the IG).</p>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-10">
+                            {{selectedQuery.title}}
+                            <textarea style="background-color: lightyellow" ng-show="input.selectedQueryUrl" class="form-control" rows="3"
+                                      ng-model="input.selectedQueryUrl"></textarea>
+                            <div><em>You can edit the query above before executing. Don't add the server, as this is added automatically.</em></div>
+
+
+                        </div>
+                        <div class="col-md-2">
+                            <div ng-show = "input.selectedQueryUrl" class="pull-right"><button class="btn btn-danger"
+                              ng-click="executeQuery(input.selectedQueryUrl)">Execute</button> </div>
+                        </div>
+                    </div>
+                    <hr/>
+
+                    <div ng-show="executeMessage">
+                        <div class="alert alert-warning">{{executeMessage}}</div>
+                    </div>
+
+                    <div ng-show="sampleResult">Status: {{sampleResult.status}}
+                        <span ng-hide="sampleResult.status == 200"> <em>&nbsp;&nbsp;&nbsp;See the error returned from the server in the Json tab below.</em></span>
+
+                    </div>
+                    <uib-tabset ng-show="sampleResult">
+                        <uib-tab heading="Json">
+                            <pre ng-show="sampleResult">{{sampleResult.data | json}}</pre>
+                        </uib-tab>
+                        <uib-tab heading="Graph" select="fitGraph(sampleGraph)">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="graph" id="resourcesGraph"/>
+                                </div>
+                                <div class="col-md-4">
+                                    <pre ng-show="selectedResource.resourcesGraph">{{selectedResource.resourcesGraph | json}}</pre>
+                                </div>
+                            </div>
+
+
+                        </uib-tab>
+                        <uib-tab heading="List">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="list-group">
+                                        <div ng-repeat = "entry in sampleResult.data.entry"
+                                             ng-class="{'list-group-item':true,'listItemSelected':entry.resource.id==input.selectedResourceInList.id}"
+                                             style="cursor:pointer;"
+                                             ng-click="input.selectedResourceInList = entry.resource">
+                                            {{entry.resource.resourceType}}
+                                            <div>{{entry.resource.id}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <pre>{{input.selectedResourceInList | json}}</pre>
+                                </div>
+                            </div>
+                        </uib-tab>
+                    </uib-tabset>
+
+
+
+                </div>
+
+
+
+
+
+
+
+            </div>
+        </uib-tab>
+
+        <!--
+        <uib-tab heading="Ad hoc queries">
+            <br/>
+            <em>This allows customized queries to be sent to the server. Note that as this is (currentlty) a standard
+            HAPi FHIR server, it may allow queries that are not planned to be supported by the HPI. One use of this is
+            to test out additions to the API interface for consideration by the project team. There are 2 types of query you can make:
+            <ul>
+                <li>Search queries that will return a bundle of matching resources (or an empty bundle if there are no matches)</li>
+                <li>Read queries that return a single resource where the id matches the one entered into the text box.</li>
+
+            </ul>
+
+
+            </em>
+            <hr/>
+
+            <div class="row">
+                <div class="col-md-2">
+                    Resource Type:
+
+                </div>
+                <div class="col-md-2">
+                    <div class="btn-group">
+                        <label style="margin:3px" class="btn btn-default" ng-model="input.qType" uib-btn-radio="'search'">Search</label>
+                        <label style="margin:3px" class="btn btn-default" ng-model="input.qType" uib-btn-radio="'read'">Read</label>
+
+
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div ng-show="input.qType=='read'">
+                        This will retrieve a single resource by id. Enter the id into the query box below
+                    </div>
+                    <div ng-show="input.qType=='search'">
+                        This will search for resources. Enter the querystring into the box below
+                    </div>
+
+
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-2">
+                    <select class="form-control" ng-model="input.type" ng-change="setQUrl()"
+                            ng-options="type for type in input.qTypes">
+
+                    </select>
+
+                </div>
+                <div class="col-md-8">
+                    <input type="text" ng-show = "input.qType =='search'" class="form-control" ng-model="input.queryString" ng-change="setQUrl()"
+                           placeholder="Enter query string eg name=smith for a Patient"/>
+
+                    <input type="text" ng-show = "input.qType =='read'" class="form-control" ng-model="input.queryId" ng-change="setQUrl()"
+                           placeholder="Enter the resource id"/>
+
+                </div>
+                <div class="col-md-1">
+                    <button ng-show="input.type" class="btn btn-danger" ng-click="executeQuery()">Execute</button>
+                </div>
+            </div>
+            <br/>
+            <div class="row">
+                <div class="col-md-1">
+                    Query:
+                </div>
+                <div class="col-md-11">
+                    <em>{{qUrl}}</em>
+                </div>
+            </div>
+
+
+
+
+
+            <div>Status:{{qResult.status}}</div>
+            <uib-tabset>
+                <uib-tab heading="Json">
+                    <pre>{{qResult.data | json}}</pre>
+                </uib-tab>
+                <uib-tab heading="Graph" select="fitGraph(adhocGraph)" ng-show="qResult.data.resourceType == 'Bundle'">
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="graph" id="adHocRresourcesGraph"/>
+                        </div>
+                        <div class="col-md-4">
+                            <pre ng-show="selectedResource.adHocRresourcesGraph">{{selectedResource.adHocRresourcesGraph | json}}</pre>
+                        </div>
+                    </div>
+
+
+                </uib-tab>
+            </uib-tabset>
+
+
+
+
+
+
+        </uib-tab>
+        -->
+
+    </uib-tabset>
+
+
+
+
+
+
+
+
+
+
+
+
+</div>

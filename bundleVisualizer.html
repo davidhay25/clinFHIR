@@ -295,19 +295,7 @@
                     </div>
 
                     <uib-tabset>
-                        <uib-tab heading="Json">
-                            <div>
-                                <!--
 
-                                                              <pre><code class="json">  {"code":"test","test":["line1","line2]} </code></pre>
-
-
-                                                                                              <pre ng-show="fhir"><code class="language-json">  {{fhir | json}} </code></pre>
-                                                              -->
-                                <pre ng-show="fhir">  {{fhir | json}} </pre>
-
-                            </div>
-                        </uib-tab>
                         <uib-tab>
                             <br/>
                             <uib-tab-heading>
@@ -521,6 +509,13 @@
 
                         </uib-tab>
 
+                        <uib-tab heading="Json">
+                            <div>
+                                <pre ng-show="fhir">  {{fhir | json}} </pre>
+
+                            </div>
+                        </uib-tab>
+
                         <uib-tab ng-show = "1==2 && fhir.type == 'document' " heading="HandleBars Document">
 
                             <button class="btn btn-primary" ng-click="hbDoc()">Load HandleBars template and render document</button>
@@ -529,15 +524,7 @@
 
                             <ng-include src="hbTemplate"></ng-include>
                         </uib-tab>
-                        <!--
-                        <uib-tab ng-show = "fhir.type == 'document'" heading="Document (resources)">
 
-                            <div ng-repeat="line in document.lines">
-                                {{line.display}}
-                            </div>
-
-                        </uib-tab>
-                        -->
 
 
                     </uib-tabset>
@@ -567,6 +554,37 @@
                            <div class="row">
                                <div class="col-md-6">
                                    <div class="modelScroll">
+
+                                       <table class="table">
+                                           <tr ng-repeat="item in validationResult" ng-click="selectIssue(item)">
+                                               <td>
+                                                   {{item[0].resource.type}}
+                                                   <div>{{item[0].resource.id}}</div>
+                                               </td>
+                                               <td>
+                                                   <div ng-repeat="row in item">
+                                                       <div class="row">
+                                                            <div class="col-md-3">
+                                                                {{row.severity}}
+                                                            </div>
+                                                           <div class="col-md-6">
+                                                               {{row.diagnostics}}
+                                                           </div>
+                                                           <div class="col-md-3">
+                                                               <div ng-repeat="loc in row.location">
+                                                                   {{loc}}
+                                                               </div>
+                                                           </div>
+                                                       </div>
+                                                   </div>
+
+                                               </td>
+
+                                           </tr>
+
+                                       </table>
+
+                                       <!--
                                        <table class="table" style="cursor: pointer">
                                            <tr><th>Severity</th><th>Code</th><th>Location/Diagnostics</th></tr>
                                            <tr style="background-color: #ffaaaa" ng-repeat="issue in validationResult.issue"
@@ -616,6 +634,7 @@
 
 
                                        </table>
+                                       -->
                                    </div>
 
                                </div>

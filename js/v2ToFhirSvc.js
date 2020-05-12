@@ -215,11 +215,10 @@ angular.module("sampleApp")
                     }
 
 
-
                     node.label = label + "\n" + resource.resourceType ;
 
                     if (hashErrors && hashErrors[inx]) {
-                        node.label += " ("+hashErrors[inx].length +")";
+                        // dh - think it clutters the view... node.label += " ("+hashErrors[inx].length +")";
                         node.issues = hashErrors[inx];
                     }
 

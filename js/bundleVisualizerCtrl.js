@@ -417,6 +417,7 @@ console.log(doc)
             };
 
             $scope.selectIssue = function(issue){
+
                 console.log(issue)
                 //find the actual entry - a bit of a hack tttt
                 if (issue.location) {
@@ -469,13 +470,6 @@ console.log(doc)
                         }
                     }
                 }
-
-
-
-               // let id = $scope.selectedBundleEntry.resource.id || $scope.selectedBundleEntry.fullUrl;
-
-
-
 
                 let options = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:$scope.serverRoot,centralResourceId:url}
                 options.showInRef = $scope.input.showInRef;
@@ -595,6 +589,8 @@ console.log(doc)
 
 
                 validate(oBundle,function(hashErrors){
+                    //returns a hash by position in bundle with errors...
+
                     $scope.hashErrors = hashErrors;
 console.log(hashErrors)
 
@@ -673,12 +669,15 @@ console.log(hashErrors)
 
                             let key;
 
+                            //2020-05-10 - hask key is not full Url (as references won't be)
+                            key = entry.resource.resourceType + "/" + entry.resource.id
+                            /*
                             if  (entry.fullUrl) {
                                 key = entry.fullUrl
                             } else {
                                 key = entry.resource.resourceType + "/" + entry.resource.id
                             }
-
+*/
                             hash[key] = entry.resource;
                             if (entry.resource.resourceType == 'Composition') {
                                 arComposition.push(entry.resource)
@@ -697,13 +696,13 @@ console.log(hashErrors)
                             alert('There were '+arComposition.length + ' Composition resources, and there should only be 1')
                     }
 
+                    //if there's exactly one composition...
                     if ($scope.document.composition) {
                         //now get the subject
                         if ($scope.document.composition.subject) {
                             if ($scope.document.composition.subject.reference) {
 
-
-
+                                //the reference won't
                                 $scope.document.subject = hash[$scope.document.composition.subject.reference];
 
                                 if (!$scope.document.subject) {
@@ -719,24 +718,28 @@ console.log(hashErrors)
                         //get the resources referenced from the composition
                         $scope.document.sectionResources = []
 
-                        $scope.document.composition.section.forEach(function(section,inx){
-                            //let section = angular.copy(oSection)
-                            section.realResources = []
-                            if (section.entry) {
-                                section.entry.forEach(function (entry) {
-                                    let resource = hash[entry.reference]
-                                    if (resource) {
-                                        //todo check for list
-                                        section.realResources.push({display:resource.resourceType,resource:resource})
-                                    } else {
-                                        section.realResources.push({display:'unknown reference:'+entry.reference})
-                                    }
+                        if ($scope.document.composition.section) {
+                            $scope.document.composition.section.forEach(function(section,inx){
+                                //let section = angular.copy(oSection)
+                                section.realResources = []
+                                if (section.entry) {
+                                    section.entry.forEach(function (entry) {
+                                        let resource = hash[entry.reference]
+                                        if (resource) {
+                                            //todo check for list
+                                            section.realResources.push({display:resource.resourceType,resource:resource})
+                                        } else {
+                                            section.realResources.push({display:'unknown reference:'+entry.reference})
+                                        }
 
-                                })
-                            }
+                                    })
+                                }
 
 
-                        })
+                            })
+                        }
+
+
 
 
 //console.log($scope.document.composition)
@@ -755,6 +758,8 @@ console.log(hashErrors)
 
             //perform a validation of the resources in the bundle...
             let validate = function(bundle,cb) {
+
+
                // let deferred = $q.defer();
                 //let url = $scope.validationServer.url+"Bundle/$validate";
                 $scope.showWaiting = true;
@@ -770,7 +775,6 @@ console.log(hashErrors)
                 let hashErrors = {};    //related to position in bundle...
                 bundle.entry.forEach(function (entry,inx) {
                     let resource = entry.resource
-
                     let url = $scope.validationServer.url+resource.resourceType +"/$validate";
                     arQuery.push(processValidation(url,resource,hashErrors,inx))
                 });
@@ -816,7 +820,11 @@ console.log(hashErrors)
                                 });
 
                                 if ( addToIssue ) {
-                                    hash[inx] = data.data.issue
+                                    data.data.issue.forEach(function (iss) {
+                                        iss.resource = {type:resource.resourceType, id: resource.id}
+                                    })
+
+                                    hash[inx] = data.data.issue; //{resource:resource,issue:data.data.issue}
                                 }
                             }
 

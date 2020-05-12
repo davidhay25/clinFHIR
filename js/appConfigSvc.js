@@ -104,9 +104,13 @@ angular.module("sampleApp")
         defaultConfig.enableCache = false;  //whether caching is supported
 
         //these are the default servers....
-        defaultConfig.servers.terminology = "https://ontoserver.csiro.au/stu3-latest/";//
-        defaultConfig.servers.data = "http://fhirtest.uhn.ca/baseDstu3/";
-        defaultConfig.servers.conformance = "http://fhirtest.uhn.ca/baseDstu3/";
+        defaultConfig.servers.terminology = "https://r4.ontoserver.csiro.au/fhir/";//
+        defaultConfig.servers.data = "http://hapi.fhir.org/baseR4/";
+        defaultConfig.servers.conformance = "http://hapi.fhir.org/baseR4/";
+
+        //defaultConfig.servers.terminology = "https://ontoserver.csiro.au/stu3-latest/";//
+        //defaultConfig.servers.data = "http://fhirtest.uhn.ca/baseDstu3/";
+        //defaultConfig.servers.conformance = "http://fhirtest.uhn.ca/baseDstu3/";
 
         //defaultConfig.defaultTerminologyServerUrl = "http://fhirtest.uhn.ca/baseDstu3/";
 
