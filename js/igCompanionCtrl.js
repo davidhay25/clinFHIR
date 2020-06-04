@@ -5,11 +5,14 @@ angular.module("sampleApp")
 
             $scope.input = {}
 
-            console.log( $window.location)
+            //console.log( $window.location)
 
-            $scope.server = "http://home.clinfhir.com:8054/baseR4/";  //get from url
+            $scope.server = "http://home.clinfhir.com:8054/baseR4/";  //default - get from url
             $scope.termServer = "https://r4.ontoserver.csiro.au/fhir/"; //default - get from url
+            //$scope.validateServer = "http://home.clinfhir.com:8054/baseR4/";
 
+
+            $scope.validateServer = "http://hapi.fhir.org/baseR4/";
 
             let params = $window.location.search;
             if (params) {
@@ -22,12 +25,17 @@ angular.module("sampleApp")
                             $scope.server = ar1[1]
                             break;
                         }
+                        case "termserver" : {
+                            $scope.termServer = ar1[1]
+                            break;
+                        }
+                        case "validateserver" : {
+                            $scope.validateServer = ar1[1]
+                            break;
+                        }
                     }
-
                 })
             }
-
-
 
             //retrieve all the samples defined for this IG
             igCompanionSvc.getSamples($scope.server).then(
@@ -41,6 +49,25 @@ angular.module("sampleApp")
             );
 
 
+            $scope.validate = function(json) {
+                let resource = angular.fromJson(json)
+                delete $scope.validateResult;
+                delete $scope.validateOutcome;
+                let type = resource.resourceType;
+                let url = $scope.validateServer + type + "/$validate"
+                $http.post(url,resource).then(
+                    function(data){
+                        $scope.validateOutcome = "pass"
+                        $scope.validateResult = data.data;
+                    },
+                    function (err) {
+                        $scope.validateOutcome = "fail"
+                        $scope.validateResult = err.data;
+                       // alert('Unable to validate. Error:' + angular.toJson(err))
+                    }
+                )
+            };
+
             //when a query is selected from the list..
             $scope.selectQuery = function(qry) {
                 $scope.selectedQuery = qry;
@@ -48,7 +75,7 @@ angular.module("sampleApp")
             };
 
             $scope.executeQuery = function(qry) {
-                delete $scope.selectedResourceInList;
+                delete $scope.input.selectedResourceInList;
                 delete $scope.executeMessage;
                 $("#resourcesGraph").empty();
 
@@ -64,6 +91,7 @@ angular.module("sampleApp")
                 $http.get(qry).then(
                     function(data) {
                         $scope.sampleResult = data;
+
                         if (data.data.link) {
                             data.data.link.forEach(function (link) {
                                 if (link.relation == 'next') {

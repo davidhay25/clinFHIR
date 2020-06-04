@@ -482,15 +482,19 @@ angular.module("sampleApp")
                                         include = true;
                                     } else  {
                                         entry.resource.context.forEach(function(ctx){
-                                            if (ctx == '*' || ctx == 'Element' ||  ctx.indexOf($scope.resourceType) > -1) {
-                                                include = true;
+                                            if (ctx) {
+                                                if (ctx == '*' || ctx == 'Element' ||  ctx.indexOf($scope.resourceType) > -1) {
+                                                    include = true;
 
-                                                if (txt && entry.resource.name && entry.resource.name.toLowerCase().indexOf(txt)== -1 ) {
-                                                    include = false;
+                                                    if (txt && entry.resource.name && entry.resource.name.toLowerCase().indexOf(txt)== -1 ) {
+                                                        include = false;
+                                                    }
+
+
                                                 }
-
-
                                             }
+
+
                                         })
                                     }
                                 }

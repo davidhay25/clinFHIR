@@ -15,9 +15,11 @@ var app = express();
 //var orionModule = require("./serverModuleOrion.js")
 var smartModule = require("./serverModuleSMART.js")
 
+let surveyModule = require("./serverModuleSurvey.js")
 
-var iphoneModule = require("./serverModuleIphone.js")
-iphoneModule.setup(app)
+
+//var iphoneModule = require("./serverModuleIphone.js")
+//iphoneModule.setup(app)
 
 process.on('uncaughtException', function(err) {
     console.log('>>>>>>>>>>>>>>> Caught exception: ' + err);
@@ -68,7 +70,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/clinfhir', function(err, ldb) {
         db = ldb;
       //  orionModule.setup(app,db);
         smartModule.setup(app,db);
-
+        surveyModule.setup(app,db);
     }
 });
 
