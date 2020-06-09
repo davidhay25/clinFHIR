@@ -2,7 +2,7 @@
 angular.module("sampleApp")
     .controller('surveyCtrl',
         function ($scope,$http,modalService) {
-            $scope.input = {}
+            $scope.input = {deployType:{}, notes:{}}
             $scope.lst = []
 
             $http.get('artifacts/allResources.json').then(
@@ -88,7 +88,7 @@ angular.module("sampleApp")
                     $scope.allResources.forEach(function (item) {
                         var name = item.name;
                         if ($scope.input.selected[name]) {
-                            let resource = {name:name,dev : $scope.input.devtest[name], prod: $scope.input.production[name], notes: $scope.input.notes[name]}
+                            let resource = {name:name,deployType : $scope.input.deployType[name], notes: $scope.input.notes[name]}
                             result.resources.push(resource)
                         }
 
@@ -113,9 +113,15 @@ angular.module("sampleApp")
 
             }
 
-        $scope.checked = function(row){
-            console.log($scope.input.selected)
-        }
+            $scope.checked = function(row){
+                if (row) {
+                    if (! $scope.input.deployType[row.name]) {
+                        $scope.input.deployType[row.name] = 'dev'
+                    }
+
+                }
+
+            }
 
 
         $scope.canShowDEP = function (row) {

@@ -62,7 +62,7 @@
                         <input type="text" class="form-control" ng-model="input.name" placeholder="My Name"/>
                     </div>
                     <div class="col-md-3">
-                        <input type="text" class="form-control" ng-model="input.contact" placeholder="Contact (optional)"/>
+                        <input type="text" class="form-control" ng-model="input.contact" placeholder="Email (optional)"/>
                     </div>
                     <div class="col-md-3">
                         <checkbox ng-model="input.selectedOnly"
@@ -83,8 +83,8 @@
                     <table class="table table-bordered">
                         <tr>
                             <th width="20%">Resource type</th>
-                            <th width="15%" width="15%">Dev / Test</th>
-                            <th width="15%">Production</th>
+                            <th width="15%" width="15%">Deployment type</th>
+
                             <th>Notes</th>
                         </tr>
 
@@ -102,24 +102,46 @@
                                           ng-click="checked(row)"></checkbox>
                                 {{row.name}}
                             </td>
+
+
                             <td>
                                 <div ng-show="input.selected[row.name]">
+
+                                    <div class="btn-group">
+                                        <label class="btn btn-default" ng-model="input.deployType[row.name]" uib-btn-radio="'dev'">Dev / Test</label>
+                                        <label class="btn btn-default" ng-model="input.deployType[row.name]" uib-btn-radio="'prod'">Production</label>
+
+                                    </div>
+                                </div>
+                            </td>
+
+<!--
+                            <td>
+                                <div ng-show="input.selected[row.name]">
+
                                     <checkbox ng-model="input.devtest[row.name]"
                                               ng-click="checked(row)"></checkbox>
+
                                 </div>
 
                             </td>
+
+
                             <td>
                                 <div ng-show="input.selected[row.name]">
                                 <checkbox ng-model="input.production[row.name]"
                                           ng-click="checked(row)"></checkbox>
                                 </div>
                             </td>
+
+-->
                             <td>
                                 <div ng-show="input.selected[row.name]">
                                     <textarea class="form-control" ng-model="input.notes[row.name]"></textarea>
                                 </div>
                             </td>
+
+
                         </tr>
                     </table>
                 </div>

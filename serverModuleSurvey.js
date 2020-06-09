@@ -17,8 +17,8 @@ function setup(app,db) {
                         summary[type] = summary[type] || {count:0,dev:0,prod:0,notes:[]};
                         summary[type].count ++
                         summary[type].type = type
-                        if (resource.dev) {summary[type].dev ++}
-                        if (resource.prod) {summary[type].prod ++}
+                        if (resource.deployType == 'dev') {summary[type].dev ++}
+                        if (resource.deployType == 'prod') {summary[type].prod ++}
                         if (resource.notes) {
                             summary[type].notes.push(resource.notes)
                         }
