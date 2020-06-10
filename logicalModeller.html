@@ -1336,11 +1336,12 @@
                                         <td>Model Editor</td>
                                         <td>
 
-                                            <div ng-show="((Practitioner.telecom[0].value == treeData[0].data.header.editor) || Practitioner.telecom[0].value && !  treeData[0].data.header.editor)">
+                                                <div ng-show="((Practitioner.telecom[0].value.toLowerCase() == treeData[0].data.header.editor.toLowerCase()) || Practitioner.telecom[0].value && !  treeData[0].data.header.editor)">
                                                 <!-- IF the current user is the editor, or there is a current user but no editor-->
 
                                                 <div style="cursor: hand" class="pull-right clickable"  ng-click="changeEditor()">Change</div>
                                             </div>
+
                                             {{treeData[0].data.header.editor}}
                                         </td>
                                     </tr>
