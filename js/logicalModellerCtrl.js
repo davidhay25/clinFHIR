@@ -2200,6 +2200,11 @@ angular.module("sampleApp")
                 $scope.isDirty = false;
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource);
 
+                if ($scope.treeData.length == 0 ) {
+                    alert("There's a problem with the model structure. Please contact David Hay for assistance - david.hay25@gmail.com")
+                }
+
+
 
                 let item = $scope.treeData[0]
                 if (item && item.data && item.data.header) {

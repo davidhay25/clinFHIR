@@ -1443,8 +1443,10 @@ angular.module("sampleApp")
                                 arDoc.push(addTaggedLine("p",data.description))
 
                             } else {
-                                arDoc.push(addTaggedLine("h3",arPath.join('.')));
 
+
+                                //arDoc.push(addTaggedLine("h3",arPath.join('.')));
+                                arDoc.push(addTaggedLine("h3",arPath[arPath.length -1]));
                                 arDoc.push("<table class='dTable'>");
 
                                 addRowIfNotEmpty(arDoc,'Name',data.name);
@@ -1486,15 +1488,36 @@ angular.module("sampleApp")
 
 
                                 });
+
+                                addRowIfNotEmpty(arDoc,'Datatype/s',type)
+
                                 if (data.selectedValueSet && data.selectedValueSet.valueSet) {
-                                    type +=  "<i>"+ data.selectedValueSet.valueSet + "</i> ("+ data.selectedValueSet.strength + ")"
+                                    let binding = data.selectedValueSet.valueSet;
+                                    if (data.selectedValueSet.strength) {
+                                        binding += " (" + data.selectedValueSet.strength + ")"
+                                    }
+                                    addRowIfNotEmpty(arDoc,'Binding',binding)
+                                    //type +=  "<i>"+ data.selectedValueSet.valueSet + "</i> ("+ data.selectedValueSet.strength + ")"
 
 
                                 }
 
                                 //type = type.substring(0,type.length -2);
 
-                                addRowIfNotEmpty(arDoc,'Datatype/s',type)
+                                let display = type;     //default to just type name
+/*
+                                console.log(data)
+                                if (data.selectedValueSet) {
+                                    let binding = "<div>" + data.selectedValueSet.valueSet;
+                                    if (data.selectedValueSet.strength) {
+                                        binding += " (" + data.selectedValueSet.strength + ")"
+                                    }
+                                    binding += "</div>"
+                                    display += binding;
+                                }
+*/
+
+                                //addRowIfNotEmpty(arDoc,'Datatype/s',display)
 
 
 
