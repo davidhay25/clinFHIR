@@ -311,15 +311,15 @@ angular.module("sampleApp")
 
                             var ext = Utilities.getSingleExtensionValue(ed,simpleExtensionUrl); //in case this is an extension
                             if (ext && ext.valueString) {
-                                lne += ed.valueString
+                                lne += makeSafe(ed.valueString)
                             }
                             lne += ',';
-                            lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.usageGuide) +',';
-                            lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.misuse) +',';
-                            lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.legacy) +',';
-                            lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.lmReviewReason) +',';
-                            lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.lmElementLink) +',';
-                            lne += getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.edStatus) +',';
+                            lne += makeSafe(getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.usageGuide)) +',';
+                            lne += makeSafe(getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.misuse)) +',';
+                            lne += makeSafe(getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.legacy)) +',';
+                            lne += makeSafe(getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.lmReviewReason)) +',';
+                            lne += makeSafe(getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.lmElementLink)) +',';
+                            lne += makeSafe(getStringExtensionValue(ed,appConfigSvc.config().standardExtensionUrl.edStatus)) +',';
 
                             //var edStatusUrl = appConfigSvc.config().standardExtensionUrl.edStatus;
 
@@ -354,6 +354,7 @@ angular.module("sampleApp")
 
                         s = s.replace(/"/g, "'");
                         s = s.replace(/,/g, "-");
+
                         return '"' + s + '"';
                     } else {
                         return "";
