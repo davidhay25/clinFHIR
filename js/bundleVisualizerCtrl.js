@@ -1,6 +1,71 @@
 angular.module("sampleApp")
     .controller('bundleVisualizerCtrl',
-        function ($scope,$uibModal,$http,v2ToFhirSvc,$timeout,modalService,GetDataFromServer,appConfigSvc,$localStorage,$q) {
+        function ($scope,$uibModal,$http,v2ToFhirSvc,$timeout,modalService,
+                  GetDataFromServer,$window,appConfigSvc,$localStorage,$q) {
+
+
+        console.log($window.location)
+
+            $scope.dataServer = $localStorage.dataServer || appConfigSvc.getCurrentDataServer();
+            $scope.validationServer = $localStorage.validationServer || appConfigSvc.getCurrentConformanceServer();
+
+            let search = $window.location.search;
+
+            if (search) {
+                search = decodeURIComponent(search)
+                let bundleId;
+                console.log(search)
+                let s = search.substr(1); //remove the leading '?'
+                let ar = s.split('&')
+                ar.forEach(function (item) {
+                    let ar1 = item.split('=')
+                    switch (ar1[0]) {
+                        case 'id' :
+                            bundleId = ar1[1]
+                            break;
+                        case 'server' :
+                            let url = ar1[1]
+                            if (url.substr(-1) !== '/') {
+                                url += "/"
+                            }
+
+
+                            $scope.dataServer = {url: url}
+                            console.log($scope.dataServer)
+                            break;
+
+                    }
+                });
+
+                if (bundleId) {
+                    console.log('Loading ' + bundleId + " from " + $scope.dataServer.url)
+                    let qry = $scope.dataServer.url + "Bundle/" + bundleId;
+                    $http.get(qry).then(
+                        function (data) {
+                            console.log(data.data)
+                            processBundle(data.data)
+                        },
+                        function(err) {
+                            console.log("Bundle not found...")
+                        }
+                    )
+
+                }
+            }
+
+
+            //load bundles with an identifier in the cfBundle identifier system
+            let identifierSystem = appConfigSvc.config().standardSystem.bundleIdentifierSystem;
+            let url = $scope.dataServer.url + "Bundle?identifier="+identifierSystem + "|";
+            $http.get(url).then(
+                function(data) {
+                    console.log(data)
+                    $scope.existingBundles = data.data;
+                }
+            );
+
+
+
 
 
             //will update the config. We don't care if manually entered servers are lost or the default servers changed
@@ -160,8 +225,6 @@ console.log(doc)
 
             };
 
-            $scope.dataServer = $localStorage.dataServer || appConfigSvc.getCurrentDataServer();
-            $scope.validationServer = $localStorage.validationServer || appConfigSvc.getCurrentConformanceServer();
 
 
             $scope.changeServer = function(type) {
@@ -209,15 +272,6 @@ console.log(doc)
 
 
 
-            //load bundles with an identifier in the cfBundle identifier system
-            let identifierSystem = appConfigSvc.config().standardSystem.bundleIdentifierSystem;
-            let url = $scope.dataServer.url + "Bundle?identifier="+identifierSystem + "|";
-            $http.get(url).then(
-                function(data) {
-                    console.log(data)
-                    $scope.existingBundles = data.data;
-                }
-            );
 
             $scope.importBundle = function() {
                 $uibModal.open({
