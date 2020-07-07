@@ -122,7 +122,7 @@
 
             </div>
 
-            <div class="col-md-8">
+            <div class="col-md-6">
                 <div class="navbar-text">
                     <strong>Validation server:</strong> {{validationServer.name}} ({{validationServer.url}}) <span class="clickable" ng-click="changeServer('validation')">Change</span>
 
@@ -130,6 +130,13 @@
                 </div>
 
             </div>
+
+            <div class="col-md-2">
+                <div class="navbar-text">
+                    <div class="clickable" ng-click="toggleSidePane()">Toggle side pane</div>
+                </div>
+            </div>
+
 
             <div class="col-md-1">
                 <div class="navbar-text">
@@ -157,7 +164,7 @@
 
 
     <div class="row">
-        <div class="col-md-2">
+        <div ng-class="leftPaneClass">
 
 
             <uib-tabset>
@@ -254,7 +261,7 @@
 
 
         </div>
-        <div class="col-md-10">
+        <div ng-class="rightPaneClass">
 
             <div ng-show="!fhir || input.showHelp">
                 <br/>
@@ -445,6 +452,13 @@
                         <uib-tab heading="Graph" select="fitGraph()">
                             <div class="row">
                                 <div class="col-md-8">
+                                    <div>
+                                        <div class="pull-right">
+                                            <input ng-model="input.showHidePatient" type="checkbox"
+                                                   ng-click="showHidePatient(input.showHidePatient)"/> Hide Patient
+                                        </div>
+                                    </div>
+
                                     <div id="resourceGraph"></div>
                                 </div>
                                 <div class="col-md-4">

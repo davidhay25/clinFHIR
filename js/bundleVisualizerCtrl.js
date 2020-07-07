@@ -43,6 +43,7 @@ angular.module("sampleApp")
                     $http.get(qry).then(
                         function (data) {
                             console.log(data.data)
+                            $scope.toggleSidePane();    //hide the sidepane
                             processBundle(data.data)
                         },
                         function(err) {
@@ -65,7 +66,25 @@ angular.module("sampleApp")
             );
 
 
+            $scope.showSidePane = true;
+            $scope.toggleSidePane = function(){
+                if (! $scope.showSidePane) {
+                    $scope.leftPaneClass = "col-sm-2 col-md-2"
+                    $scope.rightPaneClass = "col-md-10 col-sm-10";
+                } else {
+                    $scope.leftPaneClass = "hidden"
+                    $scope.rightPaneClass = "col-md-12 col-sm-12";
+                }
+                $scope.showSidePane = !$scope.showSidePane
+            };
 
+            //show or hide the patient in the main graph
+            $scope.showHidePatient = function(toggle) {
+                console.log(toggle)
+                let options = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:$scope.serverRoot}
+                options.hidePatient = toggle;
+                drawGraph(options)
+            }
 
 
             //will update the config. We don't care if manually entered servers are lost or the default servers changed
@@ -639,9 +658,6 @@ console.log(doc)
                     })
                 }
 
-
-
-
                 validate(oBundle,function(hashErrors){
                     //returns a hash by position in bundle with errors...
 
@@ -674,8 +690,8 @@ console.log(hashErrors)
                     }
 
                     let options = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:serverRoot}
-
-
+                    drawGraph(options)
+/*
                     let vo = v2ToFhirSvc.makeGraph(options)
 
                     var container = document.getElementById('resourceGraph');
@@ -700,7 +716,7 @@ console.log(hashErrors)
 
                         $scope.$digest();
                     });
-
+*/
 
 
 
@@ -802,6 +818,34 @@ console.log(hashErrors)
                     }
                 }
             };
+
+
+            function drawGraph(options) {
+                let vo = v2ToFhirSvc.makeGraph(options)
+
+                var container = document.getElementById('resourceGraph');
+                var graphOptions = {
+                    physics: {
+                        enabled: true,
+                        barnesHut: {
+                            gravitationalConstant: -10000,
+                        }
+                    }
+                };
+                $scope.chart = new vis.Network(container, vo.graphData, graphOptions);
+
+                $scope.chart.on("click", function (obj) {
+
+                    var nodeId = obj.nodes[0];  //get the first node
+                    var node = vo.graphData.nodes.get(nodeId);
+                    $scope.selectedNode = node;
+
+                    //this is the entry that is selected from the 'bundle entries' tab...
+                    $scope.selectedBundleEntry = node.entry;
+
+                    $scope.$digest();
+                });
+            }
 
             //when validate called from the UI
             $scope.validate = function() {

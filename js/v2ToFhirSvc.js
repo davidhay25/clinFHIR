@@ -248,14 +248,17 @@ angular.module("sampleApp")
 
                     if (hidePatient) {
 
-                        if (node.title == 'Patient') {
+                       // if (node.title == 'Patient') {
+                        if (node.resource &&  node.resource.resourceType == 'Patient') {
                             //objNodes[inx] = node;
                         } else {
                             objNodes[node.url] = node;
+                           // arNodes.push(node);
                         }
 
                     } else {
                         objNodes[node.url] = node;
+                       // arNodes.push(node);
                     }
 
 
