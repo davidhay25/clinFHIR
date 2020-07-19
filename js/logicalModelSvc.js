@@ -115,9 +115,49 @@ angular.module("sampleApp")
         //a cache of patient references by type. todo may need to enhance this when supporting profiles...
         var patientReferenceCache = {};
         var multiple = {}       //todo hack!!!  multiple paths...
-        multiple['Composition.section.entry'] = "*"
+        multiple['Composition.section.entry'] = "*";
 
         return {
+
+            createDataModel : function(treeData) {
+                //determine type (Heading, group, item for each id
+                let hash = {}
+                treeData.forEach(function(item){
+                    //console.log(item)
+                    let id = item.id
+                    hash[id] = {path:item.id,type:'element'};   //by default, assume it's an element...
+                    //if (item.data && item.data.ed && item.data.ed.type && item.data.ed.type.length > 0) {
+                       // let dt = item.data.ed.type[0].code
+                    if (item.data && item.data.type && item.data.type.length > 0) {
+                        let dt = item.data.type[0].code
+                        if (dt == "Heading") {
+                            hash[id].type = "heading"
+                        } else {
+                            //OK, so it's not a heading. check to see if its parent is a grouper
+                            let ar = id.split('.')
+                            ar.splice(-1,1)
+                            let parentPath = ar.join('.')
+                            let parent = hash[parentPath]
+                            if (parent) {
+                                if (parent.type !== 'heading') {
+                                    parent.type = 'grouper'
+                                }
+                            }
+                        }
+                    }
+                });
+
+                let ar = [];
+                Object.keys(hash).forEach(function (key) {
+                    //let element = {path:key,type:}
+                    ar.push(hash[key])
+                    // iteration code
+                });
+                return (ar)
+
+                //console.log(hash)
+
+            },
             decorateTreeItem : function(item,ed) {
                 decorateTreeView(item,ed);
             },

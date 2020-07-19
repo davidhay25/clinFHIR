@@ -50,6 +50,10 @@ angular.module("sampleApp")
             }
 
 
+            $scope.updateDD = function(){
+                $scope.DD = logicalModelSvc.createDataModel($scope.treeData)
+            }
+
             //edit description, comments and usageGuide in a single dialog
             $scope.lmEditElementDoc = function(row){
 
@@ -99,8 +103,6 @@ angular.module("sampleApp")
 
                 alert(modelId)
             };
-
-
 
             GetDataFromServer.registerAccess('logical');
 
@@ -2111,7 +2113,7 @@ angular.module("sampleApp")
             $scope.dataTypes.push({code: 'BackboneElement',description: 'BackboneElement'});
             $scope.dataTypes.push({code: 'Dosage',description: 'Dosage',definition:'http://hl7.org/fhir/dosage.html#Dosage'});
 
-
+            $scope.dataTypes.push({code: 'Heading',description: 'Heading'});
 
             $scope.saveModel = function() {
                 

@@ -16,6 +16,25 @@ angular.module("sampleApp")
             }
         }
     }])
+
+
+    .filter('DDindent', [function() {
+        return function(ddElement) {
+            if (ddElement) {
+                switch (ddElement.type) {
+                    case "element" :
+                        return 20;
+                        break
+                    case "grouper" :
+                        return 10;
+                        break
+                }
+
+
+            }
+        }
+    }])
+
     .filter('extensionValue', [function() {
         //get the value of the extension (assuming a valueString)
     return function(ext,url) {

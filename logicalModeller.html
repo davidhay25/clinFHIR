@@ -870,6 +870,40 @@
 
                 </uib-tab>
 
+                <uib-tab heading="DD">
+                    <div class="pull-right">
+                        <button class="btn btn-link " ng-click="updateDD()">Update</button>
+                    </div>
+
+
+                    <uib-tabset>
+                        <uib-tab heading="DD layout">
+                            <div class="designerScroll">
+                                <table class="table table-bordered">
+                                <tr ng-repeat = "element in DD">
+
+                                    <td>
+
+                                        <div  ng-style="{ 'padding-left': (element | DDindent) }"
+                                              ng-click="selectNodeFromTable(element.path)" class="clickable" >
+                                            {{element.path}}
+                                        </div>
+                                    </td>
+
+
+
+                                    <td>{{element.type}}</td>
+                                </tr>
+                            </table>
+                            </div>
+                        </uib-tab>
+                    </uib-tabset>
+
+
+
+
+
+                </uib-tab>
 
                 <uib-tab ng-show="1==2" heading="Dev">
                     <br />
