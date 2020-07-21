@@ -52,6 +52,29 @@ angular.module("sampleApp")
 
             $scope.updateDD = function(){
                 $scope.DD = logicalModelSvc.createDataModel($scope.treeData)
+
+
+                logicalModelSvc.generateDDHTML($scope.DD).then(
+                    function(doc) {
+                        $scope.DDDoc = doc;
+                        $('#htmlDD').contents().find('html').html(doc)
+
+
+/* temp
+                        $scope.downloadLinkDoc = window.URL.createObjectURL(new Blob([doc],
+                            {type: "text/html"}));
+
+                        //$scope.downloadLinkJsonName = "downloaded"
+                        var now = moment().format();
+                        $scope.downloadLinkDocName = $scope.treeData[0].data.header.name + '-' + now + '.html';
+
+*/
+
+
+                    }
+                )
+
+
             }
 
             //edit description, comments and usageGuide in a single dialog
