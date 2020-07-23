@@ -213,8 +213,8 @@ angular.module("sampleApp")
                                 break;
                             default:
 
-                                arDoc.push(addTaggedLine("h3", data.name));
-
+                                //arDoc.push(addTaggedLine("h3", data.name));
+                                arDoc.push(addTaggedLine("h3", data.short));
                                 arDoc.push("<table class='dTable'>");
 
                                 //addRowIfNotEmpty(arDoc,'Name',data.name);
@@ -241,6 +241,8 @@ angular.module("sampleApp")
 
 
                                 addRowIfNotEmpty(arDoc,'Occurrence',multDisplay);
+                                addRowIfNotEmpty(arDoc,'Examples',data.examples);
+                                addRowIfNotEmpty(arDoc,'References',data.references);
 
                                 let type = "";
                                 data.type.forEach(function(typ){
@@ -3061,6 +3063,10 @@ angular.module("sampleApp")
                 var editorUrl = appConfigSvc.config().standardExtensionUrl.editor;
                 var usageGuideUrl = appConfigSvc.config().standardExtensionUrl.usageGuide;
                 var legacyUrl = appConfigSvc.config().standardExtensionUrl.legacy;
+
+                var examplesUrl = appConfigSvc.config().standardExtensionUrl.examples;
+                var referencesUrl = appConfigSvc.config().standardExtensionUrl.references;
+
                 var lmReviewReasonUrl = appConfigSvc.config().standardExtensionUrl.lmReviewReason;
                 var misuseUrl = appConfigSvc.config().standardExtensionUrl.misuse;
                 var edStatusUrl = appConfigSvc.config().standardExtensionUrl.edStatus;
@@ -3184,9 +3190,20 @@ angular.module("sampleApp")
                             item.data.misuse = ext1.valueString;
                         }
                         //look for legacy note
+
                         var ext1 = Utilities.getSingleExtensionValue(ed, legacyUrl);
                         if (ext1 && ext1.valueString) {
                             item.data.legacy = ext1.valueString;
+                        }
+
+                        var ext1 = Utilities.getSingleExtensionValue(ed, examplesUrl);
+                        if (ext1 && ext1.valueString) {
+                            item.data.examples = ext1.valueString;
+                        }
+
+                        var ext1 = Utilities.getSingleExtensionValue(ed, referencesUrl);
+                        if (ext1 && ext1.valueString) {
+                            item.data.references = ext1.valueString;
                         }
 
                         //look for autoexpand
@@ -3461,6 +3478,10 @@ angular.module("sampleApp")
                 var editorUrl = appConfigSvc.config().standardExtensionUrl.editor;
                 var usageGuideUrl = appConfigSvc.config().standardExtensionUrl.usageGuide;
                 var legacyUrl = appConfigSvc.config().standardExtensionUrl.legacy;
+
+                var examplesUrl = appConfigSvc.config().standardExtensionUrl.examples;
+                var referencesUrl = appConfigSvc.config().standardExtensionUrl.references;
+
                 var autoExpandUrl = appConfigSvc.config().standardExtensionUrl.autoExpand;
                 var lmReviewReasonUrl = appConfigSvc.config().standardExtensionUrl.lmReviewReason;
                 var misuseUrl = appConfigSvc.config().standardExtensionUrl.misuse;
@@ -3729,6 +3750,14 @@ angular.module("sampleApp")
 
                     if (data.legacy) {
                         Utilities.addExtensionOnce(ed, legacyUrl, {valueString: data.legacy})
+                    }
+
+                    if (data.examples) {
+                        Utilities.addExtensionOnce(ed, examplesUrl, {valueString: data.examples})
+                    }
+
+                    if (data.references) {
+                        Utilities.addExtensionOnce(ed, referencesUrl, {valueString: data.references})
                     }
 
                     if (data.autoExpand) {

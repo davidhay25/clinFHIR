@@ -245,6 +245,11 @@ angular.module("sampleApp")
                 $scope.input.misuse = data.misuse;
                 $scope.input.usageGuide = data.usageGuide;
                 $scope.input.legacy = data.legacy;
+
+                $scope.input.examples = data.examples;
+                $scope.input.references = data.references;
+
+
                 $scope.input.lmReviewReason = data.lmReviewReason;
                 $scope.input.lmElementLink = data.lmElementLink;
 
@@ -917,6 +922,16 @@ angular.module("sampleApp")
                     if ($scope.input.legacy) {
                         vo.legacy = $scope.input.legacy;
                     }
+
+
+                if ($scope.input.examples) {
+                    vo.examples = $scope.input.examples;
+                }
+                if ($scope.input.references) {
+                    vo.references = $scope.input.references;
+                }
+
+
                     if ($scope.input.lmReviewReason) {
                         vo.lmReviewReason = $scope.input.lmReviewReason;
                     }

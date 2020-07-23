@@ -49,7 +49,25 @@ angular.module("sampleApp")
                 $scope.isDirty = true;
             }
 
+            $window.addEventListener('beforeunload', function(event) {
+                event.preventDefault()
+                event.returnValue = "Are you sure?"
+                alert('I am the 1st one.');
+            });
 
+/*
+            window.onbeforeunload = function (event) {
+                var message = 'Sure you want to leave?';
+                alert(message)
+                if (typeof event == 'undefined') {
+                    event = window.event;
+                }
+                if (event) {
+                    event.returnValue = message;
+                }
+                return message;
+            }
+*/
             $scope.updateDD = function(){
                 $scope.DD = logicalModelSvc.createDataModel($scope.treeData)
 
