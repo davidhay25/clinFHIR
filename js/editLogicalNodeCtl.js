@@ -648,9 +648,8 @@ angular.module("sampleApp")
                     }
 
 
-
-                    if ($scope.canSave) {
-                        //set the short element to the same as the name
+                    //set the short element to the same as the name if not eneterd
+                    if ($scope.canSave && ! $scope.input.short) {
                         $scope.input.short = $scope.input.name;
                     }
 
