@@ -61,6 +61,7 @@ angular.module("sampleApp")
                     let resourceType;
                     let isJson = false;
                     let config = {headers: {'Content-type':'application/xml+fhir', accept:'application/json+fhir'}};
+                    config.timeout = 30000;
                     resource = resource.trim();
 
                     if (resource.substr(0,1) == '<') {
@@ -112,6 +113,9 @@ angular.module("sampleApp")
                         let svr = $scope.allServers[i]
                     //$scope.allServers.forEach(function(svr){
                         if (svr.selected) {
+
+                            svr.message = "Waiting..."
+
                             var url = svr.url + resourceType + '/$validate';
                             let content = resource;
                             //this assumes that the resource is json...
@@ -134,17 +138,24 @@ angular.module("sampleApp")
                                 content.parameter.push({name:'profile',value:$scope.profileUrl})
                             }
 
+
                             $http.post(url,content,config).then(
                                 function(data){
                                     console.log(data)
                                     svr.response = data.data;
                                     svr.outcome = true;
+                                    delete svr.message;
                                     updateServer(svr,data.data)
                                    // $scope.oo = data.data;
                                 },
                                 function(err) {
                                     console.log(err)
                                     //$scope.oo = err.data;
+                                    delete svr.message;
+                                    if (err.status == -1) {
+                                        svr.message = "Timeout"
+                                    }
+
                                     svr.response = err.data;
                                     svr.outcome = false;
                                     updateServer(svr,err.data)

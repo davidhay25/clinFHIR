@@ -29,7 +29,6 @@ angular.module("sampleApp")
                                 url += "/"
                             }
 
-
                             $scope.dataServer = {url: url}
                             console.log($scope.dataServer)
                             break;
@@ -50,7 +49,6 @@ angular.module("sampleApp")
                             console.log("Bundle not found...")
                         }
                     )
-
                 }
             }
 
@@ -65,6 +63,9 @@ angular.module("sampleApp")
                 }
             );
 
+
+            $scope.leftPaneClass = "col-sm-2 col-md-2"
+            $scope.rightPaneClass = "col-md-10 col-sm-10";
 
             $scope.showSidePane = true;
             $scope.toggleSidePane = function(){
@@ -84,7 +85,7 @@ angular.module("sampleApp")
                 let options = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:$scope.serverRoot}
                 options.hidePatient = toggle;
                 drawGraph(options)
-            }
+            };
 
 
             //will update the config. We don't care if manually entered servers are lost or the default servers changed
@@ -115,7 +116,7 @@ angular.module("sampleApp")
                 $scope.queries = $localStorage.bvQueries
             }
 
-            $scope.uploadFiles = function(){
+            $scope.uploadFilesDEP = function(){
                 console.log($scope.input.selectedFiles)
             };
 
@@ -126,7 +127,7 @@ angular.module("sampleApp")
                 }
                 return result
 
-            }
+            };
 
             $scope.hbDoc = function() {
                 $scope.hbTemplate = "artifacts/templates/dischargeSummary.html";

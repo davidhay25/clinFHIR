@@ -485,11 +485,6 @@ angular.module("sampleApp")
             $scope.moveRight = function() {
                 var path = $scope.selectedNode.data.path;
                 var lstChildren = getChildren(path,true)
-                if (lstChildren.length > 0) {
-                  //  alert("Sorry, nodes with children can't be moved right yet. Move them individually")
-                   // return;
-                }
-                //logicalModelSvc.saveTreeState($scope.treeData);
                 var pos = findPositionInTree(path);     //the location of the element we wish to move in the array
                 var ar = path.split('.');
                 var leafName = ar[ar.length-1];
@@ -505,6 +500,7 @@ angular.module("sampleApp")
                         break
                     }
                 }
+
                 if (siblingPos == -1) {
                     alert("Can't find a suitable sibling");
                     return;
@@ -521,23 +517,11 @@ angular.module("sampleApp")
                 nodeToShift.id = newPath;
                 nodeToShift.parent = newParentPath;
 
-                /*
-
-                $scope.selectedNode.data.path = newPath;
-                $scope.selectedNode.id = newPath;
-                $scope.selectedNode.parent = newParentPath;
-
-                $scope.treeData.splice(pos,1,angular.copy($scope.selectedNode));
-
-                */
 
                 //now move all the children...
                 if (lstChildren.length > 0) {
                     lstChildren.forEach(function (child) {
-
                         var childNodeToShift = findNodeWithPath(child.data.path);
-
-
                         var l = path.length;          //the length of original 'root' path. This has to change
                         var rightMost = child.data.path.substr(l);       //this is the remainder of the path
 
@@ -552,9 +536,6 @@ angular.module("sampleApp")
                     })
                 }
 
-
-
-
                 $scope.treeData = logicalModelSvc.reOrderTree($scope.treeData);
                 $scope.treeIdToSelect = findNodeWithPath(newPath).id;
 
@@ -567,12 +548,8 @@ angular.module("sampleApp")
 
             //todo - need to move children as well...
             $scope.moveLeft = function() {
-
                 var path = $scope.selectedNode.data.path;
-
                 var lstChildren = getChildren(path,true)
-
-
                 var pos = findPositionInTree(path);     //the location of the element we wish to move in the array
 
                 var ar = path.split('.');
@@ -590,10 +567,7 @@ angular.module("sampleApp")
 
                     if (lstChildren.length > 0) {
                         lstChildren.forEach(function (child) {
-
                             var childNodeToShift = findNodeWithPath(child.data.path);
-
-
                             var l = path.length;          //the length of original 'root' path. This has to change
                             var rightMost = child.data.path.substr(l);       //this is the remainder of the path
 
@@ -608,50 +582,13 @@ angular.module("sampleApp")
                         })
                     }
 
-
-
                     $scope.treeData = logicalModelSvc.reOrderTree($scope.treeData);
+
+                    $scope.treeIdToSelect = findNodeWithPath(newPath).id;
+
                     drawTree();
                     makeSD();
                     $scope.isDirty = true
-
-
-                    /*
-                    $scope.selectedNode.data.path = newPath;
-                    $scope.selectedNode.id = newPath;
-                    $scope.selectedNode.parent = newParent;
-
-                    $scope.treeData.splice(pos,1,angular.copy($scope.selectedNode));
-
-*/
-                    //do children here...  NOT YET WORKING!!!
-                    /*
-                    var lst = getChildren(path)
-                    if (lst.length > 0) {
-                        lst.forEach(function (item) {
-                            var childPath = item.id;
-                            //var posChild = findPositionInTree(childPath);
-                            var arCP = childPath.split('.')
-                            arCP.splice(arCP.length-3,1);       //todo - ?is this a function of the path length
-                            var newChildPath = arCP.join('.');
-                            arCP.pop();
-                            var newChildParent = arCP.join('.');
-                            item.data.path = newChildPath;
-                            item.id = newChildPath;
-                            item.parent = newChildParent;
-                            if (item.ed) {
-                                item.ed.path = newChildPath;
-                                item.ed.id = newChildPath;
-                            }
-
-
-                            //$scope.treeData.splice(posChild,1,angular.copy(item));
-
-                        })
-                    }
-
-
-*/
 
                 }
             };

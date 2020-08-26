@@ -172,11 +172,12 @@
                 <uib-tab heading="Summary">
                     <br/>
                     <table class="table">
-                        <tr><th>Server</th><th>Warnings</th><th>Errors</th></tr>
+                        <tr><th>Server</th><th>Warnings</th><th>Errors</th><th></th></tr>
                         <tr ng-repeat = "svr in allServers" ng-if="svr.selected">
-                            <td>{{svr.display}}</td>
+                            <td>{{svr.display}} </td>
                             <td>{{svr.cntWarning}}</td>
                             <td>{{svr.cntError}}</td>
+                            <td>{{svr.message}}</td>
                         </tr>
                     </table>
 
@@ -220,6 +221,9 @@
                 </uib-tab>
             </uib-tabset>
 
+
+            <em>Sending the $validate request to all indicated servers. Details will be shown in the specific
+            tab for each server. The request will timeout after 30 seconds</em>
 <!--
             ==========================
             <h4 ng-show="oo">Outcome of Validation</h4>

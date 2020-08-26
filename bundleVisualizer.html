@@ -365,12 +365,12 @@
 
                                             <uib-tabset>
                                                 <uib-tab heading="Json">
-
-
-
-
+                                                    <pre>{{selectedBundleEntry.resource | json}}</pre>
+                                                </uib-tab>
+                                                <uib-tab heading="Entry">
                                                     <pre>{{selectedBundleEntry | json}}</pre>
                                                 </uib-tab>
+
                                                 <uib-tab heading="Text">
                                                     <p ng-bind-html="selectedBundleEntry.resource.text.div"></p>
 
@@ -481,7 +481,17 @@
 
                                     -->
 
-                                    <pre>{{selectedNode.entry | json}}</pre>
+                                    <uib-tabset>
+                                        <uib-tab heading="Resource">
+                                            <pre>{{selectedNode.entry.resource | json}}</pre>
+                                        </uib-tab>
+                                        <uib-tab heading="Entry">
+                                            <pre>{{selectedNode.entry | json}}</pre>
+                                        </uib-tab>
+                                    </uib-tabset>
+
+
+
                                 </div>
                             </div>
 
