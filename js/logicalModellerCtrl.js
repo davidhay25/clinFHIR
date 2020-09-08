@@ -3132,6 +3132,50 @@ angular.module("sampleApp")
                 }
             };
 
+            /*
+           $scope.moveDn = function(){
+                logicalModelSvc.saveTreeState($scope.treeData);
+                var path = $scope.selectedNode.data.path;
+                //var originalPos = findPositionInTree(path);     //need to save where the list is now in case we need to re-insert...
+                var lst = getListOfPeers(path);
+                //find the position of this node in the peers. If we're already at the bottom, then don't shift
+                //if we're second to bottom, then insert point will be right at the bottom.
+                //otherwise insert point is above the one 2 down in the list (because of all the child nodes to consider...
+                var lengthOfPeers = lst.length;
+                var placeInList = -1;
+                   for (var i=0; i < lst.length; i++) {    //find where this node is in the list of peers...
+                       if (lst[i].data.path == path) {
+                           placeInList = i;
+                           break;
+                       }
+                   }
+                if (placeInList == lengthOfPeers-1) {
+                    //we're at the end of the list - do nothing
+                } else if (placeInList == lengthOfPeers-2) {
+                    //we're second to bottom - do nothing
+                    var removedBranch = pruneBranch(path);      //prune the list
+
+                    var insertPos = $scope.treeData.length; //the bottom
+
+                    insertBranch(removedBranch,insertPos);
+                    $scope.isDirty = true;
+                    $scope.treeIdToSelect = findNodeWithPath(path).id;
+                    drawTree();
+                    makeSD();
+
+                } else {
+                    //insert above the secone one down...
+                    var pathToInsertAbove = lst[placeInList+2].data.path;   //the node we'll insert above
+                    var removedBranch = pruneBranch(path);      //prune the list
+                    var insertPos= findPositionInTree(pathToInsertAbove);   //insert point (after the list was pruned)
+                    insertBranch(removedBranch,insertPos);
+                    $scope.isDirty = true;
+                    $scope.treeIdToSelect = findNodeWithPath(path).id;
+                    drawTree();
+                    makeSD();
+                }
+            };
+            * */
             $scope.moveDn = function(){
                 logicalModelSvc.saveTreeState($scope.treeData);
                 var path = $scope.selectedNode.data.path;
@@ -3149,22 +3193,32 @@ angular.module("sampleApp")
                        }
                    }
                 if (placeInList == lengthOfPeers-1) {
-                    //we're at the end of the list - re-insert at original
-                } else if (placeInList == lengthOfPeers-2) {
+                    //we're at the end of the list - do nothing
+      /*          } else if (placeInList == lengthOfPeers-2) {
                     //we're second to bottom - do nothing
                     var removedBranch = pruneBranch(path);      //prune the list
+
                     var insertPos = $scope.treeData.length; //the bottom
+
+                    //--- new stuff
+                    var pathToInsertAbove = lst[placeInList+1].data.path;   //the node we'll insert above
+                    var insertPos= findPositionInTree(pathToInsertAbove)+1;   //insert point (after the list was pruned)
+                    // ----
+
                     insertBranch(removedBranch,insertPos);
+
                     $scope.isDirty = true;
-                    $scope.treeIdToSelect = findNodeWithPath(path).id;
+                   //temp $scope.treeIdToSelect = findNodeWithPath(path).id;
                     drawTree();
                     makeSD();
-
+*/
                 } else {
                     //insert above the secone one down...
-                    var pathToInsertAbove = lst[placeInList+2].data.path;   //the node we'll insert above
+                    //var pathToInsertAbove = lst[placeInList+2].data.path;   //the node we'll insert above
+                    var pathToInsertAbove = lst[placeInList+1].data.path;   //the node we'll insert above
                     var removedBranch = pruneBranch(path);      //prune the list
-                    var insertPos= findPositionInTree(pathToInsertAbove);   //insert point (after the list was pruned)
+                   // var insertPos= findPositionInTree(pathToInsertAbove);   //insert point (after the list was pruned)
+                    var insertPos= findPositionInTree(pathToInsertAbove) +1;   //insert point (after the list was pruned)
                     insertBranch(removedBranch,insertPos);
                     $scope.isDirty = true;
                     $scope.treeIdToSelect = findNodeWithPath(path).id;
