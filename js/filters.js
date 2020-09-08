@@ -5,6 +5,11 @@
 
 angular.module("sampleApp")
 
+    .filter('displayFormat',function(){
+        return function (txt) {
+            return txt
+        }
+    })
 
     .filter('maxLength',function(){
         //maximum length
