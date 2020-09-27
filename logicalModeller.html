@@ -823,11 +823,12 @@
                     <div class="pull-right">
                         <button class="btn btn-link " ng-click="updateDoc()">Update</button>
 
+                        <!-- temp - moved to DD
                         <a ng-show="downloadLinkDocName" class="btn btn-link pull-right" download="{{downloadLinkDocName}}"
                            href="{{downloadLinkDoc}}" title="{{downloadLinkDocName}}" >
                             Download HTML file
                         </a>
-
+-->
 
                     </div>
 
@@ -872,12 +873,25 @@
 
                 <uib-tab heading="DD">
                     <br/>
+
+                    <a ng-show="downloadLinkDocName" class="btn btn-link pull-right" download="{{downloadLinkDocName}}"
+                       href="{{downloadLinkDoc}}" title="{{downloadLinkDocName}}" >
+                        Download HTML file
+                    </a>
+
                     <div class="pull-right">
                         <button class="btn btn-link " ng-click="updateDD()">Update</button>
                     </div>
 
 
                     <uib-tabset>
+                        <uib-tab heading="Html">
+                            <br/>
+
+                            <iframe id="htmlDD" width="100%" height = "600px"></iframe>
+
+                        </uib-tab>
+
                         <uib-tab heading="DD layout">
                             <div class="designerScroll">
                                 <table class="table table-bordered">
@@ -899,12 +913,7 @@
                             </div>
                         </uib-tab>
 
-                        <uib-tab heading="Html">
-                            <br/>
 
-                            <iframe id="htmlDD" width="100%" height = "600px"></iframe>
-
-                        </uib-tab>
 
                     </uib-tabset>
 

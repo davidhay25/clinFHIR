@@ -170,7 +170,7 @@ angular.module("sampleApp")
                     var path = data.path;     //this is the
                     var arPath = path.split('.');
                     if (arPath.length == 1) {
-                        //this is the first node. Has 'model level' data...
+                        //this is the first node. Has 'model level' data so don't display......
 
                         /*
                         if (data.header) {
@@ -204,11 +204,11 @@ angular.module("sampleApp")
 
                         switch (ddType) {
                             case 'heading' :
-                                arDoc.push(addTaggedLine("h2","Heading:" + ddPath));
+                                arDoc.push(addTaggedLine("h2", ddPath));
                                 arDoc.push(addTaggedLine("p", data.description));
                                 break;
                             case 'grouper' :
-                                arDoc.push(addTaggedLine("h2","Group:" + ddPath ));
+                                arDoc.push(addTaggedLine("h2", ddPath ));
                                 arDoc.push(addTaggedLine("p", data.description));
                                 break;
                             default:
@@ -218,9 +218,23 @@ angular.module("sampleApp")
                                 arDoc.push("<table class='dTable'>");
 
                                 //addRowIfNotEmpty(arDoc,'Name',data.name);
-                                addRowIfNotEmpty(arDoc,'Short description',data.short);
-                                addRowIfNotEmpty(arDoc,'Full description',data.description);
+                               //addRowIfNotEmpty(arDoc,'Short description',data.short);
+                                addRowIfNotEmpty(arDoc,'Description',data.description);
                                 addRowIfNotEmpty(arDoc,'Comments',data.comments);
+
+                                addRowIfNotEmpty(arDoc,'Use',data.usageGuide);
+
+                                if (data.alias) {
+                                    let alias = "";
+                                    data.alias.forEach(function (al) {
+                                        alias += "<div>" + al + "</div>";
+
+                                    });
+                                    //alias = alias.substring(0,alias.length -2);
+                                    addRowIfNotEmpty(arDoc,'Aliases',alias)
+                                }
+
+
 
                                 let mult = data.min + ".." + data.max;
 
@@ -241,7 +255,26 @@ angular.module("sampleApp")
 
 
                                 addRowIfNotEmpty(arDoc,'Occurrence',multDisplay);
-                                addRowIfNotEmpty(arDoc,'Examples',data.examples);
+
+
+                                if (data.examples) {
+
+                                    let ar =  data.examples.split('\n')
+                                    let exampleDisplay = ""
+                                    ar.forEach(function (lne) {
+                                        exampleDisplay += "<div>" + lne + "</div>"
+                                    })
+
+
+                                    addRowIfNotEmpty(arDoc,'Examples',exampleDisplay);
+                                }
+
+
+
+
+                                //addRowIfNotEmpty(arDoc,'Examples',data.examples);
+
+
                                 addRowIfNotEmpty(arDoc,'References',data.references);
 
                                 let type = "";
@@ -253,17 +286,13 @@ angular.module("sampleApp")
                                         }
 
 
-                                        //console.log(typ)
-
                                     }
 
                                     type += "<div>" + typ.code + targ +  "</div>";
 
-
-
                                 });
 
-                                addRowIfNotEmpty(arDoc,'Datatype/s',type)
+                                addRowIfNotEmpty(arDoc,'Data type',type)
 
                                 if (data.selectedValueSet && data.selectedValueSet.valueSet) {
                                     let binding = data.selectedValueSet.valueSet;
@@ -271,10 +300,13 @@ angular.module("sampleApp")
                                         binding += " (" + data.selectedValueSet.strength + ")"
                                     }
                                     addRowIfNotEmpty(arDoc,'Binding',binding)
-                                    //type +=  "<i>"+ data.selectedValueSet.valueSet + "</i> ("+ data.selectedValueSet.strength + ")"
+
 
 
                                 }
+
+
+
 
 
                                 arDoc.push("</table><br/>");
@@ -282,99 +314,7 @@ angular.module("sampleApp")
 
 
                         }
-/*
 
-                        //if this is a backbone element, create a new section
-                        if (data.type) {
-                            if (data.type[0].code == 'BackboneElement' ){
-                                arDoc.push("<br/><br/><hr/>")
-                                arDoc.push(addTaggedLine("h2",arPath.join('.')));
-                                arDoc.push(addTaggedLine("p",data.description))
-
-                            } else {
-
-
-                                arDoc.push(addTaggedLine("h3",arPath[arPath.length -1]));
-                                arDoc.push("<table class='dTable'>");
-
-                                addRowIfNotEmpty(arDoc,'Name',data.name);
-
-                                if (data.alias) {
-                                    let alias = "";
-                                    data.alias.forEach(function (al) {
-                                        alias += "<div>" + al + "</div>";
-
-                                    })
-
-                                    addRowIfNotEmpty(arDoc,'Aliases',alias)
-                                }
-
-
-
-                                addRowIfNotEmpty(arDoc,'Short description',data.short);
-                                addRowIfNotEmpty(arDoc,'Full description',data.description);
-                                addRowIfNotEmpty(arDoc,'Comments',data.comments);
-
-                                let mult = data.min + ".." + data.max;
-                                addRowIfNotEmpty(arDoc,'Multiplicity',mult);
-
-                                let type = "";
-                                data.type.forEach(function(typ){
-                                    let targ = ""
-                                    if (typ.code == 'Reference') {
-                                        if (typ.targetProfile) {
-                                            targ = " --> " + $filter('referenceType')(typ.targetProfile[0])
-                                        }
-
-
-                                        //console.log(typ)
-
-                                    }
-
-                                    type += "<div>" + typ.code + targ +  "</div>";
-
-
-
-                                });
-
-                                addRowIfNotEmpty(arDoc,'Datatype/s',type)
-
-                                if (data.selectedValueSet && data.selectedValueSet.valueSet) {
-                                    let binding = data.selectedValueSet.valueSet;
-                                    if (data.selectedValueSet.strength) {
-                                        binding += " (" + data.selectedValueSet.strength + ")"
-                                    }
-                                    addRowIfNotEmpty(arDoc,'Binding',binding)
-                                    //type +=  "<i>"+ data.selectedValueSet.valueSet + "</i> ("+ data.selectedValueSet.strength + ")"
-
-
-                                }
-
-                                //type = type.substring(0,type.length -2);
-
-                                let display = type;     //default to just type name
-
-                                addRowIfNotEmpty(arDoc,'Usage Guide',data.usageGuide);
-                                addRowIfNotEmpty(arDoc,'Misuse',data.misuse);
-                                let fhirMapping;
-                                if (data.mappingFromED) {
-                                    data.mappingFromED.forEach(function (map) {
-                                        if (map.identity=='fhir') {
-                                            fhirMapping = map.map;
-                                        }
-                                    })
-                                }
-                                if (fhirMapping) {
-                                    addRowIfNotEmpty(arDoc,'Profile mapping',fhirMapping);
-                                }
-
-                                arDoc.push("</table>");
-                            }
-                        }
-
-
-
-*/
 
                     }
                 });
@@ -416,22 +356,54 @@ angular.module("sampleApp")
                 let html = header + arDoc.join("\n") + footer;
                 //console.log(html)
 
+
+
+
+
+
                 deferred.resolve(html)
                 return deferred.promise;
 
                 function addRowIfNotEmpty(ar,description,data) {
                     if (data) {
+
+
+                        let display = data;
+
+                        let arData =  data.split('\n')
+                        if (arData.length > 1)  {
+                            display = ""
+                            arData.forEach(function (lne) {
+                                display += "<div>" + lne + "</div><br/>"
+                            })
+                        }
+
+
                         ar.push('<tr>');
-                        ar.push('<td width="20%" class="col1">' + description + "</td>");
-                        ar.push('<td>' + data + "</td>");
+                        ar.push('<td valign="top" width="20%" class="col1">' + description + "</td>");
+
+                        if (data && data.toLowerCase() == 'no description') {
+                            ar.push('<td></td>');
+                        } else {
+                            ar.push('<td>' + display + "</td>");
+                        }
+
+
                         ar.push('</tr>');
-
                     }
-
                 }
 
-                function addTaggedLine(tag,line) {
-                    return "<"+tag + ">"+line+"</"+tag+">"
+                function addTaggedLine(tag,data) {
+
+                    if (data && data.toLowerCase() == 'no description') {
+                        return "<"+tag + "></"+tag+">"
+                    } else {
+                        return "<"+tag + ">"+data+"</"+tag+">"
+                    }
+
+
+
+
                 }
 
 
@@ -1921,498 +1893,6 @@ angular.module("sampleApp")
                 }
 
 
-            },
-            generateFHIRProfileDEP : function(internalLM) {
-                //generate a real FHIR profile from the logical model
-                var deferred = $q.defer();
-                var fhirVersion = appConfigSvc.getCurrentConformanceServer().version;
-
-                //get the base type for the model.
-                var baseType;
-                var ext = Utilities.getSingleExtensionValue(internalLM, appConfigSvc.config().standardExtensionUrl.baseTypeForModel)
-                if (ext && ext.valueString) {
-                    baseType = ext.valueString
-                } else {
-                    deferred.reject('No base type. A profile cannot be generated.');
-                }
-
-
-
-                var realProfile = angular.copy(internalLM);      //the profile that we will build...
-                realProfile.snapshot = {element:[]};            //get rid of the current element defintiions...
-                realProfile.id = realProfile.id+'-cf-profile';   //construct an id
-                realProfile.url = realProfile.url+'-cf-profile';   //and a url...
-                realProfile.kind = 'resource';
-
-                realProfile.derivation = 'constraint'
-
-
-                var url = "http://hl7.org/fhir/StructureDefinition/"+ baseType;
-                //realProfile.baseDefinition = url;
-
-                if (fhirVersion == 2) {
-                    realProfile.base = url;
-                    realProfile.constrainedType = baseType;
-                } else {
-                    realProfile.baseDefinition = url;
-                    realProfile.type = baseType;
-                }
-
-                delete realProfile.extension;                   //and the extensions
-
-
-
-
-
-                GetDataFromServer.findConformanceResourceByUri(url).then(
-                    function (SD) {
-                        if (SD && SD.snapshot && SD.snapshot.element) {
-                            makeFHIRProfile(SD);    //just to avoid hard to read nesting..
-                        } else {
-                            deferred.reject('Base profile (' + url + ') has no snapshot!');
-                        }
-
-                    },
-                    function(err) {
-                        deferred.reject(angular.toJson(err));
-                    }
-                );
-
-                return deferred.promise;
-
-
-                //SD is the base profile from the core spec...
-                function makeFHIRProfile(SD) {
-                    var discriminatorUrl = appConfigSvc.config().standardExtensionUrl.discriminatorUrl;
-
-                    var err = [];
-                    var ok = [];
-                    var slices = [];            // a collection of all sliced elements
-                    var ignorePath = [];        //paths to be ignored. Used for child elements of References...
-                    var arDiscriminator = [];   //paths for which a discriminator entry has been made
-                    var arPathsAdded = [];      //paths added so far...
-
-
-
-                    //create a hash of all the paths in the base resource type (That is being profiled)...
-                    var basePathHash = {};
-                    SD.snapshot.element.forEach(function(ed){
-                        basePathHash[ed.path] = ed;
-                        if (ed.type) {
-                            ed.type.forEach(function (typ) {
-                                //if the type is a complex datatype, then add the children... the dataTypes array is read at the top of this service
-                                if (dataTypes[typ.code]) {
-                                    dataTypes[typ.code].forEach(function (child) {
-                                        var childPath = ed.path + "." + child;
-                                        basePathHash[childPath] = ed;
-
-                                    })
-                                }
-                            })
-                        }
-                    });
-
-
-                    //now work through the model. if there's no mapping, then an error. If an extension then insert the url...
-                    internalLM.snapshot.element.forEach(function(ed,inx){
-                        var newED = angular.copy(ed);
-
-
-
-
-
-                        //remove invalid property that was added in the logival model to support internal processing
-                        if (newED.type){
-                            newED.type.forEach(function (typ) {
-                                delete typ.isComplexDT;
-                            })
-                        }
-
-                        //the current path will not be correct (it is in the logical model) - we need to get this from the FHIR mapping
-                        var oldPath = newED.path;       //save the old path
-                        delete newED.path;
-
-                        if (inx == 0) {
-                            //this is the root element
-                            newED.path = baseType;
-                        } else {
-                            //get the path mapping for this element and update the path in the newED element
-                            if (ed.mapping) {
-                                ed.mapping.forEach(function (map) {
-                                    if (map.identity=='fhir') {
-
-                                        //the hack for the mapping comments
-                                        if (map.map) {
-                                            var ar1 = map.map.split('|');
-                                            var fhirPath = ar1[0];      //this is the 'real' path in the SD
-                                            newED.path = fhirPath;//map.map
-                                        }
-                                    }
-                                })
-                            }
-
-                        }
-
-                        var addToProfile = true;
-
-                        newED.id = baseType + ':' + newED.path + '-' + inx ;    //id is mandatory - but not used...
-                        var path = newED.path;
-
-
-
-                        //if the oldPath value is in the list of ignorePaths then ignore
-                        if (addToProfile) {
-                            ignorePath.forEach(function (ignore) {
-                                if (oldPath.substr(0,ignore.length) === ignore) {
-                                    addToProfile = false;
-                                }
-
-                            })
-                        }
-
-                        if (addToProfile) {
-                            if (path && path.indexOf('[x]') > -1) {
-                                ignorePath.push(oldPath)    //don't include any of the children in the profile. May need to revisit this...
-
-                            }
-                        }
-
-                        //check for a path in the FHIR mapping
-                        if (addToProfile && ! newED.path) {
-                            //there is no path - which means that there was no FHIR mapping
-                            err.push("Path: " + oldPath + " needs to have a FHIR mapping")
-                            addToProfile = false;
-                        }
-
-                        //exclude meta elements for now
-                        if (addToProfile) {
-                            var arNewPath = newED.path.split('.')
-                            if (arNewPath.length > 1 && arNewPath[1] == 'meta') {
-                                addToProfile = false;
-                            }
-                        }
-
-
-                        //if this is datatype of reference, then add it to the list of 'ignorePaths' so the children added in the model will not be included
-                        if (addToProfile) {
-                            if (ed.type) {
-                                ed.type.forEach(function (typ) {
-                                    if (typ.code == 'Reference') {
-                                        ignorePath.push(oldPath);   //ignorePath works on the path in the model, not the mapping... Note we still add this element
-                                    }
-                                })
-                            }
-                        }
-
-
-                        //if we still want to add to the profile, check for an extension...
-                        if (addToProfile) {
-                            if (newED.path.indexOf('extension') == -1) {
-                                //not an extension...
-
-                                if (!basePathHash[newED.path]) {
-                                    err.push("Path: "+newED.path + " is not valid for this resource type")
-                                    addToProfile = false;
-                                }
-
-                            } else {
-                                //this is an extension...//if this is an extension then we need to insert the url to the extension...
-                                addToProfile = false;       //Will add here, or not at all...
-                                var ext = Utilities.getSingleExtensionValue(newED, appConfigSvc.config().standardExtensionUrl.simpleExtensionUrl)
-                                if (ext && ext.valueString) {
-                                    extensionUrl = ext.valueString;
-                                    //need to set the type of the element to 'Extension' (In the LM it is the datatype)
-                                    newED.type = {code:'Extension',profile:extensionUrl}
-                                    delete newED.extension; //this is the extension that holds the url
-                                    realProfile.snapshot.element.push(newED)
-
-                                    ignorePath.push(oldPath); //If this is a complex extension and there are children in the model then ignore them...
-
-
-                                } else {
-                                    err.push("Path: "+newED.path + " is an extension, but there is no extension url given")
-                                }
-
-
-                            }
-                        }
-
-
-                        //If this path has already been added, then see if it matches a rootPath defined by a discriminator.
-                        //If so, then it can be added. If not, then add to paths to ignore
-                        if (addToProfile) {
-                            var lPath = newED.path
-                            if (arPathsAdded.indexOf(lPath) > -1) {
-                                //a possible dupe - is this root covered by a discriminator?
-                                var coveredByDiscriminator = false;
-                                arDiscriminator.forEach(function (item) {
-                                    if (lPath.substr(0,item.length) === item) {
-                                        coveredByDiscriminator = true
-                                    }
-                                });
-
-                                if (!coveredByDiscriminator ) {
-                                    //no, it isn't. Don't add to the profile
-                                    addToProfile = false;
-                                }
-                            }
-                        }
-
-
-                        //an element not yet added to the real profile
-                        if (addToProfile) {
-
-                            //the base type path should be the to the profiled base - added 2018-08-09 todo - review thos
-                            //todo - should this be changed when the LM is generated???
-                            if (newED.base && newED.base.path) {
-                                var ar9 = newED.base.path.split('.');
-                                ar9[0] = baseType;
-                                newED.base.path = ar9.join('.')
-                            }
-
-                            //if there's a discriminator, then add an entry - but once only
-                            var extDiscriminator = Utilities.getSingleExtensionValue(ed, discriminatorUrl);
-                            if (extDiscriminator) {
-                                if (arDiscriminator.indexOf(newED.path) == -1) {
-                                    var discriminator = extDiscriminator.valueString;
-                                    var element = {id:'discriminator'+inx,path: newED.path}
-                                    element.min = newED.min;
-                                    element.max = newED.max;
-                                    element.definition = "Discriminator";
-                                    if (fhirVersion == 2) {
-                                        element.slicing = {discriminator: discriminator}
-                                    } else {
-                                        element.slicing = {
-                                            rules:'open',discriminator: {path: discriminator, type: 'value'}
-                                        }
-                                    }
-                                    realProfile.snapshot.element.push(element)
-
-                                    arDiscriminator.push(newED.path)    //so it only gets added once...
-                                }
-                            }
-
-                            realProfile.snapshot.element.push(newED)
-                            arPathsAdded.push(newED.path);
-                            ok.push("Path: "+newED.path + " mapped ")
-                        }
-                    })
-
-
-
-
-
-
-
-                    if (err.length > 0) {
-
-                        deferred.reject({err:err,ok:ok});
-                    } else {
-
-
-                        deferred.resolve(realProfile)
-
-
-
-
-                    }
-
-                }
-
-
-
-            },
-
-            makeReferencedMapsModelDEP: function (SD) {
-                //builds the model that has all the models referenced by the indicated SD, recursively...
-
-                var that = this;
-                var lst = [];
-
-                //not recursive any more (ie just references from this model)
-                getModelReferences(lst, SD, SD.url);      //recursively find all the references between models...
-
-
-
-                //build the tree model...
-
-                var arNodes = [], arEdges = [];
-                var objNodes = {};
-
-
-                //build all the edges - ie references
-                lst.forEach(function (reference) {
-
-                    var srcNode = getNodeByUrl(reference.src, reference.path, objNodes, arNodes);
-                    var targNode = getNodeByUrl(reference.targ, reference.path, objNodes, arNodes);
-
-                    var ar = reference.path.split('.');
-                    var label = ar.pop();
-
-                    arEdges.push({from: srcNode.id, to: targNode.id, label: label, arrows: {to: true}})
-                });
-
-
-                var nodes = new vis.DataSet(arNodes);
-                var edges = new vis.DataSet(arEdges);
-
-                // provide the data in the vis format
-                var data = {
-                    nodes: nodes,
-                    edges: edges
-                };
-
-                //construct an object that is indexed by nodeId (for the model selection from the graph
-                var nodeObj = {};
-                arAllModels = []; //construct an array of all the models references by this one
-                arNodes.forEach(function (node) {
-                    nodeObj[node.id] = node;
-                    arAllModels.push({url: node.url})
-                });
-
-
-
-
-
-                return {references: lst, graphData: data, nodes: nodeObj, lstNodes: arAllModels};
-
-
-                function getNodeByUrl(url, label, nodes) {
-
-                    if (nodes[url]) {
-                        return nodes[url];
-                    } else {
-                        var ar = url.split('/')
-                        //var label =
-                        var node = {id: arNodes.length + 1, label: ar[ar.length - 1], shape: 'box', url: url};
-                        if (arNodes.length == 0) {
-                            //this is the first node
-                            node.color = 'green'
-                            node.font = {color: 'white'}
-                        }
-
-
-                        nodes[url] = node;
-                        arNodes.push(node);
-                        return node;
-                    }
-                }
-
-                function getModelReferences(lst, SD, srcUrl) {
-                    var treeData = that.createTreeArrayFromSD(SD);
-
-                    treeData.forEach(function (item) {
-                        if (item.data) {
-
-                            if (item.data.referenceUrl) {
-                                var resourceType = $filter('referenceType')(item.data.referenceUrl)  //todo currently only supports references to core resourc etypes...
-                                var ref = {src: srcUrl, targ: item.data.referenceUrl, path: item.data.path, type: resourceType}
-                                lst.push(ref);
-                                /*  Not quite sure why I was doing this recursively...
-                                var newSD = that.getModelFromBundle(bundle, item.data.referenceUrl);
-                                if (newSD) {
-                                    getModelReferences(lst, newSD, newSD.url)
-                                }
-                                */
-                            }
-                        }
-                    })
-
-                }
-
-
-            },
-
-            makeDocBundleWithCompositionDEP : function(SD) {
-
-              //  return;
-
-                //make a Bundle, assuming that the SD profiles a Composition
-                var bundle = {resourceType:'Bundle',type:'document',entry:[]};
-
-                var composition = {resourceType:'Composition',status:'preliminary',type:{text:'unknown'},title:'Autogenerated doc from Logical Modeller'}
-                composition.date = moment().format();
-                composition.section=[];
-                composition.text = $filter('addTextDiv')('Composition')
-                bundle.entry.push({resource:composition});
-                var sectHash = {};
-                var currentSectHash;
-                var sectionReferences = [];     //all the references from a section...
-
-                //all the non-sections for now...
-                SD.snapshot.element.forEach(function (ed,inx) {
-
-                    var mapPath = _.find(ed.mapping, {identity: 'fhir'});
-
-                    var arPath = ed.path.split('.');
-                    if (mapPath && mapPath.map && mapPath.map.indexOf('.section') > -1) {
-                        if (arPath.length == 2) {
-                            //the first entry for this section..
-                            var sectName = arPath[1];   //the namm given to this section
-                            sectHash[sectName] = {entry: []}
-                            currentSectHash = sectHash[sectName]
-                            composition.section.push(currentSectHash)
-
-                        } else if (arPath.length == 3) {
-                            //a section property - is there a fixed value? todo - currently only strings
-                            if (ed.fixedString) {
-                                var prop = arPath[2];   //?? should get this from the mapping???
-                                if (prop != 'entry') {
-                                    currentSectHash[prop] = ed.fixedString;
-                                }
-                            }
-                        }
-                    }
-
-                    if (ed.type) {
-                        ed.type.forEach(function (typ) {
-
-                            if (typ.code == 'Reference') {
-
-                                var profile = typ.targetProfile;        //internal represntation is this...
-                                if (profile) {
-                                    var type = $filter('getLogicalID')(profile) //todo only work for core types
-
-                                    var resource = {resourceType: type};
-                                    bundle.entry.push({resource: resource});
-                                    resource.id = 'auto' + inx;
-                                    resource.text = $filter('addTextDiv')(type);
-
-                                    var ref = {reference: type + "/" + resource.id,display:$filter('dropFirstInPath')(ed.path)};
-
-
-
-                                    //this will only work for sections directly off the root...
-                                    if (mapPath && mapPath.map && mapPath.map.indexOf('.section.') > -1) {
-                                        //this is a reference within a section. add a reference to it from the current section hash
-
-                                        currentSectHash.entry.push(ref);
-
-
-                                    } else {
-                                        //this is a reference that is not off a section
-                                        if (arPath.length ==2) {    //todo - are there references off the root?
-                                            var segment = arPath[1];
-                                            if (ed.max == 1) {
-                                                composition[segment] = ref;
-                                            } else {
-                                                composition[segment] = composition[segment] || []
-                                                composition[segment].push(ref)
-                                            }
-
-                                        }
-
-                                    }
-
-                                }
-                            }
-                        })
-                    }
-
-                });
-
-                //console.log(composition)
-                return bundle;
             },
 
             makeDocBundle : function(lst){

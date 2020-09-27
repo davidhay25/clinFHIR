@@ -4,6 +4,10 @@ var request  = require('request');
 var moment = require('moment');
 let http = require('http');
 
+let cors = require('cors'); //https://www.npmjs.com/package/cors
+
+
+
 //var httpProxy = require('http-proxy')
 
 //  remove for proxy var myParser = require("body-parser");
@@ -11,6 +15,7 @@ var Cookies = require( "cookies" )
 
 var express = require('express');
 var app = express();
+app.use(cors());
 
 //var orionModule = require("./serverModuleOrion.js")
 var smartModule = require("./serverModuleSMART.js")

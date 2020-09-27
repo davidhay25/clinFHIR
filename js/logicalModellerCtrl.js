@@ -52,7 +52,7 @@ angular.module("sampleApp")
             $window.addEventListener('beforeunload', function(event) {
                 event.preventDefault()
                 event.returnValue = "Are you sure?"
-                alert('I am the 1st one.');
+
             });
 
 /*
@@ -68,6 +68,7 @@ angular.module("sampleApp")
                 return message;
             }
 */
+            //update the DataDictionary display for the LM
             $scope.updateDD = function(){
                 $scope.DD = logicalModelSvc.createDataModel($scope.treeData)
 
@@ -76,6 +77,14 @@ angular.module("sampleApp")
                     function(doc) {
                         $scope.DDDoc = doc;
                         $('#htmlDD').contents().find('html').html(doc)
+
+                        $scope.downloadLinkDoc = window.URL.createObjectURL(new Blob([doc],
+                            {type: "text/html"}));
+
+                        //$scope.downloadLinkJsonName = "downloaded"
+                        var now = moment().format();
+                        $scope.downloadLinkDocName =  'DataDictionary-' + now + '.html';
+
 
 
 /* temp
@@ -611,41 +620,9 @@ angular.module("sampleApp")
 
             };
 
-            $scope.generateIG = function() {
-                alert('Not yet enabled, sorry...')
-                return;
 
 
-                logicalModelSvc.makeIG($scope.treeData).then(
-                    function(IG) {
-                        console.log(IG)
-                    },
-                    function(err) {
-                        console.log(err)
-                    }
-                )
-            }
 
-/*
-            //generate and save a questionnaire
-            $scope.generateQ = function(){
-
-                alert('not yet enabled, sorry...');
-                return;
-
-                var Qname = $scope.SD.id;   //the questionairre name (and id, url) is based on the LM model id
-                var Q = questionnaireSvc.makeQ($scope.treeData);  //update the Questionnaire
-                questionnaireSvc.saveQ(Q,Qname).then(
-                    function(ok) {
-                        modalService.showModal({}, {bodyText: ok});
-                        questionnaireSvc.findQ();       //just as a test...
-                    },
-                    function(err) {
-                        modalService.showModal({}, {bodyText: err});
-                    }
-                )
-            };
-*/
             $scope.rootForDataType= $scope.fhirRoot +  "datatypes.html#";
 
 
@@ -653,50 +630,7 @@ angular.module("sampleApp")
 
             $scope.input.newCommentboxInxDEP = -1;
 
-            /*
-            //this is the new builder model
-            $scope.showForm = function(){
 
-                $uibModal.open({
-                    templateUrl: 'modalTemplates/newBuilderModal.html',
-                    windowClass: 'nb-modal-window',
-                    controller : function($scope,startProfile,startResource,bundle,title,container){
-                        $scope.startProfile = startProfile;
-                        $scope.startResource = startResource;
-                        $scope.bundle = bundle;
-                        $scope.title = title;
-                        $scope.container = container;
-
-                        $scope.closeModal = function() {
-                            $scope.$close()
-                        }
-
-                    }, resolve : {
-                        startProfile : function(){
-                            return $scope.SD;
-                        },
-                        startResource : function() {
-                            //note that the $scope.currentResource will be directly updated by new builder...
-                            return {};
-                        },
-                        bundle : function(){
-                            //used for the references...
-                            return {resourceType:'Bundle',entry:[]};
-                        },
-                        title : function(){
-                            return "Form ";
-                        },
-                        container : function(){
-                            //used for the references...
-                            return {};
-                        }
-
-                    }
-                })
-
-
-            };
-*/
             $scope.redrawChart = function(){
                 $timeout(function(){
                     if ($scope.instanceGraph) {
@@ -707,23 +641,7 @@ angular.module("sampleApp")
                 },1000)
 
             };
-/*
-            $scope.editLMDocDEP = function(){
-                $uibModal.open({
-                    templateUrl: 'modalTemplates/editLMDoc.html',
-                    size: 'lg',
-                    controller: "editLMDocCtrl",
-                    resolve : {
-                        doc: function () {          //the default extension
-                            return  $scope.docBundle;
-                        }
-                    }
-                }).result.then(
-                    function(result) {
 
-                    })
-            };
-*/
             $scope.expandAll = function() {
                 $scope.treeData.forEach(function (item) {
 
@@ -755,19 +673,6 @@ angular.module("sampleApp")
 
             };
 
-            //collapseLayout
-
-            //set the current node as the discriminator for all nodes with the sam path..
-            /*
-            $scope.setAsDiscriminator = function (treeNode) {
-                logicalModelSvc.setAsDiscriminator(treeNode,$scope.treeData)
-                drawTree()
-                $scope.isDirty=true;
-                makeSD();
-
-            };
-
-            */
 
             $scope.showConceptMap = function(url) {
 
@@ -795,9 +700,7 @@ angular.module("sampleApp")
                 )
             }
 
-            $scope.cloneNode = function(node){
-
-
+            $scope.cloneNodeDEP = function(node){
 
                 var newName = 'clone'
 
@@ -869,84 +772,6 @@ angular.module("sampleApp")
                 }
             };
 
-            //generate a real FHIR profile from the Logical model
-            $scope.generateFHIRProfile = function(){
-
-                $uibModal.open({
-                    templateUrl: 'modalTemplates/generateProfile.html',
-                    size: 'lg',
-                    controller: function($scope,logicalModelSvc,SaveDataToServer,modalService,logicalModel) {
-
-                        $scope.canSave = false;
-                        $scope.input = {}
-
-                        logicalModelSvc.generateFHIRProfile(logicalModel).then(
-                            function(profile) {
-                                $scope.realProfile = profile;
-                                $scope.canSave = true;
-                                $scope.message = "Profile generated. Click 'Save' to save to the server"
-
-                            },function(vo) {
-                                $scope.message = "Unable to create profile.";
-                                $scope.errors = vo.err
-
-                            }
-                        );
-
-
-                        $scope.saveProfile = function() {
-                            SaveDataToServer.saveResource($scope.realProfile,appConfigSvc.getCurrentConformanceServer().url).then(
-                                function(data) {
-                                    $scope.message = "Save successful.";
-                                    $scope.oo = data.data;
-                                    delete $scope.oo.text;
-                                },function (err) {
-                                    $scope.message = "Save failed.";
-                                    $scope.oo = data.data;
-                                    delete $scope.oo.text;
-                                }
-                            ).finally(function () {
-                                $scope.canSave = false;  //hide the save button - it's confusing to have it here...
-                            })
-                        };
-
-                        //$scope.generateProfile();
-
-                    },  resolve : {
-                        logicalModel : function(){
-
-
-                            return $scope.SD
-                        }}
-
-                })
-
-
-            };
-
-            //merge the referenced model into this one at this point
-            $scope.mergeModelDEP = function(url){
-                $scope.canSaveModel = false;        //to prevent the base model from being replaced... 
-                var modelToMerge = logicalModelSvc.getModelFromBundle($scope.bundleModels,url);
-
-                if (modelToMerge) {
-
-
-                    if (! logicalModelSvc.mergeModel($scope.SD,$scope.selectedNode.id,modelToMerge)) {
-                        modalService.showModal({}, {bodyText: "Sorry, can't merge this model. Please save, reload and try again"});
-                    }
-
-
-                    $scope.treeData = logicalModelSvc.createTreeArrayFromSD($scope.SD);  //create a new tree
-                    drawTree();     //... and draw
-                    createGraphOfProfile();     //and generate the mind map...
-
-
-                }
-
-
-
-            };
 
             $scope.updateDoc = function(){
 
@@ -956,7 +781,7 @@ angular.module("sampleApp")
                         $('#htmlDoc').contents().find('html').html(doc)
 
 
-
+/* - temp moved to DD
                         $scope.downloadLinkDoc = window.URL.createObjectURL(new Blob([doc],
                             {type: "text/html"}));
 
@@ -964,7 +789,7 @@ angular.module("sampleApp")
                         var now = moment().format();
                         $scope.downloadLinkDocName = $scope.treeData[0].data.header.name + '-' + now + '.html';
 
-
+*/
 
 
                     }
@@ -979,7 +804,7 @@ angular.module("sampleApp")
                 path.pop();
                 var parent = findNodeWithPath(path.join('.')); //note this is the node for the tree view, not the graph
 
-            //    if (parent && parent.data && parent.data.type) {
+
 
                 let profile = node.data.ed.type[0].targetProfile[0];
 
@@ -1310,9 +1135,6 @@ angular.module("sampleApp")
                 if ($scope.LMDetailVisible) {
 
                     $scope.midPaneClass = "col-md-7 col-sm-7"
-                    //we can make the right pa
-                    //$scope.midPaneClass = "col-md-5 col-sm-5"
-                    //$scope.rightPaneClass = "col-md-7 col-sm-7";
 
                 } else {
                     $scope.midPaneClass = "col-md-12 col-sm-12"
@@ -1352,14 +1174,8 @@ angular.module("sampleApp")
                     function(list) {
 
                         if (list) {
-
                             sortPalette(list)
-
-
                             $scope.lmPalette = list;
-
-
-
                             checkInPalette();   //if the user logs in while a model is selected...
 
                         }
@@ -1512,7 +1328,6 @@ angular.module("sampleApp")
             //find a shortcut for a model. Note there may be more that one (as could have the same id on different servers
             function findShortCutForModel(id) {
                 var deferred = $q.defer();
-                //var seriesRef = new Firebase(fbUrl+'/series');
                 var scCollection = $firebaseArray(firebase.database().ref().child("shortCut"));
 
                 scCollection.$ref().orderByChild("modelId").equalTo(id).once("value", function(dataSnapshot){
@@ -1628,46 +1443,6 @@ angular.module("sampleApp")
 
 
 
-
-
-/* in service
-
-
-
-
-            //load all the logical models created by clinFHIR
-
-            let loadAllModels = function() {
-                console.log('load all models')
-                var url= $scope.conformanceServer.url + "StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
-
-                GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
-                    function(data) {
-                        $scope.bundleModels = data.data
-                        $scope.bundleModels.entry = $scope.bundleModels.entry || [];    //in case there are no models
-
-                        $scope.bundleModels.entry.sort(function(ent1,ent2){
-                            if (ent1.resource.id > ent2.resource.id) {
-                                return 1
-                            } else {
-                                return -1
-                            }
-                        });
-
-                        //save all the models for the search facility
-                        $scope.originalAllModels = angular.copy($scope.bundleModels);
-
-                    },
-                    function(err){
-                        alert('Error loading models: ' + angular.toJson(err));
-                    }
-                )
-            };
-
-
-
-
-            */
             //used to provide the filtering capability...
             $scope.filterModelList = function(filter) {
                 filter = filter.toLowerCase();
@@ -2285,67 +2060,14 @@ angular.module("sampleApp")
 
 
                 checkInPalette();
-                updateInstanceGraph();
+                //updateInstanceGraph();
                 $scope.hidePatientFlag = false;
 
                 $scope.$broadcast('modelSelected',entry)
 
             }
 
-            //make a bundle that has a resource instance for all the referenced resource types in the model
-            function updateInstanceGraph() {
-                return;     //disable this...
 
-                $scope.hidePatientFlag = false;
-
-                logicalModelSvc.makeScenario($scope.treeData).then(
-                    function(bundle){
-
-                        $scope.scenarioBundle = bundle;
-
-
-                        var treeData = builderSvc.makeDocumentTree(bundle,true);    //don't display any error message
-                        $('#docTreeView').jstree('destroy');
-
-                        if (treeData) {
-
-
-                            $('#docTreeView').jstree(
-                                {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
-                            ).on('select_node.jstree', function (e, data) {
-
-                                //delete $scope.currentResource;      //todo - there's a setResource() in the service too...
-                                //delete $scope.currentPath;
-                                delete $scope.selectedNode;
-                                if (data.node) {
-                                    var resource = data.node.data.resource;
-
-
-                                    var path = resource.path;
-
-                                    $scope.selectedED = logicalModelSvc.getEDForPath($scope.SD,{data: {path:path}})
-                                    $scope.$digest()
-                                }
-
-                            })
-
-
-                        }
-
-
-
-
-
-
-
-
-                        generateInstanceGraph(bundle)
-                    }
-                );      //make a scenario.
-
-            }
-
-            //
             function generateInstanceGraph(bundle,resource,hideMe){
 
 
@@ -2436,19 +2158,7 @@ angular.module("sampleApp")
 
             }
 
-            //If based on a single FHIR resource, check for differences from that base - don't delete as might be useful
-            function checkDifferences(resource) {
-                delete $scope.differenceFromBase;
-                return; //temp
-                logicalModelSvc.differenceFromBase(resource).then(
-                    function (analysis) {
-                        $scope.differenceFromBase = analysis;
-                    },
-                    function(err) {
 
-                    }
-                )
-            }
             //called when the graph tab is selected
             $scope.redrawReferencesChart = function () {
                 //alert('redraw')
@@ -2489,50 +2199,7 @@ angular.module("sampleApp")
                     }
                 )
             }
-/*
-            function checkForCommentsDEP(resource) {
-                //if there's a practitioner (ie a logged in user) then see if there is an active task to comment on this model
-                if (resource && $scope.Practitioner) {
-                    var options = {active:true,focus:resource}
-                    GetDataFromServer.getTasksForPractitioner($scope.Practitioner,options).then(
-                        function(listTasks) {
 
-                            if (listTasks.length > 0) {
-                                $scope.commentTask = listTasks[0];  //should only be 1 active task for this practitioner for this model
-
-                                //now get any 'output' resources that exist for this task. Will only be QuestionnaireResponses...
-                                GetDataFromServer.getOutputsForTask($scope.commentTask,'QuestionnaireResponse').then(
-                                    function(lst){
-                                        $scope.taskOutputs = lst;
-
-
-                                        if (lst.length > 0 && lst[0].item) {
-                                            //if there is at least 1 QuestionnaireResponse - set the text...
-                                            //todo - this only supports a single comment per practitioner per model....
-                                            try {
-                                                $scope.input.mdComment = lst[0].item[0].answer[0].valueString;
-                                            } catch (err){
-                                                alert('There was an error getting the comment')
-                                            }
-
-                                        }
-
-
-
-                                    },
-                                    function(err) {
-                                        alert('Error getting task outputs: '+angular.toJson(err))
-                                    }
-                                )
-
-                            }
-                        }
-
-                    )
-                }
-            }
-
-            */
             function loadHistory(id) {
                 logicalModelSvc.getModelHistory(id).then(
                     function(data){
@@ -2873,10 +2540,7 @@ angular.module("sampleApp")
                     state: {opened: true}
                 };
                 newNode.data = angular.copy($scope.selectedNode.data)
-               // var path = newNode.data.path;
 
-               // var ar = path.split('_');
-               // var realPath = ar[0];   // in case this has already been copied...
 
 
                 var pos = 0;
@@ -2887,15 +2551,7 @@ angular.module("sampleApp")
                     }
                 });
 
-/*
-                var cnt = 1;
-                if (ar[1]) {
-                    newNode.data.path = realPath + '_'+ ar[1]++      //there was already a copy
-                    cnt= ar[1]
-                } else {
-                    newNode.data.path = realPath + '_1';             //this is the first copy
-                }
-*/
+
 
                 newNode.data.path = newPath;    //a sibling to the current element...
 
@@ -2903,17 +2559,13 @@ angular.module("sampleApp")
 
 
                 newNode.id = newPath; //newNode.data.path;         //must have a unique id...
-              //  newNode.data.ed.id = newNode.data.path;
-              //  newNode.data.ed.path = newNode.data.path;
-               // var parentNodeId = newNode.data.path;
+
 
                 newNode.state.selected = false;
-                //newNode.text += newName; //"_copy";
                 newNode.text = newName; //"_copy";
 
-                //newNode.data.name =  newNode.text;
+
                 newNode.data.name =  newName; //newNode.text; //$scope.selectedNode.text+'_'+cnt;      //needed for the setPath() function
-                //newNode.data.pathSegment = $scope.selectedNode.text+'_'+cnt;
 
                 newNode.data.pathSegment = newName; //needed for the setPath() function
 
@@ -3132,50 +2784,7 @@ angular.module("sampleApp")
                 }
             };
 
-            /*
-           $scope.moveDn = function(){
-                logicalModelSvc.saveTreeState($scope.treeData);
-                var path = $scope.selectedNode.data.path;
-                //var originalPos = findPositionInTree(path);     //need to save where the list is now in case we need to re-insert...
-                var lst = getListOfPeers(path);
-                //find the position of this node in the peers. If we're already at the bottom, then don't shift
-                //if we're second to bottom, then insert point will be right at the bottom.
-                //otherwise insert point is above the one 2 down in the list (because of all the child nodes to consider...
-                var lengthOfPeers = lst.length;
-                var placeInList = -1;
-                   for (var i=0; i < lst.length; i++) {    //find where this node is in the list of peers...
-                       if (lst[i].data.path == path) {
-                           placeInList = i;
-                           break;
-                       }
-                   }
-                if (placeInList == lengthOfPeers-1) {
-                    //we're at the end of the list - do nothing
-                } else if (placeInList == lengthOfPeers-2) {
-                    //we're second to bottom - do nothing
-                    var removedBranch = pruneBranch(path);      //prune the list
 
-                    var insertPos = $scope.treeData.length; //the bottom
-
-                    insertBranch(removedBranch,insertPos);
-                    $scope.isDirty = true;
-                    $scope.treeIdToSelect = findNodeWithPath(path).id;
-                    drawTree();
-                    makeSD();
-
-                } else {
-                    //insert above the secone one down...
-                    var pathToInsertAbove = lst[placeInList+2].data.path;   //the node we'll insert above
-                    var removedBranch = pruneBranch(path);      //prune the list
-                    var insertPos= findPositionInTree(pathToInsertAbove);   //insert point (after the list was pruned)
-                    insertBranch(removedBranch,insertPos);
-                    $scope.isDirty = true;
-                    $scope.treeIdToSelect = findNodeWithPath(path).id;
-                    drawTree();
-                    makeSD();
-                }
-            };
-            * */
             $scope.moveDn = function(){
                 logicalModelSvc.saveTreeState($scope.treeData);
                 var path = $scope.selectedNode.data.path;
@@ -3194,30 +2803,13 @@ angular.module("sampleApp")
                    }
                 if (placeInList == lengthOfPeers-1) {
                     //we're at the end of the list - do nothing
-      /*          } else if (placeInList == lengthOfPeers-2) {
-                    //we're second to bottom - do nothing
-                    var removedBranch = pruneBranch(path);      //prune the list
 
-                    var insertPos = $scope.treeData.length; //the bottom
-
-                    //--- new stuff
-                    var pathToInsertAbove = lst[placeInList+1].data.path;   //the node we'll insert above
-                    var insertPos= findPositionInTree(pathToInsertAbove)+1;   //insert point (after the list was pruned)
-                    // ----
-
-                    insertBranch(removedBranch,insertPos);
-
-                    $scope.isDirty = true;
-                   //temp $scope.treeIdToSelect = findNodeWithPath(path).id;
-                    drawTree();
-                    makeSD();
-*/
                 } else {
                     //insert above the secone one down...
-                    //var pathToInsertAbove = lst[placeInList+2].data.path;   //the node we'll insert above
+
                     var pathToInsertAbove = lst[placeInList+1].data.path;   //the node we'll insert above
                     var removedBranch = pruneBranch(path);      //prune the list
-                   // var insertPos= findPositionInTree(pathToInsertAbove);   //insert point (after the list was pruned)
+
                     var insertPos= findPositionInTree(pathToInsertAbove) +1;   //insert point (after the list was pruned)
                     insertBranch(removedBranch,insertPos);
                     $scope.isDirty = true;

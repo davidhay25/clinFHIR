@@ -34,6 +34,10 @@
         .popover-content {
             max-width: 400px;
         }
+
+        .resourceType {
+            border: 1px solid darkgrey; padding: 2px;
+        }
     </style>
 
 
@@ -533,12 +537,28 @@
 
                         </uib-tab>
 
+
+                        <uib-tab heading="Table">
+
+
+                            <div class="row" style="margin-top: 8px"  ng-repeat = "entry in fhir.entry">
+                                <div class="col-md-3">
+
+                                    <span class = "resourceType"> {{entry.resource.resourceType}}</span>
+                                </div>
+
+                            </div>
+
+
+                        </uib-tab>
                         <uib-tab heading="Json">
                             <div>
                                 <pre ng-show="fhir">  {{fhir | json}} </pre>
 
                             </div>
                         </uib-tab>
+
+
 
                         <uib-tab ng-show = "1==2 && fhir.type == 'document' " heading="HandleBars Document">
 

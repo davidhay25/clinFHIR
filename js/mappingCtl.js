@@ -6,6 +6,7 @@ angular.module("sampleApp")
 
             //extension urls
             //todo - should these move to app config svc???
+
             let extMapUrl = "https://vonk.fire.ly/StructureDefinition/mappingMap";
             let extExampleUrl = "https://vonk.fire.ly/StructureDefinition/mappingExample";
 
