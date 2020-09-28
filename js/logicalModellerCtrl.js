@@ -18,8 +18,8 @@ angular.module("sampleApp")
                 controls: ["bold", "italic", "separator", "bullets","separator", "heading","separator", "preview"]
             };
 
-            $scope.fhirRoot =  'http://hl7.org/fhir/STU3/'; //  'http://hl7.org/fhir/';
-
+           // $scope.fhirRoot =  'http://hl7.org/fhir/STU3/'; //  'http://hl7.org/fhir/';
+            $scope.fhirRoot =  'http://hl7.org/fhir/';      //use R4
 
             $scope.statusDescription = {'excluded':'This element will be removed from the model'};
             $scope.statusDescription.confirm = "We think this should be included, but not sure";
@@ -48,12 +48,14 @@ angular.module("sampleApp")
                 makeSD();       //builds a new SD
                 $scope.isDirty = true;
             }
-
+/*
             $window.addEventListener('beforeunload', function(event) {
                 event.preventDefault()
                 event.returnValue = "Are you sure?"
 
             });
+
+            */
 
 /*
             window.onbeforeunload = function (event) {
@@ -2496,7 +2498,7 @@ angular.module("sampleApp")
                         );      //make a scenario...
 */
                         setAllMappings();   //update any mappings
-                        updateInstanceGraph()
+                      //  updateInstanceGraph()
 
 
                         //set the path of the element based on the name - and the parent names up the hierarchy..

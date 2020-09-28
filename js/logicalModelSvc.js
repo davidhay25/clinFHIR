@@ -21,7 +21,6 @@ angular.module("sampleApp")
         $http.get("artifacts/dt.json").then(
             function(data) {
                 dataTypes = data.data;
-
             }
         );
 
@@ -172,27 +171,6 @@ angular.module("sampleApp")
                     if (arPath.length == 1) {
                         //this is the first node. Has 'model level' data so don't display......
 
-                        /*
-                        if (data.header) {
-                            var title = data.header.title || data.header.name;
-
-                            arDoc.push("<h1>" + title) + "<h1>";
-
-
-                            if (data.header.purpose) {
-                                let tmp = $filter('markDown')(data.header.purpose)
-                                arDoc.push("<h2>Purpose of model</h2>");
-                                arDoc.push(tmp);
-
-                            }
-
-
-
-                        }
-
-                        arDoc.push("<h1>Structured content</h1>");
-*/
-
                     } else {
                         //this is an 'ordinary node
                         arPath.splice(0, 1);     //ar is the path as an array...
@@ -200,6 +178,9 @@ angular.module("sampleApp")
 
                         let ddType = item.type;
                         console.log(ddType)
+
+                        //need to figure out the numbering
+
 
 
                         switch (ddType) {
@@ -2774,14 +2755,7 @@ angular.module("sampleApp")
                                         default:
                                             alert('unknown FHIR version: '+fhirVersion)
                                     }
-                                    /*
-                                    if (fhirVersion == 2) {
 
-                                    } else {
-                                        newTyp.targetProfile = typ.targetProfile;
-                                    }
-
-*/
                                     //is this a coded type
                                     if (['CodeableConcept', 'Coding', 'code'].indexOf(typ.code) > -1) {
                                         item.data.isCoded = true;

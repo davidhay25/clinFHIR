@@ -121,78 +121,139 @@
 
                     </div>
                     <div class="col-md-6 col-sm-6">
-                        <div ng-show="dt.code=='Reference'">
-                            <div><label>Reference</label></div>
 
 
-                            <uib-tabset>
+                        <uib-tabset>
+                            <uib-tab heading="Main datatype details">
 
-                                <uib-tab heading="Core Types">
+                                <!-- For some reason, '||' - or - is not being recignized here...-->
+                                <div ng-hide="dt.code == 'Reference'">
+                                    <em ng-hide="isCoded">This datatype doesn't have additional details</em>
+                                </div>
+
+                                <div ng-show="dt.code=='Reference'">
+                                    <div class="rounded-box">
+                                        <div><label>Reference</label></div>
 
 
-                                    <div class="row">
-                                        <div class="col-sm-10 col-md-10">
-                                            <select  class="form-control" ng-model="input.referenceToCoreFromIg"
-                                                     ng-options="item.name for item in allResourceTypes">
+                                        <uib-tabset>
+
+                                        <uib-tab heading="Core Types">
+
+
+                                            <div class="row">
+                                                <div class="col-sm-10 col-md-10">
+                                                    <select  class="form-control" ng-model="input.referenceToCoreFromIg"
+                                                             ng-options="item.name for item in allResourceTypes">
+
+                                                    </select>
+                                                </div>
+                                                <div class="col-sm-2 col-md-2">
+                                                    <a ng-href="{{fhirRoot}}{{input.referenceToCoreFromIg.name}}.html" target="_blank">
+                                                        <i class="glyphicon glyphicon-eye-open clickable"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+
+
+
+
+                                        </uib-tab>
+                                        <uib-tab heading="Logical Models">
+                                            <select  class="form-control" ng-model="input.referenceFromIg"
+                                                     ng-options="lmDisplay(entry.resource) for entry in references.entry">
 
                                             </select>
+                                        </uib-tab>
+
+                                    </uib-tabset>
+
+                                    </div>
+                                </div>
+
+                                <div ng-show="isCoded">
+
+                                    <div class="rounded-box">
+
+
+
+                                    <div><em>{{selectedValueSet.valueSet}}</em></div>
+                                    <br/>
+
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6">
+                                            <div><label>ValueSet</label></div>
+
+                                            <select  ng-show="vsInGuide.length > 0" class="form-control" ng-model="input.vsFromIg"
+                                                     ng-change="selectVsFromIg()"
+                                                     ng-options="vs.name for vs in vsInGuide">
+
+                                            </select>
+
+
+                                            <div class="clickable " ng-click="selectVsFromServer()">Select ValueSet from Server</div>
+                                            <div class="clickable " ng-show="selectedValueSet" ng-click="removeBinding()">Remove ValueSet binding</div>
+
+
                                         </div>
-                                        <div class="col-sm-2 col-md-2">
-                                            <a ng-href="{{fhirRoot}}{{input.referenceToCoreFromIg.name}}.html" target="_blank">
-                                                <i class="glyphicon glyphicon-eye-open clickable"></i>
-                                            </a>
+                                        <div class="col-md-6 col-sm-6">
+                                            <div><label>Auto expand ValueSet in Clinical view</label></div>
+
+                                            <div class="btn-group">
+                                                <label class="btn btn-default" ng-model="input.autoExpand" uib-btn-radio="false">No</label>
+                                                <label class="btn btn-default" ng-model="input.autoExpand" uib-btn-radio="true">Yes</label>
+                                            </div>
+
                                         </div>
                                     </div>
-
-
-
-
-                                </uib-tab>
-                                <uib-tab heading="Logical Models">
-                                    <select  class="form-control" ng-model="input.referenceFromIg"
-                                             ng-options="lmDisplay(entry.resource) for entry in references.entry">
-
-                                    </select>
-                                </uib-tab>
-
-                            </uib-tabset>
-
-
-                        </div>
-
-                        <div ng-show="isCoded">
-
-                            <div><em>{{selectedValueSet.valueSet}}</em></div>
-                            <br/>
-
-                            <div class="row">
-                                <div class="col-md-6 col-sm-6">
-                                    <div><label>ValueSet</label></div>
-
-                                    <select  ng-show="vsInGuide.length > 0" class="form-control" ng-model="input.vsFromIg"
-                                             ng-change="selectVsFromIg()"
-                                             ng-options="vs.name for vs in vsInGuide">
-
-                                    </select>
-
-
-                                    <div class="clickable " ng-click="selectVsFromServer()">Select ValueSet from Server</div>
-                                    <div class="clickable " ng-show="selectedValueSet" ng-click="removeBinding()">Remove ValueSet binding</div>
-
-
-                                </div>
-                                <div class="col-md-6 col-sm-6">
-                                    <div><label>Auto expand ValueSet in Clinical view</label></div>
-
-                                    <div class="btn-group">
-                                        <label class="btn btn-default" ng-model="input.autoExpand" uib-btn-radio="false">No</label>
-                                        <label class="btn btn-default" ng-model="input.autoExpand" uib-btn-radio="true">Yes</label>
                                     </div>
-
                                 </div>
-                            </div>
 
-                        </div>
+                            </uib-tab>
+
+                            <uib-tab>
+                                <uib-tab-heading>
+                                    Additional datatypes <span class="badge">{{additionalDatatypes.length}}</span>
+                                </uib-tab-heading>
+
+                                <em>There can be other potential datatypes, but not coded or reference types.</em>
+
+                                <div ng-show="additionalDatatypes.length > 0">
+                                    Current additional datatypes:
+                                </div>
+                                <ul>
+                                    <li ng-repeat="dt in additionalDatatypes track by $index">
+
+                                        {{dt}}
+                                        <span class="pull-right">
+                                                <i class="glyphicon glyphicon-minus-sign clickable pull-right"
+                                                   ng-click="removeAdditionalDT($index)"></i>
+                                            </span>
+
+
+                                    </li>
+                                </ul>
+
+                                <hr/>
+                                <div class="row">
+                                    <div class="col-md-6 col-sm-6">
+                                        <em>Select an additional datatype from the dropdown</em>
+                                    </div>
+                                    <div class="col-md-6 col-sm-6">
+                                        <select ng-change="addAdditionalDT(input.addDataType)" ng-model="input.addDataType" class="form-control"
+                                                ng-options = "type for type in additionalDT">
+                                        </select>
+                                    </div>
+                                </div>
+
+
+
+
+
+                            </uib-tab>
+
+                        </uib-tabset>
+
 
 
                     </div>

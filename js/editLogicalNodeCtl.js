@@ -10,6 +10,19 @@ angular.module("sampleApp")
             $scope.rootForDataType = rootForDataType;   //HTTP root for viewing datatype details
             $scope.canSave = true;
             $scope.allDataTypes = allDataTypes;
+            //set the additional datatypes permitted
+
+            $scope.additionalDT = []; //these are all the possible DT
+            $scope.additionalDatatypes = [];        //these are the assigned additional Dt
+            //note that additionalDT are a string... (main dt is an object)
+            allDataTypes.forEach(function (dt) {
+                if (['Reference','CodeableConcept','Coding','code'].indexOf(dt.code) == -1) {
+                    $scope.additionalDT.push(dt.code)
+                }
+            });
+
+
+
             $scope.parentPath = parentPath;
             $scope.pathDescription = 'Parent path';
             $scope.vsInGuide = igSvc.getResourcesInGuide('valueSet');       //so we can show the list of ValueSets in the IG
@@ -55,6 +68,18 @@ angular.module("sampleApp")
             }
 
 */
+
+            $scope.addAdditionalDT = function(dt){
+                $scope.additionalDatatypes = $scope.additionalDatatypes || []
+                $scope.additionalDatatypes.push(dt)
+
+            };
+
+            //remove one of the additional datatypes
+            $scope.removeAdditionalDT = function(inx) {
+                $scope.additionalDatatypes.splice(inx,1)
+            };
+
             $scope.fhirMapping = function(map) {
                 $scope.isExtension = false;
                 if (map && map.indexOf('xtension') > -1) {
@@ -157,18 +182,6 @@ angular.module("sampleApp")
                                 }
                             }
 
-
-                            /*
-                            var ref = ed.binding.valueSetReference;
-                            if (ref) {
-                                var url = ref.reference;
-                                var ar = url.split('/');
-                                var name = ar[ar.length-1];
-                                //var vo={vs:{url:url,name:name},strength:ed.binding.strength}
-                                var vo={vs:{url:url,name:name},strength:ed.binding.strength}
-                                $scope.selectedValueSet = vo;
-                            }
-                            */
                         }
 
 
@@ -225,7 +238,7 @@ angular.module("sampleApp")
                     return;
                 }
 
-               // if (editNode) {
+
                     //editing an existing node
                 $scope.pathDescription = 'Path'
                 var data = node.data;
@@ -309,8 +322,19 @@ angular.module("sampleApp")
                 }
 
 
+                //the main datatype is in pos 0...
                 $scope.dt = data.type[0];   //the selected datatype...
                 var dtCode = data.type[0].code;     //only the first datatype (we only support 1 right now)
+
+                if (data.type.length > 1) {
+                    //these are additional datatypes...
+
+                    for (var i=1; i < data.type.length ; i++ ) {
+                        let dt = data.type[i]
+                        $scope.additionalDatatypes.push(dt.code)
+                    }
+
+                }
 
 
                     //$timeout(setOptionsForDtAndPath,1000);      //check options for this dt & path (need to wait for the config to be loaded
@@ -840,7 +864,18 @@ angular.module("sampleApp")
                     alignMap('snomed',vo.mappingPathSnomed,vo.mappingFromED)
                     alignMap('lm',vo.mappingPathLM,vo.mappingFromED)
 
+
+
+
                     vo.type = [{code:$scope.input.dataType.code}];
+                    //if there are additional datatypes, then add them after the main one...
+                    if ($scope.additionalDatatypes && $scope.additionalDatatypes.length > 0) {
+                        $scope.additionalDatatypes.forEach(function (dt) {
+                            vo.type.push({code:dt})
+                        })
+                    }
+
+
                     vo.editNode = editNode;
                     //I don't think this is used .... vo.parentPath = parentPath;
 
