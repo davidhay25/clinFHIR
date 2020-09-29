@@ -206,7 +206,7 @@ angular.module("sampleApp")
 
 
                     item.number = thisNumber
-                   
+
 
                     //does this element have children?
                     if (hashChildren[id]) {
@@ -239,13 +239,13 @@ angular.module("sampleApp")
 
                         //this is an 'ordinary node
                         arPath.splice(0, 1);     //ar is the path as an array...
-                        let ddPath = arPath[arPath.length -1] ; //arPath.join('.');
+                        let ddPath = arPath[arPath.length - 1]; //arPath.join('.');
 
                         let ddType = item.type;
 
                         let displayNumbering = data.number + " ";
 
-                        let headingDisplay = data.short ; // not ddPath
+                        let headingDisplay = data.short; // not ddPath
                         switch (ddType) {
                             case 'heading' :
                                 arDoc.push(addTaggedLine("h2", displayNumbering + headingDisplay));
@@ -254,114 +254,113 @@ angular.module("sampleApp")
 
                                 break;
                             case 'grouper' :
-                                arDoc.push(addTaggedLine("h2", displayNumbering + headingDisplay ));
+                                arDoc.push(addTaggedLine("h2", displayNumbering + headingDisplay));
                                 arDoc.push(addTaggedLine("p", data.description));
                                 break;
-                            default:
-
-                                //arDoc.push(addTaggedLine("h3", data.name));
-                                arDoc.push(addTaggedLine("h3", displayNumbering + headingDisplay));
-
-                                arDoc.push("<table class='dTable'>");
-
-                                //addRowIfNotEmpty(arDoc,'Name',data.name);
-                               //addRowIfNotEmpty(arDoc,'Short description',data.short);
-                                addRowIfNotEmpty(arDoc,'Description',data.description);
-                                addRowIfNotEmpty(arDoc,'Comments',data.comments);
-
-                                addRowIfNotEmpty(arDoc,'Use',data.usageGuide);
-
-                                if (data.alias) {
-                                    let alias = "";
-                                    data.alias.forEach(function (al) {
-                                        alias += "<div>" + al + "</div>";
-
-                                    });
-                                    //alias = alias.substring(0,alias.length -2);
-                                    addRowIfNotEmpty(arDoc,'Aliases',alias)
-                                }
-
-
-
-                                let mult = data.min + ".." + data.max;
-
-                                let multDisplay = "";
-                                switch (mult) {
-                                    case "0..1" :
-                                        multDisplay = "Optional, single occurrence"
-                                        break
-                                    case "0..*" :
-                                        multDisplay = "Optional, multiple occurrences"
-                                        break;
-                                    case "1..1" :
-                                        multDisplay = "Required, single occurrence"
-                                        break;
-                                    case "1..*" :
-                                        multDisplay = "Multiple occurrences, at least one"
-                                }
-
-
-                                addRowIfNotEmpty(arDoc,'Occurrence',multDisplay);
-
-
-                                if (data.examples) {
-
-                                    let ar =  data.examples.split('\n')
-                                    let exampleDisplay = ""
-                                    ar.forEach(function (lne) {
-                                        exampleDisplay += "<div>" + lne + "</div>"
-                                    })
-
-
-                                    addRowIfNotEmpty(arDoc,'Examples',exampleDisplay);
-                                }
-
-
-
-
-                                //addRowIfNotEmpty(arDoc,'Examples',data.examples);
-
-
-                                addRowIfNotEmpty(arDoc,'References',data.references);
-
-                                let type = "";
-                                data.type.forEach(function(typ){
-                                    let targ = ""
-                                    if (typ.code == 'Reference') {
-                                        if (typ.targetProfile) {
-                                            targ = " --> " + $filter('referenceType')(typ.targetProfile[0])
-                                        }
-
-
-                                    }
-
-                                    type += "<div>" + typ.code + targ +  "</div>";
-
-                                });
-
-                                addRowIfNotEmpty(arDoc,'Data type',type)
-
-                                if (data.selectedValueSet && data.selectedValueSet.valueSet) {
-                                    let binding = data.selectedValueSet.valueSet;
-                                    if (data.selectedValueSet.strength) {
-                                        binding += " (" + data.selectedValueSet.strength + ")"
-                                    }
-                                    addRowIfNotEmpty(arDoc,'Binding',binding)
-
-
-
-                                }
-
-
-
-
-
-                                arDoc.push("</table><br/>");
-                                break;
-
-
                         }
 
+                        // default:
+                        if (data.description !== "No description"){
+                            //arDoc.push(addTaggedLine("h3", data.name));
+                            
+                            if (ddType !== 'heading' && ddType !== 'grouper') {
+                                arDoc.push(addTaggedLine("h3", displayNumbering + headingDisplay));
+                            }
+
+
+                            arDoc.push("<table class='dTable'>");
+
+                            //addRowIfNotEmpty(arDoc,'Name',data.name);
+                            //addRowIfNotEmpty(arDoc,'Short description',data.short);
+                            addRowIfNotEmpty(arDoc, 'Description', data.description);
+                            addRowIfNotEmpty(arDoc, 'Comments', data.comments);
+
+                            addRowIfNotEmpty(arDoc, 'Use', data.usageGuide);
+
+                            if (data.alias) {
+                                let alias = "";
+                                data.alias.forEach(function (al) {
+                                    alias += "<div>" + al + "</div>";
+
+                                });
+                                //alias = alias.substring(0,alias.length -2);
+                                addRowIfNotEmpty(arDoc, 'Aliases', alias)
+                            }
+
+
+                            let mult = data.min + ".." + data.max;
+
+                            let multDisplay = "";
+                            switch (mult) {
+                                case "0..1" :
+                                    multDisplay = "Optional, single occurrence"
+                                    break
+                                case "0..*" :
+                                    multDisplay = "Optional, multiple occurrences"
+                                    break;
+                                case "1..1" :
+                                    multDisplay = "Required, single occurrence"
+                                    break;
+                                case "1..*" :
+                                    multDisplay = "Multiple occurrences, at least one"
+                            }
+
+
+                            addRowIfNotEmpty(arDoc, 'Occurrence', multDisplay);
+
+
+                            if (data.examples) {
+
+                                let ar = data.examples.split('\n')
+                                let exampleDisplay = ""
+                                ar.forEach(function (lne) {
+                                    exampleDisplay += "<div>" + lne + "</div>"
+                                })
+
+
+                                addRowIfNotEmpty(arDoc, 'Examples', exampleDisplay);
+                            }
+
+
+                            //addRowIfNotEmpty(arDoc,'Examples',data.examples);
+
+
+                            addRowIfNotEmpty(arDoc, 'References', data.references);
+
+                            let type = "";
+                            data.type.forEach(function (typ) {
+                                let targ = ""
+                                if (typ.code == 'Reference') {
+                                    if (typ.targetProfile) {
+                                        targ = " --> " + $filter('referenceType')(typ.targetProfile[0])
+                                    }
+
+
+                                }
+
+                                type += "<div>" + typ.code + targ + "</div>";
+
+                            });
+
+                            addRowIfNotEmpty(arDoc, 'Data type', type)
+
+                            if (data.selectedValueSet && data.selectedValueSet.valueSet) {
+                                let binding = data.selectedValueSet.valueSet;
+                                if (data.selectedValueSet.strength) {
+                                    binding += " (" + data.selectedValueSet.strength + ")"
+                                }
+                                addRowIfNotEmpty(arDoc, 'Binding', binding)
+
+
+                            }
+
+
+                            arDoc.push("</table><br/>");
+                            //break;
+
+
+                            // }
+                        }
 
                     }
                 });
