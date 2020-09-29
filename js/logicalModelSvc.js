@@ -157,11 +157,74 @@ angular.module("sampleApp")
                 //console.log(hash)
 
             },
+            makeDDNumbers : function(tree) {
+
+
+                let hashChildren = {}
+                let hashId = {}
+                let rootId;
+                tree.forEach(function (item,ctr) {
+                    hashId[item.item.id] = item;
+                    if (ctr == 0) {
+                        rootId = item.item.id
+                    }
+
+                    hashChildren[item.item.parent] = hashChildren[item.item.parent] || []
+
+                    let p = hashChildren[item.item.parent]
+                    p.push(item.item.id)
+                })
+
+
+                //will set the numbers
+                process(rootId,"",1);
+
+                //copy the numbers to the item
+                tree.forEach(function (item,ctr) {
+                    let id = item.item.id
+                    let ele = hashId[id]
+                    if (ctr > 0) {
+                        item.item.data.number = ele.number.substr(2)
+                    }
+
+                });
+
+                return;
+
+
+
+                function process(id,base,ctr) {
+
+                    //set the number on the item
+                    let item = hashId[id];
+                    let thisNumber;
+                    if (base) {
+                        thisNumber = base + '.' + ctr;
+                    } else {
+                        thisNumber = ctr
+                    }
+
+
+                    item.number = thisNumber
+                   
+
+                    //does this element have children?
+                    if (hashChildren[id]) {
+                        //yes - process each child
+                        hashChildren[id].forEach(function (childId,ctr) {
+                            process(childId,thisNumber,ctr+1)
+                        })
+                    }
+
+
+                }
+
+            },
             generateDDHTML : function(tree) {
-                var deferred = $q.defer();
-                var arDoc = []
+                this.makeDDNumbers(tree);   //adds hierarchical numbering to the tree items...
 
-
+                let deferred = $q.defer();
+                let arDoc = [];
                 tree.forEach(function (item) {
                     let branch = item.item;
                     var data = branch.data;
@@ -172,30 +235,33 @@ angular.module("sampleApp")
                         //this is the first node. Has 'model level' data so don't display......
 
                     } else {
+
+
                         //this is an 'ordinary node
                         arPath.splice(0, 1);     //ar is the path as an array...
-                        let ddPath = arPath.join('.');
+                        let ddPath = arPath[arPath.length -1] ; //arPath.join('.');
 
                         let ddType = item.type;
-                        console.log(ddType)
 
-                        //need to figure out the numbering
+                        let displayNumbering = data.number + " ";
 
-
-
+                        let headingDisplay = data.short ; // not ddPath
                         switch (ddType) {
                             case 'heading' :
-                                arDoc.push(addTaggedLine("h2", ddPath));
+                                arDoc.push(addTaggedLine("h2", displayNumbering + headingDisplay));
                                 arDoc.push(addTaggedLine("p", data.description));
+
+
                                 break;
                             case 'grouper' :
-                                arDoc.push(addTaggedLine("h2", ddPath ));
+                                arDoc.push(addTaggedLine("h2", displayNumbering + headingDisplay ));
                                 arDoc.push(addTaggedLine("p", data.description));
                                 break;
                             default:
 
                                 //arDoc.push(addTaggedLine("h3", data.name));
-                                arDoc.push(addTaggedLine("h3", data.short));
+                                arDoc.push(addTaggedLine("h3", displayNumbering + headingDisplay));
+
                                 arDoc.push("<table class='dTable'>");
 
                                 //addRowIfNotEmpty(arDoc,'Name',data.name);
