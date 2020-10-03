@@ -1952,6 +1952,17 @@ angular.module("sampleApp")
 
                // $scope.$broadcast('loadTasks',entry)
 
+
+
+                $('#htmlDD').contents().find('html').html("")
+                delete $scope.downloadLinkDoc;
+                delete $scope.downloadLinkDocName;
+
+
+
+
+
+
                 $scope.canSaveModel = true;     //allow edits to the model to be saved
 
                 $scope.isDirty = false;

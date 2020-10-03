@@ -116,6 +116,8 @@ angular.module("sampleApp")
         var multiple = {}       //todo hack!!!  multiple paths...
         multiple['Composition.section.entry'] = "*";
 
+
+
         return {
 
             createDataModel : function(treeData) {
@@ -157,8 +159,133 @@ angular.module("sampleApp")
                 //console.log(hash)
 
             },
-            makeDDNumbers : function(tree) {
+            insertReferencedLM : function(tree) {
+                let deferred = $q.defer()
 
+                let arQuery = [], hashResults = {}
+                tree.forEach(function (item,inx) {
+
+                    let path = item.item.id;
+
+                    var data = item.item.data;
+                    if (data.type) {
+                        let  type = data.type[0]
+                        console.log(type);
+                        if (type.code == 'Reference') {
+                           // console.log()
+                            if (type.targetProfile && type.targetProfile.length > 0) {
+                                let url = type.targetProfile[0];
+                                if (url.indexOf('://hl7.org/fhir') == -1 ) {
+                                    //don't try to retrrieve core profiles
+                                    arQuery.push(
+                                        $http.get(url).then(
+                                            function(data) {
+                                                //hashResults[url] = {path: path, SD: data.data};
+                                                hashResults[inx] = {path: path, SD: data.data};
+                                            },
+                                            function(err){
+                                                console.log('error loading SD ' +url)
+                                            })
+                                    )
+                                }
+
+                            }
+                        }
+
+                    }
+
+
+                });
+
+                $q.all(arQuery).then(
+                    function(data){
+
+                        console.log(hashResults)
+
+
+                        Object.keys(hashResults).forEach(function(k) {
+                            let SD = hashResults[k].SD
+                            let path = hashResults[k].path;     //this is the insert point on the original
+                            let insertRoot = path;
+
+
+                            //locate the insert point in the array
+                            let insertIndex = tree.length;      //default to the end of the tree
+                            for (var i =0; i < tree.length; i++) {
+                                if (tree[i].path == path ) {
+                                    insertIndex = i;
+                                    console.log('inserting at ' + insertIndex)
+                                    break;
+                                }
+                            }
+
+
+                            console.log(SD)
+
+                            SD.snapshot.element.forEach(function (element, inx) {
+
+                                //ignore the first element of the inserted LM
+                                if (inx > 0) {
+                                    //this is a minimal object to insert - just that info needed for the document...
+                                    //need to create a compatible path
+                                    let pathFromInsert = element.path;
+                                    //now make the 'root' of this path the same as the insert point in the host
+                                    let ar = pathFromInsert.split('.')
+                                    ar[0] = insertRoot
+
+                                    let newPath =  ar.join('.')
+                                    //now make the parent...
+                                    ar.pop();
+                                    let parentPath = ar.join('.')
+
+                                    let data = {}
+                                    data.description = element.definition;
+                                    data.short = element.short;
+                                    data.path = newPath;// element.path;
+                                    data.type = element.type;
+                                    let insrt = {item : {parent:parentPath, data: data}}
+                                    insrt.path = newPath;
+                                    insrt.id = newPath; //element.path;
+                                    insrt.item.id = newPath; //path;
+
+                                    insertIndex ++
+                                    tree.splice(insertIndex,0,insrt)
+
+                                   // tree.push(insrt)
+                                }
+
+
+                            })
+
+
+                        });
+
+/*
+                        tree.sort(function(a,b){
+                            if (a.number > b.number) {
+                                return -1
+                            } else {
+                                return 1
+                            }
+                        })
+*/
+
+
+                        deferred.resolve(tree)
+
+
+
+
+
+                    }
+                )
+
+
+
+                return deferred.promise;
+
+            },
+            makeDDNumbers : function(tree) {
 
                 let hashChildren = {}
                 let hashId = {}
@@ -173,7 +300,7 @@ angular.module("sampleApp")
 
                     let p = hashChildren[item.item.parent]
                     p.push(item.item.id)
-                })
+                });
 
 
                 //will set the numbers
@@ -183,11 +310,32 @@ angular.module("sampleApp")
                 tree.forEach(function (item,ctr) {
                     let id = item.item.id
                     let ele = hashId[id]
-                    if (ctr > 0) {
-                        item.item.data.number = ele.number.substr(2)
+                    if (ele) {
+                        if (ctr > 0) {
+                            if (ele.number) {
+                                item.item.data = item.item.data || {}
+                                item.item.data.number = ele.number.substr(2)
+                            } else {
+                                console.log("element " + id + " has no number",ele)
+                            }
+
+                        }
+                    } else {
+                        console.log("Cant't find "+ id + " in the element cache")
                     }
+                   // console.log(id,ele)
+
 
                 });
+/*
+                tree.sort(function(a,b){
+                    if (a.number > b.number) {
+                        return 1
+                    } else {
+                        return -1
+                    }
+                })
+*/
 
                 return;
 
@@ -220,153 +368,166 @@ angular.module("sampleApp")
                 }
 
             },
-            generateDDHTML : function(tree) {
-                this.makeDDNumbers(tree);   //adds hierarchical numbering to the tree items...
+            generateDDHTML : function(inTree) {
+                let deferred = $q.defer()
+                let that = this;
 
-                let deferred = $q.defer();
-                let arDoc = [];
-                tree.forEach(function (item) {
-                    let branch = item.item;
-                    var data = branch.data;
+                let tree = angular.copy(inTree)     //we may wind up changing the tree...
 
-                    var path = data.path;     //this is the
-                    var arPath = path.split('.');
-                    if (arPath.length == 1) {
-                        //this is the first node. Has 'model level' data so don't display......
+                this.insertReferencedLM(tree).then(
+                    function(data) {
+                        console.log(tree)
+                        that.makeDDNumbers(tree);   //adds hierarchical numbering to the tree items...
+                        console.log(tree)
+                       // let deferred = $q.defer();
+                        let arDoc = [];
+                        tree.forEach(function (item) {
+                            let branch = item.item;
+                            var data = branch.data;
 
-                    } else {
+                            var path = data.path;     //this is the
+                            var arPath = path.split('.');
+                            if (arPath.length == 1) {
+                                //this is the first node. Has 'model level' data so don't display......
 
-
-                        //this is an 'ordinary node
-                        arPath.splice(0, 1);     //ar is the path as an array...
-                        let ddPath = arPath[arPath.length - 1]; //arPath.join('.');
-
-                        let ddType = item.type;
-
-                        let displayNumbering = data.number + " ";
-
-                        let headingDisplay = data.short; // not ddPath
-                        switch (ddType) {
-                            case 'heading' :
-                                arDoc.push(addTaggedLine("h2", displayNumbering + headingDisplay));
-                                arDoc.push(addTaggedLine("p", data.description));
+                            } else {
 
 
-                                break;
-                            case 'grouper' :
-                                arDoc.push(addTaggedLine("h2", displayNumbering + headingDisplay));
-                                arDoc.push(addTaggedLine("p", data.description));
-                                break;
-                        }
+                                //this is an 'ordinary node
+                                arPath.splice(0, 1);     //ar is the path as an array...
+                                let ddPath = arPath[arPath.length - 1]; //arPath.join('.');
 
-                        // default:
-                        if (data.description !== "No description"){
-                            //arDoc.push(addTaggedLine("h3", data.name));
-                            
-                            if (ddType !== 'heading' && ddType !== 'grouper') {
-                                arDoc.push(addTaggedLine("h3", displayNumbering + headingDisplay));
-                            }
+                                let ddType = item.type;
 
+                                let displayNumbering = data.number + " ";
 
-                            arDoc.push("<table class='dTable'>");
-
-                            //addRowIfNotEmpty(arDoc,'Name',data.name);
-                            //addRowIfNotEmpty(arDoc,'Short description',data.short);
-                            addRowIfNotEmpty(arDoc, 'Description', data.description);
-                            addRowIfNotEmpty(arDoc, 'Comments', data.comments);
-
-                            addRowIfNotEmpty(arDoc, 'Use', data.usageGuide);
-
-                            if (data.alias) {
-                                let alias = "";
-                                data.alias.forEach(function (al) {
-                                    alias += "<div>" + al + "</div>";
-
-                                });
-                                //alias = alias.substring(0,alias.length -2);
-                                addRowIfNotEmpty(arDoc, 'Aliases', alias)
-                            }
+                                let headingDisplay = data.short; // not ddPath
+                                switch (ddType) {
+                                    case 'heading' :
+                                        arDoc.push(addTaggedLine("h2", displayNumbering + headingDisplay));
+                                        arDoc.push(addTaggedLine("p", data.description));
 
 
-                            let mult = data.min + ".." + data.max;
+                                        break;
+                                    case 'grouper' :
+                                        arDoc.push(addTaggedLine("h2", displayNumbering + headingDisplay));
+                                        arDoc.push(addTaggedLine("p", data.description));
+                                        break;
+                                }
 
-                            let multDisplay = "";
-                            switch (mult) {
-                                case "0..1" :
-                                    multDisplay = "Optional, single occurrence"
-                                    break
-                                case "0..*" :
-                                    multDisplay = "Optional, multiple occurrences"
-                                    break;
-                                case "1..1" :
-                                    multDisplay = "Required, single occurrence"
-                                    break;
-                                case "1..*" :
-                                    multDisplay = "Multiple occurrences, at least one"
-                            }
+                                if (data.description == "No description"){
+                                    data.description = "There was no detailed description in the model"
+                                }
 
 
-                            addRowIfNotEmpty(arDoc, 'Occurrence', multDisplay);
+                                // default:
+                                if (data.description !== "No description"){
+                                    //arDoc.push(addTaggedLine("h3", data.name));
 
-
-                            if (data.examples) {
-
-                                let ar = data.examples.split('\n')
-                                let exampleDisplay = ""
-                                ar.forEach(function (lne) {
-                                    exampleDisplay += "<div>" + lne + "</div>"
-                                })
-
-
-                                addRowIfNotEmpty(arDoc, 'Examples', exampleDisplay);
-                            }
-
-
-                            //addRowIfNotEmpty(arDoc,'Examples',data.examples);
-
-
-                            addRowIfNotEmpty(arDoc, 'References', data.references);
-
-                            let type = "";
-                            data.type.forEach(function (typ) {
-                                let targ = ""
-                                if (typ.code == 'Reference') {
-                                    if (typ.targetProfile) {
-                                        targ = " --> " + $filter('referenceType')(typ.targetProfile[0])
+                                    if (ddType !== 'heading' && ddType !== 'grouper') {
+                                        arDoc.push(addTaggedLine("h3", displayNumbering + headingDisplay));
                                     }
 
 
+                                    arDoc.push("<table class='dTable'>");
+
+                                    //addRowIfNotEmpty(arDoc,'Name',data.name);
+                                    //addRowIfNotEmpty(arDoc,'Short description',data.short);
+                                    addRowIfNotEmpty(arDoc, 'Description', data.description);
+                                    addRowIfNotEmpty(arDoc, 'Comments', data.comments);
+
+                                    addRowIfNotEmpty(arDoc, 'Use', data.usageGuide);
+
+                                    if (data.alias) {
+                                        let alias = "";
+                                        data.alias.forEach(function (al) {
+                                            alias += "<div>" + al + "</div>";
+
+                                        });
+                                        //alias = alias.substring(0,alias.length -2);
+                                        addRowIfNotEmpty(arDoc, 'Aliases', alias)
+                                    }
+
+
+                                    let mult = data.min + ".." + data.max;
+
+                                    let multDisplay = "";
+                                    switch (mult) {
+                                        case "0..1" :
+                                            multDisplay = "Optional, single occurrence"
+                                            break
+                                        case "0..*" :
+                                            multDisplay = "Optional, multiple occurrences"
+                                            break;
+                                        case "1..1" :
+                                            multDisplay = "Required, single occurrence"
+                                            break;
+                                        case "1..*" :
+                                            multDisplay = "Multiple occurrences, at least one"
+                                    }
+
+
+                                    addRowIfNotEmpty(arDoc, 'Occurrence', multDisplay);
+
+
+                                    if (data.examples) {
+
+                                        let ar = data.examples.split('\n')
+                                        let exampleDisplay = ""
+                                        ar.forEach(function (lne) {
+                                            exampleDisplay += "<div>" + lne + "</div>"
+                                        })
+
+
+                                        addRowIfNotEmpty(arDoc, 'Examples', exampleDisplay);
+                                    }
+
+
+                                    //addRowIfNotEmpty(arDoc,'Examples',data.examples);
+
+
+                                    addRowIfNotEmpty(arDoc, 'References', data.references);
+
+                                    let type = "";
+                                    data.type.forEach(function (typ) {
+                                        let targ = ""
+                                        if (typ.code == 'Reference') {
+                                            if (typ.targetProfile) {
+                                                targ = " --> " + $filter('referenceType')(typ.targetProfile[0])
+                                            }
+
+
+                                        }
+
+                                        type += "<div>" + typ.code + targ + "</div>";
+
+                                    });
+
+                                    addRowIfNotEmpty(arDoc, 'Data type', type)
+
+                                    if (data.selectedValueSet && data.selectedValueSet.valueSet) {
+                                        let binding = data.selectedValueSet.valueSet;
+                                        if (data.selectedValueSet.strength) {
+                                            binding += " (" + data.selectedValueSet.strength + ")"
+                                        }
+                                        addRowIfNotEmpty(arDoc, 'Binding', binding)
+
+
+                                    }
+
+
+                                    arDoc.push("</table><br/>");
+                                    //break;
+
+
+                                    // }
                                 }
-
-                                type += "<div>" + typ.code + targ + "</div>";
-
-                            });
-
-                            addRowIfNotEmpty(arDoc, 'Data type', type)
-
-                            if (data.selectedValueSet && data.selectedValueSet.valueSet) {
-                                let binding = data.selectedValueSet.valueSet;
-                                if (data.selectedValueSet.strength) {
-                                    binding += " (" + data.selectedValueSet.strength + ")"
-                                }
-                                addRowIfNotEmpty(arDoc, 'Binding', binding)
-
 
                             }
+                        });
 
 
-                            arDoc.push("</table><br/>");
-                            //break;
-
-
-                            // }
-                        }
-
-                    }
-                });
-
-
-                const header = `   
+                        const header = `   
                     <html><head>
                     <style>
                     
@@ -396,19 +557,30 @@ angular.module("sampleApp")
                     
                 `;
 
-                const footer = "</body></html>"
+                        const footer = "</body></html>"
 
 
-                let html = header + arDoc.join("\n") + footer;
-                //console.log(html)
-
-
-
+                        let html = header + arDoc.join("\n") + footer;
+                        //console.log(html)
 
 
 
-                deferred.resolve(html)
+
+
+
+                        deferred.resolve(html)
+                        //return deferred.promise;
+
+
+
+                    }
+
+
+                )
+
                 return deferred.promise;
+
+
 
                 function addRowIfNotEmpty(ar,description,data) {
                     if (data) {
@@ -733,7 +905,7 @@ angular.module("sampleApp")
                 }
 
             },
-            getSample : function(ed) {
+            getSampleDEP : function(ed) {
                 //return a sample based on an ed.
                 var dt;
                 if (ed && ed.type) {
@@ -811,7 +983,7 @@ angular.module("sampleApp")
 
                 return sample;
             },
-            isMultiple : function(path) {
+            isMultipleDEP : function(path) {
                 //true if a given path is multiple. todo - need to read from the SD...
                 if (multiple[path]) {
                     return true
@@ -819,7 +991,7 @@ angular.module("sampleApp")
                     return false;
                 }
             },
-            makeScenario : function(tree) {
+            makeScenarioDEP : function(tree) {
                 var deferred = $q.defer();
                 var that = this;
                 //generate a scenario from the model (as a tree)
@@ -1143,7 +1315,7 @@ angular.module("sampleApp")
                         relativeMappings.forEach(function(m) {
 
                             map.push({description: m.branch.data.path,v2:m.sourceMap,fhir:m.targetMap,fhirPath:m.fhirPath})
-                        })
+                        });
 
 
                         deferred.resolve(map)
