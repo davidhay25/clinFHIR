@@ -323,28 +323,10 @@ angular.module("sampleApp")
 
                     }
 
-                    /*
-                    //the user is also set by the project controller...
-                    var user = $localStorage.user;
-                    logicalModelSvc.setCurrentUser(user);
-                    securitySvc.setCurrentUser(user);
 
-                    //is there a selected model? if so, load it
-                    var model = $localStorage.cfModel;
-                    //return the practitioner resource that corresponds to the current user (the service will create if absent)
-                    GetDataFromServer.getPractitionerByLogin(user).then(
-                        function (practitioner) {
-                            $scope.Practitioner = practitioner;
-                            getPalette(practitioner);       //get the palette of logical models
-                        }, function (err) {
-                            console.log(err)
-                        }
-                    );
-
-                    */
 
                 } else {
-                    //this
+
                     var sc = $firebaseObject(firebase.database().ref().child("shortCut").child(hash));
 
                     sc.$loaded().then(
@@ -392,10 +374,11 @@ angular.module("sampleApp")
 
             } else {
                 //if there's no hash, then load all the cf created models
-                loadAllModels();
+                //changed to always load the list of CF ccreated SDs on this server...
+                //loadAllModels();
 
             }
-
+            loadAllModels();
 
             //called whenever the auth state changes - eg login/out, initial load, create user etc.
             firebase.auth().onAuthStateChanged(function(user) {
@@ -1895,7 +1878,7 @@ angular.module("sampleApp")
                 projectSvc.smartPut(url,SDToSave).then(
                     function(data) {
 
-                        loadAllModels();        //todo - do we really need a re-load after every save???
+                        // - 2020- 10 - 4 loadAllModels();        //todo - do we really need a re-load after every save???
 
 
                         var res = data.data;

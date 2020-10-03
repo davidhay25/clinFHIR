@@ -818,7 +818,7 @@
                     <pre>{{error.data | json}}</pre>
                 </uib-tab>
 
-                <uib-tab heading="Doc">
+                <uib-tab ng-show = "false" heading="Doc">
                     <br/>
                     <div class="pull-right">
                         <button class="btn btn-link " ng-click="updateDoc()">Update</button>
@@ -871,7 +871,7 @@
 
                 </uib-tab>
 
-                <uib-tab heading="DD">
+                <uib-tab heading="Report">
                     <br/>
 
                     <a ng-show="downloadLinkDocName" class="btn btn-link pull-right" download="{{downloadLinkDocName}}"
