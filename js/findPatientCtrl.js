@@ -128,7 +128,7 @@ angular.module("sampleApp")
 
                         },
                         function(err) {
-                            
+
                             modalService.showModal({}, {bodyText: 'Error finding patient - ' + angular.toJson(err)})
 
                             //modalService.showModal({}, {bodyText: 'Error finding patient - have you selected the correct Data Server?'})

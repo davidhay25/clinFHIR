@@ -898,7 +898,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
             //get a single page of data
             function getPage(url) {
-                let options = {};
+                let options = {headers:{}};
                 if (oauthAccessToken) {
                     options.headers['Authorization'] = "Bearer " + oauthAccessToken
                 }
