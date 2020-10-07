@@ -877,7 +877,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             return deferred.promise;
         },
 
-        getAllResourcesFollowingPaging : function(url,limit){
+        getAllResourcesFollowingPaging : function(url,limit,oauthAccessToken){
             //Get all the resurces specified by a query, following any paging...
             //http://stackoverflow.com/questions/28549164/how-can-i-do-pagination-with-bluebird-promises
 
@@ -898,7 +898,11 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
             //get a single page of data
             function getPage(url) {
-                return $http.get(url).then(
+                let options = {};
+                if (oauthAccessToken) {
+                    options.headers['Authorization'] = "Bearer " + oauthAccessToken
+                }
+                return $http.get(url,options).then(
                     function(data) {
                         var bundle = data.data;     //the response is a bundle...
 

@@ -203,7 +203,13 @@
 
             </div>
         </div>
-
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+                <input type = "text" class="form-control" ng-model="input.oauthAccessToken"
+                       ng-blur = saveOauthAccessToken(input.oauthAccessToken)
+                placeholder="If the server is protected by OAuth2 / SMART enter the Access Token"/>
+            </div>
+        </div>
 
 
     </div>

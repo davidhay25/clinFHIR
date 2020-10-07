@@ -78,12 +78,12 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                 }
             }
         },
-        findPatientsByName: function (name) {
+        findPatientsByName: function (name,oauthAccessToken) {
             var deferred = $q.defer();
 
             var qry = appConfigSvc.getCurrentDataServer().url + "\Patient?name=" + name;
 
-            supportSvc.getAllResourcesFollowingPaging(qry).then(
+            supportSvc.getAllResourcesFollowingPaging(qry,null,oauthAccessToken).then(
                 function (data) {
                    // console.log(data)
                     deferred.resolve(data);

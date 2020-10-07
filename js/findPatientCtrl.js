@@ -1,12 +1,24 @@
 angular.module("sampleApp")
     .controller('findPatientCtrl',
-            function($scope,ResourceUtilsSvc,resourceSvc,supportSvc,resourceCreatorSvc,appConfigSvc,GetDataFromServer,
+            function($scope,ResourceUtilsSvc,resourceSvc,supportSvc,resourceCreatorSvc,
+                     $localStorage,appConfigSvc,GetDataFromServer,
                      modalService){
 
                 $scope.input={mode:'find',gender:'male'};   //will be replaced by name randomizer
                 $scope.input.dob = new Date(1982,9,31);     //will be replaced by name randomizer
                 $scope.outcome = {log:[]};
                 $scope.appConfigSvc = appConfigSvc;
+
+
+                //oct-2020 - allow user to enter acccess token
+                $scope.input.oauthAccessToken = $localStorage.oauthAccessToken;
+
+                $scope.saveOauthAccessToken = function(token) {
+                    console.log ('saving token')
+                    $localStorage.oauthAccessToken = token
+                }
+
+
 
                 $scope.input.createSamples = true;
                 //when the 'Add new patient' is selected...
@@ -105,7 +117,7 @@ angular.module("sampleApp")
                         return true;
                     }
                     $scope.waiting = true;
-                    resourceCreatorSvc.findPatientsByName(name).then(
+                    resourceCreatorSvc.findPatientsByName(name, $scope.input.oauthAccessToken).then(
                         function(data){
 
                             $scope.matchingPatientsList = data;
@@ -116,7 +128,11 @@ angular.module("sampleApp")
 
                         },
                         function(err) {
-                            modalService.showModal({}, {bodyText: 'Error finding patient - have you selected the correct Data Server?'})
+                            
+                            modalService.showModal({}, {bodyText: 'Error finding patient - ' + angular.toJson(err)})
+
+                            //modalService.showModal({}, {bodyText: 'Error finding patient - have you selected the correct Data Server?'})
+
                         }
                     ).finally(function(){
                         $scope.waiting = false;
