@@ -117,7 +117,8 @@ angular.module("sampleApp")
                         return true;
                     }
                     $scope.waiting = true;
-                    resourceCreatorSvc.findPatientsByName(name, $scope.input.oauthAccessToken).then(
+                    // todo resourceCreatorSvc.findPatientsByName(name, $scope.input.oauthAccessToken).then(
+                    resourceCreatorSvc.findPatientsByName(name).then(
                         function(data){
 
                             $scope.matchingPatientsList = data;

@@ -9,7 +9,8 @@ angular.module("sampleApp")
 
         return {
             getAuthToken: function () {
-                return $localStorage.token
+
+                return $localStorage.oauthAccessToken
 
             },
             setAuthToken : function(authToken){
