@@ -14,8 +14,22 @@ angular.module("sampleApp")
                 $scope.input.oauthAccessToken = $localStorage.oauthAccessToken;
 
                 $scope.saveOauthAccessToken = function(token) {
-                    console.log ('saving token')
-                    $localStorage.oauthAccessToken = token
+
+                    if (token) {
+                        let t = token.toLowerCase();
+                        if (t.substr(0,7) !== "bearer ") {
+                            token = "Bearer " + token
+                        }
+
+                        console.log ('saving token: ' + token)
+
+                        $localStorage.oauthAccessToken = token
+                    } else {
+                        delete $localStorage.oauthAccessToken
+                        console.log("removing token")
+                    }
+
+
                 }
 
 
