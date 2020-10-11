@@ -18,10 +18,10 @@ angular.module("sampleApp")
             $scope.allServers = [];
 
             $scope.allServers.push({display:"FHIR test 3","url":"http://test.fhir.org/r3/"});
-            $scope.allServers.push({display:"FHIR test 4","url":"http://test.fhir.org/r4/",selected:true});
+            $scope.allServers.push({display:"FHIR test 4","url":"http://test.fhir.org/r4/"});
 
             $scope.allServers.push({display:"Public HAPI 3","url":"http://fhirtest.uhn.ca/baseDstu3/"});
-            $scope.allServers.push({display:"Public HAPI 4","url":"http://fhirtest.uhn.ca/baseR4/"});
+            $scope.allServers.push({display:"Public HAPI 4","url":"http://hapi.fhir.org/baseR4/",selected:true});
 
             $scope.allServers.push({display:"Telstra Health R3",url:"http://sqlonfhir-stu3.azurewebsites.net/fhir/",needsParameter:true});
             $scope.allServers.push({display:"Telstra Health R4",url:"http://sqlonfhir-r4.azurewebsites.net/fhir/",needsParameter:true});
