@@ -6,8 +6,6 @@ let http = require('http');
 
 let cors = require('cors'); //https://www.npmjs.com/package/cors
 
-
-
 //var httpProxy = require('http-proxy')
 
 //  remove for proxy var myParser = require("body-parser");
@@ -20,7 +18,7 @@ app.use(cors());
 //var orionModule = require("./serverModuleOrion.js")
 var smartModule = require("./serverModuleSMART.js")
 
-let surveyModule = require("./serverModuleSurvey.js")
+//let surveyModule = require("./serverModuleSurvey.js")
 
 
 //var iphoneModule = require("./serverModuleIphone.js")
@@ -44,11 +42,6 @@ const wss = new WebSocket.Server({server:server});
 var taskModule = require("./serverModuleTask");
 taskModule.setup(app,wss,WebSocket)     // need WebSocket for the constants
 
-//for v2 processing
-//console.log('including server modele');
-//let v2Module = require("./serverModuleV2");
-//v2Module.setup(app);
-//console.log('included server modele');
 
 wss.on('connection', function connection(ws) {
     ws.on('message', function incoming(message) {
@@ -135,6 +128,7 @@ app.use('/',function(req,res,next){
 
 app.use('/', express.static(__dirname,{index:'/launcher.html'}));
 
+/*
 
 //this is used for the re-direct from simplifier
 app.get('/createExample',function(req,res){
@@ -145,7 +139,7 @@ app.get('/createExample',function(req,res){
     res.sendFile("resourceCreator.html", { root: __dirname  })
 });
 
-
+*/
 
 //when a user navigates to cf
 app.post('/stats/login',function(req,res){
@@ -321,13 +315,7 @@ function updateServerCount(serverName,type,obj) {
     }
 }
 
-/*
-//old clients trying to access server...
-app.use('/socket.io',function(req,res){
-    res.end();
-});
 
-*/
 
 app.post('/errorReport',function(req,res){
     if(! db) {
