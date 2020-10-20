@@ -415,9 +415,9 @@ angular.module("sampleApp")
                                         break;
                                 }
 
-                                if (data.description == "No description"){
-                                    data.description = "There was no detailed description in the model"
-                                }
+                              //  if (data.description == "No description"){
+                              //      data.description = "There was no detailed description in the model"
+                              //  }
 
 
                                 // default:
