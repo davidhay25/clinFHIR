@@ -173,6 +173,9 @@
 
             <uib-tabset>
                 <uib-tab heading="Bundles">
+
+
+
                     <div class="row">
                         <div class="col-sm-4">
 
@@ -192,6 +195,12 @@
                         </div>
                     </div>
 
+
+                    <div ng-hide="existingBundles">
+                        Loading bundles from server...
+                    </div>
+
+
                     <div ng-show="showBundleHelp" class="rounded-box">
 
                         These are bundles that were imported to the Visualizer (using the 'Import' link above) and saved to the current data server.
@@ -200,10 +209,12 @@
                     </div>
 
                     <div class="list-group">
-                        <div ng-class="{'list-group-item':1,'listItemSelected':entry==selectedEntry}"
+                        <div ng-class="{'list-group-item':true,'listItemSelected':entry==selectedEntry}"
                              ng-repeat="entry in existingBundles.entry"
                              ng-click = "selectBundleFromList(entry)">
                             {{entry.resource.identifier.value}}
+                            <span class="pull-right badge">{{entry.resource.entry.length}}</span>
+                            <div>{{entry.resource.id}}</div>
                         </div>
                     </div>
                 </uib-tab>
@@ -294,10 +305,7 @@
                 <a href="https://docs.google.com/document/d/1bwyRKU100m8VOM30bcR_6bUms8FaC13SMrPAK5o6IR8/edit#" target="_blank">Link to on-line docs</a>
             </div>
 
-            <uib-tabset ng-show="fhir">
 
-                <uib-tab heading="FHIR Bundle visualizations" ng-show="fhir">
-                    <br/>
                     <div>
 
                         <button class="btn btn-link pull-right" ng-show="fhir"
@@ -305,7 +313,7 @@
 
                     </div>
 
-                    <uib-tabset>
+                    <uib-tabset ng-show="fhir">
 
                         <uib-tab>
                             <br/>
@@ -575,136 +583,6 @@
 
 
 
-
-                </uib-tab>
-                <uib-tab ng-show="fhir">
-                    <uib-tab-heading>
-                        Validation results <span class="badge">{{valErrors}} errors  {{valWarnings}} warnings</span>
-                    </uib-tab-heading>
-                    <br/>
-                    <!--
-
-
-
-                    <div>
-                        <button ng-show="fhir" class="btn btn-danger" ng-click="validate()">Validate</button>
-                    </div>
--->
-
-                   <uib-tabset>
-                       <uib-tab heading="Errors">
-                           <br/>
-
-                           <div class="row">
-                               <div class="col-md-6">
-                                   <div class="modelScroll">
-
-                                       <table class="table">
-                                           <tr ng-repeat="item in validationResult" ng-click="selectIssue(item)">
-                                               <td>
-                                                   {{item[0].resource.type}}
-                                                   <div>{{item[0].resource.id}}</div>
-                                               </td>
-                                               <td>
-                                                   <div ng-repeat="row in item">
-                                                       <div class="row">
-                                                            <div class="col-md-3">
-                                                                {{row.severity}}
-                                                            </div>
-                                                           <div class="col-md-6">
-                                                               {{row.diagnostics}}
-                                                           </div>
-                                                           <div class="col-md-3">
-                                                               <div ng-repeat="loc in row.location">
-                                                                   {{loc}}
-                                                               </div>
-                                                           </div>
-                                                       </div>
-                                                   </div>
-
-                                               </td>
-
-                                           </tr>
-
-                                       </table>
-
-                                       <!--
-                                       <table class="table" style="cursor: pointer">
-                                           <tr><th>Severity</th><th>Code</th><th>Location/Diagnostics</th></tr>
-                                           <tr style="background-color: #ffaaaa" ng-repeat="issue in validationResult.issue"
-                                               ng-click = "selectIssue(issue)"
-                                               ng-show="issue.severity=='error'">
-                                               <td >
-                                                   {{issue.severity}}
-                                               </td>
-                                               <td >
-                                                   {{issue.code}}
-                                               </td>
-                                               <td>
-                                                   <div><em>
-                                                       <div ng-repeat="location in issue.location">
-                                                           {{location}}
-                                                       </div>
-                                                   </em></div>
-                                                   {{issue.diagnostics}}
-                                                   <div ng-repeat = "exp in issue.expression">
-                                                       {{exp}}
-                                                   </div>
-                                               </td>
-
-                                           </tr>
-
-                                           <tr ng-repeat="issue in validationResult.issue" ng-show="issue.severity !== 'error'"
-                                               ng-click = "selectIssue(issue)">
-                                               <td>
-                                                   {{issue.severity}}
-                                               </td>
-                                               <td >
-                                                   {{issue.code}}
-                                               </td>
-                                               <td >
-                                                   <div><em>
-                                                       <div ng-repeat="location in issue.location">
-                                                           {{location}}
-                                                       </div>
-                                                   </em></div>
-                                                   {{issue.diagnostics}}
-                                                   <div ng-repeat = "exp in issue.expression">
-                                                       {{exp}}
-                                                   </div>
-                                               </td>
-
-                                           </tr>
-
-
-                                       </table>
-                                       -->
-                                   </div>
-
-                               </div>
-                               <div class="col-md-6">
-                                    <pre>{{selectedIssueEntry | json}}</pre>
-                               </div>
-                           </div>
-
-
-
-                       </uib-tab>
-                       <uib-tab heading="Json">
-                           <div>
-                               <pre ng-show="validationResult">{{validationResult | json}}</pre>
-                           </div>
-                       </uib-tab>
-                   </uib-tabset>
-
-
-
-
-                </uib-tab>
-
-
-
-            </uib-tabset>
 
 
         </div>

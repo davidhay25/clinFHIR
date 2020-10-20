@@ -53,13 +53,20 @@ angular.module("sampleApp")
             }
 
 
+
+
             //load bundles with an identifier in the cfBundle identifier system
             let identifierSystem = appConfigSvc.config().standardSystem.bundleIdentifierSystem;
             let url = $scope.dataServer.url + "Bundle?identifier="+identifierSystem + "|";
+            $scope.showWaiting = true;
             $http.get(url).then(
                 function(data) {
                     console.log(data)
                     $scope.existingBundles = data.data;
+                }
+            ).finally(
+                function () {
+                    $scope.showWaiting = false;
                 }
             );
 
@@ -104,8 +111,8 @@ angular.module("sampleApp")
 
             //pre-defined queries
             $scope.queries = [];
-            $scope.queries.push({display:'Patients called eve',query:'Patient?name=hay'});
-            $scope.queries.push({display:'All Florence Hays data',query:'Patient/112529/$everything'});
+            //$scope.queries.push({display:'Patients called eve',query:'Patient?name=hay'});
+           // $scope.queries.push({display:'All Florence Hays data',query:'Patient/112529/$everything'});
 
             //inward and outwards references in graph
             $scope.input = {};
@@ -431,6 +438,15 @@ console.log(doc)
                                 return;
                             }
 
+                            if (! res.entry || res.entry.length == 0) {
+                                modalService.showModal({}, {bodyText:"There must be at least one entry in the bundle"});
+                                return;
+                            }
+
+                            if (res.entry && res.entry.length > 200) {
+                                modalService.showModal({}, {bodyText:"The maximum number of entries in a saved bundle is 200."});
+                                return;
+                            }
 
 
                             if ($scope.input.identifier) {
@@ -858,7 +874,9 @@ console.log(hashErrors)
             //perform a validation of the resources in the bundle...
             let validate = function(bundle,cb) {
 
+                let url = $scope.validationServer.url + "Bundle/$validate";
 
+/*
                // let deferred = $q.defer();
                 //let url = $scope.validationServer.url+"Bundle/$validate";
                 $scope.showWaiting = true;
@@ -958,9 +976,9 @@ console.log(hashErrors)
 
                 }
 
-/*
+*/
 
-                return;
+
                 //bundle validation...
                 $scope.showWaiting = true;
                 //delete $scope.hashErrors;
@@ -1030,7 +1048,7 @@ console.log(hashErrors)
                     }
                 )
 
-                */
+
             };
 
             $scope.copyToClipboard = function(){

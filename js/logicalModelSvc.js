@@ -405,13 +405,13 @@ angular.module("sampleApp")
                                 switch (ddType) {
                                     case 'heading' :
                                         arDoc.push(addTaggedLine("h2", displayNumbering + headingDisplay));
-                                        arDoc.push(addTaggedLine("p", data.description));
+                                        // arDoc.push(addTaggedLine("p", data.description));
 
 
                                         break;
                                     case 'grouper' :
                                         arDoc.push(addTaggedLine("h2", displayNumbering + headingDisplay));
-                                        arDoc.push(addTaggedLine("p", data.description));
+                                        //arDoc.push(addTaggedLine("p", data.description));
                                         break;
                                 }
 
