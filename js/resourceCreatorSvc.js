@@ -2749,7 +2749,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     graphData.nodes.add(node);  //add the node
 
 
-                    var link = {from: baseId, to: baseId + ctr, arrows: {to: true}}
+                    var link = {from: baseId, to: baseId + ctr, arrows: {to: true},label:ref.key}
                     graphData.edges.add(link);
                 }
 
@@ -2769,7 +2769,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     }
                     graphData.nodes.add(node);  //add the node
 
-                    var link = {to: baseId, from: baseId + ctr, arrows: {to: true}}
+                    var link = {to: baseId, from: baseId + ctr, arrows: {to: true}, label:ref.name}
                     graphData.edges.add(link);
                 }
 

@@ -138,6 +138,15 @@
                                             <div id="resourcenetwork"></div>
                                         </uib-tab>
 
+                                        <uib-tab heading="Task " ng-show="outcome.selectedResource.resourceType=='Task'">
+                                            <br/>
+                                            <div ng-controller="pvTaskCtrl">
+                                                <ng-include src="'./includes/pvTask.html'"></ng-include>
+                                            </div>
+
+                                        </uib-tab>
+
+
                                         <uib-tab heading="Sections" ng-show="outcome.selectedResource.resourceType=='Composition'">
                                             <div ng-repeat = "section in outcome.selectedResource.section">
                                                 <h5>{{section.title}}
@@ -159,7 +168,6 @@
                                                     </div>
                                                 </div>
 
-
                                             </div>
                                         </uib-tab>
 
@@ -179,9 +187,15 @@
                                            ng-repeat="reference in resourceReferences.outwardLinks"
                                            ng-click="selectNewResource(reference,$event)">
 
+                                            {{reference.reference}}
+                                            <div><em>{{reference.key}}</em></div>
+
+
+
+<!--<pre>{{reference | json}}</pre>
                                             <div>{{reference.element}} ==> {{reference.reference}}</div>
                                             <div><p ng-bind-html="reference.resource.text.div"></p></div>
-
+-->
                                         </a>
                                     </div>
 
@@ -192,8 +206,11 @@
                                            ng-repeat="reference in resourceReferences.inwardLinks"
                                            ng-click="selectNewResource(reference,$event)">
 
-                                            <div>{{reference.resource.resourceType}}/{{reference.resource.id}}.
-                                                {{reference.name}}</div>
+
+
+                                            <div>{{reference.resource.resourceType}}/{{reference.resource.id}}
+                                                </div>
+                                            <div><em>{{reference.name}}</em></div>
                                             <div><p ng-bind-html="reference.resource.text.div"></p></div>
 
                                         </a>
