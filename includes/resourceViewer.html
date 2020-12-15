@@ -3,6 +3,10 @@
     .myActive {
         background-color: red;
     }
+
+    .modal-xlg{
+        width:1200px;
+    }
 </style>
 
 
@@ -57,7 +61,7 @@
 
                             <div class="alert alert-warning" style="margin-top: 8px">
                                 <div class="row">
-                                    <div class="col-md-12 col-sm-12">
+                                    <div class="col-md-10 col-sm-10">
 
                                         <ul class="pagination" style="margin-top:1px;margin-bottom:1px" ng-show="resourceVersions && resourceVersions.entry.length > 1">
                                             <li><a href="#"><strong>Versions:</strong></a></li>
@@ -69,6 +73,12 @@
 
 
                                     </div>
+                                    <div class="col-md-2 col-sm-2">
+                                        <button class="btn btn-link"
+                                                ng-show="resourceVersions.entry.length > 1"
+                                                ng-click="zoomResourceHistory(resourceVersions.entry)">Side-by-side</button>
+                                    </div>
+
 
 
                                 </div>

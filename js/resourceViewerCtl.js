@@ -63,6 +63,30 @@ angular.module("sampleApp")
             $scope.appConfigSvc = appConfigSvc;     //for displaying the patient json
 
 
+
+            //for the side by sude
+            $scope.zoomResourceHistory = function(entries) {
+                console.log(entries)
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/resourceHistory.html',
+                    backdrop: 'static',
+                    size: 'xlg',
+                    controller: function($scope,hx){
+                        $scope.hx = hx
+                    },
+                    resolve: {
+                        hx: function () {
+                            let ar = []
+                            entries.forEach(function (entry) {
+                                ar.push(entry.resource)
+                            });
+                            return ar
+                        },
+
+                    }
+                })
+            }
+
             //was a 'share' link (like in logocal modeller passed)...
 
             //create a shortcut to this patient
