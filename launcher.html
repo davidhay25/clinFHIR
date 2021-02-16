@@ -179,8 +179,8 @@
 
 
                 <uib-tabset>
-                    <uib-tab>
-                        <uib-tab-heading><strong>Main modules (open in new tab)</strong></uib-tab-heading>
+                    <uib-tab heading="For Implementers">
+
 
                         <br/>
 
@@ -210,7 +210,9 @@
                                     <a target="_blank" href="http://gb2.clinfhir.com">Graph Builder 2</a>
                                 </td>
                                 <td>
-                                    Build graphs of inter-connected FHIR resources.
+                                    Build graphs of inter-connected FHIR resources. These can be created through the User
+                                    Interface or downloaded from a FHIR server and further manipulated. The app uses the
+                                    <a href="https://fshschool.org/" target="_blank">FHIR shorthand language</a> to represent resource contents.
                                     <div>This is the successor to Scenario Builder</div>
                                 </td>
                                 <td>
@@ -219,26 +221,7 @@
 
                                 </td>
                             </tr>
-                            <tr>
-                                <td width="15%">
-                                    <a target="_blank" href="logicalModeller.html">Logical Modeller</a>
-                                </td>
-                                <td>
-                                    The Logical modeller allows the creation of a model that represents a particular interoperability requirement
-                                    in a format that is easy to use. It uses FHIR datatypes, and can be based on an existing resource type or completely
-                                    'ad hoc'. It is intended to act as a 'bridge' between Modeller and User, and can act as the basis for the generation
-                                    of the profiling components required by FHIR
-                                </td>
-                                <td>
-                                    Models are saved on the Conformance Server. Can reference ValueSets from the Terminology server.
-                                    <br/>  <br/>
 
-                                    <div><a class="pull-right" target="_blank" href="https://fhirblog.com/creating-an-information-model/">Create an Information Model</a></div>
-                                    <div><a class="pull-right" target="_blank" href="https://fhirblog.com/creating-a-resources-model/">Create a Resources Model</a></div>
-
-
-                                </td>
-                            </tr>
                             <tr>
                                 <td>
                                     <a target="_blank" href="query.html">Server Query</a>
@@ -318,7 +301,7 @@
                                 </td>
                             </tr>
 
-
+<!--
 
                             <tr>
                                 <td>
@@ -332,16 +315,61 @@
                                 </td>
                             </tr>
 
-
+-->
 
 
                         </table>
 
 
                     </uib-tab>
+                    <uib-tab heading="For designers">
 
-                    <uib-tab>
-                        <uib-tab-heading><strong>Older modules (open in new tab)</strong></uib-tab-heading>
+                    <br/>
+                    <table class="table width='100%'">
+                        <tr>
+                            <td width="15%">
+                                <a target="_blank" href="logicalModeller.html">Logical Modeller</a>
+                            </td>
+                            <td>
+                                The Logical modeller allows the creation of a model that represents a particular interoperability requirement
+                                in a format that is easy to use. It uses FHIR datatypes, and can be based on an existing resource type or completely
+                                'ad hoc'. It is intended to act as a 'bridge' between Modeller and User, and can act as the basis for the generation
+                                of the profiling components required by FHIR
+                            </td>
+                            <td>
+                                Models are saved on the Conformance Server. Can reference ValueSets from the Terminology server.
+                                <br/>  <br/>
+
+                                <div><a class="pull-right" target="_blank" href="https://fhirblog.com/creating-an-information-model/">Create an Information Model</a></div>
+                                <div><a class="pull-right" target="_blank" href="https://fhirblog.com/creating-a-resources-model/">Create a Resources Model</a></div>
+
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="15%">
+                                <a target="_blank" href="igAnalysis.html">Artifacts in use</a>
+                            </td>
+                            <td>
+                                Uses statistics exposed by the IG publisher build environment to report
+                                on the use of Extensions and Profiles within Implementation Guides.
+
+                            </td>
+                            <td>
+                                Due to the volume of data, the app can be sluggish or even time out.
+                                This will be addressed in a future release
+
+                            </td>
+                        </tr>
+                    </table>
+
+                    <br/>
+                    </uib-tab>
+
+
+
+                    <uib-tab heading="Older modules">
+
                         <br/>
 
 

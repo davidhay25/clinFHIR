@@ -103,6 +103,9 @@ angular.module("igApp")
 
 
 
+                },
+                function(data) {
+                    alert('Sorry, request to the server timed out')
                 }
 
             );

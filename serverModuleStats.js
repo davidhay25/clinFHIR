@@ -261,8 +261,6 @@ function setup(app,indb) {
 
 
     var updateLocation = function(doc,ip) {
-
-
         //doc.ip="198.102.235.144"
         var url = "http://freegeoip.net/json/"+doc.ip;
 
