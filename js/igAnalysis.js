@@ -1,14 +1,29 @@
 angular.module("igApp")
     .controller('igCtrl',
-        function ($scope,$uibModal,$http) {
+        function ($scope,$uibModal,$http,$interval) {
 
             let hashExtension = {};     //a hash of ed urls
             let hashType = {};      //a hash of resource types
             let url = "http://test.fhir.org/usage-stats";
             registerAccess();
 
+            $scope.output = {}
+
             //let url = "/artifacts/usagestats.json";
-            $http.get(url).then(
+            let config = {}
+            config.timeout =  2*60 * 1000
+
+
+            //start the counter
+            $scope.output.counter = 0
+
+            let interval = $interval(function(){
+                $scope.output.counter += 1;
+
+                console.log($scope.output.counter)
+            },1000)
+
+            $http.get(url,config).then(
                 function(data) {
                     let vo = data.data;
                     $scope.allIGs = [];
@@ -108,7 +123,11 @@ angular.module("igApp")
                     alert('Sorry, request to the server timed out')
                 }
 
-            );
+            ). finally(function () {
+                if (interval) {
+                    $interval.cancel(interval)
+                }
+            });
 
             $scope.hashIGDetailDescription = {};
             $scope.hashIGDetailDescription.extensions = "Extensions defined by this IG";
