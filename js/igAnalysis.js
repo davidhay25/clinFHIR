@@ -23,13 +23,21 @@ angular.module("igApp")
                 console.log($scope.output.counter)
             },1000)
 
+            $scope.rawData = {}
             $http.get(url,config).then(
                 function(data) {
                     let vo = data.data;
-                    $scope.allIGs = [];
-                    for (var IGurl in vo) {
 
+
+                    $scope.allIGs = [];
+
+                    for (var IGurl in vo) {
+                        //for (var IGurl in vo) {
                         let IG = vo[IGurl];
+
+                        let key = IG.package + "#" + IG.version;
+                        $scope.rawData[key] = IG
+
                         $scope.allIGs.push({url:IGurl,ig:IG})
                         //console.log(IG)
                         for (var extUrl in IG.usage) {

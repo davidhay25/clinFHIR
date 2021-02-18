@@ -117,150 +117,165 @@
                             </div>
                         </div>
                         <div class="col-md-9"  ng-show="selectedIG">
-                            <div class="row">
-                                <div class="col-md-2">
-                                    Date
-                                </div>
-                                <div class="col-md-4">
-                                    {{selectedIG.ig.date}}
-                                </div>
-                                <div class="col-md-2">
-                                    Version
-                                </div>
-                                <div class="col-md-4">
-                                    {{selectedIG.ig.version}}
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-2">
-                                    Package
-                                </div>
-                                <div class="col-md-4">
-                                    {{selectedIG.ig.package}}
-                                </div>
-                                <div class="col-md-2">
-                                    FHIR Version
-                                </div>
-                                <div class="col-md-4">
-                                    {{selectedIG.ig.fhirVersion}}
-                                </div>
-                            </div>
 
-                            <hr/>
+                            <uib-tabset>
+                                <uib-tab heading="Summary">
 
-                            <div class="row">
-                                <div class="col-md-2">
-                                    <div>
-                                        <button class="btn btn-default form-control" ng-click="showIGDetails('profiles')">Defined Profiles</button>
-                                    </div>
-                                    <div>
-                                        <button class="btn btn-default form-control" ng-click="showIGDetails('extensions')">Defined Extensions</button>
-                                    </div>
-                                    <div>
-                                        <button class="btn btn-default form-control" ng-click="showIGDetails('used')">Extensions used</button>
-                                    </div>
 
-                                </div>
-                                <div class="col-md-10">
-                                    <div class="banner">{{hashIGDetailDescription[selectedIGDetailsKey]}}</div>
-                                    <div ng-show = "selectedIGDetailsKey =='profiles'">
-                                        <div class="row">
-                                            <div class="col-md-1">
-                                                <strong>Base</strong>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <strong>Title</strong>
-                                            </div>
-                                            <div class="col-md-7">
-                                                <strong>Url</strong>
-                                            </div>
+
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            Date
                                         </div>
-                                        <br/>
-
-
-                                        <div ng-repeat="(type,v) in selectedIG.ig.profiles">
-                                            <em>{{type}}</em>
-                                            <div ng-repeat ="item in v">
-                                                <div class="row">
-                                                    <div class="col-md-4 col-md-offset-1">
-                                                        {{item.title}}
-                                                    </div>
-                                                    <div class="col-md-7">
-                                                        {{item.url}}
-                                                    </div>
-                                                </div>
-                                            </div>
+                                        <div class="col-md-4">
+                                            {{selectedIG.ig.date}}
                                         </div>
-
+                                        <div class="col-md-2">
+                                            Version
+                                        </div>
+                                        <div class="col-md-4">
+                                            {{selectedIG.ig.version}}
+                                        </div>
                                     </div>
-                                    <div ng-show = "selectedIGDetailsKey =='extensions'">
-                                        <table class="table table-bordered">
-                                            <tr><th>Title</th><th>Types</th><th>Url</th></tr>
-                                            <tr ng-repeat="row in selectedIG.ig.extensions">
-                                                <td>{{row.title}}</td>
-                                                <td>
-                                                    <div ng-repeat="type in row.types track by $index">
-                                                        {{type}}
-                                                    </div>
-                                                </td>
-                                                <td>{{row.url}}</td>
-                                            </tr>
-                                        </table>
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            Package
+                                        </div>
+                                        <div class="col-md-4">
+                                            {{selectedIG.ig.package}}
+                                        </div>
+                                        <div class="col-md-2">
+                                            FHIR Version
+                                        </div>
+                                        <div class="col-md-4">
+                                            {{selectedIG.ig.fhirVersion}}
+                                        </div>
                                     </div>
-                                    <div ng-show = "selectedIGDetailsKey =='used'">
 
+                                    <hr/>
 
-                                        <uib-tabset>
-                                            <uib-tab heading ='By Extension Definition'>
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <div>
+                                                <button class="btn btn-default form-control" ng-click="showIGDetails('profiles')">Defined Profiles</button>
+                                            </div>
+                                            <div>
+                                                <button class="btn btn-default form-control" ng-click="showIGDetails('extensions')">Defined Extensions</button>
+                                            </div>
+                                            <div>
+                                                <button class="btn btn-default form-control" ng-click="showIGDetails('used')">Extensions used</button>
+                                            </div>
+
+                                        </div>
+                                        <div class="col-md-10">
+                                            <div class="banner">{{hashIGDetailDescription[selectedIGDetailsKey]}}</div>
+                                            <div ng-show = "selectedIGDetailsKey =='profiles'">
                                                 <div class="row">
                                                     <div class="col-md-1">
-                                                        <strong>Url</strong>
+                                                        <strong>Base</strong>
                                                     </div>
                                                     <div class="col-md-4">
-                                                        <strong>Paths</strong>
+                                                        <strong>Title</strong>
                                                     </div>
-
+                                                    <div class="col-md-7">
+                                                        <strong>Url</strong>
+                                                    </div>
                                                 </div>
                                                 <br/>
 
-                                                <div ng-repeat="(url,v) in selectedIG.ig.usage">
-                                                    <em>{{url}}</em>
+
+                                                <div ng-repeat="(type,v) in selectedIG.ig.profiles">
+                                                    <em>{{type}}</em>
                                                     <div ng-repeat ="item in v">
                                                         <div class="row">
                                                             <div class="col-md-4 col-md-offset-1">
-                                                                {{item}}
+                                                                {{item.title}}
                                                             </div>
-
+                                                            <div class="col-md-7">
+                                                                {{item.url}}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </uib-tab>
-                                            <uib-tab heading ='By Path'>
 
-                                                <div ng-repeat="item in usedExtensionsByPath">
+                                            </div>
+                                            <div ng-show = "selectedIGDetailsKey =='extensions'">
+                                                <table class="table table-bordered">
+                                                    <tr><th>Title</th><th>Types</th><th>Url</th></tr>
+                                                    <tr ng-repeat="row in selectedIG.ig.extensions">
+                                                        <td>{{row.title}}</td>
+                                                        <td>
+                                                            <div ng-repeat="type in row.types track by $index">
+                                                                {{type}}
+                                                            </div>
+                                                        </td>
+                                                        <td>{{row.url}}</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                            <div ng-show = "selectedIGDetailsKey =='used'">
 
-                                                    <div>{{item.path}}</div>
-                                                    <div ng-repeat="url in item.url">
+
+                                                <uib-tabset>
+                                                    <uib-tab heading ='By Extension Definition'>
                                                         <div class="row">
-                                                            <div class="col-md-offset-1 col-md-11">
-                                                                {{url.url}}
+                                                            <div class="col-md-1">
+                                                                <strong>Url</strong>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <strong>Paths</strong>
+                                                            </div>
+
+                                                        </div>
+                                                        <br/>
+
+                                                        <div ng-repeat="(url,v) in selectedIG.ig.usage">
+                                                            <em>{{url}}</em>
+                                                            <div ng-repeat ="item in v">
+                                                                <div class="row">
+                                                                    <div class="col-md-4 col-md-offset-1">
+                                                                        {{item}}
+                                                                    </div>
+
+                                                                </div>
                                                             </div>
                                                         </div>
+                                                    </uib-tab>
+                                                    <uib-tab heading ='By Path'>
 
-                                                    </div>
+                                                        <div ng-repeat="item in usedExtensionsByPath">
 
-                                                </div>
+                                                            <div>{{item.path}}</div>
+                                                            <div ng-repeat="url in item.url">
+                                                                <div class="row">
+                                                                    <div class="col-md-offset-1 col-md-11">
+                                                                        {{url.url}}
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+
+                                                        </div>
 
 
 
-                                            </uib-tab>
-                                        </uib-tabset>
+                                                    </uib-tab>
+                                                </uib-tabset>
 
 
 
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
+
+                                </uib-tab>
+                                <uib-tab heading="Raw data">
+                                    <pre>{{rawData[selectedIG.ig.package+'#'+selectedIG.ig.version] | json}}</pre>
+                                </uib-tab>
+                            </uib-tabset>
+
+
+
                         </div>
                     </div>
 
