@@ -86,6 +86,8 @@ angular.module("sampleApp")
                 $scope.showSidePane = !$scope.showSidePane
             };
 
+
+
             //show or hide the patient in the main graph
             $scope.showHidePatient = function(toggle) {
                 console.log(toggle)
@@ -652,14 +654,17 @@ console.log(doc)
                         })
                     }
                 );
-
-
-
             };
 
             //validate the resources in the bundle, then draw the graph (which needs the errors to display)
             let processBundle = function(oBundle) {
                 delete $scope.serverRoot;
+
+                //hide the side pane
+                $scope.showSidePane = true;
+                $scope.toggleSidePane();
+
+
                 $scope.fhir = oBundle;
 
                 //create hash by type
@@ -870,20 +875,13 @@ console.log(hashErrors)
             };
 
 
-
-            //perform a validation of the resources in the bundle...
+            //validate each entry
+            //return hashErrors - keyed by index within the bundle
             let validate = function(bundle,cb) {
 
-                let url = $scope.validationServer.url + "Bundle/$validate";
+                validateBundle(bundle)
 
-/*
-               // let deferred = $q.defer();
-                //let url = $scope.validationServer.url+"Bundle/$validate";
                 $scope.showWaiting = true;
-
-                //let url = "http://home.clinfhir.com:8054/baseR4/Bundle/$validate";
-                //let url = $scope.conformanceServer.url + "Bundle/$validate";
-
 
                 $scope.valErrors = 0, $scope.valWarnings=0;
 
@@ -900,11 +898,11 @@ console.log(hashErrors)
                 if (arQuery.length > 0) {
                     $q.all(arQuery).then(
                         function(){
-                          //  deferred.resolve(hashErrors)
+                            //  deferred.resolve(hashErrors)
                             cb(hashErrors)
                         },
                         function(){
-                          //  deferred.resolve(hashErrors)
+                            //  deferred.resolve(hashErrors)
                             cb(hashErrors)
                         }
 
@@ -918,7 +916,7 @@ console.log(hashErrors)
                     cb({})
                 }
 
-               // return deferred.promise;
+                // return deferred.promise;
 
 
                 function processValidation(url,resource,hash,inx){
@@ -976,7 +974,34 @@ console.log(hashErrors)
 
                 }
 
-*/
+            }
+
+
+
+            let validateBundle = function(bundle) {
+                delete $scope.bundleValidationResult
+                let url = $scope.validationServer.url + "Bundle/$validate";
+                $http.post(url,bundle).then(
+                    function(data) {
+                        console.log(data)
+                        $scope.bundleValidationResult= data.data;
+
+
+                    },function(err) {
+                        console.log(err)
+                        $scope.bundleValidationResult = err.data;
+
+                    }
+                )
+
+            }
+
+
+
+            //perform a validation of the resources in the bundle...
+            let validateBundleDEP = function(bundle,cb) {
+
+                let url = $scope.validationServer.url + "Bundle/$validate";
 
 
                 //bundle validation...
@@ -996,8 +1021,6 @@ console.log(hashErrors)
                 ).finally(
                     function () {
                         $scope.showWaiting = false;
-
-
 
                         //count of errors for each resource
                         let hashErrors = {};

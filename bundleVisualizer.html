@@ -508,6 +508,23 @@
                             </div>
 
                         </uib-tab>
+
+                        <uib-tab heading="Bundle validation">
+                            <table class="table table-condensed">
+                                <tr ng-repeat="iss in bundleValidationResult.issue">
+                                    <td>{{iss.severity}}</td>
+                                    <td>{{iss.diagnostics}}</td>
+                                    <td>
+                                        <div ng-repeat="loc in iss.location">
+                                            {{loc}}
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                            <pre>{{bundleValidationResult | json}}</pre>
+                        </uib-tab>
+
+
                         <uib-tab ng-show = "fhir.type == 'document'" heading="Document">
 
                             <strong>Subject</strong>
