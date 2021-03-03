@@ -527,6 +527,7 @@ console.log(doc)
 
             $scope.selectBundleEntry = function(entry,entryErrors) {
                 $scope.selectedBundleEntry = entry
+
                 $scope.selectedBundleEntryErrors = entryErrors;
 
                 $scope.createGraphOneEntry();

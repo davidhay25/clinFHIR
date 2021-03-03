@@ -374,6 +374,11 @@
 
                                         <div class="col-md-8">
 
+                                            <div class="pull-right">
+                                                <a target="_blank"
+                                                   ng-show="selectedBundleEntry"
+                                                   ng-href="http://hl7.org/fhir/{{selectedBundleEntry.resource.resourceType}}.html#resource">Spec</a>
+                                            </div>
 
                                             <uib-tabset>
                                                 <uib-tab heading="Json">
