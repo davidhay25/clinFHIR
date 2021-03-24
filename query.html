@@ -43,12 +43,25 @@
     <script src="js/resourceCreatorSvc.js"></script>
     <script src="resourceBuilder/rbServices.js"></script>
     <script src="js/resourceSvc.js"></script>
+    <script src="js/commonSvc.js"></script>
     <script src="js/filters.js"></script>
     <script src="js/components/profileDisplayComp.js"></script>
     <script src="directive/fhirpath/fhirpath.js"></script>
     <script src="directive/graphql/graphql.js"></script>
 
+    <script src="resourceBuilder/vsBrowser.js"></script>
+
+
     <title>Server Query</title>
+
+    <style>
+        .required {
+            color: red;
+        }
+        .notrequired {
+            color: black;
+        }
+    </style>
 
 </head>
 
@@ -62,11 +75,23 @@
                 Server Query
             </a>
         </div>
-        <div class="col-md-9 col-sm-9">
+        <div class="col-md-6 col-sm-6">
+        </div>
+        <div class="col-md-3 col-sm-3">
+            <div class="navbar-text pull-right">
+                <a href="https://www.lyniate.com/" target="_blank">
+                    <img  src="/icons/supported_by_lyniate.png"/>
+                </a>
+
+            </div>
+
         </div>
     </nav>
 
     <ng-include src="'/includes/serverQuery.html'"></ng-include>
+
+    <vs-browser trigger="showVSBrowserDialog" hidesearch="true"
+                vs-selected="vsSelected"></vs-browser>
 
 </div>
 </body>

@@ -5,16 +5,15 @@
 <!-- Display a 'select server' panel-->
 
 <div class="panel panel-default">
-    <div class="panel-body">
+    <div class="panel-heading">
+        <strong>Select server</strong>
+    </div>
+    <div class="panel-body ">
 
         <div class="row" >
 
+
             <div class="col-md-1 col-sm-1">
-                <strong>Select Server</strong>
-
-            </div>
-
-            <div class="col-md-2 col-sm-2">
                 <div><input type="radio" ng-model="input.serverType" value="known"> Known</div>
                 <input type="radio" ng-model="input.serverType" value="adhoc"> AdHoc
             </div>
@@ -30,14 +29,24 @@
                     </select>
                 </div>
                 <div ng-show="input.serverType == 'adhoc'">
-                    <input type="text" ng-model="input.adHocServer" ng-blur="selectServer(null,input.adHocServer)"
-                           class="form-control" placeholder="Enter the base Url of the server"/>
+                    <div class="row">
+                        <div class="col-md-10">
+                            <input type="text" ng-model="input.adHocServer"
+                                   class="form-control" placeholder="Enter the base Url of the server"/>
+                        </div>
+                        <div class="col-md-2 ">
+                            <button class="btn btn-primary" ng-click="selectServer(null,input.adHocServer)">Set</button>
+                        </div>
+                    </div>
+
+
                 </div>
 
             </div>
 
-            <div class="col-md-2 col-sm-2">
-
+            <div class="col-md-3 col-sm-3">
+                <input type="text" ng-model="input.accessToken" class="form-control"
+                       placeholder="Access token, if required by server for queries"/>
             </div>
 
 
@@ -66,6 +75,109 @@
     <div class="col-sm-12 col-md-12">
 
         <uib-tabset>
+            <uib-tab heading="Server Capabilities">
+                <br/>
+                <div>
+                    <uib-tabset>
+                        <uib-tab heading="REST Interface">
+                            <ng-include src="'/includes/conformanceDisplay.html'"></ng-include>
+
+                        </uib-tab>
+                        <uib-tab heading="Description">
+                            <br/>
+
+
+                            <table class="table">
+                                <tr>
+                                    <td valign="top" width="15%"><strong>Name</strong></td>
+                                    <td width="35%">{{conformance.name}}{{conformance.software.name}}</td>
+                                    <td valign="top" width="15%"><strong>FHIR version</strong></td>
+                                    <td width="35%">{{conformance.fhirVersion}}</td>
+                                </tr>
+                                <tr>
+                                    <td valign="top"><strong>Description</strong></td><td>{{conformance.description}}</td>
+                                    <td valign="top"><strong>Publisher</strong></td><td>{{conformance.publisher}}</td>
+                                </tr>
+                                <tr>
+                                    <td valign="top"><strong>Accept Unknown</strong></td><td>{{conformance.acceptUnknown}}</td>
+                                    <td valign="top"><strong>Formats</strong></td>
+                                    <td>
+                                        <div ng-repeat="f in conformance.format">
+                                            {{f}}
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                            </table>
+
+
+                            <br />
+
+                            <div uib-alert ng-show="waiting" class="alert-info">
+                                Generating the quality report. Note that this can take some time as all profiles and extension definitions
+                                are retrieved by the report. It is assumed that all these artifacts are stored on the current conformance server
+                                (This is not required by FHIR, but is a limitation of this report)
+                            </div>
+                            <div ng-show="qualityReport">
+                                <h5>Quality report</h5>
+                                <uib-tabset>
+                                    <uib-tab heading = "Issues">
+                                        <br/>
+                                        <div class="panel" >
+                                            <table class="table  table-bordered">
+                                                <tr ng-repeat = "issue in qualityReport.issues">
+                                                    <td>{{issue.level}}</td>
+                                                    <td>{{issue.display}}</td>
+                                                </tr>
+                                            </table>
+
+                                        </div>
+                                    </uib-tab>
+                                    <uib-tab heading="Profiles">
+                                        <br/>
+                                        <ul>
+                                            <li ng-repeat = "profile in qualityReport.profiles">
+                                                {{profile.url}}
+                                            </li>
+                                        </ul>
+
+                                    </uib-tab>
+                                    <uib-tab heading="Extensions">
+                                        <br/>
+                                        <table class="table table-bordered table-condensed">
+                                            <tr ng-repeat = "extension in qualityReport.extensions">
+                                                <td>{{extension.ed.url}}</td>
+                                                <td>{{extension.ed.description}}</td>
+                                            </tr>
+                                        </table>
+
+                                    </uib-tab>
+
+                                </uib-tabset>
+
+                            </div>
+
+
+                        </uib-tab>
+
+
+
+                        <uib-tab heading="REST Operations">
+                            <br />
+
+                            <ng-include src="'/includes/operationsDisplay.html'"></ng-include>
+
+                        </uib-tab>
+
+
+                        <uib-tab heading="Json">
+                            <pre>{{conformance | json}}</pre>
+                        </uib-tab>
+                    </uib-tabset>
+
+                </div>
+            </uib-tab>
             <uib-tab heading="Query">
                 <div class="pull-right">
                     <button class="btn btn-link" ng-click="showHistory = ! showHistory">
@@ -99,14 +211,27 @@
 
 
                         <div ng-show="server">
+<!--
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <input type="text" ng-model="input.token" class="form-control"
+                                           placeholder="Access token"/>
+                                </div>
+                                <div class="col-md-8">
+                                    If the server requires an access token, then enter it here and it will be
+                                    added as an Authorization header. (Don't include the 'Bearer' - this will be added automatically)
+                                </div>
+                            </div>
 
+                            <br/>
+                            -->
 
                             <uib-tabset>
                                 <uib-tab heading="Query Builder">
                                     <br/>
                                     <div class="row">
                                         <div class="col-md-2 col-sm-2">
-                                            Resource Type
+                                            <strong>Resource Type</strong>
                                         </div>
                                     </div>
 
@@ -118,15 +243,24 @@
                                             <select class="form-control" ng-model="input.selectedType"
                                                     ng-change="typeSelected(input.selectedType)"
                                                     ng-options="type.name for type in standardResourceTypes"/>
+
                                         </div>
 
-                                        <div class="col-md-1 col-sm-1" ng-show="type">
-                                            <a target="_blank" ng-href="{{fhirBasePath}}{{type.name | getLogicalID | lowercase}}.html">
+                                        <div class="col-md-1 col-sm-1">
+                                            <a  ng-show="type" target="_blank" ng-href="{{fhirBasePath}}{{type.name | getLogicalID | lowercase}}.html">
                                                 <i class="glyphicon glyphicon-globe"
                                                    title="View Resource definition in spec">
                                                 </i>
 
                                             </a>
+                                            <div>
+                                            <i class="glyphicon glyphicon-question-sign clickable"
+                                               uib-popover="These are the types where there is an interaction of 'search-type'
+                                            in the CapabilityStatement."
+                                               popover-placement="top"
+                                               popover-trigger="'mouseenter'">
+                                            </i>
+                                            </div>
                                         </div>
 
                                         <div class="col-md-5 col-sm-5">
@@ -177,6 +311,48 @@
 
                                 </uib-tab>
 
+                                <uib-tab heading="Query help">
+                                    <br/>
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6 myBox">
+                                            <h5>General links (open in new tab)</h5>
+                                            <table class="table">
+                                                <tr ng-repeat="link in fhirHelp.links">
+                                                    <td>{{link.description}}</td>
+                                                    <td><a href="{{link.url}}" target="_blank">{{link.url}}</a>  </td>
+
+                                                </tr>
+                                            </table>
+
+                                        </div>
+                                        <div class="col-md-6 col-sm-6">
+
+
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-12 col-sm-12 myBox">
+
+                                            <h5>Search parameters (links open in new tab)</h5>
+
+                                            <table class="table table-bordered">
+                                                <tr><th>Name</th><th>Parameter</th><th>Example syntax</th><th>Description</th><th>Spec</th></tr>
+                                                <tr ng-repeat="srch in fhirHelp.search">
+                                                    <td>{{srch.name}}</td>
+                                                    <td>{{srch.param}}</td>
+                                                    <td>{{srch.syntax}}</td>
+                                                    <td>{{srch.description}}</td>
+                                                    <td><a href="{{srch.url}}" target="_blank">Details</a>  </td>
+
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+
+
+
+                                </uib-tab>
                                 <!--
                                 <uib-tab heading="GraphQL">
                                     <graphql></graphql>
@@ -218,9 +394,6 @@
 
                                         <div class="list-group"  style="height:600px; overflow-y: auto;">
 
-
-
-
                                             <div ng-class="{'list-group-item':true,'list-group-item-info':result.selectedEntry.fullUrl == entry.fullUrl}"
                                                  ng-repeat="entry in response.data.entry">
                                                 <div  ng-click="selectEntry(entry)"  ng-clickDEP="result.selectedEntry = entry" style="cursor: pointer">
@@ -247,7 +420,7 @@
                                                 <div id="queryResourceTree"></div>
 
                                             </uib-tab>
-                                            <uib-tab heading="Validate" ng-show="result.selectedEntry">
+                                            <uib-tab ng-show="false" heading="Validate" ng-show="result.selectedEntry">
                                                 <br/>
                                                 <div class="row">
                                                     <div class="col-sm-6 col-md-6">
@@ -340,7 +513,8 @@
 
 
             </uib-tab>
-            <uib-tab heading="Validate">
+
+            <uib-tab ng-show="false" heading="Validate">
                 <br/>
                 <div class="row">
                     <div class="col-md-6 col-sm-6">
@@ -388,153 +562,8 @@
 
                 </div>
             </uib-tab>
-            <uib-tab heading="Server Capabilities">
-                <br/>
-                <div>
-                    <uib-tabset>
-                        <uib-tab heading="Description">
-                            <br/>
 
 
-                            <table class="table">
-                                <tr>
-                                    <td valign="top" width="15%"><strong>Name</strong></td>
-                                    <td width="35%">{{conformance.name}}{{conformance.software.name}}</td>
-                                    <td valign="top" width="15%"><strong>FHIR version</strong></td>
-                                    <td width="35%">{{conformance.fhirVersion}}</td>
-                                </tr>
-                                <tr>
-                                    <td valign="top"><strong>Description</strong></td><td>{{conformance.description}}</td>
-                                    <td valign="top"><strong>Publisher</strong></td><td>{{conformance.publisher}}</td>
-                                </tr>
-                                <tr>
-                                    <td valign="top"><strong>Accept Unknown</strong></td><td>{{conformance.acceptUnknown}}</td>
-                                    <td valign="top"><strong>Formats</strong></td>
-                                    <td>
-                                        <div ng-repeat="f in conformance.format">
-                                            {{f}}
-                                        </div>
-
-                                    </td>
-
-                                </tr>
-                            </table>
-
-
-                            <br />
-
-                            <div uib-alert ng-show="waiting" class="alert-info">
-                                Generating the quality report. Note that this can take some time as all profiles and extension definitions
-                                are retrieved by the report. It is assumed that all these artifacts are stored on the current conformance server
-                                (This is not required by FHIR, but is a limitation of this report)
-                            </div>
-                            <div ng-show="qualityReport">
-                                <h5>Quality report</h5>
-                                <uib-tabset>
-                                    <uib-tab heading = "Issues">
-                                        <br/>
-                                        <div class="panel" >
-                                            <table class="table  table-bordered">
-                                                <tr ng-repeat = "issue in qualityReport.issues">
-                                                    <td>{{issue.level}}</td>
-                                                    <td>{{issue.display}}</td>
-                                                </tr>
-                                            </table>
-
-                                        </div>
-                                    </uib-tab>
-                                    <uib-tab heading="Profiles">
-                                        <br/>
-                                        <ul>
-                                            <li ng-repeat = "profile in qualityReport.profiles">
-                                                {{profile.url}}
-                                            </li>
-                                        </ul>
-
-                                    </uib-tab>
-                                    <uib-tab heading="Extensions">
-                                        <br/>
-                                        <table class="table table-bordered table-condensed">
-                                            <tr ng-repeat = "extension in qualityReport.extensions">
-                                                <td>{{extension.ed.url}}</td>
-                                                <td>{{extension.ed.description}}</td>
-                                            </tr>
-                                        </table>
-
-                                    </uib-tab>
-
-                                </uib-tabset>
-
-                            </div>
-
-                            <!-- remove temporarily...
-                            <button class="btn btn-primary" ng-hide="waiting" ng-click="createConformanceQualityReport()">
-                                Generate Quality report</button>
-                            -->
-
-                        </uib-tab>
-
-                        <uib-tab heading="REST Interface">
-                            <ng-include src="'/includes/conformanceDisplay.html'"></ng-include>
-
-                        </uib-tab>
-
-                        <uib-tab heading="REST Operations">
-                            <br />
-                            <ng-include src="'/includes/operationsDisplay.html'"></ng-include>
-
-                        </uib-tab>
-
-
-                        <uib-tab heading="Json">
-                            <pre>{{conformance | json}}</pre>
-                        </uib-tab>
-                    </uib-tabset>
-
-                </div>
-            </uib-tab>
-            <uib-tab heading="Query help">
-                <br/>
-                <div class="row">
-                    <div class="col-md-6 col-sm-6 myBox">
-                        <h5>General links (open in new tab)</h5>
-                        <table class="table">
-                            <tr ng-repeat="link in fhirHelp.links">
-                                <td>{{link.description}}</td>
-                                <td><a href="{{link.url}}" target="_blank">{{link.url}}</a>  </td>
-
-                            </tr>
-                        </table>
-
-                    </div>
-                    <div class="col-md-6 col-sm-6">
-
-
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-12 col-sm-12 myBox">
-
-                        <h5>Search parameters (links open in new tab)</h5>
-
-                        <table class="table table-bordered">
-                            <tr><th>Name</th><th>Parameter</th><th>Example syntax</th><th>Description</th><th>Spec</th></tr>
-                            <tr ng-repeat="srch in fhirHelp.search">
-                                <td>{{srch.name}}</td>
-                                <td>{{srch.param}}</td>
-                                <td>{{srch.syntax}}</td>
-                                <td>{{srch.description}}</td>
-                                <td><a href="{{srch.url}}" target="_blank">Details</a>  </td>
-
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-
-
-
-            </uib-tab>
         </uib-tabset>
 
 

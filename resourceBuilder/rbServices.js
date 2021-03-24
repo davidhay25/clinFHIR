@@ -493,14 +493,14 @@ console.log(url)
         localServerQuery : function(url) {
             return $http.get(url);
         },
-        adHocFHIRQueryFollowingPaging : function(url) {
+        adHocFHIRQueryFollowingPaging : function(url,accessToken) {
             //used when a caller expects a bundle
 
 
 
             //an ahhoc query - full url given - to avoid a controller using $http directly...
             var deferred = $q.defer();
-            var bundle = Utilities.perfromQueryFollowingPaging(url).then(
+            var bundle = Utilities.perfromQueryFollowingPaging(url,null,accessToken).then(
                 function(bundle) {
                     //May 2019
                     if (bundle && bundle.resourceType !== 'Bundle') {
@@ -1744,12 +1744,16 @@ console.log(summary);
                 }
             }
 
-
             return isAuthoredByClinFhir;
         },
-        perfromQueryFollowingPaging : function(url,limit){
+        perfromQueryFollowingPaging : function(url,limit,accessToken){
             //Get all the resurces specified by a query, following any paging...
             //http://stackoverflow.com/questions/28549164/how-can-i-do-pagination-with-bluebird-promises
+
+            let config = {}
+            if (accessToken) {
+                config.headers = {Authorization:"Bearer " + accessToken}
+            }
 
             var returnBundle = {resourceType:'Bundle',total:0,type:'searchset',link:[],entry:[]};
             returnBundle.link.push({relation:'self',url:url})
@@ -1767,28 +1771,20 @@ console.log(summary);
             limit = limit || 100;
 
 
-           // var returnBundle = {total:0,type:'searchset',link:[],entry:[]};
-            //returnBundle.link.push({relation:'self',url:url})
+
             getPage(url);
 
             //get a single page of data
             function getPage(url) {
-                return $http.get(url).then(
+                return $http.get(url,config).then(
                     function(data) {
-
-
-
                         var bundle = data.data;     //the response is a bundle...
-
 
                         //added May 2019 - check for when the response is not a query...
                         if (bundle && bundle.resourceType !== 'Bundle') {
                             deferred.resolve(bundle);       //isn't really a bundle...
                             return;
                         }
-
-
-
 
                         //copy all resources into the array..
                         if (bundle && bundle.entry) {
@@ -1807,14 +1803,6 @@ console.log(summary);
                                 if (lnk.relation == 'next'){// && returnBundle.entry.length < limit) {
                                     moreToGet = true;
                                     var url = lnk.url;
-
-                                //todo - this is a real hack as the NZ server is not setting the paging correctly...
-
-                                    //url = url.replace('http://127.0.0.1:8080/baseDstu2','http://fhir.hl7.org.nz/baseDstu2')
-
-                                
-
-
                                     getPage(url);
                                     break;
                                 }

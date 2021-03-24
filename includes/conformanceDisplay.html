@@ -20,18 +20,28 @@
 
         <h5>Resource Types</h5>
         <div class="list-group myScroll" >
+
             <div href="#" ng-class="{'list-group-item':true,myActive:selectedType.type == res.type}"
                  style="cursor: pointer"
                ng-click="showType(res)"
+                 ng-show="res.interaction.length > 0"
                ng-repeat="res in conformance.rest[0].resource">
-                {{res.type}}
 
-                <span class="pull-right">
+                <div>
+                    {{res.type}}
+
+                    <span class="pull-right">
 
                     <a title="Load spec page in new tab" target = "_blank" ng-href="{{makeUrl(res.type)}}">
                         <i class="glyphicon glyphicon-globe"></i></a>
                 </span>
+                </div>
+
+
+
             </div>
+
+
         </div>
 
     </div>
@@ -41,7 +51,6 @@
 
     <div ng-show="selectedType" class="col-md-9 col-sm-9">
 
-        <!--{{selectedType}}-->
         <div class="row" ng-show="selectedType.documentation">
             <div class="col-md-12">
                 {{selectedType.documentation}}
@@ -51,49 +60,55 @@
 
 
 
-
-
         <uib-tabset class="myScroll" >
-            <uib-tab heading="Profile" >  <!--ng-show="selectedType.profile"-->
+            <uib-tab heading="Resource structure" >  <!--ng-show="selectedType.profile"-->
 
-<!--
-                <a class="pull-right" href="#" ng-click="showProfile(selectedType.profile.reference)">{{selectedType.profile.reference}}</a>
-
-                -->
 
 
                 <div class="row">
                     <div class="col-md-6 col-sm-6">
+
+
                         <!-- a component (1.5) todisplay a profile-->
+                        <!--
                         <show-profile profile="selectedProfile" treedivid="'pfTreeViewConf'"
                                       ontreenodeselected="treeNodeSelected(item)"></show-profile>
+
+                        -->
                         <!-- Where the tree will be rendered-->
                         <div id="pfTreeViewConf"></div>
+
+                        <div>
+                            <em>The structure for this resource type defined in the spec</em>
+                        </div>
 
                     </div>
                     <div class="col-md-6 col-sm-6">
 
                         <br/>
 
-                        <uib-tabset>
+                        <uib-tabset ng-show="edFromTreeNode">
                             <uib-tab heading="Details">
                                 <br/>
                                 <div class="row">
                                     <div class="col-md-3 col-sm-3">Path</div>
                                     <div class="col-md-9 col-sm-9">
-                                        <div ng-repeat="item in edFromTreeNode.type">{{edFromTreeNode.path}}</div>
+                                        {{edFromTreeNode.path}}
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-3 col-sm-3">DataType/s</div>
                                     <div class="col-md-9 col-sm-9">
-                                        <div ng-repeat="item in edFromTreeNode.type">{{item.code}}</div>
+                                        <div ng-repeat="typ in edFromTreeNode.types">{{typ.code}}</div>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-3 col-sm-3">Definition</div>
                                     <div class="col-md-9 col-sm-9">{{edFromTreeNode.definition}}</div>
-
+                                </div>
+                                <div class="row" ng-show="edFromTreeNode.comment">
+                                    <div class="col-md-3 col-sm-3">Comment</div>
+                                    <div class="col-md-9 col-sm-9">{{edFromTreeNode.comment}}</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-3 col-sm-3">
@@ -103,29 +118,21 @@
                                         {{edFromTreeNode.min}}..{{edFromTreeNode.max}}
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-md-3 col-sm-3">
-                                    </div>
-                                    <div class="col-md-9 col-sm-9">
-                                        <div ng-repeat="type in edFromTreeNode.type">
-                                            <em ng-repeat="p in type.profile">
 
-                                                <a href="#" ng-click="showProfileByUrl(p)">{{p}}</a>
-
-
-
-                                            </em>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
+                                <div class="row" ng-show="edFromTreeNode.binding">
                                     <div class="col-md-3 col-sm-3">
                                         Binding
                                     </div>
                                     <div class="col-md-9 col-sm-9">
-                                        <a href="#" ng-click="showValueSetForProfile(edFromTreeNode.binding.valueSetReference.reference)">
-                                            {{edFromTreeNode.binding.valueSetReference.reference}}
-                                        </a>
+
+                                        <div>ValueSet:
+                                            <span  class="clickable" ng-click="showValueSetForProfile(edFromTreeNode.binding.valueSet)">
+                                                {{edFromTreeNode.binding.valueSet}}
+                                            </span>
+
+                                        </div>
+                                        <div>Strength: {{edFromTreeNode.binding.strength}}</div>
+
                                     </div>
                                 </div>
                             </uib-tab>
@@ -143,51 +150,6 @@
 
 
 
-
-
-
-
-<!--
-
-onprofileselected = "showReferencedProfile(uri)"
-                              onextensionselected="showExtensionDetail(uri)"
-                              onvaluesetselected="showValueSetForProfile(uri)">
-
-
-
-                <table  ng-show="filteredProfile" class="table table-condensed">
-                    <tr><th>Path</th><th>DataType</th><th>Definition</th></tr>
-                    <tr ng-repeat="element in filteredProfile">
-                        <td valign="top">{{element.myMeta.path}}</td>
-
-                        <td valign="top">
-                            <div ng-repeat="item in element.type">{{item.code}}</div>
-                        </td>
-                        <td valign="top">{{element.definition}}
-                            <div><em>
-
-                                <a href="#" ng-click="showValueSet(element.binding.valueSetReference.reference)">
-                                    {{element.binding.valueSetReference.reference}}
-                                </a>
-
-
-
-
-                            </em></div>
-                            <div ng-repeat="type in element.type">
-                                <em ng-repeat="p in type.profile">
-
-                                    <a href="#" ng-click="showProfile(p)">{{p}}</a>
-
-
-
-                                </em>
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-
-                -->
             </uib-tab>
 
             <uib-tab heading="Interactions" >
@@ -200,7 +162,7 @@ onprofileselected = "showReferencedProfile(uri)"
                 <!--<p>Describes the interactions supported by the server </p>-->
                 <table class="table table-bordered">
                     <tr><th>Code</th><th>Documentation</th></tr>
-                    <tr ng-repeat="int in selectedType.interaction ">
+                    <tr ng-repeat="int in selectedType.interaction">
                         <td>{{int.code}}</td>
                         <td>{{int.documentation}}</td>
                     </tr>
@@ -211,18 +173,32 @@ onprofileselected = "showReferencedProfile(uri)"
                 <br />
                 <p>The Search parameters supported by the server for this resource</p>
                 <table class="table table-bordered">
-                    <tr><th>Name</th><th>Type</th><th>Chain</th><th>Documentation</th></tr>
+                    <tr><th>Name</th><th>Type</th><th>Definition</th><th>Documentation</th></tr>
                     <tr ng-repeat="param in selectedType.searchParam">
                         <td>{{param.name}}</td>
                         <td>{{param.type}}</td>
-                        <td><div ng-repeat="c in param.chain track by $index">{{c}}</div> </td>
-
-
+                        <td>{{param.definition}}</td>
                         <td>{{param.documentation}}</td>
                     </tr>
                 </table>
 
             </uib-tab>
+
+            <uib-tab heading="Operations">
+                <br />
+                <p>The type level operations supported by the server for this resource</p>
+                <table class="table table-bordered">
+                    <tr><th>Name</th><th>Definition</th><th>Documentation</th></tr>
+                    <tr ng-repeat="op in selectedType.operation">
+                        <td>{{op.name}}</td>
+                        <td>{{op.definition}}</td>
+
+
+                        <td>{{op.documentation}}</td>
+                    </tr>
+                </table>
+            </uib-tab>
+
             <uib-tab heading="Conditionals">
                 <br/>
                 <table width="50%">

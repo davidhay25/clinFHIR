@@ -3,17 +3,77 @@
 
 <div class="row">
     <div class="col-md-6 col-sm-6">
-        <table class="table table-bordered">
-            <tr><th>Name</th></tr>
-            <tr ng-repeat="operation in conformance.rest[0].operation">
-                <td>{{operation.name}}</td>
 
-            </tr>
-        </table>
+        <div class="myScroll">
+            <table class="table table-bordered">
+                <tr><th>Name</th><th>Definition</th></tr>
+                <tr ng-click = "getOperationDefinition(operation.definition)"
+                    style="cursor: pointer"
+                    ng-class="{'bg-info':operation.definition == selectedOpDefUrl}"
+                    ng-repeat="operation in conformance.rest[0].operation">
+                    <td>{{operation.name}}</td>
+                    <td>{{operation.definition}}</td>
+                </tr>
+            </table>
+        </div>
     </div>
     <div class="col-md-6 col-sm-6">
-        <p>The Conformance resource doesn't have direct links to the spec for each Operation (it does link to the
-        OperationDefinition resource though). <a target="_blank" ng-href="{{operationsUrl}}">This link</a> will display
-        the general description of Operations in the spec.</p>
+        <uib-tabset>
+            <uib-tab heading="Details" >
+                <br/>
+
+
+
+
+                <div ng-show="operationDefinition">
+                    <div><strong>{{selectedOpDefUrl}}</strong></div>
+
+                    <div class="alert alert-warning" ng-hide="operationDefinition">
+                        OperationDefinition resource not found
+                    </div>
+
+                <br/>
+                <div><strong>Can be applied at:</strong></div>
+
+                <ul>
+                    <li ng-show="operationDefinition.system">System</li>
+                    <li ng-show="operationDefinition.type">Type</li>
+                    <li ng-show="operationDefinition.instance">Instance</li>
+                </ul>
+                <br/>
+
+                <div ng-show="operationDefinition.resource">
+                    <div><strong>Type/s:</strong></div>
+                    <ul>
+                        <li ng-repeat="type in operationDefinition.resource">
+                            {{type}}
+                        </li>
+                    </ul>
+                    <br/>
+                </div>
+
+
+
+                <div><strong>Parameters</strong></div>
+                <table class="table table-bordered">
+                    <tr><th>Name</th><th>Use</th><th>Card</th><th>Type</th></tr>
+                    <tr
+                        ng-repeat="param in operationDefinition.parameter">
+                        <td>{{param.name}}</td>
+                        <td>{{param.use}}</td>
+                        <td>{{param.min}}..{{param.max}}</td>
+                        <td>{{param.type}}</td>
+                    </tr>
+                </table>
+                </div>
+            </uib-tab>
+            <uib-tab heading="Json">
+                <pre>{{operationDefinition | json}}</pre>
+            </uib-tab>
+        </uib-tabset>
+
+
+
+
     </div>
 </div>

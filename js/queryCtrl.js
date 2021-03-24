@@ -1,18 +1,144 @@
 angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,
     resourceCreatorSvc, profileCreatorSvc,GetDataFromServer,ResourceUtilsSvc,RenderProfileSvc,$http,modalService,
-        SaveDataToServer){
+        SaveDataToServer,commonSvc){
+
+
 
     $scope.config = $localStorage.config;
-    $scope.operationsUrl = $scope.config.baseSpecUrl + "operations.html";
+    //$scope.operationsUrl = $scope.config.baseSpecUrl + "operations.html";
     $scope.input = {serverType:'known'};  //serverType allows select from known servers or enter ad-hoc
     $scope.result = {selectedEntry:{}}
     $scope.ResourceUtilsSvc = ResourceUtilsSvc;
+    $scope.fhirBasePath="http://hl7.org/fhir/";
 
     $scope.queryHistory = $localStorage.queryHistory;
     $scope.makeUrl = function(type) {
         return  $scope.config.baseSpecUrl + type;
     }
 
+    function clear() {
+        delete $scope.operationDefinition
+        delete $scope.selectedOpDefUrl
+    }
+
+    $scope.showVSBrowserDialog = {};
+    $scope.showVSBrowser = function(vs) {
+        $scope.showVSBrowserDialog.open(vs);        //the open method defined in the directive...
+    };
+
+    //these are the definitions for the base elements in R4. Copied from gb2...
+    $http.get('./artifacts/resourceElements.json').then(
+        function(data) {
+            //console.log(data.data);
+            $scope.resourceElements = data.data
+        }
+    );
+
+    $scope.buildQuery = function() {
+        delete $scope.anonQuery;
+        delete $scope.query;
+        delete $scope.response;
+        var qry = '';//$scope.server.url;
+
+        if ($scope.input.selectedType){
+            qry += $scope.input.selectedType.name;
+        }
+
+        if ($scope.input.parameters) {
+            qry += "?"+$scope.input.parameters;
+        }
+
+        $scope.anonQuery = qry;     //the query, irrespective of the server...
+        $scope.query = $scope.server.url + qry;     //the query againts the current server...
+
+    };
+
+    //select a server. If 'server' is populated then we've selected a known server. If url is populated then an ad-hoc url has been entered
+    $scope.selectServer = function(server,url) {
+        if (url) {
+            if (url.substring(url.length-1) !== '/') {
+                url += '/'
+            }
+            server = {name:'Ad Hoc server',url:url}
+        }
+
+        $scope.input.parameters = "";
+        delete $scope.filteredProfile;
+        delete $scope.response;
+        delete $scope.err;
+        delete $scope.conformance;
+        delete $scope.input.selectedType;
+        delete $scope.standardResourceTypes;
+
+        $scope.server =server;
+        $scope.input.validationServer = server;     //default the validation server to the selected server
+
+        $scope.waiting = true;
+
+        let qry = $scope.server.url + "metadata";
+
+        $http.get(qry).then (
+
+            // resourceCreatorSvc.getConformanceResource($scope.server.url).then(
+            function (data) {
+                $localStorage.serverQueryServer = server;
+                $scope.conformance = data.data;     //the CapabilityStatement (Conformance) resource
+                $scope.hashResource = {};           //has of capstmt resource entry by type...
+                $scope.standardResourceTypes= []
+                data.data.rest[0].resource.forEach(function(res){
+
+                    //include a type if there is a 'read' interaction
+                    if (res.interaction) {
+                        if (res.interaction.filter(item => item.code == 'search-type').length > 0) {
+                            $scope.standardResourceTypes.push({name:res.type})
+                        }
+
+                    }
+
+
+                    //sort the search parameters alphabetically...
+                    if (res.searchParam) {
+                        res.searchParam.sort(function (a,b) {
+                            if (a.name > b.name) {
+                                return 1
+                            } else {
+                                return -1
+                            }
+
+                        });
+                    }
+
+
+                    //todo ?? should this be added if there is no type query??
+                    $scope.hashResource[res.type] = res;
+                })
+
+            },function (err) {
+                alert('Error loading conformance resource:'+angular.toJson(err));
+            }
+        ).finally(function(){
+            $scope.waiting = false;
+        });
+
+        $scope.buildQuery();        //builds the query from the params on screen
+
+    };
+
+
+
+    $scope.server = $localStorage.serverQueryServer || appConfigSvc.getCurrentDataServer();
+    $scope.selectServer($scope.server);
+
+    $scope.getOperationDefinition = function(url) {
+        //let qry = $scope.server.url + ""
+        $scope.selectedOpDefUrl = url
+        delete $scope.operationDefinition;
+        $http.get(url).then(
+            function (data) {
+                $scope.operationDefinition = data.data
+            }
+        )
+    }
 
     $http.get('artifacts/fhirHelp.json').then(
         function(data) {
@@ -26,14 +152,13 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     setDefaultInput();
 
 
-
     GetDataFromServer.registerAccess('query');
 
     $localStorage.queryHistory = $localStorage.queryHistory || [];
 
 
     //validate a response against a profile
-    $scope.validateResponse = function(server,profileUrl,json){
+    $scope.validateResponseDEP = function(server,profileUrl,json){
         console.log(server,profileUrl,json);
         delete $scope.responseValidationResult;
         delete $scope.responseValidationSuccess;
@@ -80,7 +205,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     };
 
     //validate user-entered json = todo allow a profile to be entered...
-    $scope.validate = function(input) {
+    $scope.validateDEP = function(input) {
         try {
             var json = angular.fromJson(input)
         } catch(ex) {
@@ -147,7 +272,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         )
     };
 
-    $scope.saveResource = function(input){
+    $scope.saveResourceDEP = function(input){
         delete $scope.saveOutcome;
         delete $scope.validationResult;
         delete $scope.validationSuccess;
@@ -170,7 +295,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
     }
 
-    $scope.treeNodeSelected = function(item) {
+    $scope.treeNodeSelectedDEP = function(item) {
 
         delete $scope.edFromTreeNode;
         if (item.node && item.node.data && item.node.data.ed) {
@@ -182,7 +307,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
     //the profile is uri - ie it doesn't point directly to the resource
 
-    $scope.showProfileByUrl = function(uri) {
+    $scope.showProfileByUrlDEP = function(uri) {
 
 
         delete $scope.selectedProfile;
@@ -202,7 +327,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     }
 
     //note that the parameter is a URL - not a URI
-    $scope.showProfile = function(url) {
+    $scope.showProfileDEP = function(url) {
 
         delete $scope.selectedProfile;
         if (url.substr(0,4) !== 'http') {
@@ -226,70 +351,8 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
 
 
-    //select a server. If 'server' is populated then we've selected a known server. If url is populated then an ad-hoc url has been entered
-    $scope.selectServer = function(server,url) {
 
-        if (url) {
-            server = {name:'Ad Hoc server',url:url}
-        }
-
-        $scope.fhirBasePath="http://hl7.org/fhir/";
-        if (server.version == 3) {
-            $scope.fhirBasePath="http://build.fhir.org/";
-        }
-
-        $scope.input.parameters = "";
-        delete $scope.filteredProfile;
-        delete $scope.response;
-        delete $scope.err;
-        delete $scope.conformance;
-        delete $scope.input.selectedType;
-        delete $scope.standardResourceTypes;
-
-        $scope.server =server;
-        $scope.input.validationServer = server;     //default the validation server to the selected server
-
-        $scope.waiting = true;
-        resourceCreatorSvc.getConformanceResource($scope.server.url).then(
-            function (data) {
-                $scope.conformance = data.data;
-
-                $scope.hashResource = {};
-                $scope.standardResourceTypes= []
-                data.data.rest[0].resource.forEach(function(res){
-                    //console.log(res)
-                    $scope.standardResourceTypes.push({name:res.type})
-
-                    //sort the search parameters alphabetically...
-                    if (res.searchParam) {
-                        res.searchParam.sort(function (a,b) {
-                            if (a.name > b.name) {
-                                return 1
-                            } else {
-                                return -1
-                            }
-
-                        });
-                    }
-
-
-
-                    $scope.hashResource[res.type] = res;
-                })
-
-            },function (err) {
-                alert('Error loading conformance resource:'+angular.toJson(err));
-            }
-        ).finally(function(){
-            $scope.waiting = false;
-        });
-
-        $scope.buildQuery();        //builds the query from the params on screen
-
-    };
-
-
-    //whan a resource tye is selected in th ebuilder
+    //whan a resource tye is selected in th e builder
     $scope.typeSelected = function(type) {
         $scope.type = type;
         $scope.buildQuery();
@@ -338,30 +401,6 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         })
     };
 
-
-
-    $scope.buildQuery = function() {
-        delete $scope.anonQuery;
-        delete $scope.query;
-        delete $scope.response;
-        var qry = '';//$scope.server.url;
-
-        if ($scope.input.selectedType){
-            qry += $scope.input.selectedType.name;
-        }
-
-
-
-        if ($scope.input.parameters) {
-            qry += "?"+$scope.input.parameters;
-        }
-
-
-        $scope.anonQuery = qry;     //the query, irrespective of the server...
-        $scope.query = $scope.server.url + qry;     //the query againts the current server...
-
-    };
-
     function setDefaultInput() {
         var type = angular.copy($scope.input.selectedType);
         // var server = angular.copy($scope.input.server);
@@ -404,12 +443,12 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         }
     };
 
-    $scope.removeConformance = function(){
+    $scope.removeConformanceDEP = function(){
         delete  $scope.conformance;
     };
 
     //todo - allow the conformance to be selected - maybe a separate function...
-    $scope.loadConformance = function(url) {
+    $scope.loadConformanceDEP = function(url) {
         $scope.waiting = true;
         delete $scope.filteredProfile;
         delete $scope.selectedType;
@@ -428,7 +467,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         })
     };
 
-    $scope.createConformanceQualityReport = function() {
+    $scope.createConformanceQualityReportDEP = function() {
         $scope.waiting = true;
         resourceCreatorSvc.createConformanceQualityReport($scope.conformance).then(
             function(report) {
@@ -444,17 +483,12 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     $scope.showValueSetForProfile = function(url){
         //url is actually a URI
 
+        let ar = url.split('|')
 
-        GetDataFromServer.getValueSet(url).then(
-            function(vs) {
+        $scope.showVSBrowserDialog.open(null,ar[0]);
 
-                $scope.showVSBrowserDialog.open(vs);
-
-            }
-        ).finally (function(){
-            $scope.showWaiting = false;
-        });
     };
+
 
     /*
     //when the user selects a reference to a profiled resource....
@@ -477,52 +511,46 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
     */
 
+
+
     //when a resource type is selected in the list
     $scope.showType = function(type){
+        clear()
         delete $scope.selectedProfile;
         $scope.selectedType = type;
+        //type.type is the actual type - tyep is an instance ot rest[x].resource...
+/*
+        $scope.selectedProfile = {snapshot:[]}
+        $scope.selectedProfile.url = ""
+        $scope.selectedProfile.snapshot.element = $scope.resourceElements[type.type]
 
-        delete $scope.filteredProfile;
+        console.log($scope.selectedProfile)
 
-        //note that the reference is a URL - ie a direct reference to the SD - not a URI...
-        if (type.profile && type.profile.reference) {
-            //there is an issue that the url for the 'base' resources is not resolving - eg
-            //http://hl7.org/fhir/profiles/Account *should* be a direft reference to the SD for Account - but it doesn't
-            //for the moment we'll do a 'search by url' for these ones...
-            var reference = type.profile.reference;
-            if (reference.indexOf('http://hl7.org/fhir/')> -1) {
-                //this is needs to be treated as a URI, and we have to change it a bit...
-                reference=reference.replace('profiles','StructureDefinition')       //this seems wrong...
-                reference=reference.replace('Profile','StructureDefinition')
+*/
 
-                localFindProfileByUri(reference)
 
-            } else {
-                //this is a 'real' reference - ie it is a resolvable URL...
-                $scope.showProfile(reference);
+
+        let pseudoProfile = {resourceElements:$scope.resourceElements[type.type]}
+        pseudoProfile.header = {name:type.type}
+        let treeData = commonSvc.makeTree(pseudoProfile)
+
+
+        var id = '#pfTreeViewConf';
+
+        $(id).jstree('destroy');
+        $(id).jstree(
+            {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
+        ).on('select_node.jstree', function (e, data) {
+            if (data.node.data) {
+
+                $scope.edFromTreeNode = data.node.data;
+
+                //$scope.treeNodeSelected(data.node.data)
+
             }
-        } else {
-            //there is no profile - only a 'type' element.
-            var type = type.type;       //this is the base resource type
-            var uri = 'http://hl7.org/fhir/StructureDefinition/'+type;
-            localFindProfileByUri(uri);     //contained function
-        }
+            $scope.$digest()
+        })
 
-        function localFindProfileByUri(uri){
-            $scope.waiting = true;
-            GetDataFromServer.findConformanceResourceByUri(uri).then(
-                function(profile){
-                    $scope.selectedProfile = profile;
-                  //  $rootScope.selectedProfile = profile;
-                    $scope.filteredProfile = profileCreatorSvc.makeProfileDisplayFromProfile(profile)
-                },
-                function(err) {
-                    alert(angular.toJson(err))
-                }
-            ).finally(function(){
-                $scope.waiting = false;
-            })
-        }
 
     };
 
@@ -537,23 +565,21 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     }
 
 
-    var executeQuery = function(qry) {
+    let executeQuery = function(qry) {
        // $scope.buildQuery();        //always make sure the query is correct;
         delete $scope.response;
         delete $scope.err;
         delete $scope.result.selectedEntry;
         $scope.waiting = true;
 
-        GetDataFromServer.adHocFHIRQueryFollowingPaging(qry).then(
+        let accessToken = $scope.input.accessToken;
+        GetDataFromServer.adHocFHIRQueryFollowingPaging(qry,accessToken).then(
 
             function(data){
                 $scope.response = data;
-                //$scope.statusCode = data.statusCode;
-
 
                 var hx = {
                     anonQuery:$scope.anonQuery,
-                   // type:$scope.input.selectedType.name,
                     parameters:$scope.input.parameters,
                     server : $scope.server,
                     verb:$scope.input.verb};
@@ -597,15 +623,24 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         var newResource =  angular.fromJson(angular.toJson(r));
         var treeData = resourceCreatorSvc.buildResourceTree(newResource);
 
-        GetDataFromServer.getXmlResource(r.resourceType + "/" + r.id + "?_format=xml&_pretty=true").then(
+
+
+        let qry = $scope.server.url + r.resourceType + "/" + r.id + "?_format=xml&_pretty=true"
+        let config = {};
+        if ($scope.input.accessToken) {
+            config.headers = {Authorization:"Bearer " + $scope.input.accessToken}
+        }
+
+        $http.get(qry).then(
             function (data) {
                 $scope.xmlResource = data.data;
             },
             function (err) {
                 $scope.xmlResource = "<error>Sorry, Unable to load Xml version</error>";
-                // alert(angular.toJson(err, true))
+
             }
-        );
+        )
+
 
         //show the tree of this version
         $('#queryResourceTree').jstree('destroy');
@@ -615,23 +650,9 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
     };
 
-    //select the current data server
-    console.log(appConfigSvc.getCurrentDataServer());
-    $scope.server = appConfigSvc.getCurrentDataServer();
-    $scope.selectServer($scope.server);
 
 
-    //when the page was invoked, a conformance url was specified so display that...
-    //assume the conformance url is on the NZ server...
 
-    /*
-    $scope.startup = $rootScope.startup;        //put it on the scope so the html page can access i..
-    if ($rootScope.startup && $rootScope.startup.conformanceUrl) {
-       // $scope.input.localMode = 'showconformance';
-        $scope.config.servers.conformance = "http://fhir.hl7.org.nz/dstu2/";
-        var url = "http://fhir.hl7.org.nz/dstu2/Conformance/" + $rootScope.startup.conformanceUrl;
-        $scope.loadConformance(url);
-    }
-*/
+
 
 })
