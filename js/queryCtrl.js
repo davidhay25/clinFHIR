@@ -1,6 +1,6 @@
 angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,
     resourceCreatorSvc, profileCreatorSvc,GetDataFromServer,ResourceUtilsSvc,RenderProfileSvc,$http,modalService,
-        SaveDataToServer,commonSvc){
+        SaveDataToServer,commonSvc,$location){
 
 
 
@@ -11,49 +11,12 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     $scope.ResourceUtilsSvc = ResourceUtilsSvc;
     $scope.fhirBasePath="http://hl7.org/fhir/";
 
-    $scope.queryHistory = $localStorage.queryHistory;
-    $scope.makeUrl = function(type) {
-        return  $scope.config.baseSpecUrl + type;
-    }
 
-    function clear() {
-        delete $scope.operationDefinition
-        delete $scope.selectedOpDefUrl
-    }
 
-    $scope.showVSBrowserDialog = {};
-    $scope.showVSBrowser = function(vs) {
-        $scope.showVSBrowserDialog.open(vs);        //the open method defined in the directive...
-    };
-
-    //these are the definitions for the base elements in R4. Copied from gb2...
-    $http.get('./artifacts/resourceElements.json').then(
-        function(data) {
-            //console.log(data.data);
-            $scope.resourceElements = data.data
-        }
-    );
-
-    $scope.buildQuery = function() {
-        delete $scope.anonQuery;
-        delete $scope.query;
-        delete $scope.response;
-        var qry = '';//$scope.server.url;
-
-        if ($scope.input.selectedType){
-            qry += $scope.input.selectedType.name;
-        }
-
-        if ($scope.input.parameters) {
-            qry += "?"+$scope.input.parameters;
-        }
-
-        $scope.anonQuery = qry;     //the query, irrespective of the server...
-        $scope.query = $scope.server.url + qry;     //the query againts the current server...
-
-    };
+    //note that functions to check the $location # for a server & setuo initial one are below $scope.selectServer & $scope.buildQuery
 
     //select a server. If 'server' is populated then we've selected a known server. If url is populated then an ad-hoc url has been entered
+    //has to be at the top as called at startup
     $scope.selectServer = function(server,url) {
         if (url) {
             if (url.substring(url.length-1) !== '/') {
@@ -70,7 +33,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         delete $scope.input.selectedType;
         delete $scope.standardResourceTypes;
 
-        $scope.server =server;
+        $scope.server = server;
         $scope.input.validationServer = server;     //default the validation server to the selected server
 
         $scope.waiting = true;
@@ -125,9 +88,69 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     };
 
 
+    $scope.buildQuery = function() {
+        delete $scope.anonQuery;
+        delete $scope.query;
+        delete $scope.response;
+        var qry = '';//$scope.server.url;
 
+        if ($scope.input.selectedType){
+            qry += $scope.input.selectedType.name;
+        }
+
+        if ($scope.input.parameters) {
+            qry += "?"+$scope.input.parameters;
+        }
+
+        $scope.anonQuery = qry;     //the query, irrespective of the server...
+        $scope.query = $scope.server.url + qry;     //the query againts the current server...
+
+    };
+
+    // the most recently selected server
     $scope.server = $localStorage.serverQueryServer || appConfigSvc.getCurrentDataServer();
-    $scope.selectServer($scope.server);
+    $scope.input.serverType = "known"
+    var hash = $location.hash();
+    if (hash) {
+        console.log("server passed in: " + hash)
+        //$scope.server = {url:hash}
+        $scope.fromHash = true;
+        $scope.input.serverType = "adhoc"
+        $scope.input.adHocServer = hash;
+        $scope.selectServer(null,hash)
+    } else {
+        $scope.selectServer($scope.server);
+    }
+
+
+
+    $scope.queryHistory = $localStorage.queryHistory;
+    $scope.makeUrl = function(type) {
+        return  $scope.config.baseSpecUrl + type;
+    }
+
+    function clear() {
+        delete $scope.operationDefinition
+        delete $scope.selectedOpDefUrl
+    }
+
+    $scope.showVSBrowserDialog = {};
+    $scope.showVSBrowser = function(vs) {
+        $scope.showVSBrowserDialog.open(vs);        //the open method defined in the directive...
+    };
+
+    //these are the definitions for the base elements in R4. Copied from gb2...
+    $http.get('./artifacts/resourceElements.json').then(
+        function(data) {
+            //console.log(data.data);
+            $scope.resourceElements = data.data
+        }
+    );
+
+
+
+
+
 
     $scope.getOperationDefinition = function(url) {
         //let qry = $scope.server.url + ""

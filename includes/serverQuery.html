@@ -14,33 +14,47 @@
 
 
             <div class="col-md-1 col-sm-1">
-                <div><input type="radio" ng-model="input.serverType" value="known"> Known</div>
-                <input type="radio" ng-model="input.serverType" value="adhoc"> AdHoc
+                <div ng-hide = "fromHash">
+                    <div>
+                        <input type="radio"  ng-model="input.serverType" value="known"> Known
+                    </div>
+                    <input type="radio" ng-model="input.serverType" value="adhoc"> AdHoc
+                </div>
             </div>
 
 
             <div class="col-md-3 col-sm-3">
-                <div ng-show="input.serverType == 'known'">
-                    <select class="form-control"
-                            ng-change="selectServer(server)"
-                            ng-options="value.name for value in config.allKnownServers track by value.name"
-                            ng-model="server">
+               
+                <div ng-hide = "fromHash">
+                    <div ng-show="input.serverType == 'known'">
+                        <select class="form-control"
+                                ng-change="selectServer(server)"
+                                ng-options="value.name for value in config.allKnownServers track by value.name"
+                                ng-model="server">
 
-                    </select>
-                </div>
-                <div ng-show="input.serverType == 'adhoc'">
-                    <div class="row">
-                        <div class="col-md-10">
-                            <input type="text" ng-model="input.adHocServer"
-                                   class="form-control" placeholder="Enter the base Url of the server"/>
-                        </div>
-                        <div class="col-md-2 ">
-                            <button class="btn btn-primary" ng-click="selectServer(null,input.adHocServer)">Set</button>
-                        </div>
+                        </select>
                     </div>
 
+                    <div ng-show="input.serverType == 'adhoc'">
+                        <div class="row">
+                            <div class="col-md-10">
+                                <input type="text" ng-model="input.adHocServer"
+                                       class="form-control" placeholder="Enter the base Url of the server"/>
+                            </div>
+                            <div class="col-md-2 ">
+                                <button class="btn btn-primary" ng-click="selectServer(null,input.adHocServer)">Set</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div ng-show="fromHash">
+                    {{server.url}}
 
                 </div>
+
+
+
 
             </div>
 
