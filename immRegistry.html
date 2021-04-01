@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ImmRegistry</title>
+    <script src="js/libs/jquery-1.9.0.min.js"></script>
+    <script src="js/libs/angular.min1-5.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+
+    <script src="js/libs/moment.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
+    <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+    <script src="js/libs/angular-sanitize.js"></script>
+    <script src="js/libs/jstree.min.js"></script>
+
+    <style>
+        .myScroll {
+            height: 600px;
+            overflow-y: scroll;
+        }
+    </style>
+
+    <script>
+        angular.module("sampleApp",['ui.bootstrap','ngStorage']).config(function($locationProvider) {
+
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+        });
+        angular.module("sampleApp").constant("moment", moment);
+
+    </script>
+    <script src="js/libs/ngStorage.min.js"></script>
+    <script src="js/immRegistryCtrl.js"></script>
+    <script src="js/immRegistrySvc.js"></script>
+
+</head>
+<body style="padding: 8px;padding-top: 80px">
+    <div ng-app="sampleApp" ng-controller="immRegistryCtrl" class="container-fluid">
+
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+
+        <div class="container-fluid">
+            <div class="col-md-7 col-sm-7">
+                    <span>
+                        <a class="navbar-brand" href="#">
+                            Immunization Registry
+                        </a>
+                    </span>
+            </div>
+            <div class="col-md-2 col-sm-2">
+                <form class="navbar-form navbar-left">
+                    <img ng-show="showWaiting" src="css/ajax_loader_blue_32.gif"/>
+
+                </form>
+            </div>
+            <div class="col-md-3 col-sm-3">
+            </div>
+        </div>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-6">
+            X
+        </div>
+        <div class="col-md-6">
+            X
+        </div>
+    </div>
+
+
+        <uib-tabset>
+
+            <uib-tab heading="Plan view">
+                <uib-tabset>
+
+                    <uib-tab heading="Tree">
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div id="planTree"></div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="myScroll">
+                                    <div><strong>Action from plan</strong></div>
+                                    <pre>{{selectedPlanSubAction | json}}</pre>
+                                    <div><strong>ActivityDefinition</strong></div>
+                                    <pre>{{selectedAD | json}}</pre>
+                                </div>
+
+
+
+                            </div>
+                        </div>
+
+
+
+
+
+
+
+                    </uib-tab>
+
+                    <uib-tab heading="Plan Json">
+                        <pre>{{plan | json}}</pre>
+                    </uib-tab>
+
+
+                </uib-tabset>
+            </uib-tab>
+            <uib-tab heading="Patient view">
+
+                <div class="alert alert-warning">
+                    <button class="btn btn-primary" ng-click="loadPatient('pat')">Load patient</button>
+                </div>
+
+                <uib-tabset>
+                    <uib-tab heading="Immunizations">
+                        <div><strong>List of Immunizations</strong></div>
+                        <table class="table table-bordered">
+                            <tr><th>Date</th><th>Status</th><th>Vaccine code</th><th>Display</th><th>Series</th><th>Dose number</th></tr>
+                            <tr ng-repeat="imm in immunizations">
+                                <td>{{imm.occurrenceDateTime}}</td>
+                                <td>{{imm.status}}</td>
+
+                                <td>{{imm.vaccineCode.coding[0].code}}</td>
+                                <td>{{imm.vaccineCode.coding[0].display}}</td>
+                                <td>{{imm.protocolApplied[0].series}}</td>
+                                <td>{{imm.protocolApplied[0].doseNumberPositiveInt}}</td>
+                            </tr>
+                        </table>
+
+                        <div><strong>Analysis</strong></div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <table class="table table-bordered">
+                                    <tr><th>Disease</th><th>Doses due</th><th>Doses administered</th></tr>
+                                    <tr ng-repeat="(k,v) in analysis">
+                                        <td>{{v.name}}</td>
+                                        <td>{{v.due}}</td>
+                                        <td>{{v.received}}</td>
+                                    </tr>
+                                </table>
+
+                            </div>
+                            <div class="col-md-6">
+                                <div><strong>Vaccines to come...</strong></div>
+
+                                <strong>Catch up vaccines</strong>
+
+                                <table class="table table-bordered">
+                                    <tr ng-repeat = "(k,v) in hashVaccine">
+                                        <td valign="top">{{k}}</td>
+                                        <td>
+                                            <span ng-repeat = "dis in v">{{dis.display}} </span>
+
+                                        </td>
+                                        <td><i class="glyphicon glyphicon-plus clickable"
+                                               style="padding: 10px"
+                                               ng-click="addVaccine(k)">
+
+                                        </i></td>
+                                        <td><i class="glyphicon glyphicon-minus clickable"
+                                               style="padding: 10px"
+                                               ng-click="removeVaccine(k)">
+
+                                        </i></td>
+                                        <td>{{catchupVaccine[k]}}</td>
+                                    </tr>
+                                </table>
+
+
+
+                                <div><em>Add vaccines due on programms</em></div>
+                            </div>
+                        </div>
+
+                    </uib-tab>
+
+                    <uib-tab>
+
+                    </uib-tab>
+
+                </uib-tabset>
+
+
+
+            </uib-tab>
+
+        </uib-tabset>
+
+
+
+
+
+</div>
+
+</body>
+</html>
