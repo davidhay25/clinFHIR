@@ -1,0 +1,45 @@
+<div>
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+
+                <h3>Demo patient</h3>
+
+            </div>
+
+
+            <div class="col-md-4 col-sm-4">
+
+                <div class="pull-right">
+                    <button class="btn btn-link" ng-click="$dismiss()">Cancel</button>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="modal-body">
+
+        <div class="row">
+            <div class="col-sm-2">
+                Age
+            </div>
+            <div class="col-sm-2">
+                <input class="form-control" type="number" ng-model="input.age"/>
+            </div>
+            <div class="col-sm-2">
+                <select class="form-control" ng-model="input.unit">
+                    <option value="1">Weeks</option>
+                    <option value="4">Months</option>
+                    <option value="52">Years</option>
+                </select>
+
+            </div>
+            <div class="col-sm-2">
+                <strong>Vaccinations due</strong>
+            </div>
+
+        </div>
+    </div>
+</div>

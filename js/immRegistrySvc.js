@@ -6,14 +6,16 @@ angular.module("sampleApp")
     .service('immRegistrySvc', function($http) {
 
         return {
-            analyseImms: function(plan,hashAD,arImmunizations,hashCatchup) {
+            analyseImms: function(plan,hashAD,arImmunizations,hashCatchup,patientAgeInDays) {
                 //analyse the imms based on disease code
                 //hashCatchup is hash of proposed catchup vaccines, keyed by vaccine
 
                 let diseaseCoveredExtUrl = "http://clinfhir.com/StructureDefinition/disease-covered"
 
+                //a simplified list of the plan {age: vaccineCode: display: }
+                let vaccinesDueByAge = []
 
-                let patientAgeInDays = 18*30;    //13 months old
+                //let patientAgeInDays = 1*30;    //13 months old
                 let hashHxDisease = {}     //key on disease. Contains array of admin age
 
                 //the diseases that a vaccine will cover
@@ -72,6 +74,7 @@ angular.module("sampleApp")
 //that disease was given. For a smarter algorithm, we record the date given and make sure the
 //administration intervals were correct..
 console.log(arImmunizations)
+
                 arImmunizations.forEach(function(imm){
                     let code = imm.vaccineCode.coding[0].code;      //the vaccine code
                     if (hashVaccine[code]) {
@@ -120,18 +123,19 @@ console.log(arImmunizations)
                  */
 
 
-//top level actions (vaccines to be given at this age)
+                //top level actions (vaccines to be given at this age)
                 plan.action.forEach(function(topLevelAction){
                     //get the age to administer in days
                     let age = topLevelAction.timingAge.value;      //age in weeks or months
                     let units = topLevelAction.timingAge.code;      //the units for the age
 
+                    //ageToAdminister is in days
                     let ageToAdminister = age * 7;  //assume weeks
                     if (units == "mo") {
                         ageToAdminister = age * 30
                     }
 
-                    if (ageToAdminister < patientAgeInDays) {
+                   // if (ageToAdminister < patientAgeInDays) {
                         //these vaccines should have been administered if the person is up to date...
                         topLevelAction.action.forEach(function(detailAction){
                             let adUrl = detailAction.definitionCanonical
@@ -142,25 +146,41 @@ console.log(arImmunizations)
                                 //the app will crash and burn if ad is null. Would mean the plan is wrong..
                             }
 
+
+
                             //get the diseases that this ActivityDefinition represents
                             let diseases = getDiseases(ad)
                             if (diseases.length > 0) {
                                 diseases.forEach(function(dis){
                                     let diseaseCode = dis.code;     //the code of the disease
-                                    hashHxDisease[diseaseCode] = hashHxDisease[diseaseCode] || {name:dis.display,due:0,received:0}
-                                    hashHxDisease[diseaseCode].due ++
+                                    if (ageToAdminister <= patientAgeInDays) {
+                                        //these vaccines should have been administered if the person is up to date...
+                                        hashHxDisease[diseaseCode] = hashHxDisease[diseaseCode] || {
+                                            name: dis.display,
+                                            due: 0,
+                                            received: 0
+                                        }
+                                        hashHxDisease[diseaseCode].due++
+
+                                        //update the simplified list of vaccines due
+                                        let item = {age:ageToAdminister,
+                                            vaccineCode:ad.productCodeableConcept.coding[0].code,
+                                            display:ad.productCodeableConcept.coding[0].code};
+
+                                        vaccinesDueByAge.push(item)
+                                    }
+
                                 })
                             }
                         })
-                    }
+                    //}
                 })
 
-//This now has the number of
-                console.log(hashHxDisease)
 
-                return {hashVaccine:hashVaccine, analysis:hashHxDisease}
 
-//get the list of diseases covered by an ActivityDefinition
+                return {hashVaccine:hashVaccine, analysis:hashHxDisease,vaccinesDueByAge:vaccinesDueByAge}
+
+                //get the list of diseases covered by an ActivityDefinition
                 function getDiseases(ad) {
                     let diseases = []
                     if (ad.extension) {

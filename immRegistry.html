@@ -22,6 +22,17 @@
             height: 600px;
             overflow-y: scroll;
         }
+        .overDue {
+            background-color:salmon;
+        }
+        .ok {
+            background-color:#00A000;
+            color:white;
+        }
+        .toomuch {
+            background-color:red;
+            color:white;
+        }
     </style>
 
     <script>
@@ -63,14 +74,7 @@
         </div>
     </nav>
 
-    <div class="row">
-        <div class="col-md-6">
-            X
-        </div>
-        <div class="col-md-6">
-            X
-        </div>
-    </div>
+
 
 
         <uib-tabset>
@@ -105,9 +109,14 @@
 
                     </uib-tab>
 
+                    <uib-tab heading="By disease">
+                        for each disease, when and what vaccines should be given
+                    </uib-tab>
+
                     <uib-tab heading="Plan Json">
                         <pre>{{plan | json}}</pre>
                     </uib-tab>
+
 
 
                 </uib-tabset>
@@ -115,32 +124,96 @@
             <uib-tab heading="Patient view">
 
                 <div class="alert alert-warning">
-                    <button class="btn btn-primary" ng-click="loadPatient('pat')">Load patient</button>
+
+
+                    <div class="row">
+
+                        <div class="col-sm-1">
+                            <div class="pull-right" style="padding-top: 8px">Age</div>
+                        </div>
+                        <div class="col-sm-1">
+                            <input class="form-control" type="number"
+                                   ng-change="analyse()"
+                                   ng-model="input.age"/>
+                        </div>
+                        <div class="col-sm-2">
+                            <select class="form-control" ng-change="analyse()" ng-model="input.ageUnit">
+                                <option value="w">Weeks</option>
+                                <option value="m">Months</option>
+                                <option value="y">Years</option>
+                            </select>
+
+                        </div>
+
+                        <div class="col-sm-8">
+                            <!--
+                            <button class="btn btn-primary" ng-click="analyse('pat')">Analyse</button>
+                            -->
+                        </div>
+
+
+                    </div>
+                    <!--
+                    <button class="btn btn-link pull-right" ng-click="addPatient()">Add patient</button>
+
+                    -->
                 </div>
 
-                <uib-tabset>
-                    <uib-tab heading="Immunizations">
-                        <div><strong>List of Immunizations</strong></div>
-                        <table class="table table-bordered">
-                            <tr><th>Date</th><th>Status</th><th>Vaccine code</th><th>Display</th><th>Series</th><th>Dose number</th></tr>
-                            <tr ng-repeat="imm in immunizations">
-                                <td>{{imm.occurrenceDateTime}}</td>
-                                <td>{{imm.status}}</td>
 
-                                <td>{{imm.vaccineCode.coding[0].code}}</td>
-                                <td>{{imm.vaccineCode.coding[0].display}}</td>
-                                <td>{{imm.protocolApplied[0].series}}</td>
-                                <td>{{imm.protocolApplied[0].doseNumberPositiveInt}}</td>
-                            </tr>
-                        </table>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div><strong>List of Immunizations</strong></div>
+                            <table class="table table-bordered">
+                                <tr><th>Date</th><th>Status</th><th>Vaccine code</th><th>Display</th><th>Dose</th></tr>
+                                <tr ng-repeat="imm in immunizations">
+                                    <td>{{imm.occurrenceDateTime}}</td>
+                                    <td>{{imm.status}}</td>
 
-                        <div><strong>Analysis</strong></div>
+                                    <td>{{imm.vaccineCode.coding[0].code}}</td>
+                                    <td>{{imm.vaccineCode.coding[0].display}}</td>
+                                   <!-- <td>{{imm.protocolApplied[0].series}}</td> -->
+                                    <td>{{imm.protocolApplied[0].doseNumberPositiveInt}}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <div><strong>Plan for this age</strong></div>
+                            <table class="table table-bordered">
+                                <tr><th>Age</th><th>Vaccine</th></tr>
+                                <tr ng-repeat = "top in plan.action" ng-show="showExpectedVaccine(top)">
+                                    <td>{{top.title}}</td>
+                                    <td>
+                                        <span ng-repeat="vacc in top.action">
+                                            {{hashAD[vacc.definitionCanonical].productCodeableConcept.coding[0].code}}
+                                        </span>
+                                    </td>
+
+                                </tr>
+                            </table>
+
+                            <!--
+                            <div><strong>Plan for this age</strong></div>
+                            <table class="table table-bordered">
+                                <tr><th>Age</th><th>Vaccine</th><th>Display</th><th>Diseases</th></tr>
+                                <tr ng-repeat = "item in vaccinesDueByAge">
+                                    <td>{{item.age}}</td>
+                                    <td>{{item.code}}</td>
+                                    <td>{{item.display}}</td>
+                                </tr>
+                            </table>
+                            -->
+                        </div>
+                    </div>
+
+
+                        <div><strong>Disease analysis - vaccines given vs plan</strong></div>
 
                         <div class="row">
                             <div class="col-md-6">
                                 <table class="table table-bordered">
                                     <tr><th>Disease</th><th>Doses due</th><th>Doses administered</th></tr>
-                                    <tr ng-repeat="(k,v) in analysis">
+                                    <tr ng-class="{overDue:v.received < v.due,ok:v.received == v.due,toomuch:v.received > v.due}"
+                                            ng-repeat="(k,v) in analysis">
                                         <td>{{v.name}}</td>
                                         <td>{{v.due}}</td>
                                         <td>{{v.received}}</td>
@@ -149,11 +222,12 @@
 
                             </div>
                             <div class="col-md-6">
-                                <div><strong>Vaccines to come...</strong></div>
+
 
                                 <strong>Catch up vaccines</strong>
 
                                 <table class="table table-bordered">
+                                    <tr><th>Vaccine code</th><th>Diseases covered</th><th>Add</th><th>Remove</th><th>Doses needed</th></tr>
                                     <tr ng-repeat = "(k,v) in hashVaccine">
                                         <td valign="top">{{k}}</td>
                                         <td>
@@ -176,17 +250,11 @@
 
 
 
-                                <div><em>Add vaccines due on programms</em></div>
+                               <em>Select the vaccines needed to achieve immunity</em>
                             </div>
                         </div>
 
-                    </uib-tab>
 
-                    <uib-tab>
-
-                    </uib-tab>
-
-                </uib-tabset>
 
 
 
