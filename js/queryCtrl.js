@@ -1,17 +1,18 @@
 angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,
     resourceCreatorSvc, profileCreatorSvc,GetDataFromServer,ResourceUtilsSvc,RenderProfileSvc,$http,modalService,
-        SaveDataToServer,commonSvc,$location){
+        SaveDataToServer,commonSvc,$location,v2ToFhirSvc,$timeout){
 
 
 
     $scope.config = $localStorage.config;
-    //$scope.operationsUrl = $scope.config.baseSpecUrl + "operations.html";
     $scope.input = {serverType:'known'};  //serverType allows select from known servers or enter ad-hoc
     $scope.result = {selectedEntry:{}}
     $scope.ResourceUtilsSvc = ResourceUtilsSvc;
     $scope.fhirBasePath="http://hl7.org/fhir/";
 
 
+    $scope.input.showQuery = true  ;       //if true, the query builder can be shown
+    $scope.input.showResults = false;     //show the resoult of a query
 
     //note that functions to check the $location # for a server & setuo initial one are below $scope.selectServer & $scope.buildQuery
 
@@ -94,13 +95,47 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         delete $scope.response;
         var qry = '';//$scope.server.url;
 
+        if (!$scope.input.selectedType) {
+            return;
+        }
+
         if ($scope.input.selectedType){
             qry += $scope.input.selectedType.name;
         }
 
-        if ($scope.input.parameters) {
-            qry += "?"+$scope.input.parameters;
+
+        let prefix = '?';
+
+        if ($scope.searchParamList) {
+            $scope.searchParamList.forEach(function (param){
+                let name = param.name
+
+                //these vars are only set when a value is entered...
+                if ($scope.input.selectedSearchParam && $scope.input.selectedSearchParamValue) {
+
+                    console.log($scope.input.selectedSearchParam[name])
+                    if ($scope.input.selectedSearchParamValue[name]) {
+                        let value = $scope.input.selectedSearchParamValue[name]
+                        qry += prefix + name + "=" + value;
+                        prefix = "&"
+
+                    }
+                }
+            })
         }
+
+
+
+
+        //add any includes
+        if ($scope.input.selectedInclude) {
+            Object.keys($scope.input.selectedInclude).forEach(function (key){
+
+                qry += prefix + "_include=" + $scope.input.selectedType.name + ":" +  key
+                prefix = "&"
+            })
+        }
+
 
         $scope.anonQuery = qry;     //the query, irrespective of the server...
         $scope.query = $scope.server.url + qry;     //the query againts the current server...
@@ -113,7 +148,6 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     var hash = $location.hash();
     if (hash) {
         console.log("server passed in: " + hash)
-        //$scope.server = {url:hash}
         $scope.fromHash = true;
         $scope.input.serverType = "adhoc"
         $scope.input.adHocServer = hash;
@@ -149,20 +183,6 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
 
 
-
-
-
-    $scope.getOperationDefinition = function(url) {
-        //let qry = $scope.server.url + ""
-        $scope.selectedOpDefUrl = url
-        delete $scope.operationDefinition;
-        $http.get(url).then(
-            function (data) {
-                $scope.operationDefinition = data.data
-            }
-        )
-    }
-
     $http.get('artifacts/fhirHelp.json').then(
         function(data) {
             $scope.fhirHelp = data.data;
@@ -172,13 +192,12 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         }
     );
 
-    setDefaultInput();
+    //setDefaultInput();
 
 
     GetDataFromServer.registerAccess('query');
 
     $localStorage.queryHistory = $localStorage.queryHistory || [];
-
 
     //validate a response against a profile
     $scope.validateResponseDEP = function(server,profileUrl,json){
@@ -227,96 +246,6 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
     };
 
-    //validate user-entered json = todo allow a profile to be entered...
-    $scope.validateDEP = function(input) {
-        try {
-            var json = angular.fromJson(input)
-        } catch(ex) {
-            modalService.showModal({}, {bodyText:'This is not valid JSON'});
-            return;
-        }
-        var resourceType = json.resourceType;
-        if (!resourceType) {
-            modalService.showModal({}, {bodyText:"There must be a 'resourceType' property"});
-            return;
-        }
-        if (! $scope.hashResource[resourceType]) {
-            modalService.showModal({}, {bodyText:"The currently selected server does not support this resource type"});
-            return;
-        }
-
-        //perform validation
-        delete $scope.validationResult;
-        delete $scope.validationSuccess;
-        delete $scope.saveOutcome;
-
-        var url = $scope.server.url + resourceType + "/$validate";
-        var profile = $scope.input.validationProfile;
-        if (profile) {
-            //add the profile to the resource (if not already there)
-            json.meta = json.meta || {}
-            json.meta.profile = json.meta.profile || [];
-            var exists = false;
-            json.meta.profile.forEach(function (prof) {
-                if (prof == profile) {exists=true;}
-            });
-            if (! exists) {
-                json.meta.profile.push(profile)
-                $scope.input.validateJson = angular.toJson(json,2);
-            }
-
-           // url += "?profile="+profile;
-        }
-
-        $http.post(url,angular.toJson(json)).then(
-            function(data) {
-                $scope.validationResult = data.data;    //should be an OO
-                $scope.validationSuccess = true
-                //just make sure there are no warnings - like if the profile could not be found....
-                if (data.data) {
-                    var oo = data.data;
-                    if (oo.issue) {
-                        oo.issue.forEach(function (iss) {
-                            if (iss.severity !== 'information') {   //information is not an error
-                                $scope.validationSuccess = false
-                            }
-                        })
-                    }
-
-
-                }
-
-
-            },function(err) {
-                $scope.validationSuccess = false
-                $scope.validationResult = err.data;    //should be an OO
-                //modalService.showModal({}, {bodyText:"There was an error calling the validation service: " + angular.toJson(err)});
-            }
-        )
-    };
-
-    $scope.saveResourceDEP = function(input){
-        delete $scope.saveOutcome;
-        delete $scope.validationResult;
-        delete $scope.validationSuccess;
-
-        try {
-            var json = angular.fromJson(input)
-        } catch(ex) {
-            modalService.showModal({}, {bodyText:'This is not valid JSON'});
-            return;
-        }
-
-        SaveDataToServer.saveResource(json,$scope.server.url).then(
-            function(data) {
-                $scope.saveOutcome = {success:true,msg:"Resource saved. Status code:" + data.status}
-            },
-            function(err) {
-                $scope.saveOutcome = {success:false,msg:angular.toJson(err)}
-            }
-        )
-
-    }
 
     $scope.treeNodeSelectedDEP = function(item) {
 
@@ -378,12 +307,29 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     //whan a resource tye is selected in th e builder
     $scope.typeSelected = function(type) {
         $scope.type = type;
+
+
+        $scope.searchParamList = $scope.hashResource[type.name].searchParam;
+
+        //console.log($scope.hashResource[type.name].searchParam)
+
+        //locate all the potential _includes
+        let ar = $scope.hashResource[type.name].searchParam;
+        $scope.includeList = ar.filter(item => (item.type=='reference')); // paramList;
+
+        console.log($scope.includeList)
+
+        let searchParams
+
+        //locate all the potential chainint
+
+
         $scope.buildQuery();
 
     };
 
 
-    $scope.addParamToQuery = function(modelUrl) {
+    $scope.addParamToQueryDEP = function(modelUrl) {
         $uibModal.open({
             templateUrl: 'modalTemplates/queryParam.html',
             controller: function ($scope,hashResource,type) {
@@ -424,30 +370,39 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         })
     };
 
-    function setDefaultInput() {
+    function setDefaultInputDEP() {
         var type = angular.copy($scope.input.selectedType);
         // var server = angular.copy($scope.input.server);
         $scope.input = {serverType:'known'};
         $scope.input.localMode = 'serverquery'
         $scope.input.verb = 'GET';
-       // $scope.input.category="parameters";
+
         if (type) {
             $scope.input.selectedType = type;       //remember the type
         }
-        //  $scope.input.server =server;
+
     }
 
     $scope.selectFromHistory = function(hx){
         if ($scope.server) {
-
-            delete $scope.conformance;
+            $scope.hx = hx;
+            //delete $scope.conformance;
+            /*
             $scope.input.selectedType = {name:hx.type};
             $scope.input.parameters = hx.parameters;
             $scope.input.verb = hx.verb;
             $scope.buildQuery();
+            */
         }
 
     };
+
+    $scope.executeFromHistory = function(hx) {
+
+        let qry = $scope.server.url + hx.anonQuery;
+        executeQuery(qry)
+
+    }
 
     $scope.showConformanceDEP = function(){
         delete $scope.filteredProfile;
@@ -565,10 +520,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
             {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
         ).on('select_node.jstree', function (e, data) {
             if (data.node.data) {
-
                 $scope.edFromTreeNode = data.node.data;
-
-                //$scope.treeNodeSelected(data.node.data)
 
             }
             $scope.$digest()
@@ -601,6 +553,9 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
             function(data){
                 $scope.response = data;
 
+                $scope.input.showQuery = false;       //hide the query builder tab contents
+                $scope.input.showResults = true;      //show the results
+
                 var hx = {
                     anonQuery:$scope.anonQuery,
                     parameters:$scope.input.parameters,
@@ -613,7 +568,12 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
                 }
 
                 $scope.queryHistory = resourceCreatorSvc.addToQueryHistory(hx)
+
                 $scope.input.parameters = "";
+
+                let options = {bundle:data.data,hashErrors: {},serverRoot:$scope.server.url}
+                drawGraph(options)
+
 
             },
             function(err) {
@@ -674,7 +634,40 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     };
 
 
+    $scope.fitGraph = function(){
+        $timeout(function(){
+            if ($scope.chart) {
+                $scope.chart.fit();
+            }
+        },1000)
+    };
 
+    function drawGraph(options) {
+        let vo = v2ToFhirSvc.makeGraph(options)
+
+        var container = document.getElementById('bundleGraph');
+        var graphOptions = {
+            physics: {
+                enabled: true,
+                barnesHut: {
+                    gravitationalConstant: -10000,
+                }
+            }
+        };
+        $scope.chart = new vis.Network(container, vo.graphData, graphOptions);
+
+        $scope.chart.on("click", function (obj) {
+
+            var nodeId = obj.nodes[0];  //get the first node
+            var node = vo.graphData.nodes.get(nodeId);
+            $scope.selectedNode = node;
+
+            //this is the entry that is selected from the 'bundle entries' tab...
+            $scope.selectedBundleEntry = node.entry;
+
+            $scope.$digest();
+        });
+    }
 
 
 
