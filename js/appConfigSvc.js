@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2020-07-23';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2021-04-16';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -182,8 +182,8 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:'HSPC-14',version:3,url:"https://api3.hspconsortium.org/fhirconnect14/open/",everythingOperation:true});
         //defaultConfig.allKnownServers.push({name:'HSPC Careplan',version:3,url:"https://api-stu3.hspconsortium.org/careplantest/open/",everythingOperation:true});
 
-        defaultConfig.allKnownServers.push({name:'Patients First R3',version:3,url:"http://its.patientsfirst.org.nz/RestService.svc/Terminz/"});
-
+        defaultConfig.allKnownServers.push({name:'TermiNZ R4',version:4,url:"https://terminz.azurewebsites.net/fhir/"});
+        //defaultConfig.allKnownServers.push({name:'Patients First R3',version:3,url:"http://its.patientsfirst.org.nz/RestService.svc/Terminz/"});
         defaultConfig.allKnownServers.push({name:'HSPC Synthea',version:3,url:"https://api3.hspconsortium.org/HSPCplusSynthea/open/"});
 
        // defaultConfig.allKnownServers.push({name:'NHS-UK STU-2',version:2,url:"https://fhir.nhs.uk/"});

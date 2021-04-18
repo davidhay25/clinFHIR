@@ -300,8 +300,7 @@
                                                              ng-click="typeSelected({name:type})">
 
                                                             <span class="pull-right">
-                                                                <a  ng-show="type" target="_blank" ng-href="{{fhirBasePath}}
-                                                                    {{type}}.html">
+                                                                <a  ng-show="type" target="_blank" ng-href="{{fhirBasePath}}{{type}}.html">
                                                                     <i class="glyphicon glyphicon-globe"
                                                                        title="View Resource definition in spec">
                                                                     </i>
@@ -322,8 +321,7 @@
                                                              ng-click="typeSelected(type)">
 
                                                             <span class="pull-right">
-                                                                <a  ng-show="type" target="_blank" ng-href="{{fhirBasePath}}
-                                                                    {{type.name | getLogicalID | lowercase}}.html">
+                                                                <a  ng-show="type" target="_blank" ng-href="{{fhirBasePath}}{{type.name | getLogicalID | lowercase}}.html">
                                                                     <i class="glyphicon glyphicon-globe"
                                                                         title="View Resource definition in spec">
                                                                     </i>
@@ -345,7 +343,7 @@
 
                                             <div class="col-md-5 col-sm-5 paramListScroll">
                                                 <div ng-repeat="param in searchParamList">
-                                                    <div class="row"  ng-hide="param.name == 'reference'">
+                                                    <div class="row" ng-hide="param.type == 'reference'">
                                                         <div class="col-md-5">
                                                             <input type="checkbox"
                                                                    style="padding-top: 12px"
@@ -533,12 +531,10 @@
 
 
                         <div class="row" ng-show="input.showResults && response">
-
                             <div class="rounded-box-filled">
-
                                 <div class="row">
                                     <div class="col-md-8">
-                                        <strong>Results for :{{query}}</strong>
+                                        <strong>Results for {{query}}</strong>
                                     </div>
 
                                     <div class="col-md-4">

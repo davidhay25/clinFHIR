@@ -455,8 +455,10 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
     $scope.executeFromHistory = function(hx) {
 
+
         let qry = $scope.server.url + hx.anonQuery;
-        executeQuery(qry)
+        $scope.query = qry;
+        executeQuery(qry,hx.type)
 
     }
 
@@ -586,17 +588,20 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     };
 
     $scope.executeAdHoc = function(qry) {
-        executeQuery($scope.server.url + qry)
+        let type = $scope.input.selectedType.name
+
+        executeQuery($scope.server.url + qry,type)
     }
 
 
     $scope.doit = function() {
         $scope.buildQuery();
-        executeQuery($scope.query)
+        let type = $scope.input.selectedType.name
+        executeQuery($scope.query,type)
     }
 
 
-    let executeQuery = function(qry) {
+    let executeQuery = function(qry,type) {
        // $scope.buildQuery();        //always make sure the query is correct;
         delete $scope.response;
         delete $scope.err;
@@ -604,12 +609,6 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         $scope.waiting = true;
 
         let accessToken = $scope.input.accessToken;
-
-
-        //todo - add this as a parm - or get it from the query...
-        
-        let type = $scope.input.selectedType.name
-
 
         $http.get(qry).then (
 
@@ -624,6 +623,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
                 //if this is query that hasn't been performed before - add it to the history...
                 let found = false
                 $localStorage.queryHistory.forEach(function (hx){
+
                     if (hx.anonQuery == qry) {
                         found = true
                     }
