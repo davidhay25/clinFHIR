@@ -89,6 +89,26 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     };
 
 
+
+    //create the list of 'common' types - from teh library
+    $localStorage.queryHistory = $localStorage.queryHistory || [];
+
+    $scope.queryHistory = $localStorage.queryHistory;
+    $scope.commonTypes = []
+
+    //console.log($localStorage.queryHistory)
+    //if ($localStorage.queryHistory) {
+
+    //get all the unique types in the history
+    $localStorage.queryHistory.forEach(function (hx){
+        if (hx.type && $scope.commonTypes.indexOf(hx.type) == -1) {
+            $scope.commonTypes.push(hx.type)
+        }
+    })
+    //}
+
+
+    //builds the query from the user entered data
     $scope.buildQuery = function() {
         delete $scope.anonQuery;
         delete $scope.query;
@@ -110,35 +130,65 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
             $scope.searchParamList.forEach(function (param){
                 let name = param.name
 
+                //input.selectedSearchParam[name] - the checkbox
+                //input.selectedSearchParamValue - the value
                 //these vars are only set when a value is entered...
-                if ($scope.input.selectedSearchParam && $scope.input.selectedSearchParamValue) {
 
-                    console.log($scope.input.selectedSearchParam[name])
-                    if ($scope.input.selectedSearchParamValue[name]) {
+                if ($scope.input.selectedSearchParam && $scope.input.selectedSearchParamValue) {    //only set when an include is selected
+                    if ($scope.input.selectedSearchParam[name] && $scope.input.selectedSearchParamValue[name]) {
                         let value = $scope.input.selectedSearchParamValue[name]
+
+                        //if ($scope.input.selectedSearchParam && $scope.input.selectedSearchParamValue) {
+                        //  console.log($scope.input.selectedSearchParam[name])
+                        //  if ($scope.input.selectedSearchParamValue[name]) {
+                        //  let value = $scope.input.selectedSearchParamValue[name]
                         qry += prefix + name + "=" + value;
                         prefix = "&"
 
+                        //  }
                     }
                 }
+
             })
         }
 
 
+        //add any chained queries -  input.selectedChain is a hash of possible chain values, input.selectedChainValue{}
+        if ($scope.input.selectedChain && $scope.input.selectedChainValue) {
+
+            Object.keys($scope.input.selectedChain).forEach(function (key){
+
+                let cbValue = $scope.input.selectedChain[key];      //the value of the checkbox
+                let chainValue =  $scope.input.selectedChainValue[key];     //the value entered by the user
+                if (cbValue && chainValue) {
+
+                    qry += prefix + key + '.' + chainValue
+                    prefix = "&"
+                }
+
+            })
+        }
 
 
-        //add any includes
+        //add any includes input.selectedInclude is a hash of possible includes
         if ($scope.input.selectedInclude) {
             Object.keys($scope.input.selectedInclude).forEach(function (key){
+                let value = $scope.input.selectedInclude[key]
+                if (value) {
+                    qry += prefix + "_include=" + $scope.input.selectedType.name + ":" +  key
+                    prefix = "&"
+                }
 
-                qry += prefix + "_include=" + $scope.input.selectedType.name + ":" +  key
-                prefix = "&"
             })
         }
 
+
+        qry += prefix + "_count=100"
 
         $scope.anonQuery = qry;     //the query, irrespective of the server...
         $scope.query = $scope.server.url + qry;     //the query againts the current server...
+
+        $scope.adHocQry = $scope.query;     //to allow the user to manually change
 
     };
 
@@ -158,7 +208,8 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
 
 
-    $scope.queryHistory = $localStorage.queryHistory;
+
+
     $scope.makeUrl = function(type) {
         return  $scope.config.baseSpecUrl + type;
     }
@@ -197,7 +248,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
     GetDataFromServer.registerAccess('query');
 
-    $localStorage.queryHistory = $localStorage.queryHistory || [];
+
 
     //validate a response against a profile
     $scope.validateResponseDEP = function(server,profileUrl,json){
@@ -304,9 +355,13 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
 
 
-    //whan a resource tye is selected in th e builder
+    //whan a resource tye is selected in the builder
     $scope.typeSelected = function(type) {
         $scope.type = type;
+        delete $scope.query;        //remove the current query
+        $scope.input.selectedType = type
+        $scope.input.selectedSearchParam = {};      //clear the list of selected parameters
+        $scope.input.selectedSearchParamValue = {}  //... and the parameter values
 
 
         $scope.searchParamList = $scope.hashResource[type.name].searchParam;
@@ -315,6 +370,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
         //locate all the potential _includes
         let ar = $scope.hashResource[type.name].searchParam;
+
         $scope.includeList = ar.filter(item => (item.type=='reference')); // paramList;
 
         console.log($scope.includeList)
@@ -548,7 +604,16 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         $scope.waiting = true;
 
         let accessToken = $scope.input.accessToken;
-        GetDataFromServer.adHocFHIRQueryFollowingPaging(qry,accessToken).then(
+
+
+        //todo - add this as a parm - or get it from the query...
+        
+        let type = $scope.input.selectedType.name
+
+
+        $http.get(qry).then (
+
+        //GetDataFromServer.adHocFHIRQueryFollowingPaging(qry,accessToken).then(
 
             function(data){
                 $scope.response = data;
@@ -556,28 +621,69 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
                 $scope.input.showQuery = false;       //hide the query builder tab contents
                 $scope.input.showResults = true;      //show the results
 
-                var hx = {
-                    anonQuery:$scope.anonQuery,
-                    parameters:$scope.input.parameters,
-                    server : $scope.server,
-                    verb:$scope.input.verb};
+                //if this is query that hasn't been performed before - add it to the history...
+                let found = false
+                $localStorage.queryHistory.forEach(function (hx){
+                    if (hx.anonQuery == qry) {
+                        found = true
+                    }
+                })
+
+                if (! found) {
+                    var hx = {
+                        type: type,
+                        anonQuery:$scope.anonQuery,
+                        parameters:$scope.input.parameters,
+                        server : $scope.server,
+                        verb:$scope.input.verb
+                    };
+                    $localStorage.queryHistory.push(hx)
+
+                    if ($scope.commonTypes.filter(item => item == type).length == 0) {
+                        $scope.commonTypes.push(type);
+                        $scope.commonTypes.sort();
+                    }
+
+                }
+                /*
+
+                queryHistory
 
 
-                if ($scope.input.selectedType) {
-                    hx.type = $scope.input.selectedType.name;
+
+
+                if (type) {
+                    hx.type = type;
+
+                    let ar =
+                        //anonQuery
+
+
+                    $scope.queryHistory = resourceCreatorSvc.addToQueryHistory(hx)
+
+                    //let type = $scope.input.selectedType.name;      //todo should add this as a param...
+
+
                 }
 
-                $scope.queryHistory = resourceCreatorSvc.addToQueryHistory(hx)
+
+
+
+*/
+
+
 
                 $scope.input.parameters = "";
 
                 let options = {bundle:data.data,hashErrors: {},serverRoot:$scope.server.url}
                 drawGraph(options)
 
-
             },
             function(err) {
                 $scope.err = err;
+                $scope.response = {resourceType:'Bundle',entry:[]};
+                $scope.input.showQuery = false;       //hide the query builder tab contents
+                $scope.input.showResults = true;      //show the results
 
             }
         ).finally(function(){

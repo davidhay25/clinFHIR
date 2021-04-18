@@ -1596,6 +1596,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             $localStorage.queryHistory = $localStorage.queryHistory || []
 
             var duplicate = false;
+
             for (var i = 0; i < $localStorage.queryHistory.length; i++) {
                 var item = $localStorage.queryHistory[i];
                 if (item.verb == hx.verb && item.type == hx.type && item.parameters == hx.parameters && item.id == hx.id) {
