@@ -107,6 +107,26 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     })
     //}
 
+    $scope.getOperationDefinition = function(url){
+
+        $scope.selectedOpDefUrl = url;
+        let qry = $scope.server.url + "OperationDefinition?url=" + url;
+        $http.get(qry).then(
+            function (data) {
+                if (data.data.entry.length >= 0) {
+                    $scope.operationDefinition = data.data.entry[0].resource;
+
+
+                }
+            },
+            function (err) {
+                console.log("Can't find OpDef " + url)
+            }
+        )
+
+
+    }
+
 
     //builds the query from the user entered data
     $scope.buildQuery = function() {
@@ -364,20 +384,19 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         $scope.input.selectedSearchParamValue = {}  //... and the parameter values
 
 
-        $scope.searchParamList = $scope.hashResource[type.name].searchParam;
+        if ($scope.hashResource[type.name]) {
+            $scope.searchParamList = $scope.hashResource[type.name].searchParam;
 
-        //console.log($scope.hashResource[type.name].searchParam)
+            //locate all the potential _includes
+            let ar = $scope.hashResource[type.name].searchParam;
+            $scope.includeList = ar.filter(item => (item.type=='reference')); // paramList;
+        } else {
+            console.log('No hashResource for ' + type.name)
+        }
 
-        //locate all the potential _includes
-        let ar = $scope.hashResource[type.name].searchParam;
 
-        $scope.includeList = ar.filter(item => (item.type=='reference')); // paramList;
 
-        console.log($scope.includeList)
 
-        let searchParams
-
-        //locate all the potential chainint
 
 
         $scope.buildQuery();
@@ -590,6 +609,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     $scope.executeAdHoc = function(qry) {
         let type = $scope.input.selectedType.name
 
+
         executeQuery($scope.server.url + qry,type)
     }
 
@@ -609,6 +629,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         $scope.waiting = true;
 
         let accessToken = $scope.input.accessToken;
+        $scope.query = qry;
 
         $http.get(qry).then (
 
