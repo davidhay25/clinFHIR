@@ -1,8 +1,8 @@
-angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$uibModal,$localStorage,appConfigSvc,
-    resourceCreatorSvc, profileCreatorSvc,GetDataFromServer,ResourceUtilsSvc,RenderProfileSvc,$http,modalService,
-        SaveDataToServer,commonSvc,$location,v2ToFhirSvc,$timeout){
+angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$localStorage,appConfigSvc,
+    resourceCreatorSvc,ResourceUtilsSvc,$http,modalService
+        ,commonSvc,$location,v2ToFhirSvc,$timeout){
 
-
+//profileCreatorSvc  RenderProfileSvc  SaveDataToServer  $rootScope
 
     $scope.config = $localStorage.config;
     $scope.input = {serverType:'known'};  //serverType allows select from known servers or enter ad-hoc
@@ -11,19 +11,24 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
     $scope.fhirBasePath="http://hl7.org/fhir/";
 
 
+    //anonQuery
+
     $scope.input.showQuery = true  ;       //if true, the query builder can be shown
     $scope.input.showResults = false;     //show the resoult of a query
 
     //note that functions to check the $location # for a server & setuo initial one are below $scope.selectServer & $scope.buildQuery
 
+
     //select a server. If 'server' is populated then we've selected a known server. If url is populated then an ad-hoc url has been entered
     //has to be at the top as called at startup
+    //the 'url' is used when entering an ad-hoc server
     $scope.selectServer = function(server,url) {
         if (url) {
             if (url.substring(url.length-1) !== '/') {
                 url += '/'
             }
             server = {name:'Ad Hoc server',url:url}
+            $scope.server = server;
         }
 
         $scope.input.parameters = "";
@@ -34,7 +39,14 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         delete $scope.input.selectedType;
         delete $scope.standardResourceTypes;
 
-        $scope.server = server;
+        delete $scope.searchParamList;
+        delete $scope.includeList;
+
+        $scope.input.showQuery = true;
+        $scope.input.showResults = false;
+
+      //  $scope.server = server;
+
         $scope.input.validationServer = server;     //default the validation server to the selected server
 
         $scope.waiting = true;
@@ -42,8 +54,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         let qry = $scope.server.url + "metadata";
 
         $http.get(qry).then (
-
-            // resourceCreatorSvc.getConformanceResource($scope.server.url).then(
+            
             function (data) {
                 $localStorage.serverQueryServer = server;
                 $scope.conformance = data.data;     //the CapabilityStatement (Conformance) resource
@@ -88,24 +99,28 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
     };
 
-
-
     //create the list of 'common' types - from teh library
     $localStorage.queryHistory = $localStorage.queryHistory || [];
+
+    //Get rid of any junk prior to this upgrade. These have the 'anonQuery' element set
+    if ($localStorage.queryHistory.length > 0) {
+        if ($localStorage.queryHistory[0].anonQuery) {
+            $localStorage.queryHistory.length = 0;
+        }
+    }
+
 
     $scope.queryHistory = $localStorage.queryHistory;
     $scope.commonTypes = []
 
-    //console.log($localStorage.queryHistory)
-    //if ($localStorage.queryHistory) {
-
-    //get all the unique types in the history
+    //get all the unique types in the history for the parameters selection
     $localStorage.queryHistory.forEach(function (hx){
         if (hx.type && $scope.commonTypes.indexOf(hx.type) == -1) {
             $scope.commonTypes.push(hx.type)
         }
     })
-    //}
+
+
 
     $scope.getOperationDefinition = function(url){
 
@@ -150,22 +165,16 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
             $scope.searchParamList.forEach(function (param){
                 let name = param.name
 
-                //input.selectedSearchParam[name] - the checkbox
-                //input.selectedSearchParamValue - the value
-                //these vars are only set when a value is entered...
 
                 if ($scope.input.selectedSearchParam && $scope.input.selectedSearchParamValue) {    //only set when an include is selected
                     if ($scope.input.selectedSearchParam[name] && $scope.input.selectedSearchParamValue[name]) {
                         let value = $scope.input.selectedSearchParamValue[name]
 
-                        //if ($scope.input.selectedSearchParam && $scope.input.selectedSearchParamValue) {
-                        //  console.log($scope.input.selectedSearchParam[name])
-                        //  if ($scope.input.selectedSearchParamValue[name]) {
-                        //  let value = $scope.input.selectedSearchParamValue[name]
+
                         qry += prefix + name + "=" + value;
                         prefix = "&"
 
-                        //  }
+
                     }
                 }
 
@@ -212,23 +221,31 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
     };
 
+    //------------- determine the server when launched-----------------------
     // the most recently selected server
     $scope.server = $localStorage.serverQueryServer || appConfigSvc.getCurrentDataServer();
     $scope.input.serverType = "known"
+
     var hash = $location.hash();
     if (hash) {
         console.log("server passed in: " + hash)
         $scope.fromHash = true;
         $scope.input.serverType = "adhoc"
         $scope.input.adHocServer = hash;
-        $scope.selectServer(null,hash)
+
+
+        if (hash.substring(hash.length-1) !== '/') {
+            hash += '/'
+        }
+        $scope.server = {name:'Ad Hoc server',url:hash}
+
+
+       // $scope.selectServer(null,hash)
     } else {
-        $scope.selectServer($scope.server);
+        //$scope.selectServer($scope.server);
     }
 
-
-
-
+    $scope.selectServer($scope.server);
 
     $scope.makeUrl = function(type) {
         return  $scope.config.baseSpecUrl + type;
@@ -252,8 +269,6 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         }
     );
 
-
-
     $http.get('artifacts/fhirHelp.json').then(
         function(data) {
             $scope.fhirHelp = data.data;
@@ -265,10 +280,10 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
     //setDefaultInput();
 
+    //registrt that app started...
+    $http.post('/stats/login',{module:"query",servers: {}})
 
-    GetDataFromServer.registerAccess('query');
-
-
+    //GetDataFromServer.registerAccess('query');
 
     //validate a response against a profile
     $scope.validateResponseDEP = function(server,profileUrl,json){
@@ -328,54 +343,9 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
     };
 
-    //the profile is uri - ie it doesn't point directly to the resource
-
-    $scope.showProfileByUrlDEP = function(uri) {
 
 
-        delete $scope.selectedProfile;
-        //first get the profile from the conformance server
-
-        GetDataFromServer.findConformanceResourceByUri(uri).then(
-            function(profile) {
-                //now get the profile
-                $scope.selectedProfile = profile;
-
-
-
-            }
-        )
-
-
-    }
-
-    //note that the parameter is a URL - not a URI
-    $scope.showProfileDEP = function(url) {
-
-        delete $scope.selectedProfile;
-        if (url.substr(0,4) !== 'http') {
-            //this is a relative reference. Assume that the profile is on the current conformance server
-            url = $scope.config.servers.conformance + url;
-
-        }
-
-
-        //generate a display of the profile based on it's URL. (points directly to the SD)
-        resourceCreatorSvc.getProfileDisplay(url).then(
-            function(vo) {
-                $scope.filteredProfile = vo.lst;
-                $scope.selectedProfile = vo.profile;
-            },
-            function(err){
-
-            }
-        );
-    };
-
-
-
-
-    //whan a resource tye is selected in the builder
+    //when a resource tye is selected in the builder
     $scope.typeSelected = function(type) {
         $scope.type = type;
         delete $scope.query;        //remove the current query
@@ -383,188 +353,51 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         $scope.input.selectedSearchParam = {};      //clear the list of selected parameters
         $scope.input.selectedSearchParamValue = {}  //... and the parameter values
 
+        delete $scope.searchParamList;
+        delete $scope.includeList;
 
         if ($scope.hashResource[type.name]) {
             $scope.searchParamList = $scope.hashResource[type.name].searchParam;
 
             //locate all the potential _includes
             let ar = $scope.hashResource[type.name].searchParam;
-            $scope.includeList = ar.filter(item => (item.type=='reference')); // paramList;
+            if (ar) {
+                $scope.includeList = ar.filter(item => (item.type=='reference')); // paramList;
+            }
+
         } else {
             console.log('No hashResource for ' + type.name)
         }
-
-
-
-
-
 
         $scope.buildQuery();
 
     };
 
 
-    $scope.addParamToQueryDEP = function(modelUrl) {
-        $uibModal.open({
-            templateUrl: 'modalTemplates/queryParam.html',
-            controller: function ($scope,hashResource,type) {
-                $scope.paramList = hashResource[type.name].searchParam; // paramList;
-
-
-                $scope.input = {};
-
-                $scope.close = function() {
-                    $scope.$close({param:$scope.input.param,value:$scope.input.paramValue})
-                }
-
-
-            },
-            resolve : {
-                type : function(){
-                    return $scope.type;
-                },
-                hashResource : function(){
-                    return $scope.hashResource;
-                }
-            }}).result.then(function(vo) {
-              //  console.log(vo)
-                if (vo) {
-                    delete $scope.response;
-
-                    if ($scope.input.parameters) {
-                        $scope.input.parameters = $scope.input.parameters + '&'
-                    } else {
-                        $scope.input.parameters =""
-                    }
-                    $scope.input.parameters += vo.param.name + '=' + vo.value;
-                    $scope.buildQuery()
-                }
-
-
-
-        })
-    };
-
-    function setDefaultInputDEP() {
-        var type = angular.copy($scope.input.selectedType);
-        // var server = angular.copy($scope.input.server);
-        $scope.input = {serverType:'known'};
-        $scope.input.localMode = 'serverquery'
-        $scope.input.verb = 'GET';
-
-        if (type) {
-            $scope.input.selectedType = type;       //remember the type
-        }
-
-    }
-
     $scope.selectFromHistory = function(hx){
         if ($scope.server) {
             $scope.hx = hx;
-            //delete $scope.conformance;
-            /*
-            $scope.input.selectedType = {name:hx.type};
-            $scope.input.parameters = hx.parameters;
-            $scope.input.verb = hx.verb;
-            $scope.buildQuery();
-            */
+
         }
 
     };
 
     $scope.executeFromHistory = function(hx) {
 
-
-        let qry = $scope.server.url + hx.anonQuery;
+        //use the current server for the query - may not be the same as in the history...
+        let qry = $scope.server.url + hx.query;
         $scope.query = qry;
-        executeQuery(qry,hx.type)
-
+        executeQuery(qry,hx.type,true)
     }
 
-    $scope.showConformanceDEP = function(){
-        delete $scope.filteredProfile;
-        if ($scope.server) {
-            $scope.waiting = true;
-            resourceCreatorSvc.getConformanceResource($scope.server.url).then(
-                function (data) {
-
-                    $scope.conformance = data.data      //setting the conformance variable shows the de
-                },function (err) {
-                    alert('Error loading conformance resource:'+angular.toJson(err));
-                }
-            ).finally(function(){
-                $scope.waiting = false;
-            })
-        }
-    };
-
-    $scope.removeConformanceDEP = function(){
-        delete  $scope.conformance;
-    };
-
-    //todo - allow the conformance to be selected - maybe a separate function...
-    $scope.loadConformanceDEP = function(url) {
-        $scope.waiting = true;
-        delete $scope.filteredProfile;
-        delete $scope.selectedType;
-        url = url || "http://fhir.hl7.org.nz/baseDstu2/Conformance/ohConformance";
-
-
-        resourceCreatorSvc.getConformanceResourceFromUrl(url).then(
-            function (data) {
-
-                $scope.conformance = data.data
-            },function (err) {
-                alert('Error loading conformance resource:'+angular.toJson(err));
-            }
-        ).finally(function(){
-            $scope.waiting = false;
-        })
-    };
-
-    $scope.createConformanceQualityReportDEP = function() {
-        $scope.waiting = true;
-        resourceCreatorSvc.createConformanceQualityReport($scope.conformance).then(
-            function(report) {
-                $scope.qualityReport = report;
-
-                $scope.waiting = false;
-            }
-        );
-
-    };
-
     //the handler for when a valueset is selected from within the <show-profile component on conformanceDisplay.html
-    $scope.showValueSetForProfile = function(url){
+    $scope.showValueSetForProfileDEP = function(url){
         //url is actually a URI
-
         let ar = url.split('|')
-
         $scope.showVSBrowserDialog.open(null,ar[0]);
 
     };
 
-
-    /*
-    //when the user selects a reference to a profiled resource....
-    $scope.showReferencedProfileDEP = function(uri) {
-
-
-        //retrieve the profile based on its URI and re-set the selected profile
-
-        GetDataFromServer.findConformanceResourceByUri(uri).then(
-            function(profile) {
-
-                $scope.selectedProfile = profile;
-            },
-            function(err) {
-                console.log(err)
-            }
-        )
-
-    };
-
-    */
 
 
 
@@ -574,14 +407,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         delete $scope.selectedProfile;
         $scope.selectedType = type;
         //type.type is the actual type - tyep is an instance ot rest[x].resource...
-/*
-        $scope.selectedProfile = {snapshot:[]}
-        $scope.selectedProfile.url = ""
-        $scope.selectedProfile.snapshot.element = $scope.resourceElements[type.type]
 
-        console.log($scope.selectedProfile)
-
-*/
 
 
 
@@ -608,11 +434,8 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
     $scope.executeAdHoc = function(qry) {
         let type = $scope.input.selectedType.name
-
-
         executeQuery($scope.server.url + qry,type)
     }
-
 
     $scope.doit = function() {
         $scope.buildQuery();
@@ -620,20 +443,23 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         executeQuery($scope.query,type)
     }
 
-
-    let executeQuery = function(qry,type) {
+    let executeQuery = function(qry,type,executeFromHistory) {
        // $scope.buildQuery();        //always make sure the query is correct;
         delete $scope.response;
         delete $scope.err;
         delete $scope.result.selectedEntry;
         $scope.waiting = true;
 
+        let config = {headers:{Accept:"application/fhir+json"}}
         let accessToken = $scope.input.accessToken;
+        if (accessToken) {
+            config.headers.Authorization = "Bearer " + accessToken;
+        }
+
         $scope.query = qry;
 
-        $http.get(qry).then (
+        $http.get(qry,config).then (
 
-        //GetDataFromServer.adHocFHIRQueryFollowingPaging(qry,accessToken).then(
 
             function(data){
                 $scope.response = data;
@@ -642,22 +468,59 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
                 $scope.input.showResults = true;      //show the results
 
                 //if this is query that hasn't been performed before - add it to the history...
-                let found = false
+                if (! executeFromHistory) {
+                    let anonQuery = qry.replace($scope.server.url,"");      //remove the server...
+
+                    let ar = $localStorage.queryHistory.filter(item => (item.query == anonQuery && item.server == $scope.server.url))
+                    if (ar.length == 0) {
+                        let hx = {
+                            type: $scope.type.name,
+                            server : $scope.server.url,
+                            query : anonQuery
+                        };
+
+                        $localStorage.queryHistory.push(hx)
+
+                        if ($scope.commonTypes.filter(item => item == type).length == 0) {
+                            $scope.commonTypes.push(type);
+                            $scope.commonTypes.sort();
+                        }
+
+                    }
+                }
+
+
+        /*
+
+        return;
+
+
                 $localStorage.queryHistory.forEach(function (hx){
 
-                    if (hx.anonQuery == qry) {
+                    if (hx.query == anonQuery && ) {
                         found = true
                     }
                 })
 
                 if (! found) {
+
                     var hx = {
                         type: type,
                         anonQuery:$scope.anonQuery,
                         parameters:$scope.input.parameters,
                         server : $scope.server,
+                        query : qry,
                         verb:$scope.input.verb
                     };
+
+
+
+
+                    let hx = {
+                        server : $scope.server.url,
+                        query : anonQuery
+                    };
+
                     $localStorage.queryHistory.push(hx)
 
                     if ($scope.commonTypes.filter(item => item == type).length == 0) {
@@ -665,34 +528,11 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
                         $scope.commonTypes.sort();
                     }
 
-                }
-                /*
-
-                queryHistory
-
-
-
-
-                if (type) {
-                    hx.type = type;
-
-                    let ar =
-                        //anonQuery
-
-
-                    $scope.queryHistory = resourceCreatorSvc.addToQueryHistory(hx)
-
-                    //let type = $scope.input.selectedType.name;      //todo should add this as a param...
 
 
                 }
 
-
-
-
-*/
-
-
+  */
 
                 $scope.input.parameters = "";
 
@@ -723,33 +563,106 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
 
     };
 
+    $scope.selectVersion = function(resource) {
+
+        showResource(resource)
+    }
+
     //select an entry from the query result
     $scope.selectEntry = function(entry){
         delete $scope.bundle;
         delete $scope.xmlResource;
-        $scope.result.selectedEntry = entry;
+        delete $scope.selectedResource;
+        delete $scope.selectedResourceVersions;
 
-        var r = angular.copy(entry.resource);
-        var newResource =  angular.fromJson(angular.toJson(r));
-        var treeData = resourceCreatorSvc.buildResourceTree(newResource);
+        showResource(entry.resource);
 
-
-
-        let qry = $scope.server.url + r.resourceType + "/" + r.id + "?_format=xml&_pretty=true"
+        //get the versions = todo - check if supported in CS
+        let qryVersion = $scope.server.url + entry.resource.resourceType + "/" + entry.resource.id + "/_history"
         let config = {};
         if ($scope.input.accessToken) {
             config.headers = {Authorization:"Bearer " + $scope.input.accessToken}
         }
+        $http.get(qryVersion,config).then(
+            function (data) {
+                //only if tthere is more than one version
+                if (data.data && data.data.entry &&  data.data.entry.length > 1) {
+                    $scope.selectedResourceVersions = data.data;
+                }
+            },
+            function (err) {
+                console.log(err)
+            }
+        )
+/*
+        return
 
-        $http.get(qry).then(
+        //$scope.result.selectedEntry = entry;
+        $scope.selectedResource = entry.resource;
+
+        var r = angular.copy(entry.resource);
+        var newResource =  angular.fromJson(angular.toJson(r));
+
+        var treeData = resourceCreatorSvc.buildResourceTree(newResource);
+
+        //retrieve the XML version - todo - utilize the lantana library/\...
+        let qry = $scope.server.url + r.resourceType + "/" + r.id + "?_format=xml&_pretty=true"
+      //  let config = {};
+        if ($scope.input.accessToken) {
+            config.headers = {Authorization:"Bearer " + $scope.input.accessToken}
+        }
+
+        $http.get(qry,config).then(
             function (data) {
                 $scope.xmlResource = data.data;
             },
             function (err) {
                 $scope.xmlResource = "<error>Sorry, Unable to load Xml version</error>";
-
             }
         )
+
+        //get the versions = todo - check if supported in CS
+        let qryVersion = $scope.server.url + r.resourceType + "/" + r.id + "/_history"
+        $http.get(qryVersion,config).then(
+            function (data) {
+                //only if tthere is more than one version
+                if (data.data && data.data.entry &&  data.data.entry.length > 1) {
+                    $scope.selectedResourceVersions = data.data;
+                }
+            },
+            function (err) {
+               console.log(err)
+            }
+        )
+
+        //show the tree of this version
+        $('#queryResourceTree').jstree('destroy');
+        $('#queryResourceTree').jstree(
+            {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
+        )
+        */
+
+    };
+
+    showResource = function (resource) {
+        $scope.selectedResource = resource;
+
+        var r = angular.copy(resource);
+        var newResource =  angular.fromJson(angular.toJson(r));
+
+        var treeData = resourceCreatorSvc.buildResourceTree(newResource);
+
+        //retrieve the XML version - utilize the lantana library...
+        let qry = "transformXML";
+        $http.post(qry,resource).then(
+            function (data) {
+                $scope.xmlResource = vkbeautify.xml(data.data);
+            },
+            function (err) {
+                $scope.xmlResource = "<error>Sorry, Unable to load Xml version</error>";
+            }
+        )
+
 
 
         //show the tree of this version
@@ -757,9 +670,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$rootScope,$u
         $('#queryResourceTree').jstree(
             {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
         )
-
-    };
-
+    }
 
     $scope.fitGraph = function(){
         $timeout(function(){

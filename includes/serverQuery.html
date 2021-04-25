@@ -29,7 +29,7 @@
             </div>
 
 
-            <div class="col-md-3 col-sm-3">
+            <div class="col-md-4 col-sm-4">
 
                 <div ng-hide = "fromHash">
                     <div ng-show="input.serverType == 'known'">
@@ -200,6 +200,7 @@
             </uib-tab>
             <uib-tab heading="Query">
 
+
                 <div class="row">
                     <div  ng-class="{'col-md-8 col-sm-8':showHistory,'col-md-12 col-sm-12':!showHistory}">
                         <div ng-show="server">
@@ -208,11 +209,7 @@
                                 <br/>
                                 <uib-tab heading="Query Builder">
                                     <br/>
-
                                     <div>
-
-
-
                                         <div class="row">
                                             <div class="col-md-2 col-sm-2">
 
@@ -385,7 +382,12 @@
                                                 <div ng-repeat="inc in includeList">
                                                     <input type="checkbox"
                                                            ng-change="buildQuery()"
-                                                           ng-model="input.selectedInclude[inc.name]"/> {{inc.name}}
+                                                           ng-model="input.selectedInclude[inc.name]"/>
+
+
+                                                    <span uib-popover= "{{inc.documentation}}"
+                                                          popover-placement="right"
+                                                          popover-trigger="'mouseenter'"> {{inc.name}}</span>
                                                 </div>
 
 
@@ -398,13 +400,15 @@
                                                     </i>
                                                 </a>
 
-
-
                                                 <div class="row" ng-repeat = "inc in includeList" style="padding-top: 8px">
                                                     <div class="col-md-3">
                                                         <input type="checkbox"
                                                                ng-change="buildQuery()"
-                                                               ng-model="input.selectedChain[inc.name]"/> {{inc.name}}
+                                                               ng-model="input.selectedChain[inc.name]"/>
+
+                                                        <span uib-popover= "{{inc.documentation}}"
+                                                              popover-placement="right"
+                                                              popover-trigger="'mouseenter'"> {{inc.name}}</span>
                                                     </div>
 
                                                     <div class="col-md-9">
@@ -445,25 +449,33 @@
                                 </uib-tab>
 
                                 <uib-tab heading="History">
+
+
+
                                     <h4>Previous Queries</h4>
 
-                                    <div class="row">
-                                        <div class="col-md-8">
-                                            <div class="list-group">
-                                                <a href="#" class="list-group-item"
-                                                   ng-repeat="hx in queryHistory"
-                                                   ng-model="input.hx" ng-click = "selectFromHistory(hx)">
 
-                                                    <div ng-class="{thisServer:hx.server.url == server.url}">{{hx.anonQuery}}</div>
-                                                </a>
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <div class="paramListScroll">
+                                                <div class="list-group">
+                                                    <a href="#" class="list-group-item"
+                                                       ng-repeat="hx in queryHistory"
+                                                       ng-model="input.hx" ng-click = "selectFromHistory(hx)">
+
+                                                        <div>{{hx.query}}</div>
+                                                    </a>
+                                                </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <pre>{{hx | json}}</pre>
+
+                                                <button class="btn btn-primary" ng-click="executeFromHistory(hx)">Execute</button>
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
-                                            <pre>{{hx | json}}</pre>
 
-                                            <button class="btn btn-primary" ng-click="executeFromHistory(hx)">Execute</button>
-                                        </div>
-                                    </div>
+
 
 
                                 </uib-tab>
@@ -576,7 +588,7 @@
 
                                             <div ng-class="{'list-group-item':true,'list-group-item-info':result.selectedEntry.fullUrl == entry.fullUrl}"
                                                  ng-repeat="entry in response.data.entry">
-                                                <div  ng-click="selectEntry(entry)"  ng-clickDEP="result.selectedEntry = entry" style="cursor: pointer">
+                                                <div ng-click="selectEntry(entry)"  ng-clickDEP="result.selectedEntry = entry" style="cursor: pointer">
                                                     {{entry.resource.resourceType}}
                                                     <div>{{ResourceUtilsSvc.getOneLineSummaryOfResource(entry.resource)}}</div>
                                                 </div>
@@ -584,78 +596,34 @@
                                         </div>
                                     </div>
                                     <div class="col-md-9 col-sm-9">
+                                        <br/>
+                                        <div class="alert alert-warning" ng-show="selectedResourceVersions && selectedResourceVersions.entry.length > 1">
+                                            <ul class="pagination" style="margin-top:1px;margin-bottom:1px">
+                                                <li><a href="#"><strong>Versions:</strong></a></li>
+
+                                                <li ng-repeat="ent in selectedResourceVersions.entry">
+                                                    <a href="#" ng-click="selectVersion(ent.resource)">
+                                                        {{selectedResourceVersions.entry.length - $index}}</a>
+                                                </li>
+                                            </ul>
+                                        </div>
 
                                         <uib-tabset>
-                                            <uib-tab heading="Json" ng-show="result.selectedEntry">
+                                            <uib-tab heading="Json" ng-show="selectedResource">
                                                 <br/>
-                                                <pre>{{result.selectedEntry.resource | json}}</pre>
+                                                <pre>{{selectedResource | json}}</pre>
                                             </uib-tab>
-                                            <uib-tab heading="XML" ng-show="result.selectedEntry">
+                                            <uib-tab heading="XML" ng-show="xmlResource">
                                                 <br/>
                                                 <pre>{{xmlResource}}</pre>
                                             </uib-tab>
 
-                                            <uib-tab heading="Tree" ng-show="result.selectedEntry">
+                                            <uib-tab heading="Tree" ng-show="selectedResource">
                                                 <br/>
                                                 <div id="queryResourceTree"></div>
 
                                             </uib-tab>
-                                            <uib-tab ng-show="false" heading="Validate" ng-show="result.selectedEntry">
-                                                <br/>
-                                                <div class="row">
-                                                    <div class="col-sm-6 col-md-6">
-                                                        <pre>{{result.selectedEntry.resource | json}}</pre>
-                                                    </div>
-                                                    <div class="col-sm-6 col-md-6">
 
-
-                                                        <div class="row">
-                                                            <div class="col-md-4 col-sm-4">
-                                                                Validation Server
-                                                            </div>
-                                                            <div class="col-md-8 col-sm-8">
-                                                                <select class="form-control" style="margin-bottom: 8px"
-                                                                        ng-options="value.name for value in config.allKnownServers track by value.name"
-                                                                        ng-model="input.validationServer">
-
-                                                                </select>
-                                                            </div>
-                                                        </div>
-
-
-
-                                                        <div class="row">
-                                                            <div class="col-md-9 col-sm-9">
-                                                                <input type="text" class="form-control" ng-model = "input.responseValidationProfile"
-                                                                       placeholder="Optional profile (must be on the validation server)"/>
-
-                                                            </div>
-                                                            <div class="col-md-3 col-sm-3">
-                                                                <button class="btn btn-primary"
-                                                                        ng-click="validateResponse(input.validationServer,
-                                                                        input.responseValidationProfile,
-                                                                        result.selectedEntry.resource)">
-                                                                    Validate</button>
-                                                            </div>
-                                                        </div>
-                                                        <br/>
-
-                                                        <!--
-                                                        <button class="btn btn-primary pull-right"
-                                                                ng-click="validateResponse(result.selectedEntry.resource)">
-                                                            Validate
-                                                        </button>
-                                                        -->
-
-                                                        <hr/>
-                                                        <pre ng-show="responseValidationResult"
-                                                             ng-class="{alert:true, 'alert-success':responseValidationSuccess, 'alert-danger':! responseValidationSuccess}"
-                                                             role="alert">{{responseValidationResult | json}}</pre>
-
-                                                    </div>
-                                                </div>
-
-                                            </uib-tab>
 
                                             <uib-tab ng-show = "false" heading="FHIRPath" ng-show="result.selectedEntry">
                                                 <br/>

@@ -7,6 +7,8 @@ const https = require('https');
 
 let cors = require('cors'); //https://www.npmjs.com/package/cors
 
+var Fhir = require('fhir').Fhir;
+
 var express = require('express');
 var app = express();
 app.use(cors());
@@ -86,6 +88,24 @@ app.use('/',function(req,res,next){
 app.use('/', express.static(__dirname,{index:'/launcher.html'}));
 
 console.log('listening on port '+port);
+
+
+// ---------- for the server query - to strt with
+app.post("/transformXML",function (req,res){
+    //transform from Json to Xml
+    let body= "";
+    req.on('data', function (data) {
+        body += data;
+    });
+
+    req.on('end', function () {
+        let resource = JSON.parse(body)
+        var fhir = new Fhir();
+        var xml = fhir.objToXml(resource);
+        //console.log(body,xml)
+        res.send(xml)
+    })
+})
 
 
 //attempt to start the SSL server...
