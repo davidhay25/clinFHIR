@@ -803,9 +803,6 @@ angular.module("sampleApp").service('profileDiffSvc',
                             }
                         });
 
-
-
-
                         node.text = getDisplay(node);
 
                         if (segment == 'extension') {

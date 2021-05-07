@@ -15,8 +15,21 @@ angular.module("sampleApp")
                 search = decodeURIComponent(search)
                 let bundleId;
                 console.log(search)
-                let s = search.substr(1); //remove the leading '?'
-                let ar = s.split('&')
+
+                let qry = search.substr(1); //remove the leading '?'
+                $http.get(qry).then(
+                    function (data) {
+                        console.log(data.data)
+                        $scope.toggleSidePane();    //hide the sidepane
+                        processBundle(data.data)
+                    },
+                    function(err) {
+                        alert("Sorry, the query '"+ qry +"' couldn't be executed")
+                       // console.log("")
+                    }
+                )
+                /*
+                let ar = s.split('&') - qry
                 ar.forEach(function (item) {
                     let ar1 = item.split('=')
                     switch (ar1[0]) {
@@ -50,25 +63,27 @@ angular.module("sampleApp")
                         }
                     )
                 }
+                */
+            } else {
+                //nothing passed in - read bundles from the defined server
+                //load bundles with an identifier in the cfBundle identifier system
+                let identifierSystem = appConfigSvc.config().standardSystem.bundleIdentifierSystem;
+                let url = $scope.dataServer.url + "Bundle?identifier="+identifierSystem + "|";
+                $scope.showWaiting = true;
+                $http.get(url).then(
+                    function(data) {
+                        console.log(data)
+                        $scope.existingBundles = data.data;
+                    }
+                ).finally(
+                    function () {
+                        $scope.showWaiting = false;
+                    }
+                );
             }
 
 
 
-
-            //load bundles with an identifier in the cfBundle identifier system
-            let identifierSystem = appConfigSvc.config().standardSystem.bundleIdentifierSystem;
-            let url = $scope.dataServer.url + "Bundle?identifier="+identifierSystem + "|";
-            $scope.showWaiting = true;
-            $http.get(url).then(
-                function(data) {
-                    console.log(data)
-                    $scope.existingBundles = data.data;
-                }
-            ).finally(
-                function () {
-                    $scope.showWaiting = false;
-                }
-            );
 
 
             $scope.leftPaneClass = "col-sm-2 col-md-2"

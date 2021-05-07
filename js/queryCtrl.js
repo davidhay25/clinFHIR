@@ -11,6 +11,11 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
     $scope.fhirBasePath="http://hl7.org/fhir/";
 
 
+
+    //$scope.bvUrl = "http://clinfhir.com/bundleVisualizer.html";
+    //$scope.bvUrl = "http://localhost:8081/bundleVisualizer.html";
+    $scope.bvUrl = $location.protocol() + "://" + $location.host() + ":" + $location.port() +  "/bundleVisualizer.html"
+    console.log($scope.bvUrl)
     //anonQuery
 
     $scope.input.showQuery = true  ;       //if true, the query builder can be shown
@@ -21,17 +26,18 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
 
     //select a server. If 'server' is populated then we've selected a known server. If url is populated then an ad-hoc url has been entered
     //has to be at the top as called at startup
-    //the 'url' is used when entering an ad-hoc server
+    //the 'server' is a pre-defined server, 'url' is used when entering an ad-hoc server
     $scope.selectServer = function(server,url) {
         if (url) {
             if (url.substring(url.length-1) !== '/') {
                 url += '/'
             }
             server = {name:'Ad Hoc server',url:url}
-            $scope.server = server;
+            //$scope.server = server;
         }
-
+        $scope.server = server;
         $scope.input.parameters = "";
+
         delete $scope.filteredProfile;
         delete $scope.response;
         delete $scope.err;
@@ -47,49 +53,51 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
 
       //  $scope.server = server;
 
-        $scope.input.validationServer = server;     //default the validation server to the selected server
+        //$scope.input.validationServer = server;     //default the validation server to the selected server
 
         $scope.waiting = true;
 
         let qry = $scope.server.url + "metadata";
-
         $http.get(qry).then (
-            
+
             function (data) {
                 $localStorage.serverQueryServer = server;
                 $scope.conformance = data.data;     //the CapabilityStatement (Conformance) resource
                 $scope.hashResource = {};           //has of capstmt resource entry by type...
-                $scope.standardResourceTypes= []
-                data.data.rest[0].resource.forEach(function(res){
+                $scope.standardResourceTypes= [];
 
-                    //include a type if there is a 'read' interaction
-                    if (res.interaction) {
-                        if (res.interaction.filter(item => item.code == 'search-type').length > 0) {
-                            $scope.standardResourceTypes.push({name:res.type})
+                if (data.data && data.data.rest && data.data.rest.length > 0 && data.data.rest[0].resource) {
+                    data.data.rest[0].resource.forEach(function(res){
+
+                        //include a type if there is a 'read' interaction
+                        if (res.interaction) {
+                            if (res.interaction.filter(item => item.code == 'search-type').length > 0) {
+                                $scope.standardResourceTypes.push({name:res.type})
+                            }
                         }
 
-                    }
+                        //sort the search parameters alphabetically...
+                        if (res.searchParam) {
+                            res.searchParam.sort(function (a,b) {
+                                if (a.name > b.name) {
+                                    return 1
+                                } else {
+                                    return -1
+                                }
+                            });
+                        }
 
+                        //todo ?? should this be added if there is no type query??
+                        $scope.hashResource[res.type] = res;
+                    })
+                }
+                else {
+                    alert("CapabilityStatement not valid")
+                }
 
-                    //sort the search parameters alphabetically...
-                    if (res.searchParam) {
-                        res.searchParam.sort(function (a,b) {
-                            if (a.name > b.name) {
-                                return 1
-                            } else {
-                                return -1
-                            }
-
-                        });
-                    }
-
-
-                    //todo ?? should this be added if there is no type query??
-                    $scope.hashResource[res.type] = res;
-                })
 
             },function (err) {
-                alert('Error loading conformance resource:'+angular.toJson(err));
+                alert('Error loading conformance resource from:'+qry + " Is the server available?");
             }
         ).finally(function(){
             $scope.waiting = false;
@@ -217,14 +225,18 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
         $scope.anonQuery = qry;     //the query, irrespective of the server...
         $scope.query = $scope.server.url + qry;     //the query againts the current server...
 
-        $scope.adHocQry = $scope.query;     //to allow the user to manually change
+
+        $scope.adHocQry = qry; //$scope.query;     //to allow the user to manually change
 
     };
 
     //------------- determine the server when launched-----------------------
     // the most recently selected server
     $scope.server = $localStorage.serverQueryServer || appConfigSvc.getCurrentDataServer();
+
+    $scope.input.server = $scope.server;    //set the drop down
     $scope.input.serverType = "known"
+
 
     var hash = $location.hash();
     if (hash) {
@@ -233,21 +245,15 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
         $scope.input.serverType = "adhoc"
         $scope.input.adHocServer = hash;
 
-
         if (hash.substring(hash.length-1) !== '/') {
             hash += '/'
         }
         $scope.server = {name:'Ad Hoc server',url:hash}
-
-
-       // $scope.selectServer(null,hash)
-    } else {
-        //$scope.selectServer($scope.server);
     }
 
-    $scope.selectServer($scope.server);
+    $scope.selectServer($scope.server);     //either one passed in, or the previous one...
 
-    $scope.makeUrl = function(type) {
+    $scope.makeUrlDEP = function(type) {
         return  $scope.config.baseSpecUrl + type;
     }
 
@@ -256,10 +262,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
         delete $scope.selectedOpDefUrl
     }
 
-    $scope.showVSBrowserDialog = {};
-    $scope.showVSBrowser = function(vs) {
-        $scope.showVSBrowserDialog.open(vs);        //the open method defined in the directive...
-    };
+
 
     //these are the definitions for the base elements in R4. Copied from gb2...
     $http.get('./artifacts/resourceElements.json').then(
@@ -278,59 +281,9 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
         }
     );
 
-    //setDefaultInput();
 
-    //registrt that app started...
+    //register that app started...
     $http.post('/stats/login',{module:"query",servers: {}})
-
-    //GetDataFromServer.registerAccess('query');
-
-    //validate a response against a profile
-    $scope.validateResponseDEP = function(server,profileUrl,json){
-        console.log(server,profileUrl,json);
-        delete $scope.responseValidationResult;
-        delete $scope.responseValidationSuccess;
-
-        profileUrl = profileUrl || "http://hl7.org/fhir/StructureDefinition/"+json.resourceType;
-
-        var url = server.url + json.resourceType + "/$validate";
-
-        //add the profile to the resource - remove any others...
-        delete json.meta.profile;
-        json.meta.profile = [profileUrl]
-
-        $http.post(url,angular.toJson(json)).then(
-            function(data) {
-                $scope.responseValidationResult = data.data;    //should be an OO
-                $scope.responseValidationSuccess = true
-                //just make sure there are no warnings - like if the profile could not be found....
-                if (data.data) {
-                   // try {
-                        var oo = data.data;
-                        if (oo.issue) {
-                            oo.issue.forEach(function (iss) {
-                                if (iss.severity !== 'information') {   //information is not an error
-                                    $scope.responseValidationSuccess = false
-                                }
-                            })
-                        }
-                   // } catch (ex) {
-                     //   $scope.responseValidationSuccess = false
-                    //}
-
-                }
-
-
-
-            },function(err) {
-                $scope.responseValidationSuccess = false
-                $scope.responseValidationResult = err.data;    //should be an OO
-
-            }
-        )
-
-
-    };
 
 
     $scope.treeNodeSelectedDEP = function(item) {
@@ -340,9 +293,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
             $scope.edFromTreeNode = item.node.data.ed;
             $scope.$digest();       //the event originated outside of angular...
         }
-
     };
-
 
 
     //when a resource tye is selected in the builder
@@ -374,13 +325,18 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
     };
 
 
-    $scope.selectFromHistory = function(hx){
+    $scope.selectFromHistoryDEP = function(hx){
         if ($scope.server) {
             $scope.hx = hx;
 
         }
-
     };
+
+    $scope.removeFromHistory = function(inx){
+        $localStorage.queryHistory.splice(inx,1)
+    };
+
+
 
     $scope.executeFromHistory = function(hx) {
 
@@ -389,16 +345,6 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
         $scope.query = qry;
         executeQuery(qry,hx.type,true)
     }
-
-    //the handler for when a valueset is selected from within the <show-profile component on conformanceDisplay.html
-    $scope.showValueSetForProfileDEP = function(url){
-        //url is actually a URI
-        let ar = url.split('|')
-        $scope.showVSBrowserDialog.open(null,ar[0]);
-
-    };
-
-
 
 
     //when a resource type is selected in the list
@@ -433,8 +379,18 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
     };
 
     $scope.executeAdHoc = function(qry) {
-        let type = $scope.input.selectedType.name
+
+        let ar = qry.split('?')
+        let type = {name:ar[0]}
         executeQuery($scope.server.url + qry,type)
+        /*
+        if (ar.length == 2) {
+            let type = {name:ar[0]}
+            executeQuery($scope.server.url + qry,type)
+        } else {
+            alert("The query seems incorrect. It should have the format: {type}?{parameters}")
+        }
+*/
     }
 
     $scope.doit = function() {
@@ -448,7 +404,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
         delete $scope.response;
         delete $scope.err;
         delete $scope.result.selectedEntry;
-        $scope.waiting = true;
+
 
         let config = {headers:{Accept:"application/fhir+json"}}
         let accessToken = $scope.input.accessToken;
@@ -457,10 +413,8 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
         }
 
         $scope.query = qry;
-
+        $scope.waiting = true;
         $http.get(qry,config).then (
-
-
             function(data){
                 $scope.response = data;
 
@@ -553,7 +507,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
     };
 
     //display the bundle in the results pane
-    $scope.showBundle = function(bundle){
+    $scope.showBundleDEP = function(bundle){
         delete $scope.result.selectedEntry;
         delete xmlResource;
         $scope.bundle = bundle;
@@ -563,8 +517,8 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
 
     };
 
+    //one of the versions of a resource with history is shown
     $scope.selectVersion = function(resource) {
-
         showResource(resource)
     }
 
@@ -644,6 +598,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
 
     };
 
+    //display the details of a single resource
     showResource = function (resource) {
         $scope.selectedResource = resource;
 
@@ -652,7 +607,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
 
         var treeData = resourceCreatorSvc.buildResourceTree(newResource);
 
-        //retrieve the XML version - utilize the lantana library...
+        //convert json to  XML on the server - utilizes the lantana library...
         let qry = "transformXML";
         $http.post(qry,resource).then(
             function (data) {
@@ -662,8 +617,6 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
                 $scope.xmlResource = "<error>Sorry, Unable to load Xml version</error>";
             }
         )
-
-
 
         //show the tree of this version
         $('#queryResourceTree').jstree('destroy');
@@ -701,7 +654,9 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
             $scope.selectedNode = node;
 
             //this is the entry that is selected from the 'bundle entries' tab...
-            $scope.selectedBundleEntry = node.entry;
+            //$scope.selectedBundleEntry = node.entry;
+
+            $scope.selectEntry(node.entry)
 
             $scope.$digest();
         });

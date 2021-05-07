@@ -1,0 +1,102 @@
+<div ng-show="selectedItem.kind == 'extension'">
+    <uib-tabset>
+        <br/>
+        <uib-tab heading="Summary">
+
+            <div class="row">
+                <div class="col-md-2">
+                    Url
+                </div>
+                <div class="col-md-4">
+                    {{selectedResource.url}}
+                </div>
+                <div class="col-md-2">
+                    Version
+                </div>
+                <div class="col-md-4">
+                    {{selectedResource.version}}
+                </div>
+            </div>
+            <br/>
+            <div class="row">
+                <div class="col-md-2">
+                    Name
+                </div>
+                <div class="col-md-4">
+                    {{selectedResource.name}}
+                </div>
+                <div class="col-md-2">
+                    Title
+                </div>
+                <div class="col-md-4">
+                    {{selectedResource.title}}
+                </div>
+            </div>
+            <br/>
+            <div class="row">
+                <div class="col-md-2">
+                    Description
+                </div>
+                <div class="col-md-10">
+                    {{selectedResource.description}}
+                </div>
+
+            </div>
+
+            <br/>
+            <div class="row">
+
+                <div class="col-md-2">
+                    Context
+                </div>
+                <div class="col-md-4">
+                    <div ng-repeat="ctx in selectedResource.context">
+                        {{ctx.expression}}
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row" ng-show="extensionSummary.isSimple">
+
+                <div class="col-md-2">
+                   Type
+                </div>
+                <div class="col-md-4">
+
+                </div>
+            </div>
+
+            <br/>
+
+
+            <div ng-hide="extensionSummary.isSimple">
+                <table class="table table-bordered">
+                    <tr ng-repeat="item in extensionSummary.contents">
+                        <td>{{item.name}}</td>
+                        <td>{{item.definition}}</td>
+                        <td>
+                            <div ng-repeat="typ in item.type">
+                                {{typ.code}}
+                            </div>
+                        </td>
+                        <td>
+                            <div>{{item.binding.valueSet}}</div>
+                            <div>{{item.binding.strength}}</div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+
+
+        </uib-tab>
+        <uib-tab heading="Summary object json">
+            <br/>
+            <div><pre>{{extensionSummary | json}}</pre></div>
+        </uib-tab>
+        <uib-tab heading="Resource Json">
+            <pre>{{selectedResource | json}}</pre>
+        </uib-tab>
+    </uib-tabset>
+</div>

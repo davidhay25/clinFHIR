@@ -14,8 +14,9 @@ var app = express();
 app.use(cors());
 
 let statsModule = require("./serverModuleStats")
-
 var smartModule = require("./serverModuleSMART.js")
+
+let registryModule = require('./serverModuleRegistry.js');
 
 process.on('uncaughtException', function(err) {
     console.log('>>>>>>>>>>>>>>> Caught exception: ' + err);
@@ -35,6 +36,7 @@ const wss = new WebSocket.Server({server:server});
 var taskModule = require("./serverModuleTask");
 taskModule.setup(app,wss,WebSocket)     // need WebSocket for the constants
 
+registryModule.setup(app)
 
 wss.on('connection', function connection(ws) {
     ws.on('message', function incoming(message) {

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <base href="/" />
+    <meta charset="UTF-8">
+    <script src="js/libs/jquery-1.9.0.min.js"></script>
+    <script src="js/libs/angular.min1-5.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+
+
+    <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
+    <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
+
+
+    <style>
+
+        .listScroll {
+            height: 900px;
+            overflow-y: scroll;
+        }
+
+        .extension {
+            color: mediumpurple;
+        }
+
+        .required {
+            color: red;
+        }
+
+        .normal {
+            color: black;
+        }
+
+    </style>
+
+    <script src="js/libs/jstree.min.js"></script>
+    <!--
+    <link rel="stylesheet" type="text/css" href="css/vis.min.css"/>
+    <script src="js/libs/angular-sanitize.js"></script>
+    <script src="js/libs/moment.min.js"></script>
+    <script src="js/libs/lodash.core.js"></script>
+
+
+
+    <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
+    <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
+
+    <script src="js/libs/angular-sanitize.js"></script>
+-->
+    <script>
+        angular.module("sampleApp",['ui.bootstrap']).config(function($locationProvider) {
+
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+        });
+
+    </script>
+
+    <script src="js/packageViewerCtrl.js"></script>
+    <script src="js/packageViewerSvc.js"></script>
+
+    <title>Package Viewer</title>
+
+</head>
+
+
+<body  style="padding: 8px;padding-top: 80px" >
+
+<div ng-app="sampleApp" ng-controller="packageViewerCtrl" class="container-fluid">
+
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="col-md-3 col-sm-3">
+            <a class="navbar-brand" href="#">
+                Package Viewer
+            </a>
+        </div>
+        <div class="col-md-6 col-sm-6">
+        </div>
+        <div class="col-md-3 col-sm-3">
+            <div class="navbar-text pull-right">
+                <a href="https://www.lyniate.com/" target="_blank">
+                    <img  src="/icons/supported_by_lyniate.png"/>
+                </a>
+
+            </div>
+
+        </div>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-3">
+
+            <select ng-model="input.package" class="form-control"
+                    ng-change="selectPackage(input.package)"
+                    ng-options="package.display for package in allPackages"></select>
+
+            <uib-accordion>
+                <div  ng-repeat="(k,v) in package.grouped" uib-accordion-group class="panel-default">
+                    <uib-accordion-heading>
+                        {{k}}
+                        <span class="pull-right badge">{{v.length}}</span>
+                    </uib-accordion-heading>
+
+                    <div class="list-group">
+                        <div class="list-group-item" ng-repeat="item in v" style="cursor: pointer">
+                            <div ng-click="selectItem(item)">{{item.display}}</div>
+                        </div>
+                    </div>
+
+
+                </div>
+
+            </uib-accordion>
+
+
+        </div>
+
+        <div class="col-md-9">
+            {{selectedItem}}
+
+            <!---------------------------------    extension -------------------->
+
+            <ng-include src="'/includes/pvExtension.html'"></ng-include>
+
+<!--
+            <div ng-show="selectedItem.kind == 'extension'">
+                <uib-tabset>
+                    <uib-tab heading="Json">
+                        <pre>{{selectedResource | json}}</pre>
+                    </uib-tab>
+                </uib-tabset>
+            </div>
+-->
+            <!---------------------------------    misc -------------------->
+
+            <div ng-show="selectedItem.kind == 'misc'">
+                <uib-tabset>
+                    <uib-tab heading="Json">
+                        <pre>{{selectedResource | json}}</pre>
+                    </uib-tab>
+                </uib-tabset>
+            </div>
+
+            <!---------------------------------    operationdefinition -------------------->
+
+            <div ng-show="selectedItem.kind == 'operationdefinition'">
+                <uib-tabset>
+                    <uib-tab heading="Json">
+                        <pre>{{selectedResource | json}}</pre>
+                    </uib-tab>
+                </uib-tabset>
+            </div>
+
+            <!---------------------------------    searchparameter -------------------->
+
+            <div ng-show="selectedItem.kind == 'searchparameter'">
+                <uib-tabset>
+                    <uib-tab heading="Json">
+                        <pre>{{selectedResource | json}}</pre>
+                    </uib-tab>
+                </uib-tabset>
+            </div>
+
+
+            <!---------------------------------    valueset -------------------->
+
+            <div ng-show="selectedItem.kind == 'valueset'">
+                <uib-tabset>
+                    <uib-tab heading="Json">
+                        <pre>{{selectedResource | json}}</pre>
+                    </uib-tab>
+                    <uib-tab heading="Explore">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" ng-model="input.filter" placeholder="Filter text"/>
+                            </div>
+                            <div class="col-md-1">
+                                <button class="btn btn-primary" ng-click="VSExpand(selectedResource,input.filter)">Expand</button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-link" ng-click="uploadVS(selectedResource,input.filter)">Upload to Terminology server</button>
+                            </div>
+
+
+                        </div>
+
+                        {{expandUrl}}
+
+                       <div ng-show="expandVSError" class="alert alert-danger">
+                           <pre>{{expandVSError | json}}</pre>
+                       </div>
+
+
+                        <div class="row" ng-show="expandedVS">
+                            <div class="col-md-6">
+
+                                <table class="table table-bordered">
+                                    <tr ng-repeat = "concept in expandedVS.expansion.contains"
+                                        ng-click="input.selectedConcept = concept"
+                                        style="cursor: pointer">
+                                        <td>{{concept.code}}</td>
+                                        <td>{{concept.display}}</td>
+                                        <td>{{concept.definition}}</td>
+                                    </tr>
+                                </table>
+
+                            </div>
+                            <div class="col-md-6">
+                                <pre>{{expandedVS | json}}</pre>
+                            </div>
+                        </div>
+
+                    </uib-tab>
+                </uib-tabset>
+            </div>
+
+            <!---------------------------------    codesystem -------------------->
+
+            <div ng-show="selectedItem.kind == 'codesystem'">
+                <uib-tabset>
+                    <uib-tab heading="List">
+                        <br/>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="listScroll">
+                                    <table class="table table-bordered">
+                                        <tr ng-repeat = "concept in selectedResource.concept"
+                                            ng-click="input.selectedConcept = concept"
+                                            style="cursor: pointer">
+                                            <td>{{concept.code}}</td>
+                                            <td>{{concept.display}}</td>
+                                            <td>{{concept.definition}}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+
+                            </div>
+                            <div class="col-md-6">
+                                <div ng-show="input.selectedConcept">
+                                    <strong>Concept json</strong>
+                                    <pre>{{input.selectedConcept | json}}</pre>
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                    </uib-tab>
+                    <uib-tab heading="Json">
+                        <pre>{{selectedResource | json}}</pre>
+                    </uib-tab>
+                </uib-tabset>
+            </div>
+
+            <!---------------------------------    resource profile -------------------->
+            <div ng-show="selectedItem.kind == 'resourceprofile'">
+
+                <uib-tabset>
+                    <uib-tab heading="Json">
+                        <pre>{{selectedResource| json}}</pre>
+                    </uib-tab>
+
+                    <uib-tab heading="Tree">
+
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div id="treeView"></div>
+                            </div>
+                            <div class="col-md-9">
+                                <uib-tabset>
+                                    <uib-tab heading="Details">
+
+
+
+                                    </uib-tab>
+
+                                    <uib-tab heading="ElementDefinition">
+                                        <pre>{{selectedED | json}}</pre>
+                                    </uib-tab>
+                                </uib-tabset>
+
+                            </div>
+                        </div>
+
+                    </uib-tab>
+
+                    <uib-tab heading="Raw data">
+                        <table class="table">
+                            <tr ng-repeat="ed in selectedResource.snapshot.element">
+                                <td>{{ed.path}}</td>
+                                <td>{{ed.sliceName}}</td>
+                                <td>{{ed.id}}</td>
+                            </tr>
+                        </table>
+                    </uib-tab>
+
+
+                    <uib-tab heading="table">
+                        <table class="table table-bordered">
+                            <tr><th>Path</th><th>MS</th><th>Mult.</th><th>Description</th></tr>
+                            <tr ng-repeat="row in allElements">
+                                <!-- <td  ng-style="{ 'padding-left': (row.path | pathindent) }">{{row.path}}</td> -->
+
+                                <!-- <td><div style="white-space: pre">{{showElementPath(row.path)}}</div></td>-->
+                                <td>{{row.path}}</td>
+                                <td>{{row.ed.mustSupport}}</td>
+                                <td>{{row.ed.min}}..{{row.ed.max}}</td>
+                                <td>
+                                    <div>{{row.description}}</div>
+                                    <ul>
+                                        <li ng-repeat="child in row.children">
+                                            <!--<pre>{{child | json}}</pre>-->
+                                            <div ng-show = "child.sliceName">
+                                                {{child.sliceName}} ({{child.definition}})
+
+                                            </div>
+                                            <div ng-show = "child.err">
+                                                {{child.err}}
+                                            </div>
+                                            <!--
+                                            <div><em>{{child.err}}</em></div>
+                                            -->
+                                        </li>
+                                    </ul>
+                                    <div><em>{{row.err}}</em></div>
+                                    <div ng-show="row.extUrl">URL:<em >{{row.extUrl}}</em></div>
+                                    <div><span class="clickable" ng-click="viewVS(row.ed.binding.valueSet)">{{row.ed.binding.valueSet}}</span> </div>
+
+                                </td>
+                            </tr>
+                        </table>
+                    </uib-tab>
+
+                </uib-tabset>
+
+            </div>
+
+
+            <!---------------------------------    datatype profile -------------------->
+
+            <div ng-show="selectedItem.kind == 'datatypeprofile'">
+                <uib-tabset>
+                    <uib-tab heading="Json">
+                        <pre>{{selectedResource | json}}</pre>
+                    </uib-tab>
+                </uib-tabset>
+            </div>
+
+            <!---------------------------------    conceptmap -------------------->
+            <div ng-show="selectedItem.kind == 'conceptmap'">
+                <uib-tabset>
+                    <uib-tab heading="List">
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="listScroll">
+                                    <div ng-repeat="group in selectedResource.group">
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                Source:
+                                            </div>
+                                            <div class="col-md-10">
+                                                {{group.source}}
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                Target:
+                                            </div>
+                                            <div class="col-md-10">
+                                               {{group.target}}
+                                            </div>
+                                        </div>
+
+                                        <table class="table table-bordered">
+                                            <tr ng-repeat = "map in group.element"
+                                                ng-click="input.selectedMap = map">
+                                                <td>{{map.code}}</td>
+                                                <td>{{map.display}}</td>
+                                                <td>
+                                                    <div ng-repeat="target in map.target">
+                                                        {{target.code}} {{target.display}}
+                                                        <div>{{target.equivalence}}</div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                            <div class="col-md-6">
+                                <pre>{{input.selectedMap | json}}</pre>
+                            </div>
+                        </div>
+
+
+                    </uib-tab>
+                    <uib-tab heading="Json">
+                        <pre>{{selectedResource | json}}</pre>
+                    </uib-tab>
+                </uib-tabset>
+            </div>
+
+        </div>
+    </div>
+
+
+</div>
+</body>
+</html>

@@ -34,10 +34,9 @@
                 <div ng-hide = "fromHash">
                     <div ng-show="input.serverType == 'known'">
                         <select class="form-control"
-                                ng-change="selectServer(server)"
+                                ng-change="selectServer(input.server)"
                                 ng-options="value.name for value in config.allKnownServers track by value.name"
-                                ng-model="server">
-
+                                ng-model="input.server">
                         </select>
                     </div>
 
@@ -458,20 +457,42 @@
                                         <div class="row">
                                             <div class="col-md-8">
                                                 <div class="paramListScroll">
-                                                <div class="list-group">
-                                                    <a href="#" class="list-group-item"
-                                                       ng-repeat="hx in queryHistory"
-                                                       ng-model="input.hx" ng-click = "selectFromHistory(hx)">
 
-                                                        <div>{{hx.query}}</div>
-                                                    </a>
-                                                </div>
+                                                    <table class="table table-bordered table-condensed">
+                                                        <tr ng-repeat = "hx in queryHistory">
+                                                            <td>{{hx.query}}</td>
+                                                            <td>
+                                                                <div class="clickable"
+                                                                     ng-click="removeFromHistory($index)">Remove</div>
+
+                                                            </td>
+                                                            <td>
+                                                                <div class="clickable"
+                                                                        ng-click="executeFromHistory(hx)">Execute</div>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+
+                                                    <!--
+                                                    <div class="list-group">
+                                                        <a href="#" class="list-group-item"
+                                                           ng-repeat="hx in queryHistory"
+                                                           ng-model="input.hx" ng-click = "selectFromHistory(hx)">
+
+                                                            <div>{{hx.query}}</div>
+                                                        </a>
+                                                    </div>
+
+                                                    -->
+
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
+                                                <!--
                                                 <pre>{{hx | json}}</pre>
 
                                                 <button class="btn btn-primary" ng-click="executeFromHistory(hx)">Execute</button>
+                                                -->
                                             </div>
                                         </div>
 
@@ -527,29 +548,20 @@
                         </div>
 
 
-
-
-                        <!--
-                        <div class="row" ng-show="err">
-                            <div class="col-md-12 col-sm-12">
-                                <div><strong>StatusCode:{{err.statusCode}}</strong></div>
-                                <pre>{{err.data | json}}</pre>
-                            </div>
-                        </div>
-                        -->
-
-
                         <hr/>
 
 
                         <div class="row" ng-show="input.showResults && response">
-                            <div class="rounded-box-filled">
+                            <div class="col-md-12 col-sm-12">
+
+                                <div class="rounded-box-filled">
                                 <div class="row">
-                                    <div class="col-md-8">
-                                        <strong>Results for {{query}}</strong>
+
+                                    <div class="col-md-10"  style="padding: 8px;">
+                                        <strong> Url: {{query}}</strong>
                                     </div>
 
-                                    <div class="col-md-4">
+                                    <div class="col-md-2">
                                         <div class="pull-right">
                                             <button class="btn btn-primary" ng-click="input.showQuery=true;input.showResults=false">
                                                 Close results
@@ -561,41 +573,60 @@
                             </div>
 
 
-                            <div class="alert alert-danger" ng-show="err">
+                                <div class="alert alert-danger" ng-show="err">
                                 <div><strong>StatusCode:{{err.statusCode}}</strong></div>
                                 <pre>{{err.data | json}}</pre>
                             </div>
 
 
-                            <div class="col-md-12 col-sm-12">
 
 
                                 <div class="row">
-                                    <div class="col-md-3 col-sm-3">
+                                    <div class="col-md-4">
+                                        <div class="rounded-box">
 
-                                        <div class="row" style="margin-bottom: 8px">
+                                            <a  style="padding: 8px" target="_blank" class="pull-right" ng-href = "{{bvUrl}}?{{query}}">
+                                                View in Bundle Visualizer
+                                            </a>
 
-                                            <div class="col-md-8 col-sm-8">
-                                                {{response.data.entry.length}} Entries
+                                            <div style="padding: 8px">
+                                                   {{response.data.entry.length}} Entries
                                             </div>
-                                            <div class="col-md-4 col-sm-4">
-                                                <span ng-click="showBundle(response.data)" class="clickable">Show Bundle</span>
-                                            </div>
+
+
+
                                         </div>
 
+                                        <uib-tabset>
+                                            <br/>
+                                            <uib-tab heading = "List">
+                                                <div class="list-group"  style="height:600px; overflow-y: auto;">
 
-                                        <div class="list-group"  style="height:600px; overflow-y: auto;">
-
-                                            <div ng-class="{'list-group-item':true,'list-group-item-info':result.selectedEntry.fullUrl == entry.fullUrl}"
-                                                 ng-repeat="entry in response.data.entry">
-                                                <div ng-click="selectEntry(entry)"  ng-clickDEP="result.selectedEntry = entry" style="cursor: pointer">
-                                                    {{entry.resource.resourceType}}
-                                                    <div>{{ResourceUtilsSvc.getOneLineSummaryOfResource(entry.resource)}}</div>
+                                                    <div ng-class="{'list-group-item':true,'list-group-item-info':result.selectedEntry.fullUrl == entry.fullUrl}"
+                                                         ng-repeat="entry in response.data.entry">
+                                                        <div ng-click="selectEntry(entry)"  style="cursor: pointer">
+                                                            {{entry.resource.resourceType}}
+                                                            <div>{{ResourceUtilsSvc.getOneLineSummaryOfResource(entry.resource)}}</div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </div>
+                                            </uib-tab>
+
+
+                                            <uib-tab heading = "Graph"  select="fitGraph()">
+                                                <div id="bundleGraph"></div>
+                                            </uib-tab>
+
+                                            <uib-tab heading="Bundle" >
+                                                <br/>
+                                                <pre>{{response | json}}</pre>
+
+                                            </uib-tab>
+
+
+                                        </uib-tabset>
                                     </div>
-                                    <div class="col-md-9 col-sm-9">
+                                    <div class="col-md-8">
                                         <br/>
                                         <div class="alert alert-warning" ng-show="selectedResourceVersions && selectedResourceVersions.entry.length > 1">
                                             <ul class="pagination" style="margin-top:1px;margin-bottom:1px">
@@ -608,57 +639,67 @@
                                             </ul>
                                         </div>
 
-                                        <uib-tabset>
-                                            <uib-tab heading="Json" ng-show="selectedResource">
+                                        <uib-tabset  ng-show="selectedResource">
+                                            <uib-tab heading="Json">
                                                 <br/>
                                                 <pre>{{selectedResource | json}}</pre>
                                             </uib-tab>
-                                            <uib-tab heading="XML" ng-show="xmlResource">
+                                            <uib-tab heading="XML">
                                                 <br/>
                                                 <pre>{{xmlResource}}</pre>
                                             </uib-tab>
 
-                                            <uib-tab heading="Tree" ng-show="selectedResource">
+                                            <uib-tab heading="Tree">
                                                 <br/>
                                                 <div id="queryResourceTree"></div>
 
                                             </uib-tab>
 
-
-                                            <uib-tab ng-show = "false" heading="FHIRPath" ng-show="result.selectedEntry">
-                                                <br/>
-                                                <fhirpath resource="result.selectedEntry.resource"></fhirpath>
-                                                <hr/>
-                                                <pre>{{result.selectedEntry.resource | json}}</pre>
-                                            </uib-tab>
-
-
-                                            <uib-tab heading="Bundle" ng-show="bundle">
-                                                <br/>
-                                                <div class="row" ng-show="bundle">
-                                                    <div class="col-sm-6 col-md-6">
-                                                        <pre>{{bundle | json}}</pre>
-                                                    </div>
-                                                    <!-- remove for now...
-                                                    <div class="col-sm-6 col-md-6">
-                                                        <fhirpath resource="bundle"></fhirpath>
-                                                    </div>
-                                                    -->
-                                                </div>
-
-                                            </uib-tab>
-
-                                            <uib-tab heading="Graph" select="fitGraph()">
-
-                                                <div id="bundleGraph"></div>
-                                            </uib-tab>
-
                                         </uib-tabset>
+
+                                    </div>
+
+
+                                </div>
+
+                                <hr/>
+
+<!--
+
+                                <div class="row">
+                                    <div class="col-md-3 col-sm-3">
+
+                                        <div class="row" style="margin-bottom: 8px">
+
+                                            <div class="col-md-6 col-sm-6">
+                                                {{response.data.entry.length}} Entries
+                                            </div>
+
+
+                                            <div class="col-md-3 col-sm-3">
+                                                <span ng-click="showBundle(response.data)" class="clickable">Show Bundle</span>
+                                            </div>
+
+
+                                            <div class="col-md-3 col-sm-3">
+                                                <a target="_blank" ng-href = "{{bvUrl}}?{{query}}">
+                                                    Bundle Visualizer
+                                                </a>
+                                            </div>
+
+
+
+                                        </div>
+
+
+
+                                    </div>
+                                    <div class="col-md-9 col-sm-9">
 
                                     </div>
                                 </div>
 
-
+-->
 
                             </div>
                         </div>

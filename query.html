@@ -31,6 +31,13 @@
             $locationProvider.hashPrefix('!');
         });
         angular.module("sampleApp").constant("moment", moment);
+/*
+        angular.module("sampleApp").config(['$compileProvider', function ($compileProvider) {
+
+            $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|blob):/);
+
+        }]);
+        */
 
     </script>
 
