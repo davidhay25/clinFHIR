@@ -30,14 +30,10 @@ function setup(app) {
 
     })
 
-
     //download from the FHIR registry
     app.get('/registry/download/:name/:version/',function(req,res) {
 
-        //let url = "https://packages.simplifier.net/hl7.fhir.uv.ips/1.0.0"
-
         let url = "https://packages.simplifier.net/"+ req.params.name + "/" + req.params.version;
-      //  console.log(url)
 
         let outFolder = packageRoot + req.params.name + "#" + req.params.version;
 
@@ -45,11 +41,12 @@ function setup(app) {
             url: url,
             dir: outFolder
         }).then(() => {
-            //console.log('file is now downloaded!');
+            //The package has been downloaded and unzipped into the packageRoot
+
+
             res.json()
         }).catch(err => {
-            //console.log('oh crap the file could not be downloaded properly');
-            //console.log(err);
+
             res.status(404).send({err:"Package not found:" + url})
         });
 
@@ -87,6 +84,13 @@ function setup(app) {
                 //the summary file is not present
                 console.log("The file does not exist.");
 
+                //is the root folder for this package present? Can be sync as only checked before downloaded
+                if (! fs.existsSync(dirName)) {
+                    res.status(404).send({err:"Package not found"})
+                    return;
+                }
+
+
                 processFolder(dirName).then(
                     function(summary) {
                         //write the summary file for next time
@@ -121,12 +125,8 @@ function setup(app) {
 
                 });
 
-
-
             }
         });
-
-
 
 
         //todo - make async...
@@ -269,11 +269,7 @@ function setup(app) {
 
         }
 
-
-
     })
-
-
 
 }
 

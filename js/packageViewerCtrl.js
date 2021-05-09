@@ -1,16 +1,110 @@
 angular.module("sampleApp").controller('packageViewerCtrl',
-    function ($scope,$http,packageViewerSvc,$uibModal,$timeout) {
+    function ($scope,$http,packageViewerSvc,$uibModal,$timeout,$location) {
 
         $scope.input = {}
 
         $scope.terminologyServer = {url:"https://r4.ontoserver.csiro.au/fhir/"}
 
+        function sortAllPackages() {
+            $scope.allPackages.sort(function(a,b){
+                    if (a.display > b.display) {
+                        return -1
+                    } else {
+                        return 1
+                    }
+                }
+
+            )
+        }
         $http.get('/registry/list').then(
             function (data) {
                 $scope.allPackages = data.data;
+                sortAllPackages()
                 console.log(data.data)
             }
         )
+
+
+        $scope.loadPackage = function (name,version) {
+            //enter the name & version, then download from the registry
+
+            if (name && version) {
+                // the name & version were supplied - proceed directly to download...
+                performDownload(name,version);
+            } else {
+                // we need to get the name & version from the user...
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/pvEnterPackageName.html',
+                    controller: function ($scope) {
+
+                    }
+                }).result.then(
+                    function(vo) {
+                        //a name and version was entered
+                        let name = vo.name ;
+                        let version = vo.version;
+                        performDownload(name,version);
+
+                        /*
+                                                $scope.downloadingFromRegistry = {name:name,version:version};
+                                                packageViewerSvc.downloadPackage(name,version).then(
+                                                    function(vo){
+                                                        let wasDownloaded = vo.wasDownloaded;
+                                                        let packageSummary = vo.packageSummary;
+                                                        //The packageSummary is returned whether it has to be downloaded first, or not...
+                                                        if (vo.wasDownloaded) {
+                                                            //add to the list of packages
+                                                            $scope.allPackages.push({name:name,version:version,display:name + '#' + version})
+                                                            sortAllPackages()
+                                                        }
+                                                        $scope.selectPackage({name:name,version:version})
+                                                        alert("The package has been downloaded")
+                                                    },
+                                                    function (message){
+                                                        //Usually means the package has already been downloaded
+                                                        //NOT ANY MORE - not currently used
+                                                        alert(message)
+
+                                                    }
+                                                ).finally(function(){
+                                                    delete $scope.downloadingFromRegistry ;
+                                                })
+                                                */
+
+                    }, function(){
+
+                    })
+
+            }
+
+
+            function performDownload(name,version) {
+                $scope.downloadingFromRegistry = {name:name,version:version};
+                packageViewerSvc.downloadPackage(name,version).then(
+                    function(vo){
+                        console.log("Was downloaded " + vo.wasDownloaded);
+                        //let packageSummary = vo.packageSummary;
+                        //The packageSummary is returned whether it has to be downloaded first, or not...
+                        if (vo.wasDownloaded) {
+                            //add to the list of packages
+                            $scope.allPackages.push({name:name,version:version,display:name + '#' + version})
+                            sortAllPackages()
+                        }
+                        $scope.selectPackage({name:name,version:version})
+                        //alert("The package has been downloaded")
+                    },
+                    function (message){
+                        //Usually means the package has already been downloaded
+                        //NOT ANY MORE - not currently used
+                        alert(message)
+
+                    }
+                ).finally(function(){
+                    delete $scope.downloadingFromRegistry ;
+                })
+            }
+        }
+
 
         //load a package from the server...
         $scope.selectPackage = function(package) {
@@ -26,7 +120,28 @@ angular.module("sampleApp").controller('packageViewerCtrl',
         }
 
         //temp load us core
-        $scope.selectPackage({name:'hl7.fhir.us.core',version:'current'})
+
+        // ============================    The module can be invoked passing across the package...
+        var hash = $location.hash();
+        //http://localhost:8081/packageViewer.html#hl7.fhir.us.core-current
+        if (hash) {
+            console.log("server passed in: " + hash)
+            let ar = hash.split('|')
+            if (ar.length !== 2) {
+                alert("The package details must be in the format {name}|{version}. No package has been selected")
+                return;
+            }
+            let name = ar[0]
+            let version = ar[1]
+
+            //invoke the loadPackage function passing across the name#version. This function
+            //will select the package if downloaded, or download it if not...
+            $scope.loadPackage(name,version)
+
+        } else {
+            //temp during debugging
+            $scope.selectPackage({name:'hl7.fhir.us.core',version:'current'})
+        }
 
 
 

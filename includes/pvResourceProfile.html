@@ -105,20 +105,6 @@
         </table>
     </uib-tab>
 
-    <uib-tab heading="Elements with ValueSet binding">
-        <table class="table">
-            <tr><th>Path</th><th>Url</th><th>Strength</th><th>Description</th></tr>
-            <tr ng-repeat="ed in selectedResource.snapshot.element" ng-show="ed.binding">
-                <td>{{ed.path | dropFirstInPath}}</td>
-                <td>
-                    <div class="clickable" ng-click = "selectValueSet(ed.binding)">{{ed.binding.valueSet}}</div>
-                </td>
-                <td>{{ed.binding.strength}}</td>
-                <td>{{ed.binding.description}}</td>
-            </tr>
-        </table>
-    </uib-tab>
-
 
     <uib-tab heading="Graph" select = "fitGraph()">
         <div class="row">
@@ -143,7 +129,37 @@
                 </div>
 
                 <hr/>
-                <pre>{{selectedGraphItem}}</pre>
+
+                <div ng-show="selectedGraphItem.kind == 'resourceprofile'">
+                    <div>{{selectedGraphItem.name}}</div>
+                    <div>{{selectedGraphItem.url}}</div>
+                    <div>{{selectedGraphItem.profileType}}</div>
+                    <div>{{selectedGraphItem.display}}</div>
+                </div>
+
+
+                <div ng-show="selectedGraphItem.kind == 'reference'">
+                    {{selectedGraphItem.path}}
+                    {{selectedGraphItem.targetProfile}}
+                </div>
+
+                <div ng-show="selectedGraphItem.kind == 'extension'">
+                    {{selectedGraphItem.path}}
+                    {{selectedGraphItem.profile}}
+                </div>
+
+                <div ng-show="selectedGraphItem.kind == 'binding'">
+                    <div> {{selectedGraphItem.path}}</div>
+                    <div>{{selectedGraphItem.binding.valueSet}}</div>
+                    <div>{{selectedGraphItem.binding.strength}}</div>
+                    <div>{{selectedGraphItem.binding.description}}</div>
+                    <div class="clickable"
+                         ng-click = "selectValueSet(selectedGraphItem.binding)">Display Valueset</div>
+
+                </div>
+<!--
+                <pre>{{selectedGraphItem | json}}</pre>
+                -->
             </div>
         </div>
 
@@ -154,6 +170,22 @@
         <pre>{{selectedItem.references | json}}</pre>
         <pre>{{selectedItem | json}}</pre>
     </uib-tab>
+
+    <uib-tab heading="Elements with ValueSet binding">
+        <table class="table">
+            <tr><th>Path</th><th>Url</th><th>Strength</th><th>Description</th></tr>
+            <tr ng-repeat="ed in selectedResource.snapshot.element" ng-show="ed.binding">
+                <td>{{ed.path | dropFirstInPath}}</td>
+                <td>
+                    <div class="clickable" ng-click = "selectValueSet(ed.binding)">{{ed.binding.valueSet}}</div>
+                </td>
+                <td>{{ed.binding.strength}}</td>
+                <td>{{ed.binding.description}}</td>
+            </tr>
+        </table>
+    </uib-tab>
+
+
 
     <uib-tab heading="Required elements">
         <table class="table">

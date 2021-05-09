@@ -22,6 +22,7 @@ angular.module("sampleApp")
         let corePackageHash = {}    //a hash keyed on kind-url for the core package(where kind = extension, profile etc.
         let currentPackageHash = {} //a hash keyed on kind-url for the current package(where kind = extension, profile etc.
 
+        /* not using this now, but don't delete...
         //load the FHIR core package.
         //todo - after all this, ontoserver already has all the core terminology. sigh.
         //todo - re-write to use loadPackage()
@@ -47,7 +48,7 @@ angular.module("sampleApp")
 
             }
         )
-
+*/
         function dropFirstInPath(path) {
             let ar = path.split('.')
             ar.splice(0,1)
@@ -57,6 +58,45 @@ angular.module("sampleApp")
 
         return {
 
+            downloadPackage : function(name,version) {
+                //the actual download from the registry...
+                let that = this;
+                let deferred = $q.defer()
+                //first make sure we don't already have it...
+                that.loadPackage(name,version).then(
+                    function(packageSummary) {
+                        //the package has already been downloaded, so return it...
+                        deferred.resolve({wasDownloaded:false, packageSummary:packageSummary});
+
+                        },
+                    function (err) {
+                        //the package can be downloaded (if it exists in the registry)
+                        let url = "/registry/download/" + name + "/" + version;
+
+                        $http.get(url).then(
+                            function (data) {
+                                //the package was downloaded. Retrieve it and return the summary...
+                                that.loadPackage(name,version).then(
+                                    function(packageSummary) {
+                                        deferred.resolve({wasDownloaded:true, packageSummary:packageSummary});
+                                    },
+                                    function(){
+                                        deferred.reject("The package was downloaded, but could not subsequently be found. Contact support.")
+                                    })
+
+                            },
+                            function (){
+                                //the package couldn't be downloaded
+                                deferred.reject("The package "+name+ "#"+ version + " could not be downloaded. Is the name/version correct?")
+                            }
+                        )
+
+                    }
+                )
+                return deferred.promise
+
+            },
+
             makeGraph : function(item,options) {
                 if (!item) {
                     return {}
@@ -64,11 +104,11 @@ angular.module("sampleApp")
                 options = options || {showBindings:true}
                 //generate the graph of 'references' from a profile
                 // {extensions: bindings: references:
-console.log(item)
+//console.log(item)
                 let arNodes = [], arEdges = [];
 
                 let profileNode = {id: "profile", color: objColours['profile'],
-                    label: item.url, shape: 'box', item: {}};
+                    label: item.url, shape: 'box', item: item};
 
 
                 arNodes.push(profileNode)
@@ -174,6 +214,7 @@ console.log(item)
             loadPackage : function(name,version) {
                 //load a package (summary) based on the name and version...
                 //return is a summary of the package - files and urls' grouped by type
+                //assume already downloaded (won't download if not found atm)
                 let deferred = $q.defer()
                 currentPackageHash = {}
 

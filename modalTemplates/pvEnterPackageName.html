@@ -1,0 +1,55 @@
+<div>
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+                <h3>Download a package from the FHIR Register</h3>
+            </div>
+
+
+            <div class="col-md-4 col-sm-4">
+                <div class="pull-right">
+                    <button class="btn btn-link" ng-click="$dismiss()">Cancel</button>
+                    <button class="btn btn-primary"
+                            ng-show="input.name && input.version"
+                            ng-click="$close({name:input.name,version:input.version})">Select</button>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-3 col-sm-3">
+                Package Name
+            </div>
+
+            <div class="col-md-6 col-sm-6">
+
+                <input type="text" class="form-control" ng-model="input.name"/>
+
+            </div>
+        </div>
+        <br/>
+        <div class="row">
+            <div class="col-md-3 col-sm-3">
+                Package Version
+            </div>
+
+            <div class="col-md-6 col-sm-6">
+
+                    <input type="text" class="form-control" ng-model="input.version"/>
+
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal-header">
+
+        <a href="https://registry.fhir.org" target="_blank">Open registry in separate tab</a>
+
+    </div>
+</div>
