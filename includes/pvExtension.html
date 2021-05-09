@@ -1,22 +1,25 @@
-<div ng-show="selectedItem.kind == 'extension'">
+
     <uib-tabset>
         <br/>
         <uib-tab heading="Summary">
 
             <div class="row">
                 <div class="col-md-2">
-                    Url
+                    Url#version
                 </div>
-                <div class="col-md-4">
-                    {{selectedResource.url}}
+                <div class="col-md-10">
+                    {{selectedResource.url}}#{{selectedResource.version}}
                 </div>
+                <!--
                 <div class="col-md-2">
                     Version
                 </div>
                 <div class="col-md-4">
                     {{selectedResource.version}}
                 </div>
+                -->
             </div>
+
             <br/>
             <div class="row">
                 <div class="col-md-2">
@@ -56,13 +59,32 @@
                 </div>
             </div>
 
-
+            <br/>
             <div class="row" ng-show="extensionSummary.isSimple">
 
                 <div class="col-md-2">
-                   Type
+                   DataType
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-10">
+                    <div ng-repeat="content in extensionSummary.contents">
+
+
+                        <div class = "row" ng-repeat="typ in content">
+                            <div class="col-md-4">
+                                {{typ.code}}
+                            </div>
+
+                        </div>
+                        <div class="col-md-8">
+
+                            <span class="clickable" ng-click="selectValueSet(content.binding)">
+
+                            {{content.binding.valueSet}} </span>
+                            ({{content.binding.strength}})
+                            <div><em>{{content.binding.description}}</em></div>
+                        </div>
+
+                    </div>
 
                 </div>
             </div>
@@ -99,4 +121,4 @@
             <pre>{{selectedResource | json}}</pre>
         </uib-tab>
     </uib-tabset>
-</div>
+

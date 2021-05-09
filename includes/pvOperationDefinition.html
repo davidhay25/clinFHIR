@@ -1,0 +1,51 @@
+<uib-tabset>
+
+    <uib-tab heading="Description">
+
+        <div class="row">
+            <div class="col-md-2">
+                Description
+            </div>
+            <div class="col-md-10">
+                {{selectedResource.description}}
+            </div>
+        </div>
+        <br/>
+        <div class="row">
+            <div class="col-md-2">
+                Comment
+            </div>
+            <div class="col-md-10">
+                {{selectedResource.comment}}
+            </div>
+        </div>
+        <br/>
+        <div class="row">
+            <div class="col-md-2">
+                Invoke
+            </div>
+            <div class="col-md-10">
+                System: {{selectedResource.system}}  Type: {{selectedResource.type}}  Instance: {{selectedResource.instance}}
+            </div>
+        </div>
+
+        <h4>Parameters</h4>
+
+        <table class="table table-bordered">
+            <tr><th>Name</th><th>Use</th><th>Type</th><th>Cardinality</th><th>Documentation</th></tr>
+            <tr ng-repeat="param in selectedResource.parameter">
+                <td>{{param.name}}</td>
+                <td>{{param.use}}</td>
+                <td>{{param.type}}</td>
+                <td>{{param.min}}..{{param.max}}</td>
+                <td>{{param.documentation}}</td>
+            </tr>
+        </table>
+
+    </uib-tab>
+
+    <uib-tab heading="Json">
+        <pre>{{selectedResource | json}}</pre>
+    </uib-tab>
+
+</uib-tabset>

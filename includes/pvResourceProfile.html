@@ -1,0 +1,215 @@
+<uib-tabset>
+
+
+    <uib-tab heading="Tree">
+
+        <div class="row">
+            <div class="col-md-3">
+                <div id="resourceProfileTreeView"></div>
+            </div>
+            <div class="col-md-9">
+                <uib-tabset>
+                    <uib-tab heading="Details">
+
+                        <div ng-show="selectedED">
+                            <div><strong>{{selectedED.path}}</strong></div>
+                            <br/>
+                            <div>{{selectedED.short}}</div>
+                            <br/>
+                            <div>{{selectedED.definition}}</div>
+                            <br/>
+                            <div>{{selectedED.comment}}</div>
+                            <br/>
+                            <div>Cardinality: {{selectedED.min}}..{{selectedED.max}}</div>
+
+                            <div>Datatypes:</div>
+
+                                <div ng-repeat="typ in selectedED.type">
+                                    <span style="margin-left: 8px">{{typ.code}}</span>
+
+                                    <div ng-repeat="target in typ.targetProfile">
+
+                                        <span style="margin-left: 16px"> ->  {{target}} </span>
+                                    </div>
+
+                                </div>
+
+
+                            <div ng-repeat="(k,v) in selectedED">
+                                <div ng-if="k.indexOf('fixed') > -1">
+                                    <br/>
+                                    Fixed value:
+                                    {{k}} {{v}}
+                                </div>
+                            </div>
+
+                            <div ng-show="selectedED.binding">
+                                <br/>
+                                Binding:
+                                <span class="clickable" ng-click="selectValueSet(selectedED.binding)">
+                                    {{selectedED.binding.valueSet}}</span> ({{selectedED.binding.strength}})
+                                <div><em>{{selectedED.binding.description}}</em></div>
+                            </div>
+
+                        </div>
+
+
+
+                    </uib-tab>
+
+                    <uib-tab heading="ElementDefinition">
+                        <pre>{{selectedED | json}}</pre>
+                    </uib-tab>
+                </uib-tabset>
+
+            </div>
+        </div>
+
+    </uib-tab>
+
+
+    <uib-tab ng-show="false" heading="Snapshot contents">
+        <table class="table">
+            <tr ng-repeat="ed in selectedResource.snapshot.element" ng-show="showTableLine(ed)">
+                <td>
+                    <div uib-popover-html="edText(ed)"
+                         popover-placement="right"
+                         popover-trigger="'mouseenter'">
+                        <span class="clickableDotted">{{ed.path}}</span>
+                    </div>
+
+                </td>
+
+
+
+                <td>{{ed.min}}..{{ed.max}}</td>
+                <td>
+                    <div ng-repeat="(k,v) in ed">
+                        <div ng-if="k.indexOf('fixed') > -1">
+                            <br/>
+                            {{k}} {{v}}
+                        </div>
+                    </div>
+
+                </td>
+                <td>
+                    <div ng-show="ed.binding">
+                         <span class="clickable" ng-click="selectValueSet(ed.binding)">
+                                    {{ed.binding.valueSet}}</span> ({{ed.binding.strength}})
+                        <div><em>{{ed.binding.description}}</em></div>
+                    </div>
+
+
+                </td>
+            </tr>
+        </table>
+    </uib-tab>
+
+    <uib-tab heading="Elements with ValueSet binding">
+        <table class="table">
+            <tr><th>Path</th><th>Url</th><th>Strength</th><th>Description</th></tr>
+            <tr ng-repeat="ed in selectedResource.snapshot.element" ng-show="ed.binding">
+                <td>{{ed.path | dropFirstInPath}}</td>
+                <td>
+                    <div class="clickable" ng-click = "selectValueSet(ed.binding)">{{ed.binding.valueSet}}</div>
+                </td>
+                <td>{{ed.binding.strength}}</td>
+                <td>{{ed.binding.description}}</td>
+            </tr>
+        </table>
+    </uib-tab>
+
+
+    <uib-tab heading="Graph" select = "fitGraph()">
+        <div class="row">
+            <div class="col-md-8">
+                <div id="profileGraph"></div>
+            </div>
+            <div class="col-md-4">
+                <h4>Display options</h4>
+                <div>
+                    <checkbox ng-model="input.showBindings" ng-change="redrawGraph()"></checkbox> Bindings
+                    <span class="badge">{{selectedItem.bindings.length}}</span>
+                </div>
+
+                <div>
+                    <checkbox ng-model="input.showExtensions" ng-change="redrawGraph()"></checkbox> Extensions
+                    <span class="badge">{{selectedItem.extensions.length}}</span>
+                </div>
+
+                <div>
+                    <checkbox ng-model="input.showReferences" ng-change="redrawGraph()"></checkbox> References
+                    <span class="badge">{{selectedItem.references.length}}</span>
+                </div>
+
+                <hr/>
+                <pre>{{selectedGraphItem}}</pre>
+            </div>
+        </div>
+
+
+
+        <pre>{{selectedItem.extensions | json}}</pre>
+        <pre>{{selectedItem.bindings | json}}</pre>
+        <pre>{{selectedItem.references | json}}</pre>
+        <pre>{{selectedItem | json}}</pre>
+    </uib-tab>
+
+    <uib-tab heading="Required elements">
+        <table class="table">
+            <tr><th>Path</th><th>Cardinality</th></tr>
+            <tr ng-repeat="ed in selectedResource.snapshot.element" ng-show="ed.min > 0">
+                <td>{{ed.path}}</td>
+                <td>{{ed.min}}..{{ed.max}}</td>
+            </tr>
+        </table>
+    </uib-tab>
+
+    <uib-tab heading="Extensions">
+        <table class="table">
+            <tr><th>Path</th><th>Profile Url</th></tr>
+            <tr ng-repeat="ext in selectedItem.extensions">
+                <td>{{ext.path}}</td>
+                <td>{{ext.profile}}</td>
+
+            </tr>
+        </table>
+    </uib-tab>
+
+    <uib-tab ng-show = "false" heading="table">
+        <table class="table table-bordered">
+            <tr><th>Path</th><th>MS</th><th>Mult.</th><th>Description</th></tr>
+            <tr ng-repeat="row in allElements">
+                <td>{{row.path}}</td>
+                <td>{{row.ed.mustSupport}}</td>
+                <td>{{row.ed.min}}..{{row.ed.max}}</td>
+                <td>
+                    <div>{{row.description}}</div>
+                    <ul>
+                        <li ng-repeat="child in row.children">
+
+                            <div ng-show = "child.sliceName">
+                                {{child.sliceName}} ({{child.definition}})
+
+                            </div>
+                            <div ng-show = "child.err">
+                                {{child.err}}
+                            </div>
+
+                        </li>
+                    </ul>
+                    <div><em>{{row.err}}</em></div>
+                    <div ng-show="row.extUrl">URL:<em >{{row.extUrl}}</em></div>
+                    <div><span class="clickable" ng-click="viewVS(row.ed.binding.valueSet)">{{row.ed.binding.valueSet}}</span> </div>
+
+                </td>
+            </tr>
+        </table>
+    </uib-tab>
+
+
+    <uib-tab heading="Resource Json">
+        <pre>{{selectedResource| json}}</pre>
+    </uib-tab>
+
+</uib-tabset>

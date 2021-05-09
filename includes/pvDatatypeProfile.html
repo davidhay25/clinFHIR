@@ -1,0 +1,75 @@
+<uib-tabset>
+
+
+    <uib-tab heading="Tree">
+
+        <div class="row">
+            <div class="col-md-3">
+                <div id="datatypeProfileTreeView"></div>
+            </div>
+            <div class="col-md-9">
+                <uib-tabset>
+                    <uib-tab heading="Details">
+
+                        <div ng-show="selectedED">
+                            <div><strong>{{selectedED.path}}</strong></div>
+                            <br/>
+                            <div>{{selectedED.short}}</div>
+                            <br/>
+                            <div>{{selectedED.definition}}</div>
+                            <br/>
+                            <div>{{selectedED.comment}}</div>
+                            <br/>
+                            <div>Cardinality: {{selectedED.min}}..{{selectedED.max}}</div>
+
+                            <div>Datatypes:</div>
+
+                                <div ng-repeat="typ in selectedED.type">
+                                    <span style="margin-left: 8px">{{typ.code}}</span>
+
+                                    <div ng-repeat="target in typ.targetProfile">
+
+                                        <span style="margin-left: 16px"> ->  {{target}} </span>
+                                    </div>
+
+                                </div>
+
+
+                            <div ng-repeat="(k,v) in selectedED">
+                                <div ng-if="k.indexOf('fixed') > -1">
+                                    <br/>
+                                    Fixed value:
+                                    {{k}} {{v}}
+                                </div>
+                            </div>
+
+                            <div ng-show="selectedED.binding">
+                                <br/>
+                                Binding:
+                                <span class="clickable" ng-click="selectValueSet(selectedED.binding)">
+                                    {{selectedED.binding.valueSet}}</span> ({{selectedED.binding.strength}})
+                                <div><em>{{selectedED.binding.description}}</em></div>
+                            </div>
+
+                        </div>
+
+
+
+                    </uib-tab>
+
+                    <uib-tab heading="ElementDefinition">
+                        <pre>{{selectedED | json}}</pre>
+                    </uib-tab>
+                </uib-tabset>
+
+            </div>
+        </div>
+
+    </uib-tab>
+
+
+    <uib-tab heading="Resource Json">
+        <pre>{{selectedResource| json}}</pre>
+    </uib-tab>
+
+</uib-tabset>

@@ -8,11 +8,14 @@
     <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
     <link rel="stylesheet" type="text/css" href="css/main.css"/>
+    <link rel="stylesheet" type="text/css" href="css/vis.min.css"/>
+    <script src="js/libs/angular-bootstrap-checkbox.js"></script>
 
 
     <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
     <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
 
+    <script src="js/libs/angular-sanitize.js"></script>
 
     <style>
 
@@ -33,9 +36,17 @@
             color: black;
         }
 
+        #profileGraph {
+            width: 100%;
+            height: 500px;
+
+            border: 1px solid lightgray;
+        }
+
     </style>
 
     <script src="js/libs/jstree.min.js"></script>
+    <script src="js/libs/vis.min.js"></script>
     <!--
     <link rel="stylesheet" type="text/css" href="css/vis.min.css"/>
     <script src="js/libs/angular-sanitize.js"></script>
@@ -50,7 +61,7 @@
     <script src="js/libs/angular-sanitize.js"></script>
 -->
     <script>
-        angular.module("sampleApp",['ui.bootstrap']).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.bootstrap',"ngSanitize",'ui.checkbox']).config(function($locationProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
@@ -97,7 +108,8 @@
                     ng-change="selectPackage(input.package)"
                     ng-options="package.display for package in allPackages"></select>
 
-            <uib-accordion>
+            <div class="listScroll">
+                <uib-accordion>
                 <div  ng-repeat="(k,v) in package.grouped" uib-accordion-group class="panel-default">
                     <uib-accordion-heading>
                         {{k}}
@@ -114,26 +126,28 @@
                 </div>
 
             </uib-accordion>
-
+            </div>
 
         </div>
 
         <div class="col-md-9">
-            {{selectedItem}}
+
+
+
+            <div class="rounded-box" ng-show="selectedItem">
+                <div style="padding: 8px">
+                    <strong>{{selectedItem.url}}</strong>
+                    <div><em>{{selectedItem.display}}</em></div>
+                </div>
+
+            </div>
+
 
             <!---------------------------------    extension -------------------->
-
-            <ng-include src="'/includes/pvExtension.html'"></ng-include>
-
-<!--
             <div ng-show="selectedItem.kind == 'extension'">
-                <uib-tabset>
-                    <uib-tab heading="Json">
-                        <pre>{{selectedResource | json}}</pre>
-                    </uib-tab>
-                </uib-tabset>
+                <ng-include src="'/includes/pvExtension.html'"></ng-include>
             </div>
--->
+
             <!---------------------------------    misc -------------------->
 
             <div ng-show="selectedItem.kind == 'misc'">
@@ -147,27 +161,32 @@
             <!---------------------------------    operationdefinition -------------------->
 
             <div ng-show="selectedItem.kind == 'operationdefinition'">
-                <uib-tabset>
-                    <uib-tab heading="Json">
-                        <pre>{{selectedResource | json}}</pre>
-                    </uib-tab>
-                </uib-tabset>
+                <ng-include src="'/includes/pvOperationDefinition.html'"></ng-include>
+
+
             </div>
 
             <!---------------------------------    searchparameter -------------------->
 
             <div ng-show="selectedItem.kind == 'searchparameter'">
+                <ng-include src="'/includes/pvSearchParameter.html'"></ng-include>
+                <!--
                 <uib-tabset>
                     <uib-tab heading="Json">
                         <pre>{{selectedResource | json}}</pre>
                     </uib-tab>
                 </uib-tabset>
+                -->
             </div>
 
 
             <!---------------------------------    valueset -------------------->
 
             <div ng-show="selectedItem.kind == 'valueset'">
+
+                <ng-include src="'/includes/pvValueSet.html'"></ng-include>
+
+                <!--
                 <uib-tabset>
                     <uib-tab heading="Json">
                         <pre>{{selectedResource | json}}</pre>
@@ -215,6 +234,7 @@
 
                     </uib-tab>
                 </uib-tabset>
+                -->
             </div>
 
             <!---------------------------------    codesystem -------------------->
@@ -257,7 +277,8 @@
 
             <!---------------------------------    resource profile -------------------->
             <div ng-show="selectedItem.kind == 'resourceprofile'">
-
+                <ng-include src="'/includes/pvResourceProfile.html'"></ng-include>
+                <!--
                 <uib-tabset>
                     <uib-tab heading="Json">
                         <pre>{{selectedResource| json}}</pre>
@@ -302,9 +323,6 @@
                         <table class="table table-bordered">
                             <tr><th>Path</th><th>MS</th><th>Mult.</th><th>Description</th></tr>
                             <tr ng-repeat="row in allElements">
-                                <!-- <td  ng-style="{ 'padding-left': (row.path | pathindent) }">{{row.path}}</td> -->
-
-                                <!-- <td><div style="white-space: pre">{{showElementPath(row.path)}}</div></td>-->
                                 <td>{{row.path}}</td>
                                 <td>{{row.ed.mustSupport}}</td>
                                 <td>{{row.ed.min}}..{{row.ed.max}}</td>
@@ -312,7 +330,7 @@
                                     <div>{{row.description}}</div>
                                     <ul>
                                         <li ng-repeat="child in row.children">
-                                            <!--<pre>{{child | json}}</pre>-->
+
                                             <div ng-show = "child.sliceName">
                                                 {{child.sliceName}} ({{child.definition}})
 
@@ -320,9 +338,7 @@
                                             <div ng-show = "child.err">
                                                 {{child.err}}
                                             </div>
-                                            <!--
-                                            <div><em>{{child.err}}</em></div>
-                                            -->
+
                                         </li>
                                     </ul>
                                     <div><em>{{row.err}}</em></div>
@@ -336,17 +352,18 @@
 
                 </uib-tabset>
 
+                -->
+
             </div>
 
 
             <!---------------------------------    datatype profile -------------------->
 
             <div ng-show="selectedItem.kind == 'datatypeprofile'">
-                <uib-tabset>
-                    <uib-tab heading="Json">
-                        <pre>{{selectedResource | json}}</pre>
-                    </uib-tab>
-                </uib-tabset>
+
+                <ng-include src="'/includes/pvDatatypeProfile.html'"></ng-include>
+
+
             </div>
 
             <!---------------------------------    conceptmap -------------------->

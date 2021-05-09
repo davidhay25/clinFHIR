@@ -1,5 +1,5 @@
 angular.module("sampleApp").controller('packageViewerCtrl',
-    function ($scope,$http,packageViewerSvc) {
+    function ($scope,$http,packageViewerSvc,$uibModal,$timeout) {
 
         $scope.input = {}
 
@@ -12,23 +12,31 @@ angular.module("sampleApp").controller('packageViewerCtrl',
             }
         )
 
+        //load a package from the server...
         $scope.selectPackage = function(package) {
-            let url = "/registry/" + package.name + "/" + package.version;
 
-            $http.get(url).then(
-                function (data) {
-                    $scope.package = data.data;
-                    console.log(data.data)
+            packageViewerSvc.loadPackage(package.name,package.version).then(
+                function (package) {
+                    $scope.package = package;
+                }, function (err) {
+                    alert ("Package could not be loaded")
                 }
             )
+            let url = "/registry/" + package.name + "/" + package.version;
         }
+
+        //temp load us core
+        $scope.selectPackage({name:'hl7.fhir.us.core',version:'current'})
+
+
 
         function clearAll() {
             delete $scope.expandedVS;
             delete $scope.expandVSError;
             delete $scope.expandUrl;
-            //delete $scope.selectedResource;
+
         }
+
 
         $scope.uploadVS = function(vs) {
             if (vs.id) {
@@ -42,7 +50,7 @@ angular.module("sampleApp").controller('packageViewerCtrl',
                     }
                 )
             } else {
-                alert("A ValueSet miust have an id to be uploaded")
+                alert("A ValueSet must have an id to be uploaded")
             }
 
         }
@@ -64,12 +72,34 @@ angular.module("sampleApp").controller('packageViewerCtrl',
             )
         }
 
+        $scope.selectValueSetDEP = function(binding) {
+            //find the item in the package that corresponds to the binding.vs
+            let ar = $scope.package.grouped.ValueSet.filter(item => item.url == binding.valueSet)
+
+            if (ar.length == 1) {
+                let item = ar[0];       //the package item that has the ValueSet with this url...
+                $scope.selectItem(ar[0])
+                //$scope.selectedItem = ar[0]
+            } else {
+                alert("Sorry, this VS is not in the package. Working on it...")
+            }
+
+            console.log(ar)
+
+
+
+        }
+
         $scope.selectItem = function (item) {
             delete $scope.selectedResource;
             console.log(item)
             clearAll()
             $scope.selectedItem = item;
+
+
             let url = "/registry/" + $scope.package.name + "/" + $scope.package.version + "/" + item.name;
+
+            //packageViewerSvc.getResourceByUrl()
             $http.get(url).then(
                 function (data) {
                     $scope.selectedResource = data.data;
@@ -79,6 +109,13 @@ angular.module("sampleApp").controller('packageViewerCtrl',
                         $scope.extensionSummary = packageViewerSvc.extensionSummary($scope.selectedResource)
                     }
 
+                    if (item.kind == 'resourceprofile') {
+                        //default to showing bindings...
+                        let graphData = packageViewerSvc.makeGraph(item,{showBindings : true});
+                        $scope.redrawGraph()
+
+                        //
+                    }
 
                     if (item.type == "StructureDefinition") {
                         packageViewerSvc.makeLogicalModel(data.data).then(
@@ -86,8 +123,14 @@ angular.module("sampleApp").controller('packageViewerCtrl',
                                 console.log(model)
                                 //$scope.allElements = model
 
-                                $scope.treeData = packageViewerSvc.createTreeArray(data.data)
-                                drawTree();
+                                if (item.kind == 'resourceprofile') {
+                                    $scope.treeData = packageViewerSvc.createTreeArray(data.data)
+                                    drawTree('resourceProfileTreeView');
+                                } else {
+                                    $scope.treeData = packageViewerSvc.createTreeArray(data.data)
+                                    drawTree('datatypeProfileTreeView');
+                                }
+
 
                             },
                             function (err) {
@@ -113,34 +156,172 @@ angular.module("sampleApp").controller('packageViewerCtrl',
             return disp;
         }
 
-        //hl7.fhir.uv.ips#1.0.0
 
+        $scope.edText = function(ed){
+            let text = "";
+            text += ed.short || ""  ;
+            text += "<br/>"
+            text += ed.definition || "";
+            text += "<br/>"
+            text += ed.comment || "";
 
-        function drawTree() {
-
-            $('#treeView').jstree('destroy');
-            $('#treeView').jstree(
-                {'core': {'multiple': false, 'data': $scope.treeData, 'themes': {name: 'proton', responsive: true}}}
-            ).on('changed.jstree', function (e, data) {
-                //seems to be the node selection event...
-
-                if (data.node) {
-                    $scope.selectedNode = data.node;
-                    $scope.selectedED = data.node.data.ed
-                }
-
-                $scope.$digest();       //as the event occurred outside of angular...
-
-            }).on('redraw.jstree', function (e, data) {
-
-                //ensure the selected node remains so after a redraw...
-                if ($scope.treeIdToSelect) {
-                    $("#lmTreeView").jstree("select_node", "#" + $scope.treeIdToSelect);
-                    delete $scope.treeIdToSelect
-                }
-
-            });
-
-
+            return text
         }
+
+        $scope.showTableLine = function(ed) {
+            let ar = ed.path.split('.')
+            if (ar.length > 1 && ['id','meta','implicitRules','contained','extension','modifierExtension'].indexOf(ar[1]) > -1) {
+                return false
+            } else {
+                return true;
+            }
+        }
+
+        $scope.selectValueSet = function(binding) {
+            $uibModal.open({
+                templateUrl: 'modalTemplates/pvViewVS.html',
+                size: 'lg',
+                controller: function($scope,$http,binding,server,packageViewerSvc){
+                    $scope.binding = binding
+
+                    $scope.uploadVS = function() {
+                        delete $scope.expandVSError;
+
+                        packageViewerSvc.getResourceByUrl(binding.valueSet,'valueset').then(
+                            function(resource) {
+                                packageViewerSvc.uploadVS(resource)
+                            },
+                            function(err) {
+                                alert ("Sorry, this ValueSet is neither in the Package or FHIR Core")
+                            }
+                        )
+                    }
+
+                    $scope.expand = function(filter) {
+                        let vsUrl = binding.valueSet;
+                        let ar = vsUrl.split('|');      //todo do need to think about url versioning at some point
+                        let url = server.url + "ValueSet/$expand?url=" + ar[0];
+                        if (filter) {
+                            url += "&filter=" + $scope.filter
+                        }
+                        $scope.expandUrl = url
+                        $scope.showWaiting = true
+                        $http.get(url).then(
+                            function(data) {
+                                $scope.expandedVS = data.data
+                            },
+                            function(err) {
+
+                                $scope.expandVSError = err
+                            }
+                        ).finally(
+                            function(){
+                                $scope.showWaiting = false
+                            }
+                        )
+                    }
+
+
+                },
+                backdrop: 'static',
+                resolve : {
+                    binding: function () {          //the default config
+                        return binding;
+                    },
+                    server : function() {
+                        return $scope.terminologyServer;
+                    }
+                 }})
+
+    }
+
+    $scope.redrawGraph = function() {
+        let options = {showBindings:$scope.input.showBindings}
+        options.showExtensions = $scope.input.showExtensions;
+        options.showReferences = $scope.input.showReferences;
+
+        let graphData = packageViewerSvc.makeGraph($scope.selectedItem,options);
+        drawGraph(graphData)
+    }
+
+
+    function drawGraph(graphData) {
+        delete $scope.selectedGraphItem;
+        var container = document.getElementById('profileGraph');
+        let options = {
+            physics: {
+                enabled: true,
+                barnesHut: {
+                    gravitationalConstant: -10000,
+                    centralGravity: .3,
+                    springConstant: .04
+                }
+            },
+            layout: {
+                randomSeed: 966706  //to ensure the initial layout is always the same - $scope.subGraph.getSeed()
+            }
+        };
+        $scope.profileGraph = new vis.Network(container, graphData, options);
+
+        $scope.profileGraph.on("click", function (obj) {
+
+            let nodeId = obj.nodes[0];  //get the first node
+            if (nodeId) {
+                //a node was clicked
+                var node = graphData.nodes.get(nodeId);
+
+                var item = node.item;
+                if (item) {
+
+                    $scope.selectedGraphItem = item
+                    $scope.$digest();
+
+                }
+            } else {
+                let edgeId = obj.edges[0]
+                if (edgeId) {
+                    let edge = graphData.edges.get(edgeId);
+                    $scope.selectEdge(edge)
+                    $scope.$digest();
+                }
+            }
+
+        });
+
+
+    }
+    $scope.fitGraph = function(){
+        if ($scope.profileGraph) {
+            $timeout(function(){$scope.profileGraph.fit()},500)
+        }
+
+    };
+
+    function drawTree(elementId) {
+        let nodeId = '#'+elementId;
+        $(nodeId).jstree('destroy');
+        $(nodeId).jstree(
+            {'core': {'multiple': false, 'data': $scope.treeData, 'themes': {name: 'proton', responsive: true}}}
+        ).on('changed.jstree', function (e, data) {
+            //seems to be the node selection event...
+
+            if (data.node) {
+                $scope.selectedNode = data.node;
+                $scope.selectedED = data.node.data.ed
+            }
+
+            $scope.$digest();       //as the event occurred outside of angular...
+
+        }).on('redraw.jstree', function (e, data) {
+
+            //ensure the selected node remains so after a redraw...
+            if ($scope.treeIdToSelect) {
+                $("#lmTreeView").jstree("select_node", "#" + $scope.treeIdToSelect);
+                delete $scope.treeIdToSelect
+            }
+
+        });
+
+
+    }
     })
