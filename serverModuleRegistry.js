@@ -9,7 +9,9 @@ let fs = require('fs')
 let AdmZip = require("adm-zip");
 
 //todo - need to figure out how to set this on different machines
-let packageRoot = "/Users/davidhay/.fhir/packages/";     //where, on this machine, the packages are found
+//let packageRoot = "/Users/davidhay/.fhir/packages/";     //where, on this machine, the packages are found
+
+let packageRoot = "fhirPackages/";     //where, on this machine, the packages are found
 
 function setup(app) {
 
