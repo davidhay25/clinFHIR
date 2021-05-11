@@ -28,6 +28,9 @@
             color: mediumpurple;
         }
 
+        .msDEP {
+            font-size: larger;
+        }
         .required {
             color: red;
         }
@@ -85,30 +88,38 @@
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
         <div class="col-md-4">
             <a class="navbar-brand" href="#">
-                Package Viewer: {{package.name}}#{{package.version}}
+                Package Viewer:
+                <div><strong>{{package.name}}#{{package.version}}</strong></div>
             </a>
         </div>
 
+
+        <div class="col-md-4">
+            <div class="navbar-text">
+                {{package.packageJson.title}}
+
+            </div>
+        </div>
+
+
         <div class="col-md-2">
             <div class="navbar-text">
-
-
                 <a ng-href="{{package.packageJson.canonical}}"
                    target="_blank">View Current IG</a>
+                <div><a ng-href="https://registry.fhir.org/package/{{package.name}}%7c{{package.version}}"
+                        target="_blank">View in registry</a></div>
             </div>
-
-        </div>
-
-
-
-        <div class="col-md-2">
             <div class="navbar-text">
-                <a ng-href="https://registry.fhir.org/package/{{package.name}}%7c{{package.version}}"
-                   target="_blank">View in registry</a>
-            </div>
+
 
         </div>
-        <div class="col-md-3 col-sm-3">
+
+
+
+
+
+        </div>
+        <div class="col-md-2 col-sm-2">
             <div class="navbar-text pull-right">
                 <a href="https://www.lyniate.com/" target="_blank">
                     <img  src="/icons/supported_by_lyniate.png"/>

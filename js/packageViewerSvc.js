@@ -476,6 +476,11 @@ return summary;
                             }
                         })
                     }
+/*
+                    if (item.data.ed.mustSupport) {
+                        attr.class += " ms"
+                    }
+                    */
 
                     if (item.data.ed.min > 0) {
                         attr.class += " required"

@@ -5,15 +5,26 @@
 
         <div class="row">
             <div class="col-md-3">
-                <div id="resourceProfileTreeView"></div>
+                <div class="myScroll">
+                    <div id="resourceProfileTreeView"></div>
+                </div>
+
+
             </div>
             <div class="col-md-9">
                 <uib-tabset>
                     <uib-tab heading="Details">
 
                         <div ng-show="selectedED">
+                            <div class='pull-right' ng-show = "selectedED.mustSupport">
+                                <span class="badge"> ** MUST SUPPORT **</span>
+                            </div>
+
                             <div><strong>{{selectedED.path}}</strong></div>
                             <br/>
+
+
+
                             <div>{{selectedED.short}}</div>
                             <br/>
                             <div>{{selectedED.definition}}</div>
@@ -189,9 +200,21 @@
 
     <uib-tab heading="Required elements">
         <table class="table">
-            <tr><th>Path</th><th>Cardinality</th></tr>
+            <tr><th>Path</th><th>Definition</th><th>Cardinality</th></tr>
             <tr ng-repeat="ed in selectedResource.snapshot.element" ng-show="ed.min > 0">
                 <td>{{ed.path}}</td>
+                <td>{{ed.definition}}</td>
+                <td>{{ed.min}}..{{ed.max}}</td>
+            </tr>
+        </table>
+    </uib-tab>
+
+    <uib-tab heading="Must Support">
+        <table class="table">
+            <tr><th>Path</th><th>Definition</th><th>Cardinality</th></tr>
+            <tr ng-repeat="ed in selectedResource.snapshot.element" ng-show="ed.mustSupport">
+                <td>{{ed.path}}</td>
+                <td>{{ed.definition}}</td>
                 <td>{{ed.min}}..{{ed.max}}</td>
             </tr>
         </table>
@@ -209,6 +232,28 @@
     </uib-tab>
 
     <uib-tab heading="Snapshot">
+        <br/>
+        <table class="table table-bordered">
+            <tr><th>Key elements</th><th>Element Definition</th></tr>
+            <tr ng-repeat="row in SD.snapshot.element">
+                <td>
+                    <div><strong> Cnt: </strong>{{$index + 1}}/{{SD.snapshot.element.length}}</div>
+                    <div><strong> Path: </strong>{{row.path}}</div>
+                    <div><strong> Id: </strong>{{row.id}}</div>
+                    <div><strong> SliceName: </strong>{{row.sliceName}}</div>
+                    <div><strong> Mult: </strong>{{row.min}}..{{row.max}}</div>
+                </td>
+
+                <td>
+                    <pre>{{row | cleanED | json}}</pre>
+                </td>
+            </tr>
+        </table>
+        <em>Mapping & Constraints have been removed from the ElementDefintion</em>
+    </uib-tab>
+
+
+    <uib-tab ng-show = "false" heading="Snapshot">
         <table class="table table-bordered">
             <tr><th>Path / Id</th><th>sliceName</th><th>Mult.</th><th>Element Definition</th></tr>
             <tr ng-repeat="row in SD.snapshot.element">
