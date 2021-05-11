@@ -212,7 +212,7 @@ angular.module("sampleApp").controller('packageViewerCtrl',
             $scope.selectedItem = item;
             switch (item.kind) {
                 case "example" :
-                    //$scope.example =
+                    //examples are special...
                     delete $scope.selectedExample
                     break;
                 default :
@@ -222,6 +222,11 @@ angular.module("sampleApp").controller('packageViewerCtrl',
                     $http.get(url).then(
                         function (data) {
                             $scope.selectedResource = data.data;
+
+                            if (item.kind = "capabilitystatement") {
+                                //I copied the code from the server query, which uses this object...
+                                $scope.conformance = data.data;
+                            }
 
                             if (item.kind == 'extension') {
                                 //generate a summary of the contents of an extension for the display
@@ -240,7 +245,6 @@ angular.module("sampleApp").controller('packageViewerCtrl',
 
                                 //Add to scope so can create snapshot list
                                 $scope.SD = data.data
-
 
                                 packageViewerSvc.makeLogicalModel(data.data).then(
                                     function (model) {
@@ -365,6 +369,13 @@ angular.module("sampleApp").controller('packageViewerCtrl',
                  }})
 
     }
+
+
+        //to support the display of types in a capability statement
+        //todo - if this gets too big, consider a separate controller...
+        $scope.showType = function(type) {
+            $scope.selectedType = type;
+        }
 
     $scope.redrawGraph = function() {
         let options = {showBindings:$scope.input.showBindings}

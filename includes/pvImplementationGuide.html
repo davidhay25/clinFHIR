@@ -1,0 +1,15 @@
+
+<uib-tabset>
+    <uib-tab heading="ImplementationGuide Json">
+        <pre>{{selectedResource | json}}</pre>
+    </uib-tab>
+    <uib-tab heading="All extensions">
+        <table class="table">
+            <tr ng-repeat="ext in package.grouped.Extension">
+                <td>{{ext.url}}</td>
+            </tr>
+        </table>
+
+    </uib-tab>
+</uib-tabset>
+

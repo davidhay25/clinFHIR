@@ -422,13 +422,15 @@
             <!---------------------------------    capabilitystatement -------------------->
 
             <div ng-show="selectedItem.kind == 'capabilitystatement'">
-                <pre>{{selectedResource | json}}</pre>
+
+                <ng-include src="'/includes/pvCapabilityStatement.html'"></ng-include>
+
             </div>
 
             <!---------------------------------    implementation guide -------------------->
 
             <div ng-show="selectedItem.kind == 'implementationguide'">
-                <pre>{{selectedResource | json}}</pre>
+                <ng-include src="'/includes/pvImplementationGuide.html'"></ng-include>
             </div>
 
 

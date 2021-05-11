@@ -4,6 +4,9 @@
 //https://www.npmjs.com/package/download-tarball
 let download = require('download-tarball')
 
+let packageRoot = process.env.packageRoot || "fhirPackages/"; //where, on this machine, the packages are found
+console.log("Package root: " + packageRoot)
+
 let http = require('http')
 let fs = require('fs')
 let AdmZip = require("adm-zip");
@@ -11,7 +14,7 @@ let AdmZip = require("adm-zip");
 //todo - need to figure out how to set this on different machines
 //let packageRoot = "/Users/davidhay/.fhir/packages/";     //where, on this machine, the packages are found
 
-let packageRoot = "fhirPackages/";     //where, on this machine, the packages are found
+//let packageRoot = "fhirPackages/";     //where, on this machine, the packages are found
 
 function setup(app) {
 
@@ -182,6 +185,7 @@ function setup(app) {
                                             hash.Extension = hash.Extension || []
                                             hash.Extension.push({
                                                 name: file,
+                                                type: 'StructureDefinition',
                                                 kind: 'extension',
                                                 display: display,
                                                 url: resource.url
@@ -311,13 +315,19 @@ function setup(app) {
                             let exHash = {}
                             fs.readdirSync(dirName + "/example", {withFileTypes: true}).forEach(function (dirEnt) {
                                 let fullName = dirName+ "/example/" + dirEnt.name;
-                                //console.log(fullName)
-                                let contents = fs.readFileSync(fullName , {encoding: 'utf8'});
-                                let example = JSON.parse(contents)
-                                if (example.resourceType) {
-                                    exHash[example.resourceType] = exHash[example.resourceType] || []
-                                    exHash[example.resourceType].push({filename:dirEnt.name,id:example.id})
+                                try {
+                                    let contents = fs.readFileSync(fullName , {encoding: 'utf8'});
+                                    //console.log(contents)
+                                    let example = JSON.parse(contents)
+                                    if (example.resourceType) {
+                                        exHash[example.resourceType] = exHash[example.resourceType] || []
+                                        exHash[example.resourceType].push({filename:dirEnt.name,id:example.id})
+                                    }
+                                } catch (ex) {
+                                    console.log(fullName)
+                                    console.log(ex)
                                 }
+
 
                             });
                             hash["Example"] = []

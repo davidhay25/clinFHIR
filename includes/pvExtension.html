@@ -2,7 +2,7 @@
     <uib-tabset>
         <br/>
         <uib-tab heading="Summary">
-
+            <br/>
             <div class="row">
                 <div class="col-md-2">
                     Url#version
@@ -66,20 +66,18 @@
                    DataType
                 </div>
                 <div class="col-md-10">
+
+
                     <div ng-repeat="content in extensionSummary.contents">
 
-
-                        <div class = "row" ng-repeat="typ in content">
-                            <div class="col-md-4">
-                                {{typ.code}}
-                            </div>
-
+                        <div ng-repeat="typ in content.type">
+                            {{typ.code}}
                         </div>
-                        <div class="col-md-8">
 
+                        <div ng-show="content.binding">
                             <span class="clickable" ng-click="selectValueSet(content.binding)">
-
-                            {{content.binding.valueSet}} </span>
+                                {{content.binding.valueSet}}
+                            </span>
                             ({{content.binding.strength}})
                             <div><em>{{content.binding.description}}</em></div>
                         </div>
@@ -113,11 +111,35 @@
 
 
         </uib-tab>
+
+        <uib-tab heading="Snapshot">
+            <br/>
+            <table class="table table-bordered">
+                <tr><th>Key elements</th><th>Element Definition</th></tr>
+                <tr ng-repeat="row in SD.snapshot.element">
+                    <td>
+                        <div><strong> Cnt: </strong>{{$index + 1}}/{{SD.snapshot.element.length}}</div>
+                        <div><strong> Path: </strong>{{row.path}}</div>
+                        <div><strong> Id: </strong>{{row.id}}</div>
+                        <div><strong> SliceName: </strong>{{row.sliceName}}</div>
+                        <div><strong> Mult: </strong>{{row.min}}..{{row.max}}</div>
+                    </td>
+
+                    <td>
+                        <pre>{{row | cleanED | json}}</pre>
+                    </td>
+                </tr>
+            </table>
+            <em>Mapping & Constraints have been removed from the ElementDefintion</em>
+        </uib-tab>
+
+
         <uib-tab heading="Summary object json">
             <br/>
             <div><pre>{{extensionSummary | json}}</pre></div>
         </uib-tab>
         <uib-tab heading="Resource Json">
+            <br/>
             <pre>{{selectedResource | json}}</pre>
         </uib-tab>
     </uib-tabset>
