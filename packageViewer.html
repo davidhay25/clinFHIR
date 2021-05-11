@@ -83,12 +83,25 @@
 <div ng-app="sampleApp" ng-controller="packageViewerCtrl" class="container-fluid">
 
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <a class="navbar-brand" href="#">
                 Package Viewer: {{package.name}}#{{package.version}}
             </a>
         </div>
-        <div class="col-md-3">
+
+        <div class="col-md-2">
+            <div class="navbar-text">
+
+
+                <a ng-href="{{package.packageJson.canonical}}"
+                   target="_blank">View Current IG</a>
+            </div>
+
+        </div>
+
+
+
+        <div class="col-md-2">
             <div class="navbar-text">
                 <a ng-href="https://registry.fhir.org/package/{{package.name}}%7c{{package.version}}"
                    target="_blank">View in registry</a>
@@ -136,6 +149,9 @@
 
                     <div class="list-group">
                         <div class="list-group-item" ng-repeat="item in v" style="cursor: pointer">
+
+                            <span class="pull-right badge">{{item.value.length}}</span>
+
                             <div ng-click="selectItem(item)">{{item.display}}</div>
                         </div>
                     </div>
@@ -162,6 +178,7 @@
             <div class="rounded-box" ng-show="selectedItem">
                 <div style="padding: 8px">
                     <strong>{{selectedItem.url}}</strong>
+                    <span class="pull-right">{{selectedItem.name}}</span>
                     <div><em>{{selectedItem.display}}</em></div>
                 </div>
 
@@ -187,8 +204,6 @@
 
             <div ng-show="selectedItem.kind == 'operationdefinition'">
                 <ng-include src="'/includes/pvOperationDefinition.html'"></ng-include>
-
-
             </div>
 
             <!---------------------------------    searchparameter -------------------->
@@ -393,6 +408,30 @@
                     </uib-tab>
                 </uib-tabset>
             </div>
+
+
+            <!---------------------------------    example -------------------->
+
+            <div ng-show="selectedItem.kind == 'example'">
+
+                <ng-include src="'/includes/pvExample.html'"></ng-include>
+
+
+            </div>
+
+            <!---------------------------------    capabilitystatement -------------------->
+
+            <div ng-show="selectedItem.kind == 'capabilitystatement'">
+                <pre>{{selectedResource | json}}</pre>
+            </div>
+
+            <!---------------------------------    implementation guide -------------------->
+
+            <div ng-show="selectedItem.kind == 'implementationguide'">
+                <pre>{{selectedResource | json}}</pre>
+            </div>
+
+
 
         </div>
     </div>

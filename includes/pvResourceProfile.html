@@ -208,31 +208,21 @@
         </table>
     </uib-tab>
 
-    <uib-tab ng-show = "false" heading="table">
+    <uib-tab heading="Snapshot">
         <table class="table table-bordered">
-            <tr><th>Path</th><th>MS</th><th>Mult.</th><th>Description</th></tr>
-            <tr ng-repeat="row in allElements">
-                <td>{{row.path}}</td>
-                <td>{{row.ed.mustSupport}}</td>
-                <td>{{row.ed.min}}..{{row.ed.max}}</td>
+            <tr><th>Path / Id</th><th>sliceName</th><th>Mult.</th><th>Element Definition</th></tr>
+            <tr ng-repeat="row in SD.snapshot.element">
                 <td>
-                    <div>{{row.description}}</div>
-                    <ul>
-                        <li ng-repeat="child in row.children">
+                    <div>{{row.path}}</div>
+                    {{row.id}}
+                </td>
 
-                            <div ng-show = "child.sliceName">
-                                {{child.sliceName}} ({{child.definition}})
+                <td>{{row.sliceName}}</td>
+                <td>{{row.min}}..{{row.max}}</td>
+                <td>
 
-                            </div>
-                            <div ng-show = "child.err">
-                                {{child.err}}
-                            </div>
+                    <pre>{{row | cleanED | json}}</pre>
 
-                        </li>
-                    </ul>
-                    <div><em>{{row.err}}</em></div>
-                    <div ng-show="row.extUrl">URL:<em >{{row.extUrl}}</em></div>
-                    <div><span class="clickable" ng-click="viewVS(row.ed.binding.valueSet)">{{row.ed.binding.valueSet}}</span> </div>
 
                 </td>
             </tr>

@@ -24,7 +24,6 @@ angular.module("sampleApp").controller('packageViewerCtrl',
             }
         )
 
-
         $scope.loadPackage = function (name,version) {
             //enter the name & version, then download from the registry
 
@@ -45,40 +44,15 @@ angular.module("sampleApp").controller('packageViewerCtrl',
                         let version = vo.version;
                         performDownload(name,version);
 
-                        /*
-                                                $scope.downloadingFromRegistry = {name:name,version:version};
-                                                packageViewerSvc.downloadPackage(name,version).then(
-                                                    function(vo){
-                                                        let wasDownloaded = vo.wasDownloaded;
-                                                        let packageSummary = vo.packageSummary;
-                                                        //The packageSummary is returned whether it has to be downloaded first, or not...
-                                                        if (vo.wasDownloaded) {
-                                                            //add to the list of packages
-                                                            $scope.allPackages.push({name:name,version:version,display:name + '#' + version})
-                                                            sortAllPackages()
-                                                        }
-                                                        $scope.selectPackage({name:name,version:version})
-                                                        alert("The package has been downloaded")
-                                                    },
-                                                    function (message){
-                                                        //Usually means the package has already been downloaded
-                                                        //NOT ANY MORE - not currently used
-                                                        alert(message)
-
-                                                    }
-                                                ).finally(function(){
-                                                    delete $scope.downloadingFromRegistry ;
-                                                })
-                                                */
 
                     }, function(){
 
                     })
-
             }
 
 
             function performDownload(name,version) {
+                clearAll();
                 $scope.downloadingFromRegistry = {name:name,version:version};
                 packageViewerSvc.downloadPackage(name,version).then(
                     function(vo){
@@ -123,7 +97,7 @@ angular.module("sampleApp").controller('packageViewerCtrl',
 
         // ============================    The module can be invoked passing across the package...
         var hash = $location.hash();
-        //http://localhost:8081/packageViewer.html#hl7.fhir.us.core-current
+
         if (hash) {
             console.log("server passed in: " + hash)
             let ar = hash.split('|')
@@ -140,10 +114,23 @@ angular.module("sampleApp").controller('packageViewerCtrl',
 
         } else {
             //temp during debugging
-            $scope.selectPackage({name:'hl7.fhir.us.core',version:'current'})
+            let name = 'hl7.fhir.uv.ips';
+            let version = "1.0.0"
+            $scope.selectPackage({name:name,version:version})
+            $timeout(
+                function() {
+                    setDropDown(name,version)
+                },1000)
+
         }
 
-
+        function setDropDown(name,version) {
+            $scope.allPackages.forEach(function (package){
+                if (package.name == name && package.version == version) {
+                    $scope.input.package = package;
+                }
+            })
+        }
 
         function clearAll() {
             delete $scope.expandedVS;
@@ -205,58 +192,87 @@ angular.module("sampleApp").controller('packageViewerCtrl',
 
         }
 
-        $scope.selectItem = function (item) {
-            delete $scope.selectedResource;
-            console.log(item)
-            clearAll()
-            $scope.selectedItem = item;
-
-
-            let url = "/registry/" + $scope.package.name + "/" + $scope.package.version + "/" + item.name;
-
+        $scope.getExample = function(item) {
+            delete $scope.selectedExample
+            let url = "/registry/example/" + $scope.package.name + "/" + $scope.package.version + "/" + item.filename;
             //packageViewerSvc.getResourceByUrl()
             $http.get(url).then(
                 function (data) {
-                    $scope.selectedResource = data.data;
-
-                    if (item.kind == 'extension') {
-                        //generate a summary of the contents of an extension for the display
-                        $scope.extensionSummary = packageViewerSvc.extensionSummary($scope.selectedResource)
-                    }
-
-                    if (item.kind == 'resourceprofile') {
-                        //default to showing bindings...
-                        let graphData = packageViewerSvc.makeGraph(item,{showBindings : true});
-                        $scope.redrawGraph()
-
-                        //
-                    }
-
-                    if (item.type == "StructureDefinition") {
-                        packageViewerSvc.makeLogicalModel(data.data).then(
-                            function (model) {
-                                console.log(model)
-                                //$scope.allElements = model
-
-                                if (item.kind == 'resourceprofile') {
-                                    $scope.treeData = packageViewerSvc.createTreeArray(data.data)
-                                    drawTree('resourceProfileTreeView');
-                                } else {
-                                    $scope.treeData = packageViewerSvc.createTreeArray(data.data)
-                                    drawTree('datatypeProfileTreeView');
-                                }
-
-
-                            },
-                            function (err) {
-                                console.log(err)
-                            }
-                        )
-                    }
-
+                    $scope.selectedExample = data.data;
                 }
             )
+
         }
+
+        $scope.selectItem = function (item) {
+            delete $scope.selectedResource;
+            delete $scope.SD;
+            console.log(item)
+            clearAll()
+            $scope.selectedItem = item;
+            switch (item.kind) {
+                case "example" :
+                    //$scope.example =
+                    delete $scope.selectedExample
+                    break;
+                default :
+                    //default is to assume that the item refers to a single file (item.name) that can be retrieved from the server...
+                    let url = "/registry/" + $scope.package.name + "/" + $scope.package.version + "/" + item.name;
+                    //packageViewerSvc.getResourceByUrl()
+                    $http.get(url).then(
+                        function (data) {
+                            $scope.selectedResource = data.data;
+
+                            if (item.kind == 'extension') {
+                                //generate a summary of the contents of an extension for the display
+                                $scope.extensionSummary = packageViewerSvc.extensionSummary($scope.selectedResource)
+                            }
+
+                            if (item.kind == 'resourceprofile') {
+                                //default to showing bindings...
+                                let graphData = packageViewerSvc.makeGraph(item,{showBindings : true});
+                                $scope.redrawGraph()
+
+                                //
+                            }
+
+                            if (item.type == "StructureDefinition") {
+
+                                //Add to scope so can create snapshot list
+                                $scope.SD = data.data
+
+
+                                packageViewerSvc.makeLogicalModel(data.data).then(
+                                    function (model) {
+                                        console.log(model)
+                                        //$scope.allElements = model
+
+                                        if (item.kind == 'resourceprofile') {
+                                            $scope.treeData = packageViewerSvc.createTreeArray(data.data)
+                                            drawTree('resourceProfileTreeView');
+                                        } else {
+                                            $scope.treeData = packageViewerSvc.createTreeArray(data.data)
+                                            drawTree('datatypeProfileTreeView');
+                                        }
+
+
+                                    },
+                                    function (err) {
+                                        console.log(err)
+                                    }
+                                )
+                            }
+
+                        }
+                    )
+            }
+
+
+
+        }
+
+
+
 
         $scope.showElementPath = function (path) {
 

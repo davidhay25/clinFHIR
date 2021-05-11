@@ -1,0 +1,25 @@
+
+<div>
+
+
+    <div class="row">
+        <div class="col-md-3">
+            <ul class="list-group">
+                <li class="list-group-item" ng-repeat="item in selectedItem.value">
+
+                    <div class="clickable" ng-click="getExample(item)">{{item.id}}</div>
+                </li>
+            </ul>
+        </div>
+        <div class="col-md-9">
+
+            <p ng-bind-html="selectedExample.text.div"></p>
+
+
+
+            <pre ng-show="selectedExample">{{selectedExample | json}}</pre>
+        </div>
+    </div>
+
+
+</div>

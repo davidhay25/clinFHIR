@@ -650,5 +650,16 @@ return summary;
             ar.splice(0,1)
             return ar.join('.')
         }
-    })
+    }).filter('cleanED',function(){
+        //remove junk from ElementDefinion
+    return function (ED) {
+        if (ED) {
+            delete ED.mapping
+            delete ED.constraint
+            return ED
+        }
+
+
+    }
+})
 
