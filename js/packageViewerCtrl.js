@@ -140,6 +140,7 @@ angular.module("sampleApp").controller('packageViewerCtrl',
         }
 
 
+        //upload a ValueSet to the Terminology server...
         $scope.uploadVS = function(vs) {
             if (vs.id) {
                 let url = $scope.terminologyServer.url + "ValueSet" + "/" + vs.id;
@@ -154,8 +155,28 @@ angular.module("sampleApp").controller('packageViewerCtrl',
             } else {
                 alert("A ValueSet must have an id to be uploaded")
             }
-
         }
+
+        //upload a CodeSystem to the Terminology server...
+        $scope.uploadCS = function(cs) {
+            if (cs.id) {
+                let url = $scope.terminologyServer.url + "CodeSystem" + "/" + cs.id;
+                $http.put(url,cs).then(
+                    function (data) {
+                        alert("CodeSystem: " + cs.url + " has been uploaded")
+                    },
+                    function (err) {
+                        alert(angular.toJSON(err.data))
+                    }
+                )
+            } else {
+                alert("A CodeSystem must have an id to be uploaded")
+            }
+        }
+
+
+
+
 
         $scope.VSExpand = function (vs,filter) {
             clearAll();

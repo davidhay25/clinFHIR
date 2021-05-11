@@ -226,39 +226,7 @@
             <!---------------------------------    codesystem -------------------->
 
             <div ng-show="selectedItem.kind == 'codesystem'">
-                <uib-tabset>
-                    <uib-tab heading="List">
-                        <br/>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="listScroll">
-                                    <table class="table table-bordered">
-                                        <tr ng-repeat = "concept in selectedResource.concept"
-                                            ng-click="input.selectedConcept = concept"
-                                            style="cursor: pointer">
-                                            <td>{{concept.code}}</td>
-                                            <td>{{concept.display}}</td>
-                                            <td>{{concept.definition}}</td>
-                                        </tr>
-                                    </table>
-                                </div>
-
-                            </div>
-                            <div class="col-md-6">
-                                <div ng-show="input.selectedConcept">
-                                    <strong>Concept json</strong>
-                                    <pre>{{input.selectedConcept | json}}</pre>
-                                </div>
-
-                            </div>
-                        </div>
-
-
-                    </uib-tab>
-                    <uib-tab heading="Json">
-                        <pre>{{selectedResource | json}}</pre>
-                    </uib-tab>
-                </uib-tabset>
+                <ng-include src="'/includes/pvCodeSystem.html'"></ng-include>
             </div>
 
             <!---------------------------------    resource profile -------------------->

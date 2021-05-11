@@ -328,7 +328,7 @@ angular.module("sampleApp")
                         if (ctr == 0) {
                             summary.short = element.short;
                             summary.definition = element.definition;
-                        } else if (element.id.indexOf('[x]:') > -1) {
+                        } else if (element.id.indexOf('[x]') > -1) {
 
                             item.type = element.type
                             item.binding = element.binding

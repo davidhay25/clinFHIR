@@ -72,7 +72,14 @@
 
                         <div ng-repeat="typ in content.type">
                             {{typ.code}}
+                            <div ng-show="typ.targetProfile">
+                                <div ng-repeat="prof in typ.targetProfile" style="margin-left: 8px">
+                                    --> {{prof}}
+                                </div>
+                            </div>
                         </div>
+
+
 
                         <div ng-show="content.binding">
                             <span class="clickable" ng-click="selectValueSet(content.binding)">
