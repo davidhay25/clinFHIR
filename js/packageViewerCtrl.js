@@ -223,7 +223,7 @@ angular.module("sampleApp").controller('packageViewerCtrl',
                         function (data) {
                             $scope.selectedResource = data.data;
 
-                            if (item.kind = "capabilitystatement") {
+                            if (item.kind == "capabilitystatement") {
                                 //I copied the code from the server query, which uses this object...
                                 $scope.conformance = data.data;
                             }
