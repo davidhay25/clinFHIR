@@ -84,11 +84,11 @@ angular.module("sampleApp").controller('packageViewerCtrl',
                         if (vo.fromBuild) {
                             //From the build environment. a name and url were entered
                             $scope.downloadingFromRegistry = vo;
-                            packageViewerSvc.downloadFromBuild(vo.url,vo.name).then(
+                            packageViewerSvc.downloadFromBuild(vo.url,vo.name,vo.version).then(
                                 function (data) {
                                     //data is {name: version:}
                                     //add to the list of packages
-                                    let version = 'current';        //build downloads are always current
+                                    let version = data.version; //'current';        //build downloads are always current
                                     $scope.allPackages.push({name:data.name,version:version,display:data.name + '#' + version})
                                     setDropDown(data.name,version)
                                     sortAllPackages()

@@ -169,18 +169,18 @@ angular.module("sampleApp")
             },
 
 
-            downloadFromBuild : function (url,name) {
+            downloadFromBuild : function (url,name,version) {
                 let deferred = $q.defer()
                 let that = this;
                 url = url.replace('index.html',"")
 
 
 
-                let cmd = "/buildenv?name="+name+"&url="+url;
+                let cmd = "/buildenv?name="+name+"&version=" + version+  "&url="+url;
                 $http.get(cmd).then(
                     function (data) {
                         //the downloaded version will always be 'current'
-                        deferred.resolve({name:name,version:'current'});
+                        deferred.resolve({name:name,version:version});
                         /*
                         that.loadPackage(name,'current').then(
                             function(packageSummary) {

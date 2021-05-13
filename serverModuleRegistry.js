@@ -389,13 +389,14 @@ console.log("286 ",type,resource.resourceType)
         });
     })
 
-    //download from the build environment
+    //download from the build environment and save on the server...
     app.get('/buildenv',function(req,res){
 
         let url = req.query.url;       //the url to the root if the iG
+        let version = req.query.version;
         let downloadUrl = url + "package.tgz";
         let name = req.query.name;     //the name to apply to the IG
-        let folderName = name + "#current";     //assume this is the current version...
+        let folderName = name + "#" + version;     //assume this is the current version...
         let outFolder = packageRoot + folderName;      //the full path to where the artifacts should be stored
 
         download({
