@@ -1,17 +1,19 @@
-<uib-tabset>
+<uib-tabset active="profileIndexTab">
 
 
     <uib-tab heading="Tree">
 
+
+
         <div class="row">
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="myScroll">
                     <div id="resourceProfileTreeView"></div>
                 </div>
 
 
             </div>
-            <div class="col-md-9">
+            <div class="col-md-8">
                 <uib-tabset>
                     <uib-tab heading="Details">
 
@@ -117,7 +119,7 @@
     </uib-tab>
 
 
-    <uib-tab heading="Graph" select = "fitGraph()">
+    <uib-tab  heading="Graph" select = "fitGraph()">
         <div class="row">
             <div class="col-md-8">
                 <div id="profileGraph"></div>
@@ -125,7 +127,7 @@
             <div class="col-md-4">
                 <h4>Display options</h4>
                 <div>
-                    <checkbox ng-model="input.showBindings" ng-change="redrawGraph()"></checkbox> Bindings
+                    <checkbox ng-model="input.showBindings" ng-change="redrawGraph()"></checkbox> ValueSet Bindings
                     <span class="badge">{{selectedItem.bindings.length}}</span>
                 </div>
 

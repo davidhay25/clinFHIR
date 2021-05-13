@@ -3719,6 +3719,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
 
         },
+
         convertContainedToBundle : function(res) {
             //convert a resource with contained resources to a bundle of resources...
             //Used for the Orion queries currently...

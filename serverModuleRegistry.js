@@ -3,18 +3,15 @@
 
 //https://www.npmjs.com/package/download-tarball
 let download = require('download-tarball')
+let got = require('got')
 
 let packageRoot = process.env.packageRoot || "fhirPackages/"; //where, on this machine, the packages are found
+
 console.log("Package root: " + packageRoot)
 
 let http = require('http')
 let fs = require('fs')
 let AdmZip = require("adm-zip");
-
-//todo - need to figure out how to set this on different machines
-//let packageRoot = "/Users/davidhay/.fhir/packages/";     //where, on this machine, the packages are found
-
-//let packageRoot = "fhirPackages/";     //where, on this machine, the packages are found
 
 function setup(app) {
 
@@ -48,15 +45,11 @@ function setup(app) {
         }).then(() => {
             //The package has been downloaded and unzipped into the packageRoot
 
-
             res.json()
         }).catch(err => {
 
             res.status(404).send({err:"Package not found:" + url})
         });
-
-
-
     })
 
     //get an example file...
@@ -151,13 +144,17 @@ function setup(app) {
                         response.files.push(file)
 
                         let ar = file.split('-')
-                        let type = ar[0];
+                        let type = ar[0];       //assume the naming convention of {type}-{id}
 
                         let fullFileName = dirName + "/" + file;
+                        //console.log(fullFileName)
                         try {
                             let contents = fs.readFileSync(fullFileName, {encoding: 'utf8'});
+
                             let resource = JSON.parse(contents)
 
+
+//console.log("   " +  resource.resourceType)
                             if (! resource.resourceType) {
                                 //this is not a resource.
                                 switch (file) {
@@ -177,8 +174,9 @@ function setup(app) {
                                 console.log(file)
                             } else {
 
-
                                 let display = resource.title || resource.name
+                              // console.log('display='+ display)
+
                                 switch (type) {
                                     case "StructureDefinition" :
                                         if (resource.type == "Extension") {
@@ -254,7 +252,7 @@ function setup(app) {
                                                 }
                                             }
 
-
+                                            //console.log('SD display='+ display)
                                             hash[variety] = hash[variety] || []
                                             hash[variety].push({
                                                 name: file,
@@ -283,19 +281,28 @@ function setup(app) {
                                     case "CapabilityStatement" :
 
                                     case "ImplementationGuide":
-
+console.log("286 ",type,resource.resourceType)
+                                        console.log('display='+ display)
                                         hash[type] = hash[type] || []
                                         hash[type].push({
+
                                             name: file,
                                             display: display,
                                             kind: resource.resourceType.toLowerCase(),
                                             url: resource.url
                                         })
                                         break;
+
                                     default :
                                         //response.files.push(file)
-                                        hash["misc"] = hash["misc"] || []
-                                        hash["misc"].push({name: file, display: display,  kind: "misc"})
+                                        console.log(type)
+                                        //If there is a .resourceType element, then assume it is an example. It looks like R3 didn't have a separate examples folder
+                                       //make the type the display
+                                        //**** display is already defined above! don't 'let' it again
+                                        display = type || 'Unknown type'
+                                        hash["Miscellaneous"] = hash["Miscellaneous"] || []
+                                        hash["Miscellaneous"].push({name: file, display: display,  kind: "misc"})
+
                                         break;
                                 }
 
@@ -303,13 +310,24 @@ function setup(app) {
 
 
                         } catch (ex) {
-                            //assume that if it can't be read then it aint a file... (eg it's a folder)
+                            //console.log('there was an error', ex)
+                            //Is this a result of Json parsing? If it is, then ignore it - as the file will be ignored as well...
+                            if (! ex.message.indexOf('JSON')) {
+                                console.log(ex)
+                                reject(ex)
+                            } else {
+                                console.log('There was an error parsing ' + fullFileName + " ignored.")
+                            }
+
+
                         }
 
                     } else {
                         //this is not a file - presumably a folder. Process examples...
-                        console.log(dirEnt)
+                        //console.log(dirEnt)
                         if (dirEnt.name == 'example') {
+
+                            //console.log('ex',hash)
 
                             //need to iterate through the examples as the .index.json is not always present...
                             let exHash = {}
@@ -324,69 +342,25 @@ function setup(app) {
                                         exHash[example.resourceType].push({filename:dirEnt.name,id:example.id})
                                     }
                                 } catch (ex) {
-                                    console.log(fullName)
-                                    console.log(ex)
+                                    console.log('Unable to read or parse ' + fullName + ' Ignored')
+                                  //  console.log(ex)
                                 }
 
-
                             });
-                            hash["Example"] = []
+
+                            hash["Example"] = hash["Example"] || []
+
                             Object.keys(exHash).forEach(function (key) {
                                 hash["Example"].push({kind:'example',display:key,value:exHash[key]})
                             })
 
-/*
-                                let exampleIndex = dirName+ "/" + dirEnt.name + "/.index.json";
-                            console.log(exampleIndex)
-
-
-                            if (fs.existsSync(exampleIndex)){
-                                let contents = fs.readFileSync(exampleIndex , {encoding: 'utf8'});
-                                let index = JSON.parse(contents)
-                                if (index.files) {
-                                    //group the examples by core type
-                                    let exHash = {}
-                                    index.files.forEach(function (item) {
-                                        exHash[item.resourceType] = exHash[item.resourceType] || []
-                                        //delete item.resourceType;
-                                        exHash[item.resourceType].push(item)
-                                    })
-                                    hash["Example"] = []
-                                    Object.keys(exHash).forEach(function (key,value) {
-                                        hash["Example"].push({kind:'example',display:key,value:exHash[key]})
-                                    })
-
-                                }
-
-
-                            }
-                             */
-
-/*
-                            fs.access(exampleIndex, (err) => {
-                                console.log(err)
-                                if (!err) {
-                                    fs.readFile(exampleIndex, {encoding: 'utf8'}, (err,data) => {
-                                        console.log(err)
-                                        //console.log(data)
-                                        if (! err) {
-                                            console.log('setting hash')
-                                            hash['example'] = ["{name:test}"]
-                                            //hash['example'] = JSON.parse(data)
-                                            //console.log(hash.CodeSystem)
-                                        }
-
-
-                                    });
-                                }
-                            })
-                            */
                         }
                     }
 
                 })
 
 
+                //console.log(hash)
                 response.grouped = hash;
                 resolve(response)
             })
@@ -394,6 +368,50 @@ function setup(app) {
             return myPromise;
 
         }
+
+    })
+
+
+    //download the manifest only from an IG in the build environment
+    app.get('/buildenv/manifest',function(req,res){
+        let url = req.query.url;       //the url to the root
+        url = url.replace('index.html',"")      //might include the index page...
+
+        let qry = url + "package.manifest.json"
+        console.log(qry)
+        got(qry,{json:true})
+            .then(response => {
+                res.json(response.body)
+            }).catch(err => {
+                console.log(err)
+                res.status(500).json(err)
+
+        });
+    })
+
+    //download from the build environment
+    app.get('/buildenv',function(req,res){
+
+        let url = req.query.url;       //the url to the root if the iG
+        let downloadUrl = url + "package.tgz";
+        let name = req.query.name;     //the name to apply to the IG
+        let folderName = name + "#current";     //assume this is the current version...
+        let outFolder = packageRoot + folderName;      //the full path to where the artifacts should be stored
+
+        download({
+            url: downloadUrl,
+            dir: outFolder
+        }).then(() => {
+            //The package has been downloaded and unzipped into the packageRoot
+
+            res.json({path:outFolder,url:downloadUrl})
+        }).catch(err => {
+
+            res.status(404).send({err:"Package not found:" + url})
+        });
+
+
+        //todo - should qw create a package.json?
 
     })
 

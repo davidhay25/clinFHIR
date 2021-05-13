@@ -1,5 +1,5 @@
 angular.module("sampleApp").controller('packageViewerCtrl',
-    function ($scope,$http,packageViewerSvc,$uibModal,$timeout,$location) {
+    function ($scope,$http,packageViewerSvc,$uibModal,$timeout,$location,$sanitize) {
 
         $scope.input = {}
 
@@ -16,6 +16,7 @@ angular.module("sampleApp").controller('packageViewerCtrl',
 
             )
         }
+
         $http.get('/registry/list').then(
             function (data) {
                 $scope.allPackages = data.data;
@@ -24,9 +25,17 @@ angular.module("sampleApp").controller('packageViewerCtrl',
             }
         )
 
-        $scope.loadPackage = function (name,version) {
-            //enter the name & version, then download from the registry
+        $scope.isSame = function(item) {
+            if ($scope.selectedItem) {
+                if ((item.name == $scope.selectedItem.name) && (item.display == $scope.selectedItem.display) )
+                    return true;
+            }
 
+        }
+
+        //retrieve a package from the registry or the IG and download to the server...
+        $scope.loadPackage = function (name,version) {
+            //enter the name & version, then download from the registry - or build environment...
             if (name && version) {
                 // the name & version were supplied - proceed directly to download...
                 performDownload(name,version);
@@ -34,21 +43,82 @@ angular.module("sampleApp").controller('packageViewerCtrl',
                 // we need to get the name & version from the user...
                 $uibModal.open({
                     templateUrl: 'modalTemplates/pvEnterPackageName.html',
+                    size: 'lg',
                     controller: function ($scope) {
+                        $scope.input = {fromBuild : false}
 
+                        $scope.retrieveManifest = function(url) {
+                            packageViewerSvc.retrieveManifestFromBuild(url).then(
+                                function (manifest) {
+                                    $scope.input.name = manifest.name;
+                                    $scope.input.version = manifest.version;
+                                   // console.log(manifest)
+                                },
+                                function (err) {
+                                    alert ('Cannot retrieve manifest, is this the url to the IG?')
+                                }
+                            )
+                        }
+
+                        $scope.canDownload = function() {
+                            if ($scope.input.fromBuild) {
+                                if ($scope.input.url && $scope.input.name) {
+                                    return true
+                                } else {
+                                    return false
+                                }
+                            }
+
+                            if (!$scope.input.fromBuild) {
+                                if ($scope.input.version && $scope.input.name) {
+                                    return true
+                                } else {
+                                    return false
+                                }
+                            }
+                        }
                     }
                 }).result.then(
                     function(vo) {
-                        //a name and version was entered
-                        let name = vo.name ;
-                        let version = vo.version;
-                        performDownload(name,version);
+                        console.log(vo)
+                        if (vo.fromBuild) {
+                            //From the build environment. a name and url were entered
+                            $scope.downloadingFromRegistry = vo;
+                            packageViewerSvc.downloadFromBuild(vo.url,vo.name).then(
+                                function (data) {
+                                    //data is {name: version:}
+                                    //add to the list of packages
+                                    let version = 'current';        //build downloads are always current
+                                    $scope.allPackages.push({name:data.name,version:version,display:data.name + '#' + version})
+                                    setDropDown(data.name,version)
+                                    sortAllPackages()
+                                    $scope.selectPackage(data);     //display the downloaded package
+                                  /*  $timeout(
+                                        function() {
+                                            setDropDown(name,version)
+                                        },1000)
+                                    */
+                                }, function(err) {
+                                    alert("The package could not be downloaded. Is the Url correct?")
+                                }
+                            ).finally(
+                                function(){
+                                    delete $scope.downloadingFromRegistry;
+                                }
+                            )
 
+                        } else {
+                            //From the registry. a name and version was entered
+                            let name = vo.name ;
+                            let version = vo.version;
+                            performDownload(name,version);
+                        }
 
                     }, function(){
 
                     })
             }
+
 
 
             function performDownload(name,version) {
@@ -57,7 +127,7 @@ angular.module("sampleApp").controller('packageViewerCtrl',
                 packageViewerSvc.downloadPackage(name,version).then(
                     function(vo){
                         console.log("Was downloaded " + vo.wasDownloaded);
-                        //let packageSummary = vo.packageSummary;
+
                         //The packageSummary is returned whether it has to be downloaded first, or not...
                         if (vo.wasDownloaded) {
                             //add to the list of packages
@@ -65,11 +135,10 @@ angular.module("sampleApp").controller('packageViewerCtrl',
                             sortAllPackages()
                         }
                         $scope.selectPackage({name:name,version:version})
-                        //alert("The package has been downloaded")
                     },
                     function (message){
                         //Usually means the package has already been downloaded
-                        //NOT ANY MORE - not currently used
+                        //not currently used
                         alert(message)
 
                     }
@@ -79,10 +148,9 @@ angular.module("sampleApp").controller('packageViewerCtrl',
             }
         }
 
-
-        //load a package from the server...
+        //load a package from the server (ie assume that it has already been downloaded) ...
         $scope.selectPackage = function(package) {
-
+            console.log(package)
             packageViewerSvc.loadPackage(package.name,package.version).then(
                 function (package) {
                     $scope.package = package;
@@ -93,7 +161,6 @@ angular.module("sampleApp").controller('packageViewerCtrl',
             let url = "/registry/" + package.name + "/" + package.version;
         }
 
-        //temp load us core
 
         // ============================    The module can be invoked passing across the package...
         var hash = $location.hash();
@@ -215,15 +282,40 @@ angular.module("sampleApp").controller('packageViewerCtrl',
 
         $scope.getExample = function(item) {
             delete $scope.selectedExample
+            delete $scope.selectedExampleXml
             let url = "/registry/example/" + $scope.package.name + "/" + $scope.package.version + "/" + item.filename;
             //packageViewerSvc.getResourceByUrl()
             $http.get(url).then(
                 function (data) {
                     $scope.selectedExample = data.data;
+                    drawResourceTree($scope.selectedExample)
+
+                    //get the XML version
+                    let url = $http.post('transformXML',data.data).then(
+                        function (data) {
+                            //vkbeautify.xml(response.xml[0]);
+                            $scope.selectedExampleXml = vkbeautify.xml(data.data);
+                            //console.log(data.data)
+                        }
+                    )
+
+
+
                 }
             )
-
         }
+
+        function drawResourceTree(resource) {
+            let treeData = packageViewerSvc.buildResourceTree(resource);
+
+            //show the tree of this version
+            $('#resourceTreeViewXXX').jstree('destroy');
+            $('#resourceTreeViewXXX').jstree(
+                {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
+            );
+        }
+
+
 
         $scope.selectItem = function (item) {
             delete $scope.selectedResource;
@@ -233,9 +325,14 @@ angular.module("sampleApp").controller('packageViewerCtrl',
             $scope.selectedItem = item;
             switch (item.kind) {
                 case "example" :
+
                     //examples are special...
-                    delete $scope.selectedExample
+                    delete $scope.selectedExample;
+                    delete $scope.selectedExampleXml;
                     break;
+
+
+
                 default :
                     //default is to assume that the item refers to a single file (item.name) that can be retrieved from the server...
                     let url = "/registry/" + $scope.package.name + "/" + $scope.package.version + "/" + item.name;
@@ -243,6 +340,12 @@ angular.module("sampleApp").controller('packageViewerCtrl',
                     $http.get(url).then(
                         function (data) {
                             $scope.selectedResource = data.data;
+
+                            if (item.kind == 'misc') {
+                                delete $scope.selectedExample;
+                                $scope.selectedExample = data.data;
+
+                            }
 
                             if (item.kind == "capabilitystatement") {
                                 //I copied the code from the server query, which uses this object...
@@ -392,13 +495,24 @@ angular.module("sampleApp").controller('packageViewerCtrl',
     }
 
 
-        //to support the display of types in a capability statement
-        //todo - if this gets too big, consider a separate controller...
-        $scope.showType = function(type) {
-            $scope.selectedType = type;
-        }
+    //to support the display of types in a capability statement
+    //todo - if this gets too big, consider a separate controller...
+    $scope.showType = function(type) {
+        $scope.selectedType = type;
+    }
 
-    $scope.redrawGraph = function() {
+    //https://stackoverflow.com/questions/22533491/angularjs-how-can-i-ignore-certain-html-tags
+
+    $scope.clean = function(string) {
+        try {
+            return $sanitize(string);
+        } catch(e) {
+
+            return "The text contained HTML that the sanitizer couldn't properly check, so it is not displayed.";
+        }
+    };
+
+        $scope.redrawGraph = function() {
         let options = {showBindings:$scope.input.showBindings}
         options.showExtensions = $scope.input.showExtensions;
         options.showReferences = $scope.input.showReferences;
