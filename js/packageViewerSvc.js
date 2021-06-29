@@ -30,8 +30,7 @@ angular.module("sampleApp")
         $http.get(url).then(
             function (data) {
                 corePackage = data.data
-                //console.log("Core package loaded")
-                //console.log(corePackage)
+
 
                 //now generate a hash so we can locate the filename from the url
                 angular.forEach(corePackage.grouped,function(v,k){
@@ -66,7 +65,7 @@ angular.module("sampleApp")
                 }
                 var tree = [];
                 var idRoot = 0;
-                //console.log(resource)
+
                 function processNode(tree, parentId, element, key, level,pathRoot) {
 
                     if (angular.isArray(element)) {
@@ -103,7 +102,7 @@ angular.module("sampleApp")
 
                         } else {
 
-                            //console.log(key,element)
+
                             //http://itsolutionstuff.com/post/angularjs-how-to-remove-html-tags-using-filterexample.html
                             //strip out the html tags... - elemenyt is not always a string - bit don't care...
                             try {
@@ -247,7 +246,7 @@ angular.module("sampleApp")
                 options = options || {showBindings:true}
                 //generate the graph of 'references' from a profile
                 // {extensions: bindings: references:
-//console.log(item)
+
                 let arNodes = [], arEdges = [];
 
                 let profileNode = {id: "profile", color: objColours['profile'],
@@ -366,7 +365,7 @@ angular.module("sampleApp")
                 $http.get(url).then(
                     function (data) {
                         currentPackage = data.data;
-                        console.log(currentPackage)
+
 
                         //now generate a hash so we can locate the filename from the url
                         angular.forEach(currentPackage.grouped,function(v,k){
@@ -478,7 +477,7 @@ angular.module("sampleApp")
                             summary.contents = [(item)]
                         }
 
-                      //  console.log(element.id, element.sliceName)
+
                     })
                 } else {
                     let hash = {}, slices = []
@@ -490,7 +489,7 @@ angular.module("sampleApp")
                         }
                     })
 
-                    console.log(hash)
+
                     slices.forEach(function (slice){
                         let item = {sliceName : slice}
 
@@ -514,30 +513,7 @@ angular.module("sampleApp")
                     })
 
 
-/*<!--
-return summary;
 
-                    sd.snapshot.element.forEach(function (element,ctr){
-
-                        if (element.sliceName) {
-                           // hash[]
-                        }
-
-                        console.log(element.id, element.sliceName)
-                        if (ctr == 0) {
-                            summary.short = element.short;
-                            summary.definition = element.definition;
-                        } else if (element.id.indexOf('[x]:') > -1) {
-                            let item = {}
-                            item.type = element.type
-                            item.binding = element.binding
-                            summary.contents = summary.contents || []
-                            summary.contents.push(item)
-                        }
-
-                        //  console.log(element.id, element.sliceName)
-                    })
-*/
                 }
                 return summary;
 
@@ -737,7 +713,7 @@ return summary;
 
                 //retrieve the Extension Definition to populate child nodes
                 function checkExtensionDef(extUrl, item) {
-                    console.log('checking '+ extUrl)
+
 
                     item.extUrl = extUrl;
                     var deferred = $q.defer();
@@ -757,7 +733,7 @@ return summary;
 
                             item.description = extensionDef.description;
 
-                            //console.log(extensionDef)
+
                             if (extensionDef && extensionDef.snapshot && extensionDef.snapshot.element) {
                                 //item.children = item.children || []
                                 let isComplex = false;  //will be complex

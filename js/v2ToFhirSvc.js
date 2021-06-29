@@ -7,6 +7,7 @@ angular.module("sampleApp")
         objColours.Encounter = '#E89D0C';
         objColours.List = '#ff8080';
         objColours.Observation = '#FFFFCC';
+        objColours.ValueSet = '#FFFFCC';
         objColours.Practitioner = '#FFBB99';
         objColours.MedicationStatement = '#ffb3ff';
         objColours.MedicationRequest = '#ffb3ff';
@@ -23,6 +24,7 @@ angular.module("sampleApp")
         objColours.MedicationDispense = '#FFFFCC';
         objColours.Composition = '#FFFFCC';
         objColours.Medication = '#FF9900';
+        objColours.Measure = '#FF9900';
         objColours.Immunization = '#aeb76c';
 
         return {
@@ -159,6 +161,144 @@ angular.module("sampleApp")
 
 
             },
+            makeGraphCanonical : function (bundle) {
+                //make a graph using canonical references
+
+                //this is a hash of all resources in the bundle with a url.
+                //It will be used by the canonical reference function (if an element has a value in this hash key, it is considered a canonical reference)
+
+                let hashResources = {}
+                bundle.entry.forEach(function (entry) {
+                    let resource = entry.resource;
+                    if (resource.url) {
+                        hashResources[resource.url] = resource
+                    }
+                })
+
+                let refs = []
+                bundle.entry.forEach(function (entry) {
+                    let resource = entry.resource;
+                    switch (resource.resourceType) {
+                        case 'Measure' :
+                        case 'Library' :
+                            processResource(hashResources,resource,refs)
+                            break
+                    }
+                    //console.log(entry.resource.url)
+                })
+
+
+                console.log(refs)
+                //refs = array {source, target, path, url}
+
+                //now that we have the references, we can construct the graph.
+                //first create a hash of all nodes / resources to beincluded
+                let hashAllNodes = {}
+                let arEdges = [], arNodes = []
+                let inx = 0
+                let hashRefsByResource = {}     //a hash of all the canonical references from a resource. Used for display...
+                refs.forEach(function (ref){
+
+                    hashRefsByResource[ref.source.id] = hashRefsByResource[ref.source.id] || []
+
+                    hashRefsByResource[ref.source.id].push({path:ref.path,url:ref.url,type:ref.target.resourceType})
+
+                    let sourceNodeIndex = hashAllNodes[ref.source.id]
+                    if (! sourceNodeIndex) {
+                        sourceNodeIndex = inx++
+                        hashAllNodes[ref.source.id] = sourceNodeIndex
+                        arNodes.push({id: sourceNodeIndex, label: ref.source.resourceType,
+                            shape: 'box',resource:ref.source})
+                    }
+                    let targetNodeIndex = hashAllNodes[ref.target.id]
+                    if (! targetNodeIndex){
+                        targetNodeIndex = inx++
+                        hashAllNodes[ref.target.id] = targetNodeIndex
+                        arNodes.push({id: targetNodeIndex, label: ref.target.resourceType,
+                            shape: 'box',color:objColours[ ref.target.resourceType], resource:ref.target})
+                    }
+                    //now we can create the link between source and target...
+                    if (sourceNodeIndex !== targetNodeIndex) {
+                        arEdges.push({id: 'e' + arEdges.length +1,from: sourceNodeIndex, to: targetNodeIndex, label: ref.path,arrows : {to:true}})
+                    }
+                })
+
+                nodes = new vis.DataSet(arNodes);
+                edges = new vis.DataSet(arEdges);
+                var data = {
+                    nodes: nodes,
+                    edges: edges
+                };
+
+                return ({graphData: data,hashRefsByResource : hashRefsByResource})
+
+                function processResource(hashResources,resource,refs) {
+                    let debug = false
+                    console.log('-----------')
+                    console.log(resource.resourceType + "   " + resource.id)
+
+                    //let refs = []
+                    function processBranch(refs,parentPath,branch) {
+                        Object.keys(branch).forEach(function (key) {
+                            let element = branch[key]
+                            let typ = typeof(element)
+                            //console.log(key)
+                            switch (typ) {
+                                case "object" :
+                                    if (Array.isArray(element)){
+                                        if (debug) {console.log(parentPath, key,'array',element.length)}
+                                        element.forEach(function (child) {
+                                            let path = parentPath + "." + key
+                                            //console.log('child',path,child,)
+                                            //if the content of the array element is a string, then forEach will iterate over each character
+                                            if (typeof(child) == 'string') {
+                                                if (debug) {console.log('---leaf:',path,child)}
+                                                if (hashResources[child]) {
+                                                    //the assumption is that this is a canonical reference...
+                                                    let item={source:resource, path:path,url:child,target : hashResources[child]}
+                                                    refs.push(item)
+                                                }
+                                            } else {
+                                                processBranch(refs,path,child)
+                                            }
+                                        })
+                                    } else {
+                                        if (debug) {console.log(parentPath, key,'object')}
+                                        let path = parentPath + "." + key
+                                        processBranch(refs,path,element)
+                                    }
+                                    break
+                                case "string" :
+                                    //want the value...
+                                    let path = parentPath + '.' + key
+                                    if (hashResources[element]) {
+                                        //the assumption is that this is a canonical reference...
+                                        let item={source:resource, path:path,url:element,target : hashResources[element]}
+                                        refs.push(item)
+                                    }
+
+                                    let display = element.substr(0,80)
+                                    if (debug) {console.log('---leaf:',path,display)}
+                                    //console.log(key,element)
+                                    break
+                                default :
+                                    if (debug) {console.log('===========>',key,typ)}
+
+                            }
+                            //console.log(key, typeof(element) )
+                        })
+
+                    }
+                    processBranch(refs,resource.resourceType,resource)
+
+                    console.log(refs)
+
+                }
+
+
+
+
+            },
             makeGraph: function (options) {
                 //makeGraph: function (bundle,hashErrors,serverRoot,hidePatient,centralResourceId) {
 
@@ -167,6 +307,7 @@ angular.module("sampleApp")
                 if (!bundle || ! bundle.entry) {
                     return {graphData : {}, allReferences:[], nodes: {}, visNodes:{},visEdges:{}};
                 }
+
 
 
                 let hashErrors = options.hashErrors;
@@ -267,7 +408,9 @@ angular.module("sampleApp")
                     findReferences(refs,resource,resource.resourceType);
 
                     //console.log(refs);
-
+                    let cRefs = []
+                    //findCanonicalReferences(cRefs,resource,resource.resourceType);
+                    //console.log(cRefs)
 
 
                     refs.forEach(function(ref){
@@ -275,16 +418,14 @@ angular.module("sampleApp")
                         //gAllReferences.push({src:url,path:ref.path,targ:ref.reference,index:ref.index});    //all relationsin the collection
                     })
 
-
-
-
                 });
                 console.log(objNodes)
 
                 //so now we have the references, build the graph model...
                 let hash = {};      //this will be a hash of nodes that have a reference to centralResourceId (if specified)
-                //hash[]
 
+
+                console.log(allReferences)
 
                 allReferences.forEach(function(ref){
 
@@ -307,7 +448,6 @@ angular.module("sampleApp")
 
                     }
 
-
                     if (targetNode) {
                         var label = $filter('dropFirstInPath')(ref.path);
                         arEdges.push({id: 'e' + arEdges.length +1,from: ref.src.id, to: targetNode.id, label: label,arrows : {to:true}})
@@ -315,8 +455,6 @@ angular.module("sampleApp")
                         console.log('>>>>>>> error Node Id '+ref.targ + ' is not present')
                     }
                 });
-
-
 
                 var nodes;
                 let edges;
@@ -355,12 +493,6 @@ angular.module("sampleApp")
                     nodes = new vis.DataSet(arNodes);
                     edges = new vis.DataSet(arEdges);
                 }
-
-
-
-
-
-                //var edges = new vis.DataSet(arEdges);
 
                 // provide the data in the vis format
                 var data = {
@@ -403,11 +535,7 @@ angular.module("sampleApp")
                                                     refs.push({path: lpath, reference: obj.reference})
                                                 }
                                             }
-
-
                                         }
-
-
                                     } else {
                                         //if it's not a reference, then does it have any children?
                                         findReferences(refs,obj,lpath,inx)
@@ -457,6 +585,101 @@ angular.module("sampleApp")
 
                     })
                 }
+
+                //find canonical references from a single node.
+                //A canonical reference is where the
+                function findCanonicalReferences() {
+
+                }
+
+/*
+                //find canonical references from a single node.
+                //A canonical is considered to be an element value starting with http
+                function findCanonicalReferences(refs,node,nodePath,index) {
+                    angular.forEach(node,function(value,key){
+
+                        //if it's an object, does it have a child called 'reference'?
+
+                        if (angular.isArray(value)) {
+                            value.forEach(function(obj,inx) {
+                                //examine each element in the array
+                                if (obj) {  //somehow null's are getting into the array...
+                                    var lpath = nodePath + '.' + key;
+                                    if (obj.reference) {
+                                        //this is a reference!
+
+                                        if (obj.reference && obj.reference.indexOf('urn:uuid') !== -1) {
+                                            // this is an uuid
+                                            refs.push({path: lpath, reference: obj.reference})
+                                        } else {
+                                            if (obj.reference.indexOf('http') == 0) {
+                                                //this is an absolute reference
+                                                refs.push({path: lpath, reference: obj.reference})
+                                            } else {
+                                                //construct an absolute reference from the server root if possible
+                                                if (serverRoot) {
+                                                    //if there's a serverRoot and it this is a relative reference, then convert to an absolute reference
+
+                                                    refs.push({path: lpath, reference: serverRoot + obj.reference})
+
+                                                } else {
+                                                    refs.push({path: lpath, reference: obj.reference})
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        //if it's not a reference, then does it have any children?
+                                        findCanonicalReferences(refs,obj,lpath,inx)
+                                    }
+                                }
+
+                            })
+                        } else
+
+                        if (angular.isObject(value)) {
+                            var   lpath = nodePath + '.' + key;
+                            if (value.reference) {
+                                //this is a reference!
+                                //if (showLog) {console.log('>>>>>>>>'+value.reference)}
+
+
+                                if (value.reference.indexOf('urn:uuid') !== -1) {
+                                    // this is an uuid
+                                    //refs.push({path: lpath, reference: obj.reference})
+                                    refs.push({path: lpath, reference: value.reference, index: index})
+                                } else {
+
+                                    if (value.reference.indexOf('http') == 0) {
+                                        //this is an absolute reference
+                                        refs.push({path: lpath, reference: value.reference, index: index})
+                                    } else {
+                                        if (serverRoot) {
+                                            //if there's a serverRoot and it this is a relative reference, then convert to an absolute reference
+                                            //todo check if relative first!
+                                            refs.push({path: lpath, reference: serverRoot + value.reference, index: index})
+                                        } else {
+                                            refs.push({path: lpath, reference: value.reference, index: index})
+                                        }
+                                    }
+
+                                }
+
+
+                            } else {
+                                //if it's not a reference, then does it have any children?
+                                findCanonicalReferences(refs,value,lpath)
+                            }
+                        }
+
+
+                    })
+                }
+
+
+*/
+
+
+
 
             }
         }

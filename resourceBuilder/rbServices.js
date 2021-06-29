@@ -497,7 +497,6 @@ console.log(url)
             //used when a caller expects a bundle
 
 
-
             //an ahhoc query - full url given - to avoid a controller using $http directly...
             var deferred = $q.defer();
             var bundle = Utilities.perfromQueryFollowingPaging(url,null,accessToken).then(
@@ -1757,7 +1756,7 @@ console.log(summary);
 
             var returnBundle = {resourceType:'Bundle',total:0,type:'searchset',link:[],entry:[]};
             returnBundle.link.push({relation:'self',url:url})
-
+/* - not really adding value...
             //add the count parameter
             if (url.indexOf('?') > -1) {
                 url += "&_count=100"
@@ -1765,7 +1764,7 @@ console.log(summary);
                 url += "?_count=100"
             }
 
-
+*/
             var deferred = $q.defer();
 
             limit = limit || 100;
@@ -1800,7 +1799,7 @@ console.log(summary);
                                 var lnk = bundle.link[i];
 
                                 //if there is a 'next' link and we're not at the limit then get the next page
-                                if (lnk.relation == 'next'){// && returnBundle.entry.length < limit) {
+                                if (lnk && lnk.relation == 'next'){// && returnBundle.entry.length < limit) {
                                     moreToGet = true;
                                     var url = lnk.url;
                                     getPage(url);

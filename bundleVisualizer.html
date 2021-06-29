@@ -2,6 +2,17 @@
 <html>
 <head lang="en">
     <base href="/" />
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YD055VEN8K"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-YD055VEN8K');
+    </script>
+
     <meta charset="UTF-8">
     <script src="js/libs/jquery-1.9.0.min.js"></script>
     <script src="js/libs/angular.min1-5.js"></script>
@@ -14,14 +25,7 @@
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
     <link rel="stylesheet" type="text/css" href="css/main.css"/>
     <link rel="stylesheet" type="text/css" href="css/vis.min.css"/>
-<!--
-    <link rel="stylesheet" type="text/css" href="css/prism.css"/>
 
-
-    <script
-            charset="UTF-8"
-            src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.9/languages/go.min.js"></script>
--->
     <script src="js/libs/angular-sanitize.js"></script>
     <script src="js/libs/firebase.js"></script>
     <script src="js/libs/angularfire.min.js"></script>
@@ -55,9 +59,7 @@
     <script src="js/modalDialogSvc.js"></script>
     <script src="resourceBuilder/rbServices.js"></script>
     <script src="js/libs/angular-bootstrap-checkbox.js"></script>
-    <!--
-    <script src="js/libs/prism.js"></script>
-    -->
+
     <style>
         .myForm {
             padding: 8px;
@@ -75,6 +77,14 @@
             height: 550px;
             border: 1px solid lightgray;
         }
+
+        #canonicalGraph {
+            width: 100%;
+            height: 550px;
+            border: 1px solid lightgray;
+        }
+
+
         #singleResourceGraph {
             width: 100%;
             height: 550px;
@@ -433,6 +443,7 @@
                                                     <br/>
                                                     <div id="singleResourceGraph"></div>
                                                 </uib-tab>
+
                                                 <uib-tab ng-show="selectedBundleEntryErrors.length > 0">
                                                     <uib-tab-heading>
                                                         Errors <span class="badge">{{selectedBundleEntryErrors.length}}</span>
@@ -457,6 +468,17 @@
                                                         </table>
                                                     </div>
                                                 </uib-tab>
+
+                                                <uib-tab ng-show="hashRefsByResource[selectedBundleEntry.resource.id].length > 0">
+                                                    <uib-tab-heading>
+                                                        Canonicals <span class="badge">{{hashRefsByResource[selectedBundleEntry.resource.id].length}}</span>
+
+                                                    </uib-tab-heading>
+
+                                                    <pre>{{hashRefsByResource[selectedBundleEntry.resource.id] | json}}</pre>
+
+                                                </uib-tab>
+
                                             </uib-tabset>
                                         </div>
 
@@ -465,6 +487,55 @@
 
                         </uib-tab>
 
+                        <uib-tab heading = "Canonical graph"  select="fitSingleGraph()">
+                            <div class="row">
+                                <div class="col-md-7">
+                                    <div class="row">
+                                        <div class="col-md-10">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button class="btn btn-link" ng-click="fitCanonicalGraph()">Fit</button>
+                                        </div>
+                                    </div>
+                                     <div id="canonicalGraph"></div>
+                                </div>
+                                <div class="col-md-5">
+                                    <uib-tabset>
+                                        <uib-tab heading="Json">
+                                            <pre>{{selectedCanResource | json}}</pre>
+                                        </uib-tab>
+                                        <uib-tab ng-show="selectedCanResource.resourceType == 'ValueSet' && selectedCanResource.expansion">
+
+                                            <uib-tab-heading>
+                                                Expansion <span class="badge">{{selectedCanResource.expansion.contains.length}}</span>
+                                            </uib-tab-heading>
+
+                                            <table class="table table-condensed">
+                                                <tr ng-repeat = "concept in selectedCanResource.expansion.contains">
+                                                    <td>
+                                                        {{concept.code}}
+                                                        <div>{{concept.system}}</div>
+                                                        <div>{{concept.version}}</div>
+                                                    </td>
+                                                    <td>{{concept.display}}</td>
+                                                </tr>
+                                            </table>
+                                        </uib-tab>
+
+                                        <uib-tab ng-show="hashRefsByResource[selectedCanResource.id].length > 0">
+                                            <uib-tab-heading>
+                                                Canonicals <span class="badge">{{hashRefsByResource[selectedCanResource.id].length}}</span>
+
+                                            </uib-tab-heading>
+
+                                            <pre>{{hashRefsByResource[selectedCanResource.id] | json}}</pre>
+
+                                        </uib-tab>
+                                    </uib-tabset>
+                                </div>
+                            </div>
+
+                        </uib-tab>
 
                         <uib-tab heading="Graph" select="fitGraph()">
                             <div class="row">
@@ -513,6 +584,9 @@
                             </div>
 
                         </uib-tab>
+
+
+
 
                         <uib-tab heading="Bundle validation">
                             <table class="table table-condensed">
@@ -589,7 +663,7 @@
                         </uib-tab>
 
 
-
+<!--
                         <uib-tab ng-show = "1==2 && fhir.type == 'document' " heading="HandleBars Document">
 
                             <button class="btn btn-primary" ng-click="hbDoc()">Load HandleBars template and render document</button>
@@ -598,6 +672,7 @@
 
                             <ng-include src="hbTemplate"></ng-include>
                         </uib-tab>
+                        -->
 
 
 

@@ -60,7 +60,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/clinfhir', function(err, ldb) {
         console.log('>>> Mongo server not running')
     } else {
         db = ldb;
-      //  orionModule.setup(app,db);
+
         smartModule.setup(app,db);
         statsModule.setup(app,db);
     }

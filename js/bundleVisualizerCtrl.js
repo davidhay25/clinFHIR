@@ -19,61 +19,59 @@ angular.module("sampleApp")
                 let qry = search.substr(1); //remove the leading '?'
                 $http.get(qry).then(
                     function (data) {
-                        console.log(data.data)
-                        $scope.toggleSidePane();    //hide the sidepane
-                        processBundle(data.data)
+                        //assume that the query in the url was a full search url - eg
+                        //If this is to a FHIR server with a stored Bundle it ww\ill be a bundle of bundles
+                        //If to an ordinary server (like github) then it will just be a bundle...
+
+                        //so the response . We'll just grab the first one...
+                        let response = data.data;
+                        if (response.resourceType !=='Bundle') {
+                            alert("The app was invoked with a Url that did not return a Bundle")
+                            return;
+                        }
+
+                        if (response.entry && response.entry.length > 0) {
+                            //if the first entry in the bundle is a Bundle, then this must be a bundle of bundles from a FHIR server. Select it
+                            if (response.entry[0].resource.resourceType == 'Bundle') {
+                                $scope.toggleSidePane();    //hide the sidepane
+                                processBundle(response.entry[0].resource)
+                            } else {
+                                //the first entry is not a Bundle - just process it
+                                $scope.toggleSidePane();    //hide the sidepane
+                                processBundle(response)
+                            }
+
+                        }
+                        //console.log(data.data)
+
                     },
                     function(err) {
                         alert("Sorry, the query '"+ qry +"' couldn't be executed")
                        // console.log("")
                     }
                 )
-                /*
-                let ar = s.split('&') - qry
-                ar.forEach(function (item) {
-                    let ar1 = item.split('=')
-                    switch (ar1[0]) {
-                        case 'id' :
-                            bundleId = ar1[1]
-                            break;
-                        case 'server' :
-                            let url = ar1[1]
-                            if (url.substr(-1) !== '/') {
-                                url += "/"
-                            }
 
-                            $scope.dataServer = {url: url}
-                            console.log($scope.dataServer)
-                            break;
-
-                    }
-                });
-
-                if (bundleId) {
-                    console.log('Loading ' + bundleId + " from " + $scope.dataServer.url)
-                    let qry = $scope.dataServer.url + "Bundle/" + bundleId;
-                    $http.get(qry).then(
-                        function (data) {
-                            console.log(data.data)
-                            $scope.toggleSidePane();    //hide the sidepane
-                            processBundle(data.data)
-                        },
-                        function(err) {
-                            console.log("Bundle not found...")
-                        }
-                    )
-                }
-                */
             } else {
-                //nothing passed in - read bundles from the defined server
+                //nothing passed in when the app was started- read bundles from the defined server
                 //load bundles with an identifier in the cfBundle identifier system
+
+                //return;
+                //======================= temp for now
+
                 let identifierSystem = appConfigSvc.config().standardSystem.bundleIdentifierSystem;
+
                 let url = $scope.dataServer.url + "Bundle?identifier="+identifierSystem + "|";
                 $scope.showWaiting = true;
-                $http.get(url).then(
+
+                GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
+
+                //$http.get(url).then(
                     function(data) {
                         console.log(data)
                         $scope.existingBundles = data.data;
+                    },
+                    function(err) {
+                        alert(angular.toJson(err))
                     }
                 ).finally(
                     function () {
@@ -81,9 +79,6 @@ angular.module("sampleApp")
                     }
                 );
             }
-
-
-
 
 
             $scope.leftPaneClass = "col-sm-2 col-md-2"
@@ -153,7 +148,7 @@ angular.module("sampleApp")
 
             };
 
-            $scope.hbDoc = function() {
+            $scope.hbDocDEP = function() {
                 $scope.hbTemplate = "artifacts/templates/dischargeSummary.html";
 
                 $timeout(function(){
@@ -613,6 +608,16 @@ console.log(doc)
 
             };
 
+            $scope.fitCanonicalGraph = function(){
+                $timeout(function(){
+                    if ($scope.canonicalGraph) {
+                        $scope.canonicalGraph.fit();
+
+                    }
+                },2000)
+
+            };
+
             $scope.fitGraph = function(){
                 $timeout(function(){
                     if ($scope.chart) {
@@ -641,7 +646,6 @@ console.log(doc)
                     url = $scope.dataServer.url + url;
                 }
 
-               // let config = {bodyText:"Do you want to execute the query: " + url};
 
                 var config = {
                     closeButtonText: "No thankyou",
@@ -650,16 +654,15 @@ console.log(doc)
                     bodyText: "Do you want to execute the query: " + url
                 };
 
-
                 modalService.showModal({}, config).then(
                     function() {
                         $scope.showWaiting = true;
                         GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
                             function(data) {
-                                console.log(data)
+                                //console.log(data)
 
                                 let newBundle = deDupeBundle(data.data)
-                                console.log(newBundle)
+                                //console.log(newBundle)
                                 processBundle(newBundle);
                             },
                             function(err) {
@@ -680,7 +683,6 @@ console.log(doc)
                 $scope.showSidePane = true;
                 $scope.toggleSidePane();
 
-
                 $scope.fhir = oBundle;
 
                 //create hash by type
@@ -696,12 +698,40 @@ console.log(doc)
                     })
                 }
 
+                //construct the graph based on canonical references
+                let vo = v2ToFhirSvc.makeGraphCanonical(oBundle)
+
+                $scope.hashRefsByResource = vo.hashRefsByResource;  //the set of canonical resources from this resource
+                var container = document.getElementById('canonicalGraph');
+                var graphOptions = {
+                    physics: {
+                        enabled: true,
+                        barnesHut: {
+                            gravitationalConstant: -10000,
+                        }
+                    }
+                };
+                $scope.canonicalGraph = new vis.Network(container, vo.graphData, graphOptions);
+                $scope.canonicalGraph.on("click", function (obj) {
+
+                    var nodeId = obj.nodes[0];  //get the first node
+
+                    var node = vo.graphData.nodes.get(nodeId);
+                    $scope.selectedCanResource = node.resource;
+
+
+                    $scope.$digest();
+                });
+
+
+
+
+
+
                 validate(oBundle,function(hashErrors){
                     //returns a hash by position in bundle with errors...
 
                     $scope.hashErrors = hashErrors;
-console.log(hashErrors)
-
                     $scope.validationResult = hashErrors
 
                     //the serverRoot is needed to figure out the references when the reference is relative
@@ -729,34 +759,6 @@ console.log(hashErrors)
 
                     let options = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:serverRoot}
                     drawGraph(options)
-/*
-                    let vo = v2ToFhirSvc.makeGraph(options)
-
-                    var container = document.getElementById('resourceGraph');
-                    var graphOptions = {
-                        physics: {
-                            enabled: true,
-                            barnesHut: {
-                                gravitationalConstant: -10000,
-                            }
-                        }
-                    };
-                    $scope.chart = new vis.Network(container, vo.graphData, graphOptions);
-
-                    $scope.chart.on("click", function (obj) {
-
-                        var nodeId = obj.nodes[0];  //get the first node
-                        var node = vo.graphData.nodes.get(nodeId);
-                        $scope.selectedNode = node;
-
-                        //this is the entry that is selected from the 'bundle entries' tab...
-                        $scope.selectedBundleEntry = node.entry;
-
-                        $scope.$digest();
-                    });
-*/
-
-
 
                 });
 
@@ -777,15 +779,9 @@ console.log(hashErrors)
 
                             let key;
 
-                            //2020-05-10 - hask key is not full Url (as references won't be)
+                            //2020-05-10 - hask key is not full Url (as references won't be - updated: but the can!)
                             key = entry.resource.resourceType + "/" + entry.resource.id
-                            /*
-                            if  (entry.fullUrl) {
-                                key = entry.fullUrl
-                            } else {
-                                key = entry.resource.resourceType + "/" + entry.resource.id
-                            }
-*/
+
                             hash[key] = entry.resource;
                             if (entry.resource.resourceType == 'Composition') {
                                 arComposition.push(entry.resource)
@@ -894,6 +890,9 @@ console.log(hashErrors)
             //validate each entry
             //return hashErrors - keyed by index within the bundle
             let validate = function(bundle,cb) {
+                //temp - disable validation - make a user initiated function
+                cb({})
+                return;
 
                 validateBundle(bundle)
 

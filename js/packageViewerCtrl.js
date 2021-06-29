@@ -17,11 +17,22 @@ angular.module("sampleApp").controller('packageViewerCtrl',
             )
         }
 
+
+        $http.post('/stats/login',{module:"packView",servers:{terminology:$scope.terminologyServer.url}}).then(
+            function(data){
+
+            },
+            function(err){
+                console.log('error accessing clinfhir to register access',err)
+            }
+        );
+
+
         $http.get('/registry/list').then(
             function (data) {
                 $scope.allPackages = data.data;
                 sortAllPackages()
-                console.log(data.data)
+
             }
         )
 
@@ -52,7 +63,7 @@ angular.module("sampleApp").controller('packageViewerCtrl',
                                 function (manifest) {
                                     $scope.input.name = manifest.name;
                                     $scope.input.version = manifest.version;
-                                   // console.log(manifest)
+
                                 },
                                 function (err) {
                                     alert ('Cannot retrieve manifest, is this the url to the IG?')
@@ -80,7 +91,7 @@ angular.module("sampleApp").controller('packageViewerCtrl',
                     }
                 }).result.then(
                     function(vo) {
-                        console.log(vo)
+
                         if (vo.fromBuild) {
                             //From the build environment. a name and url were entered
                             $scope.downloadingFromRegistry = vo;
@@ -126,7 +137,7 @@ angular.module("sampleApp").controller('packageViewerCtrl',
                 $scope.downloadingFromRegistry = {name:name,version:version};
                 packageViewerSvc.downloadPackage(name,version).then(
                     function(vo){
-                        console.log("Was downloaded " + vo.wasDownloaded);
+
 
                         //The packageSummary is returned whether it has to be downloaded first, or not...
                         if (vo.wasDownloaded) {
@@ -150,7 +161,7 @@ angular.module("sampleApp").controller('packageViewerCtrl',
 
         //load a package from the server (ie assume that it has already been downloaded) ...
         $scope.selectPackage = function(package) {
-            console.log(package)
+
             packageViewerSvc.loadPackage(package.name,package.version).then(
                 function (package) {
                     $scope.package = package;
@@ -166,7 +177,7 @@ angular.module("sampleApp").controller('packageViewerCtrl',
         var hash = $location.hash();
 
         if (hash) {
-            console.log("server passed in: " + hash)
+
             let ar = hash.split('|')
             if (ar.length !== 2) {
                 alert("The package details must be in the format {name}|{version}. No package has been selected")
@@ -274,7 +285,7 @@ angular.module("sampleApp").controller('packageViewerCtrl',
                 alert("Sorry, this VS is not in the package. Working on it...")
             }
 
-            console.log(ar)
+
 
 
 
@@ -293,9 +304,9 @@ angular.module("sampleApp").controller('packageViewerCtrl',
                     //get the XML version
                     let url = $http.post('transformXML',data.data).then(
                         function (data) {
-                            //vkbeautify.xml(response.xml[0]);
+
                             $scope.selectedExampleXml = vkbeautify.xml(data.data);
-                            //console.log(data.data)
+
                         }
                     )
 
@@ -320,7 +331,7 @@ angular.module("sampleApp").controller('packageViewerCtrl',
         $scope.selectItem = function (item) {
             delete $scope.selectedResource;
             delete $scope.SD;
-            console.log(item)
+
             clearAll()
             $scope.selectedItem = item;
             switch (item.kind) {
@@ -372,8 +383,7 @@ angular.module("sampleApp").controller('packageViewerCtrl',
 
                                 packageViewerSvc.makeLogicalModel(data.data).then(
                                     function (model) {
-                                        console.log(model)
-                                        //$scope.allElements = model
+
 
                                         if (item.kind == 'resourceprofile') {
                                             $scope.treeData = packageViewerSvc.createTreeArray(data.data)
