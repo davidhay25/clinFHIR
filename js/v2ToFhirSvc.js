@@ -188,7 +188,7 @@ angular.module("sampleApp")
                 })
 
 
-                console.log(refs)
+                //console.log(refs)
                 //refs = array {source, target, path, url}
 
                 //now that we have the references, we can construct the graph.
@@ -234,15 +234,15 @@ angular.module("sampleApp")
 
                 function processResource(hashResources,resource,refs) {
                     let debug = false
-                    console.log('-----------')
-                    console.log(resource.resourceType + "   " + resource.id)
+                    //console.log('-----------')
+                    //console.log(resource.resourceType + "   " + resource.id)
 
                     //let refs = []
                     function processBranch(refs,parentPath,branch) {
                         Object.keys(branch).forEach(function (key) {
                             let element = branch[key]
                             let typ = typeof(element)
-                            //console.log(key)
+
                             switch (typ) {
                                 case "object" :
                                     if (Array.isArray(element)){
@@ -419,13 +419,13 @@ angular.module("sampleApp")
                     })
 
                 });
-                console.log(objNodes)
+               // console.log(objNodes)
 
                 //so now we have the references, build the graph model...
                 let hash = {};      //this will be a hash of nodes that have a reference to centralResourceId (if specified)
 
 
-                console.log(allReferences)
+                //console.log(allReferences)
 
                 allReferences.forEach(function(ref){
 

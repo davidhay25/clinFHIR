@@ -31,8 +31,11 @@
     <script src="js/libs/angularfire.min.js"></script>
     <script src="js/libs/angular-sanitize.js"></script>
     <script src="js/libs/jstree.min.js"></script>
-
+<!--
     <script src="js/libs/handlebars-v4.1.2.js"></script>
+    -->
+
+
 
     <style>
         .popover-content {
@@ -53,6 +56,21 @@
         angular.module("sampleApp").constant("moment", moment);
 
     </script>
+
+    <script>
+        var config = {
+            apiKey: "AIzaSyBNMohLbPiSKwpGwfARopdeW_6LLXujcUo",
+            authDomain: "clinfhir.firebaseapp.com",
+            databaseURL: "https://clinfhir.firebaseio.com",
+            storageBucket: ""
+        };
+
+        if (firebase) {
+            firebase.initializeApp(config);
+
+        }
+    </script>
+    <script src="js/loginCtrl.js"></script>
     <script src="js/bundleVisualizerCtrl.js"></script>
     <script src="js/v2ToFhirSvc.js"></script>
     <script src="js/libs/vis.min.js"></script>
@@ -135,8 +153,14 @@
                 </span>
 
             </div>
+            <div class="col-md-2">
+                <div class="navbar-text">
+                    <div ng-hide = "showSelector || urlPassedIn" class="clickable" ng-click="showSelector = true">Show Selector</div>
+                </div>
+            </div>
 
-            <div class="col-md-6">
+<!--
+            <div class="col-md-5">
                 <div class="navbar-text">
                     <strong>Validation server:</strong> {{validationServer.name}} ({{validationServer.url}}) <span class="clickable" ng-click="changeServer('validation')">Change</span>
 
@@ -144,149 +168,263 @@
                 </div>
 
             </div>
-
+-->
             <div class="col-md-2">
-                <div class="navbar-text">
-                    <div class="clickable" ng-click="toggleSidePane()">Toggle side pane</div>
-                </div>
+
             </div>
 
 
             <div class="col-md-1">
+                <!--
                 <div class="navbar-text">
                     <div ng-show="fhir">
                         <div class="clickable" ng-hide="input.showHelp" ng-click="input.showHelp = true">Show Help</div>
                         <div class="clickable" ng-show="input.showHelp" ng-click="input.showHelp = false">Hide Help</div>
                     </div>
-
-
-
-
                 </div>
-
+                -->
             </div>
 
 
             <div class="col-md-1">
                 <form class="navbar-form navbar-left">
-                    <img ng-show="showWaiting" src="css/ajax_loader_blue_32.gif"/>
+                    <img ng-show="waiting" src="css/ajax_loader_blue_32.gif"/>
                 </form>
+            </div>
+
+            <div class="col-md-1 col-sm-1">
+
+
+                <div class="nav navbar-form navbar-right" ng-hide="firebase.auth().currentUser">
+                <span style="font-size:1.8em; cursor: pointer">
+                    <div ng-click="login()">
+                        <i class="glyphicon glyphicon-log-in clickable"></i>
+                    </div>
+                </span>
+                </div>
+
+                <div class="nav navbar-form navbar-right" ng-show="firebase.auth().currentUser">
+                    <span style="font-size:1.8em; cursor: pointer"
+                          uib-popover="{{firebase.auth().currentUser.email}}"
+                          popover-placement="left"
+                          popover-trigger="'mouseenter'">
+
+                        <div ng-click="logout()"> <i class="glyphicon glyphicon-log-out clickable"></i></div>
+                    </span>
+                </div>
+
+            </div>
+<!--
+            <div class="col-md-1">
+                <form class="navbar-form navbar-left">
+                    <i class="glyphicon glyphicon-cog clickable"
+                       style="padding: 10px"
+                       ng-click="showConfig">
+
+                    </i>
+                </form>
+            </div>
+            -->
+
+            <div class="col-md-3">
+                <div class="navbar-text pull-right">
+                    <a href="https://www.lyniate.com/" target="_blank">
+                        <img  src="/icons/supported_by_lyniate.png"/>
+                    </a>
+
+                </div>
+
             </div>
 
         </div>
     </nav>
 
+    <div ng-show = "showSelector">
 
-    <div class="row">
-        <div ng-class="leftPaneClass">
+        <uib-tabset>
+            <uib-tab>
+                <uib-tab-heading>
+                    Saved Bundles & Queries <span class="badge">{{userBundles.entry.length}}</span>
+                </uib-tab-heading>
 
+                <div class="row">
+                    <div class="col-md-6">
+                        <div ng-hide="user">
+                            <br/>
+                            <p>You need to log in using the icon on the navbar (or click here:
 
-            <uib-tabset>
-                <uib-tab heading="Bundles">
-
-
-
-                    <div class="row">
-                        <div class="col-sm-4">
-
-                            <i class="glyphicon glyphicon-question-sign clickable"
-                               style="padding: 10px"
-                               ng-click="showBundleHelp = !showBundleHelp">
-
-                            </i>
-
-                        </div>
-                        <div class="col-sm-8">
-                            <button style="padding-top: 10px"
-                                    class="btn btn-link pull-right"
-                                    ng-click="importBundle()">
-                                Import Bundle
-                            </button>
-                        </div>
-                    </div>
-
-
-                    <div ng-hide="existingBundles">
-                        Loading bundles from server...
-                    </div>
-
-
-                    <div ng-show="showBundleHelp" class="rounded-box">
-
-                        These are bundles that were imported to the Visualizer (using the 'Import' link above) and saved to the current data server.
-                        Selecting them from the list below
-                        will download them from the server, then validate and display them.
-                    </div>
-
-                    <div class="list-group">
-                        <div ng-class="{'list-group-item':true,'listItemSelected':entry==selectedEntry}"
-                             ng-repeat="entry in existingBundles.entry"
-                             ng-click = "selectBundleFromList(entry)">
-                            {{entry.resource.identifier.value}}
-                            <span class="pull-right badge">{{entry.resource.entry.length}}</span>
-                            <div>{{entry.resource.id}}</div>
-                        </div>
-                    </div>
-                </uib-tab>
-
-                <uib-tab heading="Queries">
-                    <div class="row">
-                        <div class="col-sm-4">
-                            <i class="glyphicon glyphicon-question-sign clickable"
-                               style="padding: 10px"
-                               ng-click="showQueryHelp = !showQueryHelp">
-
-                            </i>
-                        </div>
-                        <div class="col-sm-8">
-                            <button style="padding-top: 10px"
-                                    class="btn btn-link pull-right"
-                                    ng-click="addQuery()">
-                                Add Query
-                            </button>
-                        </div>
-                    </div>
-
-                    <div ng-show="showQueryHelp" class="rounded-box">
-
-                        These are queries that have been entered and saved to the local browser cache. Only the
-                        query is saved. When selected in the list, the query is executed, and the response
-                        (which must be a Bundle in JSON format) is retrieved, validated and displayed.
-                        It is possible to specify the server to query (it defaults to the data server).
-                        This is particularly useful when the server is developing query functionality as it allows the
-                        response to be queried, validated and displayed.
-                        Note that the server must support CORS, in particular the headers:
-                        Access-Control-Allow-Origin:*
-                        Access-Control-Expose-Headers:Location, Content-Location
-                    </div>
-
-                    <div class="list-group">
-                        <div ng-class="{'list-group-item':1,'listItemSelected':query==selectedQuery}"
-                             ng-repeat="query in queries"
-                             ng-click = "selectQuery(query)"
-                             uib-popover-html =queryPopover(query)
-                             popover-placement="right"
-                             popover-trigger="'mouseenter'">
-                            {{query.display}}
-                            <span class="pull-right">
-                                <i class="glyphicon glyphicon-remove clickable"
-                                                         ng-click="deleteQuery($index)"></i>
+                                <span ng-click="login()">
+                                <i class="glyphicon glyphicon-log-in clickable"></i>
                             </span>
+
+                                ) to be able to save Bundles and Queries for later
+                                use.</p>
+                            <p>You can still paste in a Bundle - or locate one using a query -
+                                from the two tabs above and it will still work just fine, but it won't be saved in your
+                                personal account.</p>
                         </div>
+
+                        <div  ng-show="user">
+                            <h4>Saved bundles</h4>
+
+                            <table class="table table-bordered">
+                                <tr ng-repeat = "item in savedBundles">
+                                    <td>{{item.name}}</td>
+                                    <td width="80"><button class="btn btn-link" ng-click="displaySavedBundle(item)">Load</button> </td>
+                                </tr>
+                            </table>
+
+
+                            <h4>Saved queries</h4>
+                            <table class="table table-bordered">
+                                <tr ng-repeat = "item in savedQueries">
+                                    <td>{{item.name}}</td>
+                                    <td>{{item.qry}}</td>
+                                    <td width="80"><button class="btn btn-link" ng-click="executeSavedQuery(item)">Execute</button> </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <div><em>Saved bundles and queries are stored on the data server - currently {{dataServer.name}} ({{dataServer.url}}). </em></div>
+
+                        <em>Bundles are stored at the [host]/Bundle endpoint, and queries at [host]/DocumentReference</em>
+
+
                     </div>
-                </uib-tab>
-            </uib-tabset>
+                    <div class="col-md-6">
+                        <h4>Configuration</h4>
+
+                        <div><strong>Data server:</strong> {{dataServer.name}} ({{dataServer.url}}) <span class="clickable" ng-click="changeServer('data')">Change</span> </div>
+                        <p>The data server serves 2 main purposes:</p>
+                        <ul>
+                            <li>Saved bundles and queries are stored there.</li>
+                            <li>It is the 'default' server when creating a query. You can however specify any server you want by using the
+                                full url when creating the query.</li>
+                        </ul>
+
+                        <strong>Validation server:</strong>
+
+                        {{validationServer.name}} ({{validationServer.url}}) <span class="clickable" ng-click="changeServer('validation')">Change</span>
+                        <p>Used when validating the bundle and its contents. This occurs automatically when a bundle is processed and displayed. </p>
+                        <br/>
+
+                    </div>
+                </div>
+
+
+
+            </uib-tab>
+
+
+            <uib-tab heading = "Paste in bundle">
+                <div class="row">
+                    <div class="col-md-4">
+                        <br/>
+                        <p>Paste a bundle into the text area to the right. </p>
+                        <p>A button will appear below that when clicked will show the contents in the Visualizer.</p>
+                        <p>Either Json or XML can be used. XML will be converted to Json (using the <a href="https://github.com/lantanagroup/FHIR.js">Lantana</a> library) before
+                        being displayed.</p>
+
+                        <button ng-show = "input.newBundle" class="btn btn-success"
+                                ng-click="viewNewBundle(input.newBundle)">View bundle</button>
+
+                        <div ng-show = "user">
+
+                            <label>Bundle name</label>
+                            <input type="text" ng-model="input.newBundleName" class="form-control"
+                                   placeholder="Bundle name, if to be saved"/>
+
+                            <span class="help-block pull-right">Required if the bundle is to be saved</span>
+
+                            <button ng-show = "executedQueryBundle && input.newBundleName && user" class="btn btn-danger"
+                                    ng-click="viewNewBundle(input.newBundle,input.newBundleName)">Save and view</button>
 
 
 
 
 
+                        </div>
+
+<!--
+                        <div><button class="btn btn-primary"
+                                     ng-click="viewNewBundle(input.newBundle,input.newBundleName)">
+                            View Bundle</button></div>
+                        -->
+                    </div>
+                    <div class="col-md-8">
+                        <textarea class="form-control" rows = '20' ng-model="input.newBundle"></textarea>
+                    </div>
+
+                </div>
+
+
+            </uib-tab>
+            <uib-tab heading = "Enter query url">
+                <br/>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <p>Enter a query that returns a FHIR bundle</p>
+                        <p>The query can be to a FHIR server or standard server (like a bundle stored in Github)</p>
+                        <p>You can use the currently configured data server ({{dataServer.url}}) or any other server. To specify another server
+                            simply use the full url - eg http://myserver/mybundle. If you leave off the 'http' the app will assume
+                            you are making standard <a href="http://hl7.org/fhir/http.html#search" target="_blank">FHIR query</a> (Only a GET is supported)</p>
+                        <p>You can change the configured server <span class="clickable">here.</span> </p>
+                        <p>If you want to save the query (so it will appear in your personal list, you need to be logged in,
+                        and specify a name in the box below.</p>
+
+                        <!--
+                        <label>Data server url</label>
+                        <div>{{dataServer.url}}</div>
+                        -->
+                        <br/><br/>
+                        <label>Query to execute</label>
+                        <input class="form-control" ng-model="input.newQuery" placeholder="The query."/>
+                        <span class="help-block pull-right">Use full query (incl. http) if to a different server</span>
+
+                        <br/><br/>
+                        <label>Query name</label>
+                        <div>
+                            <input class="form-control" ng-model="input.newQueryName" placeholder="A name for the query (required if query is to be saved"/>
+                        </div>
+                        <span class="help-block pull-right">Required if the query is to be saved</span>
+                        <br/><br/>
+
+                        <div>
+                            <button ng-show = "input.newQuery && ! testQueryBundle" class="btn btn-primary"
+                                    ng-click="testNewQuery(input.newQuery)">Test query</button>
+
+                            <button ng-show = "executedQueryBundle" class="btn btn-warning"
+                                    ng-click="clearQuery()">Clear</button>
+
+                            <button ng-show = "executedQueryBundle && input.newQueryName && user" class="btn btn-danger"
+                                    ng-click="addNewQuery(input.newQuery,input.newQueryName)">Add query to list</button>
+
+                            <button ng-show = "executedQueryBundle" class="btn btn-success"
+                                    ng-click="viewNewQueryBundle(executedQueryBundle)">View bundle</button>
+                        </div>
+
+                        <br/>
+                        <strong ng-show="executedQuery">Executed query</strong>
+                        <div>{{executedQuery}}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <pre>{{executedQueryBundle | json}}</pre>
+                    </div>
 
 
 
+                </div>
+            </uib-tab>
 
-        </div>
-        <div ng-class="rightPaneClass">
+        </uib-tabset>
+
+    </div>
+
+    <div ng-hide = "showSelector" class="row">
+
+        <div ng-class="col-md-12">
+         <!--   <div ng-class="rightPaneClass">-->
 
             <div ng-show="!fhir || input.showHelp">
                 <br/>
@@ -469,6 +607,24 @@
                                                     </div>
                                                 </uib-tab>
 
+                                                <uib-tab ng-show="selectedBundleEntry.resource.resourceType == 'ValueSet' && selectedBundleEntry.resource.expansion">
+
+                                                    <uib-tab-heading>
+                                                        Expansion <span class="badge">{{selectedBundleEntry.resource.expansion.contains.length}}</span>
+                                                    </uib-tab-heading>
+
+                                                    <table class="table table-condensed">
+                                                        <tr ng-repeat = "concept in selectedBundleEntry.resource.expansion.contains">
+                                                            <td>
+                                                                {{concept.code}}
+                                                                <div>{{concept.system}}</div>
+                                                                <div>{{concept.version}}</div>
+                                                            </td>
+                                                            <td>{{concept.display}}</td>
+                                                        </tr>
+                                                    </table>
+                                                </uib-tab>
+
                                                 <uib-tab ng-show="hashRefsByResource[selectedBundleEntry.resource.id].length > 0">
                                                     <uib-tab-heading>
                                                         Canonicals <span class="badge">{{hashRefsByResource[selectedBundleEntry.resource.id].length}}</span>
@@ -487,65 +643,18 @@
 
                         </uib-tab>
 
-                        <uib-tab heading = "Canonical graph"  select="fitSingleGraph()">
-                            <div class="row">
-                                <div class="col-md-7">
-                                    <div class="row">
-                                        <div class="col-md-10">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <button class="btn btn-link" ng-click="fitCanonicalGraph()">Fit</button>
-                                        </div>
-                                    </div>
-                                     <div id="canonicalGraph"></div>
-                                </div>
-                                <div class="col-md-5">
-                                    <uib-tabset>
-                                        <uib-tab heading="Json">
-                                            <pre>{{selectedCanResource | json}}</pre>
-                                        </uib-tab>
-                                        <uib-tab ng-show="selectedCanResource.resourceType == 'ValueSet' && selectedCanResource.expansion">
 
-                                            <uib-tab-heading>
-                                                Expansion <span class="badge">{{selectedCanResource.expansion.contains.length}}</span>
-                                            </uib-tab-heading>
-
-                                            <table class="table table-condensed">
-                                                <tr ng-repeat = "concept in selectedCanResource.expansion.contains">
-                                                    <td>
-                                                        {{concept.code}}
-                                                        <div>{{concept.system}}</div>
-                                                        <div>{{concept.version}}</div>
-                                                    </td>
-                                                    <td>{{concept.display}}</td>
-                                                </tr>
-                                            </table>
-                                        </uib-tab>
-
-                                        <uib-tab ng-show="hashRefsByResource[selectedCanResource.id].length > 0">
-                                            <uib-tab-heading>
-                                                Canonicals <span class="badge">{{hashRefsByResource[selectedCanResource.id].length}}</span>
-
-                                            </uib-tab-heading>
-
-                                            <pre>{{hashRefsByResource[selectedCanResource.id] | json}}</pre>
-
-                                        </uib-tab>
-                                    </uib-tabset>
-                                </div>
-                            </div>
-
-                        </uib-tab>
-
-                        <uib-tab heading="Graph" select="fitGraph()">
+                        <uib-tab heading = "References Graph" select="fitGraph()">
                             <div class="row">
                                 <div class="col-md-8">
+                                    <!--
                                     <div>
                                         <div class="pull-right">
                                             <input ng-model="input.showHidePatient" type="checkbox"
                                                    ng-click="showHidePatient(input.showHidePatient)"/> Hide Patient
                                         </div>
                                     </div>
+                                    -->
 
                                     <div id="resourceGraph"></div>
                                 </div>
@@ -585,10 +694,69 @@
 
                         </uib-tab>
 
+                        <uib-tab heading = "Canonical graph"  select="fitSingleGraph()">
+                            <div class="row">
+                                <div class="col-md-7">
+                                    <div class="row">
+
+                                        <div class="col-md-12">
+                                            <button class="btn btn-link pull-right" ng-click="fitCanonicalGraph()">Refresh graph (if no display)</button>
+                                        </div>
+                                    </div>
+                                    <div id="canonicalGraph"></div>
+                                </div>
+                                <div class="col-md-5">
+                                    <uib-tabset>
+                                        <uib-tab heading="Json">
+                                            <pre>{{selectedCanResource | json}}</pre>
+                                        </uib-tab>
+                                        <uib-tab ng-show="selectedCanResource.resourceType == 'ValueSet' && selectedCanResource.expansion">
+
+                                            <uib-tab-heading>
+                                                Expansion <span class="badge">{{selectedCanResource.expansion.contains.length}}</span>
+                                            </uib-tab-heading>
+
+                                            <table class="table table-condensed">
+                                                <tr ng-repeat = "concept in selectedCanResource.expansion.contains">
+                                                    <td>
+                                                        {{concept.code}}
+                                                        <div>{{concept.system}}</div>
+                                                        <div>{{concept.version}}</div>
+                                                    </td>
+                                                    <td>{{concept.display}}</td>
+                                                </tr>
+                                            </table>
+                                        </uib-tab>
+
+                                        <uib-tab ng-show="hashRefsByResource[selectedCanResource.id].length > 0">
+                                            <uib-tab-heading>
+                                                Canonicals <span class="badge">{{hashRefsByResource[selectedCanResource.id].length}}</span>
+
+                                            </uib-tab-heading>
+
+                                            <pre>{{hashRefsByResource[selectedCanResource.id] | json}}</pre>
+
+                                        </uib-tab>
+                                    </uib-tabset>
+                                </div>
+                            </div>
+
+                        </uib-tab>
+
+                        <uib-tab ng-show = "false" heading="Bundle validation">
+                            <div class="row">
+                                <div class="col-md-10">
+
+                                </div>
+                                <div class="col-md-2">
+                                    <button class="btn btn-primary" ng-click="validateBundle()">Validate</button>
+                                </div>
+                            </div>
 
 
+                            <pre>{{hashErrors | json}}</pre>
 
-                        <uib-tab heading="Bundle validation">
+
                             <table class="table table-condensed">
                                 <tr ng-repeat="iss in bundleValidationResult.issue">
                                     <td>{{iss.severity}}</td>
@@ -642,8 +810,7 @@
                         </uib-tab>
 
 
-                        <uib-tab heading="Table">
-
+                        <uib-tab ng-show = "false" heading="Table">
 
                             <div class="row" style="margin-top: 8px"  ng-repeat = "entry in fhir.entry">
                                 <div class="col-md-3">
@@ -655,6 +822,8 @@
 
 
                         </uib-tab>
+
+
                         <uib-tab heading="Json">
                             <div>
                                 <pre ng-show="fhir">  {{fhir | json}} </pre>

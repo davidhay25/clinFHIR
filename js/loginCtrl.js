@@ -2,7 +2,7 @@
 
 angular.module("sampleApp")
     .controller('loginCtrl',
-        function ($rootScope,$scope,$firebaseAuth,$uibModal,modalService) {
+        function ($scope,$firebaseAuth,$uibModal,modalService) {
 
         //https://firebase.google.com/docs/auth/web/manage-users
 
@@ -74,7 +74,7 @@ angular.module("sampleApp")
             firebase.auth().onAuthStateChanged(function(user) {
                 if (user) {
 
-                    //$rootScope.currentUser = firebase.auth().currentUser;
+
                     console.log(firebase.auth().currentUser)
 
                 } else {

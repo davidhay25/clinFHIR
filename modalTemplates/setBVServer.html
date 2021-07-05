@@ -1,0 +1,110 @@
+
+<div>
+    <!--<div ng-controller="newResourceCtrl">-->
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-6 col-sm-6 col-xs-6">
+                <h3 class="modal-title">Set {{serverType}} server</h3>
+
+            </div>
+            <div class="col-md-6 col-sm-6 col-xs-6">
+                <div class="pull-right">
+                    <button class="btn btn-link" ng-click="$dismiss()">Cancel</button>
+                    <button ng-show="canSave" class="btn btn-primary" ng-click="save()">Save</button>
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+    </div>
+    <div class="modal-body">
+
+
+
+        <div class="row">
+            <div class="col-md-4 col-sm-4">
+                <label>The name of the server</label>
+                <input type="text" ng-model="input.name"
+                       placeholder="Server name. Type to select from list"
+                       typeahead-min-length="1"
+                       typeahead-wait-msXXX="1000"
+                       typeahead-on-select="setServer(input.name)"
+                       uib-typeahead="server as server.name for server in allServers | filter:$viewValue | limitTo:20"
+                       class="form-control"/>
+            </div>
+            <div class="col-md-6 col-sm-6">
+                <label>Server url</label>
+                <input type="text" class="form-control" ng-model="input.url"/>
+            </div>
+
+            <div class="col-md-2 col-sm-2" ng-hide="canSave == true">
+                <label>Load Meta </label>
+                <button class="btn btn-warning" ng-click="checkServer(input.url)">Check</button>
+
+            </div>
+
+        </div>
+
+
+
+
+<!--
+
+
+        <div>
+
+            <form>
+                <div class="form-group">
+                    <label>Validation Server</label>
+                    <div>
+
+
+                        <input type="text" ng-model="input.validationServer"
+                               placeholder="Vlaidation server"
+                               typeahead-min-length="1"
+                               typeahead-wait-msXXX="1000"
+                               typeahead-on-select="selectValidationServer(input.validationServer)"
+                               uib-typeahead="server as server.url for server in allServers | filter:$viewValue | limitTo:20"
+                               class="form-control"/>
+
+
+
+                        <select ng-model="input.validationServer" class="form-control"
+                                ng-options="item.name for item in allServers">
+
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Data Server</label>
+                    <div>
+                        <select ng-model="input.dataServer" class="form-control"
+                                ng-options="item.name for item in allServers">
+
+                        </select>
+                    </div>
+                </div>
+
+
+            </form>
+
+        </div>
+
+-->
+
+    </div>
+
+
+    <div class="modal-header">
+        <em>You can either select one of the 'known' servers by starting to type in the name box, or enter the name
+        and url of the server manually.</em>
+
+        </div>
+    </div>
+
+</div>

@@ -89,7 +89,6 @@ console.log(user)
 
             $scope.logout=function(){
                 firebase.auth().signOut().then(function() {
-
                     modalService.showModal({}, {bodyText: 'You have been logged out of clinFHIR'})
 
                 }, function(error) {

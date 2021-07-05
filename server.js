@@ -22,6 +22,8 @@ process.on('uncaughtException', function(err) {
     console.log('>>>>>>>>>>>>>>> Caught exception: ' + err);
 });
 
+
+
 var db;
 var port = process.env.port;
 if (! port) {
@@ -90,6 +92,30 @@ app.use('/',function(req,res,next){
 app.use('/', express.static(__dirname,{index:'/launcher.html'}));
 
 console.log('listening on port '+port);
+
+
+app.post("/transformJson",function (req,res){
+    //transform from Xml to Json
+    let body= "";
+    req.on('data', function (data) {
+        body += data;
+    });
+
+    req.on('end', function () {
+        console.log(body)
+        const fhir = new Fhir();
+        try {
+            console.log('b4')
+            let json = fhir.xmlToObj(body);
+            console.log('aft')
+            res.send(json)
+        } catch (ex) {
+            console.log(ex)
+            res.status(500).send({message:"Unable to convert to Json." + ex.message})
+        }
+
+    })
+})
 
 
 // ---------- for the server query - to strt with
