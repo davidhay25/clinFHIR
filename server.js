@@ -97,7 +97,7 @@ app.use('/',function(req,res,next){
 
 app.use('/', express.static(__dirname,{index:'/launcher.html'}));
 
-console.log('listening on port '+port);
+//console.log('listening on port '+port);
 
 /*
 app.post("/transformJson",function (req,res){
@@ -146,8 +146,11 @@ app.post("/transformXML",function (req,res){
 //https://bikramkeshari.com/article/How%20redirect%20all%20HTTP%20requests%20to%20HTTPS%20using%20Node.js%20and%20Express
 
 let httpServer = express();
-
+httpServer.listen(80, () => {
+    console.log('on port 80');
+});
 httpServer.get('*', (request, response) => {
+    console.log('redirecting HTTP')
     response.redirect('https://' + request.headers.host + request.url);
 });
 
