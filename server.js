@@ -147,10 +147,10 @@ app.post("/transformXML",function (req,res){
 
 let httpServer = express();
 httpServer.listen(80, () => {
-    console.log('on port 80');
+    console.log('listening on port 80');
 });
 httpServer.get('*', (request, response) => {
-    console.log('redirecting HTTP')
+    //console.log('redirecting HTTP')
     response.redirect('https://' + request.headers.host + request.url);
 });
 
