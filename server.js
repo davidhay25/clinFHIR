@@ -1,22 +1,26 @@
 //simple server to serve static files...
 
-var request  = require('request');
+// let request  = require('request');
+
+let fs = require('fs')
 
 let http = require('http');
 const https = require('https');
 
 let cors = require('cors'); //https://www.npmjs.com/package/cors
 
-var Fhir = require('fhir').Fhir;
+//var Fhir = require('fhir').Fhir;
 
 var express = require('express');
 var app = express();
 app.use(cors());
 
 let statsModule = require("./serverModuleStats")
+let lantanaModule = require("./serverModuleLantana")
 var smartModule = require("./serverModuleSMART.js")
 
 let registryModule = require('./serverModuleRegistry.js');
+registryModule.setup(app)
 
 process.on('uncaughtException', function(err) {
     console.log('>>>>>>>>>>>>>>> Caught exception: ' + err);
@@ -30,15 +34,14 @@ if (! port) {
     port=80;
 }
 
-let server = http.createServer(app).listen(port);
+// let server = http.createServer(app).listen(port);
 
+//not using WS now - was for logical modeller
+/*
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({server:server});
-
 var taskModule = require("./serverModuleTask");
 taskModule.setup(app,wss,WebSocket)     // need WebSocket for the constants
-
-registryModule.setup(app)
 
 wss.on('connection', function connection(ws) {
     ws.on('message', function incoming(message) {
@@ -48,6 +51,7 @@ wss.on('connection', function connection(ws) {
     ws.send('Socket connection made');
 });
 
+*/
 
 //if the port was passed in on a command line
 process.argv.forEach(function (val, index) {
@@ -65,12 +69,14 @@ MongoClient.connect('mongodb://127.0.0.1:27017/clinfhir', function(err, ldb) {
 
         smartModule.setup(app,db);
         statsModule.setup(app,db);
+        lantanaModule.setup(app)
     }
 });
 
 //allow the use of custom domains - like csiro.clinfhir.com
 //need to create the domain in digitalocean as well...
 //a hash of supported domains and the default page.
+
 let domains = {}
 domains['csiro.clinfhir.com'] = '/csiroProject.html';
 domains['nz.clinfhir.com'] = '/nzProject.html';
@@ -93,7 +99,7 @@ app.use('/', express.static(__dirname,{index:'/launcher.html'}));
 
 console.log('listening on port '+port);
 
-
+/*
 app.post("/transformJson",function (req,res){
     //transform from Xml to Json
     let body= "";
@@ -134,7 +140,7 @@ app.post("/transformXML",function (req,res){
         res.send(xml)
     })
 })
-
+*/
 
 //attempt to start the SSL server...
 try {
@@ -155,8 +161,15 @@ try {
     });
 
 } catch (ex) {
+    console.log('Error starting SSL',ex)
     console.log("SSL not enabled.")
 
+    let server = http.createServer(app).listen(port);
+
+    console.log("listening on port: " + port)
 
 }
+
+
+//https://bikramkeshari.com/article/How%20redirect%20all%20HTTP%20requests%20to%20HTTPS%20using%20Node.js%20and%20Express
 

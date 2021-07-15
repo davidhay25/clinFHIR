@@ -133,7 +133,7 @@
     <script src="js/filters.js"></script>
     <script src="js/bundleVisualizerCtrl.js"></script>
 
-    <title>Bundle Visualizer</title>
+    <title>Bundle Viewer</title>
 
 </head>
 
@@ -525,7 +525,7 @@
                                             <div class="pull-right">
                                                 <a target="_blank"
                                                    ng-show="selectedBundleEntry"
-                                                   ng-href="http://hl7.org/fhir/{{selectedBundleEntry.resource.resourceType}}.html#resource">Spec</a>
+                                                   ng-href="http://hl7.org/fhir/{{selectedBundleEntry.resource.resourceType}}.html#resource">{{selectedBundleEntry.resource.resourceType}} Spec</a>
                                             </div>
 
                                             <uib-tabset>
@@ -586,6 +586,11 @@
                                                     <uib-tab-heading>
                                                         Errors <span class="badge">{{selectedBundleEntryErrors.length}}</span>
                                                     </uib-tab-heading>
+                                                    <br/>
+                                                    <div>
+                                                        <em class = "pull-right">Validation Server: {{validationServer.url}}</em>
+                                                    </div>
+
                                                     <div uib-alert class="alert-warning">
                                                         <table class="table">
                                                             <tr ng-repeat="err in selectedBundleEntryErrors">

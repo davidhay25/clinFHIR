@@ -56,7 +56,7 @@
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
 
         <div class="container-fluid">
-            <div class="col-md-7 col-sm-7">
+            <div class="col-md-6 col-sm-6">
                     <span>
                         <a class="navbar-brand" href="#">
                             Lab Viewer
@@ -69,14 +69,50 @@
 
                 </form>
             </div>
-            <div class="col-md-3 col-sm-3">
+            <div class="col-md-4 col-sm-4">
+                <div class="navbar-text">
+                    <input class="form-control" disabled = "disabled" ng-model="input.server"/>
+                </div>
             </div>
         </div>
     </nav>
 
+        <div class="row">
+            <div class="col-md-3">
+
+                <select class="form-control" ng-model="input.selectedType"
+                        ng-options = "type for type in input.arResourceType"></select>
+
+            </div>
+            <div class="col-md-3">
+                <input class="form-control" ng-model="input.nhi"/>
+            </div>
+            <div class="col-md-5">
+                <input class="form-control" ng-model="input.qry"/>
+            </div>
+            <div class="col-md-1">
+                <button class="btn btn-primary" ng-click="execute()">Execute</button>
+            </div>
+        </div>
+
+        <div class="banner">{{fullQuery}}</div>
+
+        <uib-tabset>
+            <uib-tab heading = "Full response">
+                <pre ng-show="response">{{response | json}}</pre>
+                <pre ng-show="error">{{error | json}}</pre>
+            </uib-tab>
+        </uib-tabset>
 
 
+        <div class="row">
+            <div class="col-md-3">
 
+            </div>
+        <div class="col-md-9">
+
+        </div>
+    </div>
 
 </div>
 
