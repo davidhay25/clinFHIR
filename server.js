@@ -34,7 +34,7 @@ if (! port) {
     port=80;
 }
 
-// let server = http.createServer(app).listen(port);
+let server = http.createServer(app).listen(port);
 
 //not using WS now - was for logical modeller
 /*
@@ -144,19 +144,21 @@ app.post("/transformXML",function (req,res){
 
 //need to start http server to re-direct to SSL endpoint
 //https://bikramkeshari.com/article/How%20redirect%20all%20HTTP%20requests%20to%20HTTPS%20using%20Node.js%20and%20Express
+/* - need to figure out how to call non secure servers
 
 let httpServer = express();
 httpServer.listen(80, () => {
     console.log('listening on port 80');
 });
 
-/* - need to figure out how to call non secure servers
+
 httpServer.get('*', (request, response) => {
     //console.log('redirecting HTTP')
     response.redirect('https://' + request.headers.host + request.url);
 });
 */
 
+/*
 //attempt to start the SSL server...
 try {
     // Certificate - https://itnext.io/node-express-letsencrypt-generate-a-free-ssl-certificate-and-run-an-https-server-in-5-minutes-a730fbe528ca
@@ -185,6 +187,7 @@ try {
 
 }
 
+*/
 
 //https://bikramkeshari.com/article/How%20redirect%20all%20HTTP%20requests%20to%20HTTPS%20using%20Node.js%20and%20Express
 
