@@ -1174,9 +1174,8 @@ angular.module("sampleApp")
                         },
 
                         function(err){
-                            hash[inx] = err.data.issue
-
                             if (err.data) {
+                                hash[inx] = err.data.issue
                                 err.data.issue.forEach(function(iss){
                                     if (iss.severity == 'error') {
                                         $scope.valErrors++

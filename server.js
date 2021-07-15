@@ -149,11 +149,13 @@ let httpServer = express();
 httpServer.listen(80, () => {
     console.log('listening on port 80');
 });
+
+/* - need to figure out how to call non secure servers
 httpServer.get('*', (request, response) => {
     //console.log('redirecting HTTP')
     response.redirect('https://' + request.headers.host + request.url);
 });
-
+*/
 
 //attempt to start the SSL server...
 try {
