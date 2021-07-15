@@ -142,6 +142,16 @@ app.post("/transformXML",function (req,res){
 })
 */
 
+//need to start http server to re-direct to SSL endpoint
+//https://bikramkeshari.com/article/How%20redirect%20all%20HTTP%20requests%20to%20HTTPS%20using%20Node.js%20and%20Express
+
+let httpServer = express();
+
+httpServer.get('*', (request, response) => {
+    response.redirect('https://' + request.headers.host + request.url);
+});
+
+
 //attempt to start the SSL server...
 try {
     // Certificate - https://itnext.io/node-express-letsencrypt-generate-a-free-ssl-certificate-and-run-an-https-server-in-5-minutes-a730fbe528ca
