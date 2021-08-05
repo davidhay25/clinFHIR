@@ -87,8 +87,6 @@
 </div>
 
 
-
-
 <div class="row" ng-show="server">
 
     <div class="col-sm-12 col-md-12">
@@ -199,7 +197,7 @@
                 </div>
             </uib-tab>
 
-            <uib-tab heading="Query">
+            <uib-tab heading="Query server">
 
 
                 <div class="row">
@@ -251,7 +249,7 @@
                                             <div class="col-md-9 col-sm-9">
                                                 <div class="row rounded-box" ng-show="type">
                                                     <div class="col-md-1 col-sm-1">
-                                                        <button class="btn btn-primary" ng-click="doit()">Execute</button>
+                                                        <button class="btn btn-danger" ng-click="doit()">Execute</button>
                                                     </div>
                                                     <div class="col-md-11 col-sm-11">
                                                         <h5>{{query}}</h5>
@@ -284,9 +282,6 @@
 
 
                                                 <div class="paramListScroll">
-
-
-
 
                                                     <!-- Common types (from hx)-->
                                                     <strong>Types you've used</strong>
@@ -443,11 +438,62 @@
                                             placeholder="Enter the query to be executed against {{server.url}}. eg Patient?name=hay"></textarea>
                                         </div>
                                         <div class="col-sm-2 col-md-2">
-                                            <button  rows=4 class="btn btn-primary" ng-click="executeAdHoc(adHocQry)">Execute</button>
+                                            <button  rows=4 class="btn btn-danger" ng-click="executeAdHoc(adHocQry)">Execute</button>
                                         </div>
                                     </div>
 
                                 </uib-tab>
+
+
+                                <uib-tab heading="Testing">
+
+
+                                    <br/>
+                                    <div ng-controller="serverQueryTestCtrl">
+
+                                        <ng-include src="'/includes/serverQueryTest.html'"></ng-include>
+<!--
+                                        <div class="row">
+                                            <div class = "col-md-3">
+                                                <strong>Tests</strong>
+                                                <div class="list-group">
+
+                                                    <div ng-class="{'list-group-item':true,listItemSelected:selectedTest == test}"
+                                                         style="cursor: pointer"
+                                                         ng-repeat="test in script.tests">
+                                                        <div ng-click = "selectTest(test)"> {{test.name}}</div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div class = "col-md-9">
+
+                                                <div ng-show="selectedTest">
+
+                                                <div class="rounded-box">{{selectedTest.description}}</div>
+
+
+                                                <div>
+                                                    <label>Query</label>
+                                                    <input class="form-control" ng-model="selectedTest.query"/>
+                                                </div>
+
+                                                <div>
+                                                    <label>Patient Identifier</label>
+                                                    <input class="form-control" ng-model="script.patientIdentifier"/>
+                                                </div>
+
+                                                <button class="btn btn-danger pull-right" ng-click="executeTest(selectedTest)">Execute</button>
+                                                </div>
+
+                                            </div>
+                                        </div>
+-->
+                                    </div>
+
+                                </uib-tab>
+
+
 
                                 <uib-tab heading="History">
 
@@ -559,13 +605,14 @@
                                 <div class="rounded-box-filled">
                                 <div class="row">
 
-                                    <div class="col-md-10"  style="padding: 8px;">
-                                        <strong> Url: {{query}}</strong>
+                                    <div class="col-md-11">
+                                        <strong   style="margin: 8px;">  {{query}}</strong>
                                     </div>
 
-                                    <div class="col-md-2">
+                                    <div class="col-md-1"  >
                                         <div class="pull-right">
-                                            <button class="btn btn-primary" ng-click="input.showQuery=true;input.showResults=false">
+                                            <button  style="padding: 8px;"
+                                                     class="btn btn-primary" ng-click="input.showQuery=true;input.showResults=false">
                                                 Close results
                                             </button>
                                         </div>
@@ -575,133 +622,102 @@
                             </div>
 
 
-                                <div class="alert alert-danger" ng-show="err">
+                            <div class="alert alert-danger" ng-show="err">
                                 <div><strong>StatusCode:{{err.statusCode}}</strong></div>
                                 <pre>{{err.data | json}}</pre>
                             </div>
 
 
 
+                            <div class="row" ng-hide="response.data.entry.length > 0">
+                                Sorry, there were no results for this query
+                            </div>
 
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="rounded-box">
+                            <div class="row" ng-show="response.data.entry.length > 0">
+                                <div class="col-md-4">
+                                    <div class="rounded-box">
 
-                                            <a  style="padding: 8px" target="_blank" class="pull-right" ng-href = "{{bvUrl}}?{{query}}">
-                                                View in Bundle Visualizer
-                                            </a>
+                                        <a  ng-show="response.data.entry.length > 1"
+                                            style="padding: 8px" target="_blank" class="pull-right" ng-href = "{{bvUrl}}?{{query}}">
+                                            View in Bundle Visualizer
+                                        </a>
 
-                                            <div style="padding: 8px">
-                                                   {{response.data.entry.length}} Entries
-                                            </div>
-
-
-
+                                        <div style="padding: 8px">
+                                               {{response.data.entry.length}}
+                                            <span ng-show="response.data.entry.length > 1">Entries</span>
+                                            <span ng-show="response.data.entry.length == 1">Entry</span>
                                         </div>
+                                    </div>
 
-                                        <uib-tabset>
-                                            <br/>
-                                            <uib-tab heading = "List">
-                                                <div class="list-group"  style="height:600px; overflow-y: auto;">
+                                    <uib-tabset>
+                                        <br/>
+                                        <uib-tab heading = "List">
+                                            <div class="list-group"  style="height:600px; overflow-y: auto;">
 
-                                                    <div ng-class="{'list-group-item':true,'list-group-item-info':result.selectedEntry.fullUrl == entry.fullUrl}"
-                                                         ng-repeat="entry in response.data.entry">
-                                                        <div ng-click="selectEntry(entry)"  style="cursor: pointer">
-                                                            {{entry.resource.resourceType}}
-                                                            <div>{{ResourceUtilsSvc.getOneLineSummaryOfResource(entry.resource)}}</div>
-                                                        </div>
+                                                <div ng-class="{'list-group-item':true,'list-group-item-info':result.selectedEntry.fullUrl == entry.fullUrl}"
+                                                     ng-repeat="entry in response.data.entry">
+                                                    <div ng-click="selectEntry(entry)"  style="cursor: pointer">
+                                                        {{entry.resource.resourceType}}
+                                                        <div>{{ResourceUtilsSvc.getOneLineSummaryOfResource(entry.resource)}}</div>
                                                     </div>
                                                 </div>
-                                            </uib-tab>
+                                            </div>
+                                        </uib-tab>
 
 
-                                            <uib-tab heading = "Graph"  select="fitGraph()">
-                                                <div id="bundleGraph"></div>
-                                            </uib-tab>
+                                        <uib-tab heading = "Graph" ng-show="response.data.entry.length > 1" select="fitGraph()">
+                                            <div id="bundleGraph"></div>
+                                        </uib-tab>
 
-                                            <uib-tab heading="Bundle" >
-                                                <br/>
-                                                <pre>{{response | json}}</pre>
+                                        <uib-tab heading="Bundle" ng-show="response.data.entry.length > 1" >
+                                            <br/>
+                                            <pre>{{response | json}}</pre>
 
-                                            </uib-tab>
+                                        </uib-tab>
 
 
-                                        </uib-tabset>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <br/>
-                                        <div class="alert alert-warning" ng-show="selectedResourceVersions && selectedResourceVersions.entry.length > 1">
-                                            <ul class="pagination" style="margin-top:1px;margin-bottom:1px">
-                                                <li><a href="#"><strong>Versions:</strong></a></li>
+                                    </uib-tabset>
+                                </div>
 
-                                                <li ng-repeat="ent in selectedResourceVersions.entry">
-                                                    <a href="#" ng-click="selectVersion(ent.resource)">
-                                                        {{selectedResourceVersions.entry.length - $index}}</a>
-                                                </li>
-                                            </ul>
-                                        </div>
+                                <div class="col-md-8">
+                                    <br/>
 
-                                        <uib-tabset  ng-show="selectedResource">
-                                            <uib-tab heading="Json">
-                                                <br/>
-                                                <pre>{{selectedResource | json}}</pre>
-                                            </uib-tab>
-                                            <uib-tab heading="XML">
-                                                <br/>
-                                                <pre>{{xmlResource}}</pre>
-                                            </uib-tab>
+                                    <div class="alert alert-warning" ng-show="selectedResourceVersions && selectedResourceVersions.entry.length > 1">
+                                        <ul class="pagination" style="margin-top:1px;margin-bottom:1px">
+                                            <li><a href="#"><strong>Versions:</strong></a></li>
 
-                                            <uib-tab heading="Tree">
-                                                <br/>
-                                                <div id="queryResourceTree"></div>
-
-                                            </uib-tab>
-
-                                        </uib-tabset>
-
+                                            <li ng-repeat="ent in selectedResourceVersions.entry">
+                                                <a href="#" ng-click="selectVersion(ent.resource)">
+                                                    {{selectedResourceVersions.entry.length - $index}}</a>
+                                            </li>
+                                        </ul>
                                     </div>
 
+                                    <uib-tabset ng-show="selectedResource">
+                                        <uib-tab heading="Json">
+                                            <br/>
+                                            <pre>{{selectedResource | json}}</pre>
+                                        </uib-tab>
+                                        <uib-tab heading="XML">
+                                            <br/>
+                                            <pre>{{xmlResource}}</pre>
+                                        </uib-tab>
+
+                                        <uib-tab heading="Tree">
+                                            <br/>
+                                            <div id="queryResourceTree"></div>
+
+                                        </uib-tab>
+
+                                    </uib-tabset>
 
                                 </div>
 
-                                <hr/>
 
-<!--
+                            </div>
 
-                                <div class="row">
-                                    <div class="col-md-3 col-sm-3">
+                            <hr/>
 
-                                        <div class="row" style="margin-bottom: 8px">
-
-                                            <div class="col-md-6 col-sm-6">
-                                                {{response.data.entry.length}} Entries
-                                            </div>
-
-
-                                            <div class="col-md-3 col-sm-3">
-                                                <span ng-click="showBundle(response.data)" class="clickable">Show Bundle</span>
-                                            </div>
-
-
-                                            <div class="col-md-3 col-sm-3">
-                                                <a target="_blank" ng-href = "{{bvUrl}}?{{query}}">
-                                                    Bundle Visualizer
-                                                </a>
-                                            </div>
-
-
-
-                                        </div>
-
-
-
-                                    </div>
-                                    <div class="col-md-9 col-sm-9">
-
-                                    </div>
-                                </div>
-
--->
 
                             </div>
                         </div>
@@ -713,7 +729,6 @@
 
 
             </uib-tab>
-
 
         </uib-tabset>
 

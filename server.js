@@ -1,6 +1,3 @@
-//simple server to serve static files...
-
-// let request  = require('request');
 
 let fs = require('fs')
 
@@ -18,6 +15,8 @@ app.use(cors());
 let statsModule = require("./serverModuleStats")
 let lantanaModule = require("./serverModuleLantana")
 var smartModule = require("./serverModuleSMART.js")
+let testingModule = require("./serverModuleTesting.js")
+
 
 let registryModule = require('./serverModuleRegistry.js');
 registryModule.setup(app)
@@ -35,6 +34,8 @@ if (! port) {
 }
 
 let server = http.createServer(app).listen(port);
+
+console.log(`listening on port ${port}`);
 
 //not using WS now - was for logical modeller
 /*
@@ -70,6 +71,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/clinfhir', function(err, ldb) {
         smartModule.setup(app,db);
         statsModule.setup(app,db);
         lantanaModule.setup(app)
+        testingModule.setup(app,db);
     }
 });
 

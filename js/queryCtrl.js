@@ -12,8 +12,8 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
 
 
 
-    //$scope.bvUrl = "http://clinfhir.com/bundleVisualizer.html";
-    //$scope.bvUrl = "http://localhost:8081/bundleVisualizer.html";
+
+
     $scope.bvUrl = $location.protocol() + "://" + $location.host() + ":" + $location.port() +  "/bundleVisualizer.html"
     console.log($scope.bvUrl)
     //anonQuery
@@ -405,6 +405,10 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
         delete $scope.err;
         delete $scope.result.selectedEntry;
 
+        delete $scope.xmlResource;
+        delete $scope.selectedResource;
+        delete $scope.selectedResourceVersions ;
+        $('#queryResourceTree').jstree('destroy');
 
         let config = {headers:{Accept:"application/fhir+json"}}
         let accessToken = $scope.input.accessToken;
@@ -426,9 +430,16 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
                     let anonQuery = qry.replace($scope.server.url,"");      //remove the server...
 
                     let ar = $localStorage.queryHistory.filter(item => (item.query == anonQuery && item.server == $scope.server.url))
+
+                    //todo need a better solution for ad hoc queries
+                    let type = ""
+                    if ($scope.type) {
+                        type = $scope.type.name;
+                    }
+
                     if (ar.length == 0) {
                         let hx = {
-                            type: $scope.type.name,
+                            type: type,
                             server : $scope.server.url,
                             query : anonQuery
                         };
@@ -524,10 +535,15 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
 
     //select an entry from the query result
     $scope.selectEntry = function(entry){
+
         delete $scope.bundle;
         delete $scope.xmlResource;
         delete $scope.selectedResource;
         delete $scope.selectedResourceVersions;
+
+        if (! entry) {
+            return
+        }
 
         showResource(entry.resource);
 
