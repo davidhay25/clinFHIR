@@ -4,11 +4,12 @@ angular.module("sampleApp")
 
 
             $scope.getScript = function(id) {
-                //load the testscript. will eventually have a selector
+                //load the testscript.
                 let url = "/testing/testSet/"+id
                 $http.get(url).then(
                     function (data) {
                         $scope.script = data.data
+
                     }
                 )
             }
@@ -36,6 +37,8 @@ angular.module("sampleApp")
 
             //todo - only supporting POST right now
             $scope.executeUpdate = function (verb,selectedTest) {
+                delete $scope.updateResponse
+                delete $scope.updateStatus;
 
                 let qry = $scope.server.url;    //default is post to the root...
 
@@ -52,8 +55,7 @@ angular.module("sampleApp")
                 if ($scope.input.useProxy) {
                     qry = "/proxyfhir/" + qry;
                 }
-                delete $scope.updateResponse
-                delete $scope.updateStatus;
+
 
                 if (verb == 'POST') {
                     $http.post(qry,resource).then(
@@ -81,13 +83,11 @@ angular.module("sampleApp")
                         }
                     )
                 }
-
-
-
             }
 
             $scope.selectTest = function(test) {
                 delete  $scope.selectedTestResource
+                delete $scope.updateResponse;
                 $scope.selectedTest = angular.copy(test)
                 /*
                 if ($scope.selectedTest.resource) {

@@ -6,6 +6,10 @@
         height: 550px;
         border: 1px solid lightgray;
     }
+    .myScroll {
+        height: 400px;
+        overflow-y: scroll;
+    }
 </style>
 
 
@@ -352,7 +356,7 @@
 
 
                                         <div class="row">
-                                            <div class="col-md-8">
+                                            <div class="col-md-12">
                                                 <div class="paramListScroll">
 
                                                     <table class="table table-bordered table-condensed">
@@ -374,9 +378,7 @@
 
                                                 </div>
                                             </div>
-                                            <div class="col-md-4">
 
-                                            </div>
                                         </div>
 
 
@@ -479,7 +481,7 @@
 
                                         <div style="padding: 8px">
                                                {{response.data.entry.length}}
-                                            <span ng-show="response.data.entry.length > 1">Entries</span>
+                                            <span ng-show="response.data.entry.length > 1"> / {{response.data.total}} Entries </span>
                                             <span ng-show="response.data.entry.length == 1">Entry</span>
                                         </div>
                                     </div>
