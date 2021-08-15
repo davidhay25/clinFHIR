@@ -3,28 +3,101 @@ angular.module("sampleApp")
         function ($scope,$http) {
 
 
-            //load the testscript. will eventually have a selector
-            let url = "/testing/testSet/labAPI"
-            $http.get(url).then(
+            $scope.getScript = function(id) {
+                //load the testscript. will eventually have a selector
+                let url = "/testing/testSet/"+id
+                $http.get(url).then(
+                    function (data) {
+                        $scope.script = data.data
+                    }
+                )
+            }
+
+            //load all the defined sets
+            let urlAllScripts = "/testing/testSet"
+            $http.get(urlAllScripts).then(
                 function (data) {
-                    $scope.script = data.data
+                    $scope.allScripts = data.data
+                    console.log($scope.allScripts)
+
+                    $scope.selectedScript = $scope.allScripts[0]
+                    $scope.getScript($scope.selectedScript.id)
+
                 }
             )
+
 
 
             $scope.executeTest = function(selectedTest) {
                 let fullQuery =  selectedTest.query;
                 fullQuery = fullQuery.replace('{identifier}',$scope.script.patientIdentifier)
-                //$scope.selectedTest.fullQuery = fullQuery;
                 $scope.executeAdHoc(fullQuery)
             }
 
+            //todo - only supporting POST right now
+            $scope.executeUpdate = function (verb,selectedTest) {
+
+                let qry = $scope.server.url;    //default is post to the root...
+
+                if (selectedTest.fullUrl) {
+                    //the url to post the resource to is specified in the test
+                    qry = selectedTest.fullUrl
+                } else if (selectedTest.query) {
+                    //if there is a 'query' element in the test, then append it to the query (it is usually a resource type).
+                    qry += selectedTest.query;
+                }
+
+                let resource = selectedTest.resource;
+
+                if ($scope.input.useProxy) {
+                    qry = "/proxyfhir/" + qry;
+                }
+                delete $scope.updateResponse
+                delete $scope.updateStatus;
+
+                if (verb == 'POST') {
+                    $http.post(qry,resource).then(
+                        function (data) {
+                            $scope.updateResponse = data.data;
+                            $scope.updateStatus = data.status
+                        },
+                        function (err) {
+                            $scope.updateResponse = err.data;
+                            $scope.updateStatus = err.status
+                        }
+                    )
+                }
+
+                if (verb == 'PUT') {
+                    qry += "/" + resource.id;
+                    $http.put(qry,resource).then(
+                        function (data) {
+                            $scope.updateResponse = data.data;
+                            $scope.updateStatus = data.status
+                        },
+                        function (err) {
+                            $scope.updateResponse = err.data;
+                            $scope.updateStatus = err.status
+                        }
+                    )
+                }
+
+
+
+            }
 
             $scope.selectTest = function(test) {
+                delete  $scope.selectedTestResource
                 $scope.selectedTest = angular.copy(test)
+                /*
+                if ($scope.selectedTest.resource) {
+                    let json1 = $scope.selectedTest.resource
+                    let json2 = JSON.stringify(JSON.parse(json1),null,2)
+
+                    $scope.selectedTestResource = json2
+                }
+*/
                 //let fullQuery = $scope.script.server + test.query;
-
-
 
             }
 /*

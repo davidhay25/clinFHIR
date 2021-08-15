@@ -33,7 +33,14 @@ function setup(app,indb) {
 
     //get a list of test set.
     app.get('/testing/testSet',function(req,res){
+        db.collection("apitest").find({},{id:1,name:1}).toArray(function (err, result) {
+            if (err) {
+                res.send(err, 500)
+            } else {
 
+                res.json(result)
+            }
+        })
 
     });
 

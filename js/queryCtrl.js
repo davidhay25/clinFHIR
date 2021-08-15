@@ -97,7 +97,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
 
 
             },function (err) {
-                alert('Error loading conformance resource from:'+qry + " Is the server available?");
+                alert('Error loading conformance resource from:'+qry + " Is the server available, and does it support CORS?");
             }
         ).finally(function(){
             $scope.waiting = false;
@@ -325,13 +325,6 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
     };
 
 
-    $scope.selectFromHistoryDEP = function(hx){
-        if ($scope.server) {
-            $scope.hx = hx;
-
-        }
-    };
-
     $scope.removeFromHistory = function(inx){
         $localStorage.queryHistory.splice(inx,1)
     };
@@ -418,12 +411,29 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
 
         $scope.query = qry;
         $scope.waiting = true;
+
+        //if using the CF proxy
+        if ($scope.input.useProxy) {
+            qry = "/proxyfhir/" + qry;
+        }
+
+
+        delete $scope.isBundle;
+
         $http.get(qry,config).then (
             function(data){
                 $scope.response = data;
 
+                if (data.data && data.data.resourceType == 'Bundle') {
+                    $scope.isBundle = true
+                } else {
+                    //this is a single resource - set the selected resource representatons (json, xml, tree etc.)
+                    $scope.selectEntry({resource:data.data})
+                }
+
                 $scope.input.showQuery = false;       //hide the query builder tab contents
                 $scope.input.showResults = true;      //show the results
+
 
                 //if this is query that hasn't been performed before - add it to the history...
                 if (! executeFromHistory) {
@@ -444,7 +454,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
                             query : anonQuery
                         };
 
-                        $localStorage.queryHistory.push(hx)
+                        $localStorage.queryHistory.splice(0,0,hx)
 
                         if ($scope.commonTypes.filter(item => item == type).length == 0) {
                             $scope.commonTypes.push(type);
@@ -454,50 +464,6 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
                     }
                 }
 
-
-        /*
-
-        return;
-
-
-                $localStorage.queryHistory.forEach(function (hx){
-
-                    if (hx.query == anonQuery && ) {
-                        found = true
-                    }
-                })
-
-                if (! found) {
-
-                    var hx = {
-                        type: type,
-                        anonQuery:$scope.anonQuery,
-                        parameters:$scope.input.parameters,
-                        server : $scope.server,
-                        query : qry,
-                        verb:$scope.input.verb
-                    };
-
-
-
-
-                    let hx = {
-                        server : $scope.server.url,
-                        query : anonQuery
-                    };
-
-                    $localStorage.queryHistory.push(hx)
-
-                    if ($scope.commonTypes.filter(item => item == type).length == 0) {
-                        $scope.commonTypes.push(type);
-                        $scope.commonTypes.sort();
-                    }
-
-
-
-                }
-
-  */
 
                 $scope.input.parameters = "";
 

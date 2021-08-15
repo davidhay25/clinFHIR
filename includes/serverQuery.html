@@ -77,7 +77,8 @@
             </div>
 
             <div class="col-md-3 col-sm-3">
-                <div class="pull-right">{{server.url}}</div>
+                <div>{{server.url}}</div>
+                <div style="margin-top: 10px"><checkbox ng-model="input.useProxy"></checkbox> Proxy request</div>
             </div>
 
 
@@ -92,6 +93,477 @@
     <div class="col-sm-12 col-md-12">
 
         <uib-tabset>
+
+
+            <uib-tab heading="Query server">
+
+
+                <div class="row">
+                    <div  ng-class="{'col-md-8 col-sm-8':showHistory,'col-md-12 col-sm-12':!showHistory}">
+                        <div ng-show="server">
+
+                            <uib-tabset  ng-show="input.showQuery">
+                                <br/>
+
+
+
+                                <uib-tab heading="REST query">
+                                    <br/>
+                                    <div class="row">
+                                        <div class="col-sm-10 col-md-10">
+                                            <textarea class="form-control" ng-model="adHocQry"
+                                            placeholder="Enter the query to be executed against {{server.url}}. eg Patient?name=hay"></textarea>
+                                        </div>
+                                        <div class="col-sm-2 col-md-2">
+                                            <button  rows=4 class="btn btn-danger" ng-click="executeAdHoc(adHocQry)">Execute</button>
+                                        </div>
+                                    </div>
+
+                                </uib-tab>
+
+                                <uib-tab heading="Query Builder">
+                                    <br/>
+                                    <div>
+                                        <div class="row">
+                                            <div class="col-md-2 col-sm-2">
+
+                                                <strong>Types</strong>
+
+
+                                            </div>
+
+                                            <div class="col-md-1 col-sm-1">
+
+
+
+                                                <div>
+                                                    <i class="glyphicon glyphicon-question-sign clickable"
+                                                       uib-popover="These are the types where there is an interaction of 'search-type'
+                                                in the CapabilityStatement."
+                                                       popover-placement="right"
+                                                       popover-trigger="'mouseenter'">
+                                                    </i>
+                                                </div>
+
+                                            </div>
+                                            <div class="col-md-9 col-sm-9">
+                                                <div class="row rounded-box" ng-show="type">
+                                                    <div class="col-md-1 col-sm-1">
+                                                        <button class="btn btn-danger" ng-click="doit()">Execute</button>
+                                                    </div>
+                                                    <div class="col-md-11 col-sm-11">
+                                                        <h5>{{query}}</h5>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+
+                                            <div class="col-md-2">
+
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <strong>Parameters</strong>
+                                            </div>
+                                            <div class="col-md-4 col-sm-4">
+                                                <strong>Parameter value</strong>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <strong>Includes and Chaining</strong>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="row">
+                                            <div class="col-md-2 col-sm-2">
+
+
+                                                <div class="paramListScroll">
+
+                                                    <!-- Common types (from hx)-->
+                                                    <strong>Types you've used</strong>
+                                                    <div class="list-group">
+                                                        <div ng-class="{'list-group-item':true,listItemSelected: type == input.selectedType.name}"
+                                                             ng-repeat = "type in commonTypes"
+
+                                                             style="cursor: pointer"
+                                                             ng-click="typeSelected({name:type})">
+
+                                                            <span class="pull-right">
+                                                                <a  ng-show="type" target="_blank" ng-href="{{fhirBasePath}}{{type}}.html">
+                                                                    <i class="glyphicon glyphicon-globe"
+                                                                       title="View Resource definition in spec">
+                                                                    </i>
+
+                                                                </a>
+                                                            </span>
+
+                                                            {{type}}
+                                                        </div>
+                                                    </div>
+
+                                                    <strong>All types supported</strong>
+                                                    <div class="list-group">
+                                                        <div ng-class="{'list-group-item':true,listItemSelected: type.name == input.selectedType.name}"
+                                                             ng-repeat = "type in standardResourceTypes"
+
+                                                             style="cursor: pointer"
+                                                             ng-click="typeSelected(type)">
+
+                                                            <span class="pull-right">
+                                                                <a  ng-show="type" target="_blank" ng-href="{{fhirBasePath}}{{type.name | getLogicalID | lowercase}}.html">
+                                                                    <i class="glyphicon glyphicon-globe"
+                                                                       title="View Resource definition in spec">
+                                                                    </i>
+
+                                                                </a>
+                                                            </span>
+
+                                                            {{type.name}}
+                                                        </div>
+                                                    </div>
+
+
+
+                                                </div>
+
+
+
+                                            </div>
+
+                                            <div class="col-md-5 col-sm-5 paramListScroll">
+                                                <div ng-repeat="param in searchParamList">
+                                                    <div class="row" ng-hide="param.type == 'reference'">
+                                                        <div class="col-md-5">
+                                                            <input type="checkbox"
+                                                                   style="padding-top: 12px"
+                                                                   ng-change="buildQuery()"
+                                                                   ng-model="input.selectedSearchParam[param.name]"/>
+                                                            <span
+                                                                    uib-popover= "{{param.documentation}}"
+                                                                    popover-placement="right"
+                                                                    popover-trigger="'mouseenter'">
+                                                                {{param.name}}</span>
+                                                        </div>
+                                                        <div class="col-md-7">
+                                                            <input class="form-control"
+                                                                   ng-disabled = "! input.selectedSearchParam[param.name]"
+                                                                   ng-change="buildQuery()"
+                                                                   placeholder="{{param.type}}"
+                                                                   ng-model="input.selectedSearchParamValue[param.name]"/>
+                                                        </div>
+                                                    </div>
+
+
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-5 col-sm-5" ng-show="input.selectedType">
+
+                                                <br/>
+                                                <strong>Includes</strong>
+
+                                                <a target="_blank" href="http://hl7.org/fhir/search.html#include">
+                                                    <i class="glyphicon glyphicon-globe"
+                                                       title="View description in spec">
+                                                    </i>
+                                                </a>
+
+
+
+
+                                                <div ng-repeat="inc in includeList">
+                                                    <input type="checkbox"
+                                                           ng-change="buildQuery()"
+                                                           ng-model="input.selectedInclude[inc.name]"/>
+
+
+                                                    <span uib-popover= "{{inc.documentation}}"
+                                                          popover-placement="right"
+                                                          popover-trigger="'mouseenter'"> {{inc.name}}</span>
+                                                </div>
+
+
+                                                <br/>
+                                                <strong>Chaining</strong>
+
+                                                <a target="_blank" href="http://hl7.org/fhir/search.html#chaining">
+                                                    <i class="glyphicon glyphicon-globe"
+                                                       title="View description in spec">
+                                                    </i>
+                                                </a>
+
+                                                <div class="row" ng-repeat = "inc in includeList" style="padding-top: 8px">
+                                                    <div class="col-md-3">
+                                                        <input type="checkbox"
+                                                               ng-change="buildQuery()"
+                                                               ng-model="input.selectedChain[inc.name]"/>
+
+                                                        <span uib-popover= "{{inc.documentation}}"
+                                                              popover-placement="right"
+                                                              popover-trigger="'mouseenter'"> {{inc.name}}</span>
+                                                    </div>
+
+                                                    <div class="col-md-9">
+                                                        <input class="form-control"
+                                                               ng-disabled = "! input.selectedChain[inc.name]"
+                                                               ng-change="buildQuery()"
+                                                               placeholder="chained query parameter.  eg identifier=abc1234"
+                                                               ng-model="input.selectedChainValue[inc.name]"/>
+
+                                                    </div>
+
+                                                </div>
+
+
+
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+
+                                </uib-tab>
+
+
+                                <uib-tab heading="Testing">
+
+                                    <br/>
+                                    <div ng-controller="serverQueryTestCtrl">
+
+                                        <ng-include src="'/includes/serverQueryTest.html'"></ng-include>
+
+                                    </div>
+
+                                </uib-tab>
+
+
+
+                                <uib-tab heading="History">
+
+
+
+                                    <h4>Previous Queries</h4>
+
+
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <div class="paramListScroll">
+
+                                                    <table class="table table-bordered table-condensed">
+                                                        <tr ng-repeat = "hx in queryHistory">
+                                                            <td>{{hx.query}}</td>
+                                                            <td>
+                                                                <div class="clickable"
+                                                                     ng-click="removeFromHistory($index)">Remove</div>
+
+                                                            </td>
+                                                            <td>
+                                                                <div class="clickable"
+                                                                        ng-click="executeFromHistory(hx)">Execute</div>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+
+
+
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+
+                                            </div>
+                                        </div>
+
+
+
+
+                                </uib-tab>
+
+                                <uib-tab heading="Query help">
+                                    <br/>
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6 myBox">
+                                            <h5>General links (open in new tab)</h5>
+                                            <table class="table">
+                                                <tr ng-repeat="link in fhirHelp.links">
+                                                    <td>{{link.description}}</td>
+                                                    <td><a href="{{link.url}}" target="_blank">{{link.url}}</a>  </td>
+
+                                                </tr>
+                                            </table>
+
+                                        </div>
+                                        <div class="col-md-6 col-sm-6">
+
+
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-12 col-sm-12 myBox">
+
+                                            <h5>Search parameters (links open in new tab)</h5>
+
+                                            <table class="table table-bordered">
+                                                <tr><th>Name</th><th>Parameter</th><th>Example syntax</th><th>Description</th><th>Spec</th></tr>
+                                                <tr ng-repeat="srch in fhirHelp.search">
+                                                    <td>{{srch.name}}</td>
+                                                    <td>{{srch.param}}</td>
+                                                    <td>{{srch.syntax}}</td>
+                                                    <td>{{srch.description}}</td>
+                                                    <td><a href="{{srch.url}}" target="_blank">Details</a>  </td>
+
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+
+
+
+                                </uib-tab>
+                            </uib-tabset>
+
+                        </div>
+
+
+                        <hr/>
+
+
+                        <div class="row" ng-show="input.showResults && response">
+                            <div class="col-md-12 col-sm-12">
+
+                                <div class="rounded-box-filled">
+                                <div class="row">
+
+                                    <div class="col-md-11">
+                                        <strong   style="margin: 8px;">  {{query}}</strong>
+                                        <div ng-show="input.useProxy">
+                                            <em>Request proxied through clinFHIR server</em>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-1"  >
+                                        <div class="pull-right">
+                                            <button  style="padding: 8px;"
+                                                     class="btn btn-primary" ng-click="input.showQuery=true;input.showResults=false">
+                                                Close results
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="alert alert-danger" ng-show="err">
+                                <div><strong>StatusCode:{{err.statusCode}}</strong></div>
+                                <pre>{{err.data | json}}</pre>
+                            </div>
+
+                            <div class="row" ng-show="response.data.total == 0 && isBundle">
+                                Sorry, there were no results for this query
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4" ng-show="response.data.entry.length > 0">
+                                    <div class="rounded-box">
+
+                                        <a ng-show="response.data.entry.length > 1"
+                                            style="padding: 8px" target="_blank" class="pull-right" ng-href = "{{bvUrl}}?{{query}}">
+                                            View in Bundle Visualizer
+                                        </a>
+
+                                        <div style="padding: 8px">
+                                               {{response.data.entry.length}}
+                                            <span ng-show="response.data.entry.length > 1">Entries</span>
+                                            <span ng-show="response.data.entry.length == 1">Entry</span>
+                                        </div>
+                                    </div>
+
+                                    <uib-tabset>
+                                        <br/>
+                                        <uib-tab heading = "List">
+                                            <div class="list-group"  style="height:600px; overflow-y: auto;">
+
+                                                <div ng-class="{'list-group-item':true,'list-group-item-info':result.selectedEntry.fullUrl == entry.fullUrl}"
+                                                     ng-repeat="entry in response.data.entry">
+                                                    <div ng-click="selectEntry(entry)"  style="cursor: pointer">
+                                                        {{entry.resource.resourceType}}
+                                                        <div>{{ResourceUtilsSvc.getOneLineSummaryOfResource(entry.resource)}}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </uib-tab>
+
+
+                                        <uib-tab heading = "Graph" ng-show="response.data.entry.length > 1" select="fitGraph()">
+                                            <div id="bundleGraph"></div>
+                                        </uib-tab>
+
+                                        <uib-tab heading="Bundle" ng-show="response.data.entry.length > 1" >
+                                            <br/>
+                                            <pre>{{response | json}}</pre>
+
+                                        </uib-tab>
+
+
+                                    </uib-tabset>
+                                </div>
+
+                                <div class="col-md-8">
+                                    <br/>
+
+                                    <div class="alert alert-warning" ng-show="selectedResourceVersions && selectedResourceVersions.entry.length > 1">
+                                        <ul class="pagination" style="margin-top:1px;margin-bottom:1px">
+                                            <li><a href="#"><strong>Versions:</strong></a></li>
+
+                                            <li ng-repeat="ent in selectedResourceVersions.entry">
+                                                <a href="#" ng-click="selectVersion(ent.resource)">
+                                                    {{selectedResourceVersions.entry.length - $index}}</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <uib-tabset ng-show="selectedResource">
+                                        <uib-tab heading="Json">
+                                            <br/>
+                                            <pre>{{selectedResource | json}}</pre>
+                                        </uib-tab>
+                                        <uib-tab heading="XML">
+                                            <br/>
+                                            <pre>{{xmlResource}}</pre>
+                                        </uib-tab>
+
+                                        <uib-tab heading="Tree">
+                                            <br/>
+                                            <div id="queryResourceTree"></div>
+
+                                        </uib-tab>
+
+                                    </uib-tabset>
+
+                                </div>
+
+
+                            </div>
+
+                            <hr/>
+
+
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+            </uib-tab>
 
             <uib-tab heading="Server Capabilities">
                 <br/>
@@ -197,538 +669,6 @@
                 </div>
             </uib-tab>
 
-            <uib-tab heading="Query server">
-
-
-                <div class="row">
-                    <div  ng-class="{'col-md-8 col-sm-8':showHistory,'col-md-12 col-sm-12':!showHistory}">
-                        <div ng-show="server">
-
-                            <uib-tabset  ng-show="input.showQuery">
-                                <br/>
-                                <uib-tab heading="Query Builder">
-                                    <br/>
-                                    <div>
-                                        <div class="row">
-                                            <div class="col-md-2 col-sm-2">
-
-                                                <strong>Types</strong>
-                                                <!--
-                                                <select class="form-control" ng-model="input.selectedType"
-                                                        ng-change="typeSelected(input.selectedType)"
-                                                        ng-options="type.name for type in standardResourceTypes"/>
-
-                                                -->
-<!--
-                                                <div class="list-group">
-                                                    <div ng-class="{'list-group-item':true}"
-                                                         ng-repeat = "type in standardResourceTypes"
-                                                         style="cursor: pointer"
-                                                         ng-click="typeSelected(type)">
-                                                        {{type.name}}
-                                                    </div>
-                                                </div>
-                                                -->
-
-                                            </div>
-
-                                            <div class="col-md-1 col-sm-1">
-
-
-
-                                                <div>
-                                                    <i class="glyphicon glyphicon-question-sign clickable"
-                                                       uib-popover="These are the types where there is an interaction of 'search-type'
-                                                in the CapabilityStatement."
-                                                       popover-placement="right"
-                                                       popover-trigger="'mouseenter'">
-                                                    </i>
-                                                </div>
-
-                                            </div>
-                                            <div class="col-md-9 col-sm-9">
-                                                <div class="row rounded-box" ng-show="type">
-                                                    <div class="col-md-1 col-sm-1">
-                                                        <button class="btn btn-danger" ng-click="doit()">Execute</button>
-                                                    </div>
-                                                    <div class="col-md-11 col-sm-11">
-                                                        <h5>{{query}}</h5>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row">
-
-                                            <div class="col-md-2">
-
-                                            </div>
-
-                                            <div class="col-md-2">
-                                                <strong>Parameters</strong>
-                                            </div>
-                                            <div class="col-md-4 col-sm-4">
-                                                <strong>Parameter value</strong>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <strong>Includes and Chaining</strong>
-                                            </div>
-                                        </div>
-
-
-                                        <div class="row">
-                                            <div class="col-md-2 col-sm-2">
-
-
-                                                <div class="paramListScroll">
-
-                                                    <!-- Common types (from hx)-->
-                                                    <strong>Types you've used</strong>
-                                                    <div class="list-group">
-                                                        <div ng-class="{'list-group-item':true,listItemSelected: type == input.selectedType.name}"
-                                                             ng-repeat = "type in commonTypes"
-
-                                                             style="cursor: pointer"
-                                                             ng-click="typeSelected({name:type})">
-
-                                                            <span class="pull-right">
-                                                                <a  ng-show="type" target="_blank" ng-href="{{fhirBasePath}}{{type}}.html">
-                                                                    <i class="glyphicon glyphicon-globe"
-                                                                       title="View Resource definition in spec">
-                                                                    </i>
-
-                                                                </a>
-                                                            </span>
-
-                                                            {{type}}
-                                                        </div>
-                                                    </div>
-
-                                                    <strong>All types supported</strong>
-                                                    <div class="list-group">
-                                                        <div ng-class="{'list-group-item':true,listItemSelected: type.name == input.selectedType.name}"
-                                                             ng-repeat = "type in standardResourceTypes"
-
-                                                             style="cursor: pointer"
-                                                             ng-click="typeSelected(type)">
-
-                                                            <span class="pull-right">
-                                                                <a  ng-show="type" target="_blank" ng-href="{{fhirBasePath}}{{type.name | getLogicalID | lowercase}}.html">
-                                                                    <i class="glyphicon glyphicon-globe"
-                                                                        title="View Resource definition in spec">
-                                                                    </i>
-
-                                                                </a>
-                                                            </span>
-
-                                                            {{type.name}}
-                                                        </div>
-                                                    </div>
-
-
-
-                                                </div>
-
-
-
-                                            </div>
-
-                                            <div class="col-md-5 col-sm-5 paramListScroll">
-                                                <div ng-repeat="param in searchParamList">
-                                                    <div class="row" ng-hide="param.type == 'reference'">
-                                                        <div class="col-md-5">
-                                                            <input type="checkbox"
-                                                                   style="padding-top: 12px"
-                                                                   ng-change="buildQuery()"
-                                                                   ng-model="input.selectedSearchParam[param.name]"/>
-                                                            <span
-                                                                    uib-popover= "{{param.documentation}}"
-                                                                    popover-placement="right"
-                                                                    popover-trigger="'mouseenter'">
-                                                                {{param.name}}</span>
-                                                        </div>
-                                                        <div class="col-md-7">
-                                                            <input class="form-control"
-                                                                   ng-disabled = "! input.selectedSearchParam[param.name]"
-                                                                   ng-change="buildQuery()"
-                                                                   placeholder="{{param.type}}"
-                                                                   ng-model="input.selectedSearchParamValue[param.name]"/>
-                                                        </div>
-                                                    </div>
-
-
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-5 col-sm-5" ng-show="input.selectedType">
-
-                                                <br/>
-                                               <strong>Includes</strong>
-
-                                                <a target="_blank" href="http://hl7.org/fhir/search.html#include">
-                                                    <i class="glyphicon glyphicon-globe"
-                                                       title="View description in spec">
-                                                    </i>
-                                                </a>
-
-
-
-
-                                                <div ng-repeat="inc in includeList">
-                                                    <input type="checkbox"
-                                                           ng-change="buildQuery()"
-                                                           ng-model="input.selectedInclude[inc.name]"/>
-
-
-                                                    <span uib-popover= "{{inc.documentation}}"
-                                                          popover-placement="right"
-                                                          popover-trigger="'mouseenter'"> {{inc.name}}</span>
-                                                </div>
-
-
-                                                <br/>
-                                                <strong>Chaining</strong>
-
-                                                <a target="_blank" href="http://hl7.org/fhir/search.html#chaining">
-                                                    <i class="glyphicon glyphicon-globe"
-                                                       title="View description in spec">
-                                                    </i>
-                                                </a>
-
-                                                <div class="row" ng-repeat = "inc in includeList" style="padding-top: 8px">
-                                                    <div class="col-md-3">
-                                                        <input type="checkbox"
-                                                               ng-change="buildQuery()"
-                                                               ng-model="input.selectedChain[inc.name]"/>
-
-                                                        <span uib-popover= "{{inc.documentation}}"
-                                                              popover-placement="right"
-                                                              popover-trigger="'mouseenter'"> {{inc.name}}</span>
-                                                    </div>
-
-                                                    <div class="col-md-9">
-                                                        <input class="form-control"
-                                                               ng-disabled = "! input.selectedChain[inc.name]"
-                                                               ng-change="buildQuery()"
-                                                               placeholder="chained query parameter.  eg identifier=abc1234"
-                                                               ng-model="input.selectedChainValue[inc.name]"/>
-
-                                                    </div>
-
-                                                </div>
-
-
-
-
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-
-
-                                </uib-tab>
-
-                                <uib-tab heading="Ad Hoc REST query">
-                                    <br/>
-                                    <div class="row">
-                                        <div class="col-sm-10 col-md-10">
-                                            <textarea class="form-control" ng-model="adHocQry"
-                                            placeholder="Enter the query to be executed against {{server.url}}. eg Patient?name=hay"></textarea>
-                                        </div>
-                                        <div class="col-sm-2 col-md-2">
-                                            <button  rows=4 class="btn btn-danger" ng-click="executeAdHoc(adHocQry)">Execute</button>
-                                        </div>
-                                    </div>
-
-                                </uib-tab>
-
-
-                                <uib-tab heading="Testing">
-
-
-                                    <br/>
-                                    <div ng-controller="serverQueryTestCtrl">
-
-                                        <ng-include src="'/includes/serverQueryTest.html'"></ng-include>
-<!--
-                                        <div class="row">
-                                            <div class = "col-md-3">
-                                                <strong>Tests</strong>
-                                                <div class="list-group">
-
-                                                    <div ng-class="{'list-group-item':true,listItemSelected:selectedTest == test}"
-                                                         style="cursor: pointer"
-                                                         ng-repeat="test in script.tests">
-                                                        <div ng-click = "selectTest(test)"> {{test.name}}</div>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-                                            <div class = "col-md-9">
-
-                                                <div ng-show="selectedTest">
-
-                                                <div class="rounded-box">{{selectedTest.description}}</div>
-
-
-                                                <div>
-                                                    <label>Query</label>
-                                                    <input class="form-control" ng-model="selectedTest.query"/>
-                                                </div>
-
-                                                <div>
-                                                    <label>Patient Identifier</label>
-                                                    <input class="form-control" ng-model="script.patientIdentifier"/>
-                                                </div>
-
-                                                <button class="btn btn-danger pull-right" ng-click="executeTest(selectedTest)">Execute</button>
-                                                </div>
-
-                                            </div>
-                                        </div>
--->
-                                    </div>
-
-                                </uib-tab>
-
-
-
-                                <uib-tab heading="History">
-
-
-
-                                    <h4>Previous Queries</h4>
-
-
-                                        <div class="row">
-                                            <div class="col-md-8">
-                                                <div class="paramListScroll">
-
-                                                    <table class="table table-bordered table-condensed">
-                                                        <tr ng-repeat = "hx in queryHistory">
-                                                            <td>{{hx.query}}</td>
-                                                            <td>
-                                                                <div class="clickable"
-                                                                     ng-click="removeFromHistory($index)">Remove</div>
-
-                                                            </td>
-                                                            <td>
-                                                                <div class="clickable"
-                                                                        ng-click="executeFromHistory(hx)">Execute</div>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-
-                                                    <!--
-                                                    <div class="list-group">
-                                                        <a href="#" class="list-group-item"
-                                                           ng-repeat="hx in queryHistory"
-                                                           ng-model="input.hx" ng-click = "selectFromHistory(hx)">
-
-                                                            <div>{{hx.query}}</div>
-                                                        </a>
-                                                    </div>
-
-                                                    -->
-
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <!--
-                                                <pre>{{hx | json}}</pre>
-
-                                                <button class="btn btn-primary" ng-click="executeFromHistory(hx)">Execute</button>
-                                                -->
-                                            </div>
-                                        </div>
-
-
-
-
-                                </uib-tab>
-
-                                <uib-tab heading="Query help">
-                                    <br/>
-                                    <div class="row">
-                                        <div class="col-md-6 col-sm-6 myBox">
-                                            <h5>General links (open in new tab)</h5>
-                                            <table class="table">
-                                                <tr ng-repeat="link in fhirHelp.links">
-                                                    <td>{{link.description}}</td>
-                                                    <td><a href="{{link.url}}" target="_blank">{{link.url}}</a>  </td>
-
-                                                </tr>
-                                            </table>
-
-                                        </div>
-                                        <div class="col-md-6 col-sm-6">
-
-
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-md-12 col-sm-12 myBox">
-
-                                            <h5>Search parameters (links open in new tab)</h5>
-
-                                            <table class="table table-bordered">
-                                                <tr><th>Name</th><th>Parameter</th><th>Example syntax</th><th>Description</th><th>Spec</th></tr>
-                                                <tr ng-repeat="srch in fhirHelp.search">
-                                                    <td>{{srch.name}}</td>
-                                                    <td>{{srch.param}}</td>
-                                                    <td>{{srch.syntax}}</td>
-                                                    <td>{{srch.description}}</td>
-                                                    <td><a href="{{srch.url}}" target="_blank">Details</a>  </td>
-
-                                                </tr>
-                                            </table>
-                                        </div>
-                                    </div>
-
-
-
-                                </uib-tab>
-                            </uib-tabset>
-
-                        </div>
-
-
-                        <hr/>
-
-
-                        <div class="row" ng-show="input.showResults && response">
-                            <div class="col-md-12 col-sm-12">
-
-                                <div class="rounded-box-filled">
-                                <div class="row">
-
-                                    <div class="col-md-11">
-                                        <strong   style="margin: 8px;">  {{query}}</strong>
-                                    </div>
-
-                                    <div class="col-md-1"  >
-                                        <div class="pull-right">
-                                            <button  style="padding: 8px;"
-                                                     class="btn btn-primary" ng-click="input.showQuery=true;input.showResults=false">
-                                                Close results
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-
-
-                            <div class="alert alert-danger" ng-show="err">
-                                <div><strong>StatusCode:{{err.statusCode}}</strong></div>
-                                <pre>{{err.data | json}}</pre>
-                            </div>
-
-
-
-                            <div class="row" ng-hide="response.data.entry.length > 0">
-                                Sorry, there were no results for this query
-                            </div>
-
-                            <div class="row" ng-show="response.data.entry.length > 0">
-                                <div class="col-md-4">
-                                    <div class="rounded-box">
-
-                                        <a  ng-show="response.data.entry.length > 1"
-                                            style="padding: 8px" target="_blank" class="pull-right" ng-href = "{{bvUrl}}?{{query}}">
-                                            View in Bundle Visualizer
-                                        </a>
-
-                                        <div style="padding: 8px">
-                                               {{response.data.entry.length}}
-                                            <span ng-show="response.data.entry.length > 1">Entries</span>
-                                            <span ng-show="response.data.entry.length == 1">Entry</span>
-                                        </div>
-                                    </div>
-
-                                    <uib-tabset>
-                                        <br/>
-                                        <uib-tab heading = "List">
-                                            <div class="list-group"  style="height:600px; overflow-y: auto;">
-
-                                                <div ng-class="{'list-group-item':true,'list-group-item-info':result.selectedEntry.fullUrl == entry.fullUrl}"
-                                                     ng-repeat="entry in response.data.entry">
-                                                    <div ng-click="selectEntry(entry)"  style="cursor: pointer">
-                                                        {{entry.resource.resourceType}}
-                                                        <div>{{ResourceUtilsSvc.getOneLineSummaryOfResource(entry.resource)}}</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </uib-tab>
-
-
-                                        <uib-tab heading = "Graph" ng-show="response.data.entry.length > 1" select="fitGraph()">
-                                            <div id="bundleGraph"></div>
-                                        </uib-tab>
-
-                                        <uib-tab heading="Bundle" ng-show="response.data.entry.length > 1" >
-                                            <br/>
-                                            <pre>{{response | json}}</pre>
-
-                                        </uib-tab>
-
-
-                                    </uib-tabset>
-                                </div>
-
-                                <div class="col-md-8">
-                                    <br/>
-
-                                    <div class="alert alert-warning" ng-show="selectedResourceVersions && selectedResourceVersions.entry.length > 1">
-                                        <ul class="pagination" style="margin-top:1px;margin-bottom:1px">
-                                            <li><a href="#"><strong>Versions:</strong></a></li>
-
-                                            <li ng-repeat="ent in selectedResourceVersions.entry">
-                                                <a href="#" ng-click="selectVersion(ent.resource)">
-                                                    {{selectedResourceVersions.entry.length - $index}}</a>
-                                            </li>
-                                        </ul>
-                                    </div>
-
-                                    <uib-tabset ng-show="selectedResource">
-                                        <uib-tab heading="Json">
-                                            <br/>
-                                            <pre>{{selectedResource | json}}</pre>
-                                        </uib-tab>
-                                        <uib-tab heading="XML">
-                                            <br/>
-                                            <pre>{{xmlResource}}</pre>
-                                        </uib-tab>
-
-                                        <uib-tab heading="Tree">
-                                            <br/>
-                                            <div id="queryResourceTree"></div>
-
-                                        </uib-tab>
-
-                                    </uib-tabset>
-
-                                </div>
-
-
-                            </div>
-
-                            <hr/>
-
-
-                            </div>
-                        </div>
-
-
-                    </div>
-
-                </div>
-
-
-            </uib-tab>
 
         </uib-tabset>
 

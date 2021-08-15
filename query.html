@@ -22,9 +22,10 @@
     <script src="js/libs/angular-sanitize.js"></script>
 
     <script src="js/libs/vkbeautify.0.99.00.beta.js"></script>
+    <script src="js/libs/angular-bootstrap-checkbox.js"></script>
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngStorage']).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.bootstrap','ngStorage','ui.checkbox']).config(function($locationProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
@@ -96,7 +97,7 @@
         <div class="col-md-6 col-sm-6">
         </div>
         <div class="col-md-3 col-sm-3">
-            <div class="navbar-text pull-right">
+            <div class="navbar-text pull-right" ng-show="false">
                 <a href="https://www.lyniate.com/" target="_blank">
                     <img  src="/icons/supported_by_lyniate.png"/>
                 </a>

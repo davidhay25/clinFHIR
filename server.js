@@ -16,7 +16,7 @@ let statsModule = require("./serverModuleStats")
 let lantanaModule = require("./serverModuleLantana")
 var smartModule = require("./serverModuleSMART.js")
 let testingModule = require("./serverModuleTesting.js")
-
+const proxyModule = require("./serverModuleProxy.js")
 
 let registryModule = require('./serverModuleRegistry.js');
 registryModule.setup(app)
@@ -72,6 +72,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/clinfhir', function(err, ldb) {
         statsModule.setup(app,db);
         lantanaModule.setup(app)
         testingModule.setup(app,db);
+        proxyModule.setup(app);
     }
 });
 
