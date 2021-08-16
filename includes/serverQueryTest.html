@@ -32,7 +32,16 @@
             <div ng-show = "selectedTest.verb == 'POST' || selectedTest.verb == 'PUT'">
 
                 <div ng-show="selectedTest.fullUrl">
-                    Absolute Url: {{selectedTest.fullUrl}}
+                  <!--  Absolute Url: {{selectedTest.fullUrl}} -->
+                    <div class="row">
+                        <div class="col-md-2">
+                            Absolute Url:
+                        </div>
+                        <div class="col-md-10">
+                            <input class="form-control" type="text" ng-model="selectedTest.fullUrl"/>
+                        </div>
+                    </div>
+                    <br/>
                 </div>
 
                 <div ng-hide="selectedTest.fullUrl">
@@ -43,9 +52,19 @@
 
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="myScroll">
+
+                        <div class="myScroll" ng-show="selectedTest.resource">
                             <pre>{{selectedTest.resource | json}}</pre>
                         </div>
+
+                        <div ng-show="selectedTest.v2">
+                            <div class="list-group">
+                                <div class="list-group-item" ng-repeat="segment in selectedTest.v2">
+                                    {{segment}}
+                                </div>
+                            </div>
+                        </div>
+
 
                     </div>
                     <div class="col-md-6">
