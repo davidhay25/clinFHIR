@@ -52,6 +52,11 @@ angular.module("sampleApp")
 
                 let resource = selectedTest.resource;
 
+                //if a v2 message, then set the resource to that...
+                if (selectedTest.v2) {
+                    resource = selectedTest.v2
+                }
+
                 if ($scope.input.useProxy) {
                     qry = "/proxyfhir/" + qry;
                 }
@@ -89,6 +94,7 @@ angular.module("sampleApp")
                 delete  $scope.selectedTestResource
                 delete $scope.updateResponse;
                 $scope.selectedTest = angular.copy(test)
+                //the display for v2 is horrible, so add create a dislay version with spaces...
                 if ($scope.selectedTest.v2) {
                     let segments = []
                     const regex = /|/
@@ -96,7 +102,7 @@ angular.module("sampleApp")
                         let lne = segment.split("|").join("| ")
                         segments.push(lne.split("^").join("^ "))
                     })
-                    $scope.selectedTest.v2 = segments
+                    $scope.selectedTest.v2Display = segments
 
                 }
 

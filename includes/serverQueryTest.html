@@ -57,9 +57,9 @@
                             <pre>{{selectedTest.resource | json}}</pre>
                         </div>
 
-                        <div ng-show="selectedTest.v2">
+                        <div ng-show="selectedTest.v2Display">
                             <div class="list-group">
-                                <div class="list-group-item" ng-repeat="segment in selectedTest.v2">
+                                <div class="list-group-item" ng-repeat="segment in selectedTest.v2Display">
                                     {{segment}}
                                 </div>
                             </div>
