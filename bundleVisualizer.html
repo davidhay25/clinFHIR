@@ -497,7 +497,7 @@
                                                     </div>
 
                                                 </uib-tab>
-                                                <uib-tab heading="Resource Type">
+                                                <uib-tab heading="Resource Type, Id">
                                                     <div class="entryListScroll">
                                                         <div ng-repeat="(k,v) in hashEntries">
                                                             <div><strong>{{k}}</strong></div>
@@ -511,6 +511,34 @@
                                                         </div>
                                                     </div>
                                                 </uib-tab>
+
+                                                <uib-tab heading="Resource Type, Name">
+                                                    <div class="entryListScroll">
+                                                        <div ng-repeat="(k,v) in hashByName">
+                                                            <div><strong>{{k}}</strong></div>
+
+
+                                                            <div class="list-group">
+                                                                <div class="list-group-item" ng-repeat="item in v"
+                                                                     ng-click="selectBundleEntry(item.entry,hashErrors[$index])">
+                                                                    {{item.display}}
+                                                                </div>
+                                                            </div>
+                                                            <!--
+                                                            <div ng-repeat = "item in v">
+                                                                <div style="padding-left: 10px; cursor: pointer"
+                                                                     ng-click="selectBundleEntry(item.entry,hashErrors[$index])">
+                                                                    <div style="padding: 8px"> {{item.display}}</div>
+
+                                                                </div>
+                                                            </div>
+                                                            -->
+
+
+                                                        </div>
+                                                    </div>
+                                                </uib-tab>
+
                                             </uib-tabset>
 
 
@@ -579,7 +607,16 @@
                                                         </div>
                                                     </div>
                                                     <br/>
-                                                    <div id="singleResourceGraph"></div>
+
+                                                    <div class="row">
+                                                        <div class="col-md-8 col-sm-8">
+                                                            <div id="singleResourceGraph"></div>
+                                                        </div>
+                                                        <div class="col-md-4 col-sm-4">
+                                                            <pre>{{selectedFromSingleGraph | json}}</pre>
+                                                        </div>
+                                                    </div>
+
                                                 </uib-tab>
 
                                                 <uib-tab ng-show="selectedBundleEntryErrors.length > 0">

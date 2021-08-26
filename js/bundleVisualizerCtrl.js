@@ -745,6 +745,7 @@ angular.module("sampleApp")
 
 
             $scope.selectBundleEntry = function(entry,entryErrors) {
+                delete $scope.selectedFromSingleGraph;
                 $scope.selectedBundleEntry = entry
                 $scope.selectedBundleEntryErrors = entryErrors;
 
@@ -801,6 +802,22 @@ angular.module("sampleApp")
                     }
                 };
                 $scope.singleResourceChart = new vis.Network(container, vo.graphData, graphOptions);
+
+                $scope.singleResourceChart.on("click", function (obj) {
+
+                    var nodeId = obj.nodes[0];  //get the first node
+
+                    var node = vo.graphData.nodes.get(nodeId);
+
+                    $scope.selectedFromSingleGraph = node.resource;
+
+
+
+                    $scope.$digest();
+                });
+
+
+                //
 
             };
 
@@ -894,6 +911,37 @@ angular.module("sampleApp")
                 //$scope.toggleSidePane();
 
                 $scope.fhir = oBundle;
+
+                //create a hash for bundle by name
+
+                $scope.hashByName = {}
+                if (oBundle.entry) {
+                    oBundle.entry.forEach(function(entry) {
+                        let resource = entry.resource;
+                        $scope.hashByName[resource.resourceType] = $scope.hashByName[resource.resourceType] || []
+
+                        if (resource.name) {
+                            let item = {entry:entry}
+                            item.display = resource.name;     //todo - maybe check datatype?
+                            $scope.hashByName[resource.resourceType].push(item)
+                        }
+                    })
+
+                    Object.keys($scope.hashByName).forEach(function (k,v) {
+                        let ar = $scope.hashByName[k]
+                        ar.sort(function(a,b){
+                            if (a.display > b.display) {
+                                return 1
+                            } else {
+                                return -1
+                            }
+                        })
+                    })
+
+
+
+
+                }
 
                 //create hash by type
                 $scope.hashEntries = {}

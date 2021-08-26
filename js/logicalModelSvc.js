@@ -3536,7 +3536,9 @@ angular.module("sampleApp")
             loadAllModels: function (conformanceServerUrl) {
                 //$scope.conformanceServer
                 var deferred = $q.defer();
-                var url = conformanceServerUrl + "StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
+                //var url = conformanceServerUrl + "StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
+                var url = conformanceServerUrl + "StructureDefinition?kind=logical";    //todo Onto is not supporting identifier query
+
 
                 //var url="http://fhir3.healthintersections.com.au/open/StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
                 GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(

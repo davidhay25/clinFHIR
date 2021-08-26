@@ -1,6 +1,2 @@
 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
 
-https://stackoverflow.com/questions/35942754/how-to-save-username-and-password-in-git#35942890
-
-git config --global credential.helper store
-then git pull & enter details that will be saved
