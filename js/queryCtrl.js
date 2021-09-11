@@ -376,15 +376,23 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
         let ar = qry.split('?')
         let type = {name:ar[0]}
         executeQuery($scope.server.url + qry,type)
-        /*
-        if (ar.length == 2) {
-            let type = {name:ar[0]}
-            executeQuery($scope.server.url + qry,type)
-        } else {
-            alert("The query seems incorrect. It should have the format: {type}?{parameters}")
-        }
-*/
+
     }
+
+    //---------------- support for operations. todo - read from capability statement
+    $scope.serverOperations = [];
+    let summaryOp = {name:'Summary',params : []}
+    summaryOp.params.push({"display":"Identifier","type":"identifier"})
+
+    $scope.selectServerOperation = function(item) {
+        $scope.selectedServerOperation = item
+    }
+
+    $scope.executeServerOperation = function() {
+
+    }
+
+    //------------------
 
     $scope.doit = function() {
         $scope.buildQuery();

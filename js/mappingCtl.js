@@ -752,7 +752,6 @@ angular.module("sampleApp")
 
                         //console.log(data.data)
 
-
                         makeDownload(structureMapResource)
 
                         let url = $scope.server.mappingServerUrl + "StructureMap/" + $scope.currentSM.id;

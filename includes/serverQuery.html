@@ -335,6 +335,26 @@
                                 </uib-tab>
 
 
+                                <uib-tab ng-show = "false" heading="Invoke Operations">
+                                    <br/>
+                                    <div class="row">
+                                        <div class="col-sm-3 col-md-3">
+                                            <div class="list-group">
+                                                <div ng-class="{'list-group-item':true}"
+                                                     ng-repeat = "op in serverOperations">
+                                                    {{op.name}}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-9 col-md-9">
+
+                                        </div>
+                                    </div>
+
+
+                                </uib-tab>
+
+
                                 <uib-tab heading="Testing">
 
                                     <br/>

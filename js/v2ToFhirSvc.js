@@ -25,6 +25,7 @@ angular.module("sampleApp")
         objColours.Composition = '#FFFFCC';
         objColours.Medication = '#FF9900';
         objColours.Measure = '#FF9900';
+        objColours.Task = '#FF9900';
         objColours.Immunization = '#aeb76c';
 
         return {

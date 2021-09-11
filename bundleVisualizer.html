@@ -192,6 +192,7 @@
                 </form>
             </div>
 
+
             <div class="col-md-1 col-sm-1">
 
 
@@ -214,17 +215,8 @@
                 </div>
 
             </div>
-<!--
-            <div class="col-md-1">
-                <form class="navbar-form navbar-left">
-                    <i class="glyphicon glyphicon-cog clickable"
-                       style="padding: 10px"
-                       ng-click="showConfig">
 
-                    </i>
-                </form>
-            </div>
-            -->
+
 
             <div class="col-md-3">
                 <div class="navbar-text pull-right">
@@ -499,16 +491,20 @@
                                                 </uib-tab>
                                                 <uib-tab heading="Resource Type, Id">
                                                     <div class="entryListScroll">
-                                                        <div ng-repeat="(k,v) in hashEntries">
-                                                            <div><strong>{{k}}</strong></div>
-                                                            <div ng-repeat = "entry in v">
-                                                                <div style="padding-left: 10px; cursor: pointer"
-                                                                     ng-click="selectBundleEntry(entry,hashErrors[$index])">
-                                                                    <div> {{entry.resource.text.div | cleanTextDiv | limitTo:50}}</div>
-                                                                    <div style="padding-left: 10px"><em>Id: {{entry.resource.id}}</em></div>
+                                                        <div class="list-group">
+                                                            <div ng-repeat="(k,v) in hashEntries">
+                                                                <div><strong>{{k}}</strong></div>
+                                                                <div ng-repeat = "entry in v"
+                                                                    ng-class="'list-group-item':true">
+                                                                    <div style="padding-left: 10px; cursor: pointer"
+                                                                         ng-click="selectBundleEntry(entry,hashErrors[$index])">
+                                                                        <div> {{entry.resource.text.div | cleanTextDiv | limitTo:50}}</div>
+                                                                        <div style="padding-left: 10px"><em>Id: {{entry.resource.id}}</em></div>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
+
                                                     </div>
                                                 </uib-tab>
 
@@ -524,15 +520,6 @@
                                                                     {{item.display}}
                                                                 </div>
                                                             </div>
-                                                            <!--
-                                                            <div ng-repeat = "item in v">
-                                                                <div style="padding-left: 10px; cursor: pointer"
-                                                                     ng-click="selectBundleEntry(item.entry,hashErrors[$index])">
-                                                                    <div style="padding: 8px"> {{item.display}}</div>
-
-                                                                </div>
-                                                            </div>
-                                                            -->
 
 
                                                         </div>

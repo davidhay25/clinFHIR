@@ -21,6 +21,9 @@ const proxyModule = require("./serverModuleProxy.js")
 let registryModule = require('./serverModuleRegistry.js');
 registryModule.setup(app)
 
+const patientCorectionsModule = require("./serverModulePatientTask.js")
+patientCorectionsModule.setup(app)
+
 process.on('uncaughtException', function(err) {
     console.log('>>>>>>>>>>>>>>> Caught exception: ' + err);
 });

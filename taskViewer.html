@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Viewer</title>
+    <script src="js/libs/jquery-1.9.0.min.js"></script>
+    <script src="js/libs/angular.min1-5.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+
+    <script src="js/libs/moment.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
+    <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+    <script src="js/libs/angular-sanitize.js"></script>
+    <script src="js/libs/jstree.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/vis.min.css"/>
+
+    <style>
+        .myScroll {
+            height: 600px;
+            overflow-y: scroll;
+        }
+        .overDue {
+            background-color:salmon;
+        }
+        .ok {
+            background-color:#00A000;
+            color:white;
+        }
+        .toomuch {
+            background-color:red;
+            color:white;
+        }
+    </style>
+
+    <script>
+        angular.module("sampleApp",['ui.bootstrap','ngStorage']).config(function($locationProvider) {
+
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+        });
+        angular.module("sampleApp").constant("moment", moment);
+
+    </script>
+    <script src="js/libs/ngStorage.min.js"></script>
+    <script src="js/taskViewerCtrl.js"></script>
+    <script src="js/v2ToFhirSvc.js"></script>
+    <script src="js/libs/vis.min.js"></script>
+    <script src="js/filters.js"></script>
+
+    <style>
+        #graph {
+            width: 100%;
+            height: 550px;
+            border: 1px solid lightgray;
+        }
+    </style>
+
+
+
+</head>
+<body style="padding: 8px;padding-top: 80px">
+    <div ng-app="sampleApp" ng-controller="taskViewerCtrl" class="container-fluid">
+
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+
+        <div class="container-fluid">
+            <div class="col-md-6 col-sm-6">
+                    <span>
+                        <a class="navbar-brand" href="#">
+                            Patient corrections reference server
+                        </a>
+                    </span>
+            </div>
+            <div class="col-md-2 col-sm-2">
+                <form class="navbar-form navbar-left">
+                    <img ng-show="showWaiting" src="css/ajax_loader_blue_32.gif"/>
+
+                </form>
+            </div>
+            <div class="col-md-4 col-sm-4">
+                <div class="navbar-text pull-right" >
+                    <a href="https://www.lyniate.com/" target="_blank">
+                        <img  src="/icons/supported_by_lyniate.png"/>
+                    </a>
+
+                </div>
+
+            </div>
+        </div>
+    </nav>
+
+
+        <div class="row">
+            <div class="col-md-3">
+                <h3>Active correction requests</h3>
+                <div class="list-group">
+                    <div ng-class="{'list-group-item':true}" style="cursor:pointer;"
+                         ng-click="selectPrimaryTask(entry.resource)"
+                         ng-repeat="entry in bundleTasks.entry track by $index">
+                        {{entry.resource.id}}
+
+                    </div>
+                </div>
+
+                <button class="btn btn-link" ng-click="newTask()">New correction request</button>
+                <br/>
+                <em>Will create 2 resources to emulate the initial request for
+                correction - Communication & Task </em>
+            </div>
+            <div class="col-md-9">
+                <div ng-show="state=='view'">
+
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <uib-tabset>
+                                <uib-tab heading="Table">
+                                    <table class="table table-condensed">
+                                        <tr><th>Resource type</th><th>Payload (string only)</th></tr>
+                                        <tr ng-repeat="resource in allResourcesForRequest">
+                                            <td ng-click="selectResource(resource)" style="cursor: pointer">
+                                                {{resource.resourceType}}
+                                                <div><em>{{resource.id}}</em></div>
+                                            </td>
+
+                                            <td>
+                                                <div ng-repeat="content in resource.payload">{{content.contentString}}</div>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <button class="btn btn-primary" ng-click="requestInfo()">Request more information</button>
+
+                                </uib-tab>
+                                <uib-tab heading="Graph"  select="fitGraph()">
+                                    <div id="graph"></div>
+                                </uib-tab>
+                            </uib-tabset>
+                        </div>
+                        <div class="col-md-6">
+                            <pre ng-show="selectedResource">{{selectedResource | json}}</pre>
+                        </div>
+                    </div>
+
+
+
+
+
+
+                </div>
+                <div ng-show="state=='newtask'">
+                    <br/>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Patient Id</label>
+                            <input class="text form-control" ng-model="input.patientId" placeholder="Patient Id"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Description of issue</label>
+                            <textarea class="form-control" ng-model="input.description" placeholder="Description of the correction requested"></textarea>
+                        </div>
+                    </div>
+                    <br/>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Recipient Id</label>
+                            <input class="text form-control" ng-model="input.ownerId"
+                                   placeholder="Will be Communication.recipient & Task.owner"/>
+                        </div>
+                        <div class="col-md-6">
+
+                        </div>
+                    </div>
+
+                    <br />
+
+                    <button class="btn btn-primary" ng-click="addTask()">Add request</button>
+                    <em>Create a new Task and a Communication resource. Simulates the initial receipt of a Communication from a client</em>
+
+                    <br />
+                    <pre>{{generatedCommunication | json}}</pre>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+</div>
+
+</body>
+</html>
