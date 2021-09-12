@@ -249,8 +249,9 @@ function setup(app) {
                 task.code = {coding:[{system:"https://www.maxmddirect.com/fhir/us/mmdtempterminology/6qlB89NQ/CodeSystem/FHIRPatientCorrectionTemp",
                         code:"medRecCxReq"}]}
                 task.status = "ready"
-                task.intent = "proposal"
-
+                task.intent = "order"
+                task.focus = {reference:"Communication/"+communicationId}
+                //task.input = {reference:"Communication/"+communicationId}
                 if (communication.payload && communication.payload.length > 0 && communication.payload[0].contentString) {
                     task.description = communication.payload[0].contentString
                 } else {
@@ -258,7 +259,13 @@ function setup(app) {
                 }
 
                 task.for = communication.subject; //{reference:"Patient/"+$scope.input.patientId }
-                task.requester = communication.subject; // {reference:"Patient/"+$scope.input.patientId }     //assume requested by the patient
+                if (communication.requestor) {
+                    task.requestor = communication.requestor; // {reference:"Patient/"+$scope.input.patientId }     //assume requested by the patient
+                } else {
+                    task.requestor = communication.subject; // {reference:"Patient/"+$scope.input.patientId }     //assume requested by the patient
+                }
+                //task.requester = communication.subject; // {reference:"Patient/"+$scope.input.patientId }     //assume requested by the patient
+
                 if (communication.recipient) {
                     task.owner = communication.recipient
                 }
@@ -267,6 +274,8 @@ function setup(app) {
                 inp.type = {text:"Original communication"}
                 inp.valueReference = {reference:"Communication/"+communicationId }
                 task.input = [inp]
+
+
 
                 console.log('about to save task...')
                 saveTask(task,function(vo){

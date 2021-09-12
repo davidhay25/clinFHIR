@@ -57,7 +57,7 @@ angular.module("sampleApp")
 
                 let communication = {resourceType:'Communication'}
                 communication.status = "completed"
-                communication.category = {coding:[{system:"\"https://www.maxmddirect.com/fhir/us/mmdtempterminology/6qlB89NQ/CodeSystem/FHIRPatientCorrectionTemp",code:"medRecCxReq"}]}
+                communication.category = {coding:[{system:"https://www.maxmddirect.com/fhir/us/mmdtempterminology/6qlB89NQ/CodeSystem/FHIRPatientCorrectionTemp",code:"medRecCxReq"}]}
                 //communication.about = {reference:"Task/"+taskId } //<<< added by server
                 communication.subject = {reference:"Patient/"+$scope.input.patientId }
                 communication.sender = {reference:"Patient/"+$scope.input.patientId }
@@ -212,6 +212,9 @@ angular.module("sampleApp")
                         function(data) {
                             let updatedCommunication = data.data   //the communication is returned
                             //set the task owner to be the patient
+
+                            //todo - move this Task update to the API
+
                             let clone = angular.copy($scope.primaryTask)
                             clone.owner = $scope.primaryCommunication.subject;
                             clone.status = "in-progress"
@@ -248,6 +251,10 @@ angular.module("sampleApp")
 
                     $http.post('/fhir/Communication',communication).then(
                         function(data) {
+
+                            //todo - move this Task update to the API
+
+
                             let updatedCommunication = data.data   //the communication is returned
                             let clone = angular.copy($scope.primaryTask)
                             clone.owner = {reference:$scope.thisUserId};        //change the owner to this user
