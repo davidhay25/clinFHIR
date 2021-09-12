@@ -1,12 +1,12 @@
-//endpoints for patient corrections Task functionity
+//endpoints for patient corrections Task functionality
 
 let request  = require('request');
-
 let serverUrl =  "http://home.clinfhir.com:8054/baseR4/"
 
 
 function setup(app) {
 
+    //the implementation of Task?reasonReference
     app.get('/fhir/Task',function(req,res){
         let qry = req.query;
         if (qry.reasonReference) {
@@ -23,6 +23,7 @@ function setup(app) {
         console.log(qry);
         res.send(qry)
     })
+
 
 
     //get a single Communication by id
@@ -52,39 +53,72 @@ function setup(app) {
 
             let resultBundle = {resourceType:'Bundle',type:'searchset',entry:[]} //the bundle of matching resources
             //get the Communication that the 'about' references - then get the patient from that and the task - which can be added to the list
-            let url = serverUrl + "Communication/"+qry.about;   //todo check for type in query
-            //todo - add _include for patient...
-            executeQuery(url,function(resource){
-                if (resource) {
+            let url = serverUrl + "Communication?_id="+qry.about;   //todo check for type in query
+
+            //add an _include for the patient and sender...
+            url += "&_include=Communication:patient&_include=Communication:sender"
+
+            getBundle(url,function(bundle1){
+
+                if (bundle1) {
+                    //console.log('first call', bundle1.resourceType)
+                    //add all the resources into the returned bundle
+                    let patientId;
+                    bundle1.entry.forEach(function (entry) {
+                        //console.log(entry.resource.resourceType)
+                        resultBundle.entry.push(entry)
+                        if (entry.resource.resourceType == 'Communication') {
+                            if (entry.resource.subject) {
+                                patientId = entry.resource.subject.reference;     //includes type
+                            }
+
+                        }
+                    })
+
                     //got the target communication resource
-                    let patientId = resource.subject.reference;     //eg Patient/patient2
+
+                    //let patientId = resource.subject.reference;     //eg Patient/patient2
+
                     console.log('patientid',patientId)
                     //get all communication resources for this patient
                     url =  serverUrl + "Communication?subject="+ patientId
+                    url += "&_count=50"
 
-                    executeQuery(url,function(set){
-                        //then go through eack one, looking for those that have an 'about' reference to the primary
+                    //console.log(url)
+                    getBundle(url,function(set){
+                        //console.log(set.resourceType)
+                        //then go through each one, looking for those that have an 'about' reference to the primary
+                        let searchReference = 'Communication/' + qry.about;
+                        //console.log('looking for ' + searchReference)
                         set.entry.forEach(function (entry){
-                            console.log(entry.resource.about)
-                            if (entry.resource.about) {
+                            //console.log(entry.resource.about)
+                            if ( entry.resource.about) {
+                                //about is an array
                                 entry.resource.about.forEach(function (ref) {
-                                    if (ref.reference == qry.about) {
+                                    //console.log(ref)
+                                    if (ref.reference == searchReference) {
                                         //yep - this resources references the target one
-                                        resultBundle.entry.push(entry.resource)
+                                        //console.log('match ' + entry.resource.id)
+                                        resultBundle.entry.push({resource:entry.resource})
                                     }
 
                                 })
                             }
+
                         })
+                        console.log('done')
+
+                        //at this point we should have all Communications that have an 'about' reference to the target
+                        res.json(resultBundle);
                     })
 
-                    //at this point we should have all Communications that have an 'about' reference to the target
-                    res.json(resultBundle);
+
 
 
                 } else {
                     //the 'about' resource doesn't exist on the server
-                    res.json(resultBundle);     //this will be a bundle with no contents...
+                    console.log("The 'about' resource was not found")
+                  res.json(resultBundle);     //this will be a bundle with no contents...
                 }
             })
             //collect all the communication resources which are for that patient and check the 'about' element, adding them to the list
@@ -129,7 +163,7 @@ function setup(app) {
     }
 
     function getBundle(url,cb) {
-        console.log(url)
+        //console.log(url)
         let options = {
             method: 'GET',
             uri: url,
@@ -143,19 +177,21 @@ function setup(app) {
             if (body) {      //should always be 201...
 
                 try {
-                    cb(JSON.parse(body))
+                    let json = JSON.parse(body)
+                    cb(json)
                 } catch(ex) {
                     cb(null)
                 }
 
             } else {
+                console.log('getBundle '+ url + 'has empty body' )
                 cb(null)
             }
 
         })
 
 
-        cb()
+
     }
 
     //receive a Communication resource. If the about is empty, then create a new task as well...
@@ -176,91 +212,88 @@ function setup(app) {
                 return
             }
 
-                //todo - validate that the communication has the reqired fields to create a Task...
+            communication.sent = new Date().toISOString();      //server side, so all the same...
 
-                console.log('communication',communication)
+            //todo - validate that the communication has the reqired fields to create a Task...
 
-                //set the Id's so we can create the references...
-                let taskId = 'cf-' + new Date().getTime() + "t"
-                let communicationId = 'cf-' + new Date().getTime() + "c"
+            console.log('communication',communication)
+
+            //set the Id's so we can create the references...
+            let taskId = 'cf-' + new Date().getTime() + "t"
+            let communicationId = 'cf-' + new Date().getTime() + "c"
 
 
-                communication.id = communicationId;
-                console.log('communication.about',communication.about)
+            communication.id = communicationId;
+            console.log('communication.about',communication.about)
 
-                if (communication.about) {
-                    console.log('saving communication that has an about of '+ communication.about)
-                    //This is a communication about an existing task. Just save it...
-                    saveCommunication(communication,function(vo1){
-                        if (vo1.status == 200) {
-                            res.json(vo1.response)
-                        } else {
-                            res.status(vo1.status).json(vo1.response)
-                        }
-
-                    })
-
-                } else {
-                    //This is a new request, so make a task
-                    console.log('Creating as task...')
-
-                    //need to update the communication so it refers to the task
-                    communication.about = {reference:"Task/"+taskId }
-
-                    let task = {resourceType:'Task',id:taskId}
-                    task.code = {coding:[{system:"https://www.maxmddirect.com/fhir/us/mmdtempterminology/6qlB89NQ/CodeSystem/FHIRPatientCorrectionTemp",code:"medRecCxReq"}]}
-                    task.status = "received"
-                    task.intent = "proposal"
-
-                    if (communication.payload && communication.payload.length > 0 && communication.payload[0].contentString) {
-                        task.description = communication.payload[0].contentString
+            if (communication.about) {
+                console.log('saving communication that has an about of ', communication.about)
+                //This is a communication about an existing task. Just save it...
+                saveCommunication(communication,function(vo1){
+                    if (vo1.status == 200) {
+                        res.json(vo1.response)
                     } else {
-                        task.description = "No description in Communication.payload[0].contentString"
+                        res.status(vo1.status).json(vo1.response)
                     }
 
-                    task.for = communication.subject; //{reference:"Patient/"+$scope.input.patientId }
-                    task.requester = communication.subject; // {reference:"Patient/"+$scope.input.patientId }     //assume requested by the patient
-                    if (communication.recipient) {
-                        task.owner = communication.recipient
-                    }
+                })
 
-                    let inp = {}
-                    inp.type = {text:"Original communication"}
-                    inp.valueReference = {reference:"Communication/"+communicationId }
-                    task.input = [inp]
+            } else {
+                //This is a new request, so make a task
+                console.log('Creating as task...')
 
-                    console.log('about to save task...')
-                    saveTask(task,function(vo){
-                        console.log("Return from save Task: " + vo.status)
-                        if (vo.status == '201') {
-                            //insert succeeded - now update the communication.about, save & return response
-                            saveCommunication(communication,function(vo1){
-                                console.log("Return from save Communication: " + vo.status)
-                                if (vo1.status == '201') {
-                                    //insert of Communication done as well.
-                                    res.status(201).json(vo1.response)
-                                } else {
-                                    //Communication insert failed. bummer. todo - ideally in a transaction, but dies that limit servers that can be used?
-                                    res.status(400).json(vo.response);      //the server should have returned an OO
-                                    return
-                                }
-                            })
+                //need to update the communication so it refers to the task
+                communication.about = {reference:"Task/"+taskId }
 
-                        } else {
-                            //task insert failed. return the response from the server
-                            //res.status(400).json(makeOO('Unable to create task. Operation cancelled.'))
-                            res.status(400).json(vo.response);      //the server should have returned an OO
-                            return
-                        }
-                    })
+                let task = {resourceType:'Task',id:taskId}
+                task.code = {coding:[{system:"https://www.maxmddirect.com/fhir/us/mmdtempterminology/6qlB89NQ/CodeSystem/FHIRPatientCorrectionTemp",
+                        code:"medRecCxReq"}]}
+                task.status = "ready"
+                task.intent = "proposal"
 
+                if (communication.payload && communication.payload.length > 0 && communication.payload[0].contentString) {
+                    task.description = communication.payload[0].contentString
+                } else {
+                    task.description = "No description in Communication.payload[0].contentString"
                 }
 
+                task.for = communication.subject; //{reference:"Patient/"+$scope.input.patientId }
+                task.requester = communication.subject; // {reference:"Patient/"+$scope.input.patientId }     //assume requested by the patient
+                if (communication.recipient) {
+                    task.owner = communication.recipient
+                }
 
+                let inp = {}
+                inp.type = {text:"Original communication"}
+                inp.valueReference = {reference:"Communication/"+communicationId }
+                task.input = [inp]
 
+                console.log('about to save task...')
+                saveTask(task,function(vo){
+                    console.log("Return from save Task: " + vo.status)
+                    if (vo.status == '201') {
+                        //insert succeeded - now update the communication.about, save & return response
+                        saveCommunication(communication,function(vo1){
+                            console.log("Return from save Communication: " + vo.status)
+                            if (vo1.status == '201') {
+                                //insert of Communication done as well.
+                                res.status(201).json(vo1.response)
+                            } else {
+                                //Communication insert failed. bummer. todo - ideally in a transaction, but dies that limit servers that can be used?
+                                res.status(400).json(vo.response);      //the server should have returned an OO
+                                return
+                            }
+                        })
 
+                    } else {
+                        //task insert failed. return the response from the server
+                        //res.status(400).json(makeOO('Unable to create task. Operation cancelled.'))
+                        res.status(400).json(vo.response);      //the server should have returned an OO
+                        return
+                    }
+                })
 
-
+            }
         })
 
         function saveTask(task,cb) {
@@ -279,6 +312,7 @@ function setup(app) {
             })
         }
 
+        //todo - could this be putResource?
         function saveCommunication(communication,cb) {
             let options = {
                 method:'PUT',
@@ -297,16 +331,11 @@ function setup(app) {
             })
         }
 
-        function makeOO(text) {
-            let oo = {resourceType:'OperationOutcome',issue:[{severity:'fatal',code:'',details:{text:text}}]}
-            return oo
-        }
-
     })
 
     app.get('/ctOpenTasks',function(req,res){
 
-        let url = serverUrl + "Task?status:not=completed&&code=medRecCxReq";
+        let url = serverUrl + "Task?status:not=completed&code=medRecCxReq";
 
         console.log(url)
         let options = {
@@ -323,6 +352,82 @@ function setup(app) {
             res.json(JSON.parse(body))
         })
 
+    })
+
+    app.get('/ctAllTasks',function(req,res){
+
+        let url = serverUrl + "Task?code=medRecCxReq";
+
+        console.log(url)
+        let options = {
+            method:'GET',
+            rejectUnauthorized: false,
+            uri : url,
+            headers: {
+                'Accept': 'application/json+fhir'
+            }
+        };
+
+        request(options,function(error,response,body){
+
+            res.json(JSON.parse(body))
+        })
+
+    })
+
+
+    function makeOO(text) {
+        let oo = {resourceType:'OperationOutcome',issue:[{severity:'fatal',code:'',details:{text:text}}]}
+        return oo
+    }
+
+    function putResource(resource,cb) {
+        let options = {
+            method:'PUT',
+            uri : serverUrl + resource.resourceType + "/"+ resource.id,
+            body : JSON.stringify(resource),
+            headers: {
+                'Accept': 'application/json+fhir',
+                'Content-type': 'application/json+fhir'
+            }
+        };
+
+        request(options,function(error,response,body){
+            console.log(response.statusCode)
+            cb({status: response.statusCode, response:JSON.parse(body)})
+
+        })
+    }
+
+
+    //============= proxy endpoints
+
+    //update a resource - eg a task
+    app.put('/fhir/:type/:id',function(req,res){
+        var body = "";
+        req.on('data', function (data) {
+            body += data;
+        });
+        req.on('end', function (data) {
+            if (data) {
+                body += data;
+            }
+        let resource;
+        try {
+            resource = JSON.parse(body)
+            putResource(resource,function(vo){
+                if (vo.status == 200 || vo.status == 201) {
+                    res.json(vo.response)
+                } else {
+                    res.status(400).json(vo.response)
+                }
+            })
+        }  catch (ex) {
+            res.status(400).json(makeOO('Invalid Json' ))
+        }
+
+
+        })
     })
 
 
