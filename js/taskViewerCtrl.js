@@ -45,6 +45,7 @@ angular.module("sampleApp")
 */
 
             $scope.getTaskHistory = function(task) {
+                delete $scope.selectedTaskVersionCommunication;
                 let qry = "/fhir/Task/" + task.id + "/_history"
                 $scope.showWaiting = true;
                 $http.get(qry).then(
@@ -162,6 +163,7 @@ angular.module("sampleApp")
                 delete $scope.primaryCommunication;
                 delete $scope.selectedResource;
                 delete $scope.selectedTaskVersion;
+                delete $scope.selectedTaskVersionCommunication;
                 delete $scope.taskHistory
 
 

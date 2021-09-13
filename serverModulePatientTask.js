@@ -6,6 +6,28 @@ let serverUrl =  "http://home.clinfhir.com:8054/baseR4/"
 
 function setup(app) {
 
+
+    app.get('/fhir/metadata',function(req,res){
+        let cs = {'resourceType': 'CapabilityStatement', status:'active',date:'2021-09-14',kind:'instance'}
+        cs.fhirVersion = '4.0.1'
+        cs.format = ['application/fhir+json']
+        cs.rest = [{mode:'server',documentation:'To support patient corrections',resource:[]}]
+        let resource1 = {type:'Communication',interaction:[],searchParam:[]}
+        resource1.interaction.push([{code:'read'}])
+        resource1.interaction.push([{code:'create'}])
+        resource1.interaction.push([{code:'search-type'}])
+        resource1.searchParam.push({name:'about',type:'token'})
+        cs.rest[0].resource.push(resource1)
+
+        let resource2 = {type:'Task',interaction:[]}
+        resource2.interaction.push([{code:'history-instance'}])
+        resource2.interaction.push([{code:'update'}])
+        cs.rest[0].resource.push(resource2)
+
+        res.json(cs)
+
+    })
+
     //get a
     app.get('/fhir/Task/:id/_history',function(req,res){
         let qry = serverUrl + "Task/" + req.params.id + "/_history?_count=50";
@@ -266,9 +288,12 @@ console.log(response.statusCode)
 
             communication.sent = new Date().toISOString();      //server side, so all the same...
 
-            //todo - validate that the communication has the reqired fields to create a Task...
-
-            //console.log('communication',communication)
+            //validate that the communication has the reqired fields to create a Task...
+            let oo = validateCommunication(communication);
+            if (oo.issue.length > 0) {
+                res.status(400).json(oo)
+                return
+            }
 
             //always create an id for this communication
             let communicationId = 'cf-' + new Date().getTime() + "c"
@@ -351,8 +376,6 @@ console.log(response.statusCode)
                 //set the Id's so we can create the references...
                 let taskId = 'cf-' + new Date().getTime() + "t"
 
-
-
                 //need to update the communication so it refers to the task
                 communication.about = {reference:"Task/"+taskId }
 
@@ -364,10 +387,15 @@ console.log(response.statusCode)
                 task.intent = "order"
                 task.focus = {reference:"Communication/"+communicationId}
                 //task.input = {reference:"Communication/"+communicationId}
-                if (communication.payload && communication.payload.length > 0 && communication.payload[0].contentString) {
-                    task.description = communication.payload[0].contentString
+
+                if (communication.topic) {
+                    task.description = communication.topic
                 } else {
-                    task.description = "No description in Communication.payload[0].contentString"
+                    if (communication.payload && communication.payload.length > 0 && communication.payload[0].contentString) {
+                        task.description = communication.payload[0].contentString
+                    } else {
+                        task.description = "No description in Communication.payload[0].contentString"
+                    }
                 }
 
                 task.for = communication.subject; //{reference:"Patient/"+$scope.input.patientId }
@@ -376,7 +404,6 @@ console.log(response.statusCode)
                 } else {
                     task.requestor = communication.subject; // {reference:"Patient/"+$scope.input.patientId }     //assume requested by the patient
                 }
-                //task.requester = communication.subject; // {reference:"Patient/"+$scope.input.patientId }     //assume requested by the patient
 
                 if (communication.recipient) {
                     task.owner = communication.recipient
@@ -407,36 +434,11 @@ console.log(response.statusCode)
                     }
                 })
 
-                /*
-                saveTask(task,function(vo){
-                    console.log("Return from save Task: " + vo.status)
-                    if (vo.status == '201') {
-                        //insert succeeded - now update the communication.about, save & return response
-                        saveCommunication(communication,function(vo1){
-                            console.log("Return from save Communication: " + vo.status)
-                            if (vo1.status == '201') {
-                                //insert of Communication done as well.
-                                res.status(201).json(vo1.response)
-                            } else {
-                                //Communication insert failed. bummer. todo - ideally in a transaction, but dies that limit servers that can be used?
-                                res.status(400).json(vo.response);      //the server should have returned an OO
-                                return
-                            }
-                        })
 
-                    } else {
-                        //task insert failed. return the response from the server
-                        //res.status(400).json(makeOO('Unable to create task. Operation cancelled.'))
-                        res.status(400).json(vo.response);      //the server should have returned an OO
-                        return
-                    }
-                })
-
-                */
 
             }
         })
-
+/*
         function saveTask(task,cb) {
             let options = {
                 method:'PUT',
@@ -471,8 +473,55 @@ console.log(response.statusCode)
 
             })
         }
-
+*/
     })
+
+    function validateCommunication(comm) {
+        let oo = {resourceType : 'OperationOutcome',issue:[]}
+        if (! comm.status || comm.status !== 'completed') {
+            oo.issue.push({severity:'fatal',code:'invalid',details:{text:".status must be present with a value of 'completed'"}})
+        }
+
+        checkCCCodeFixedValue(comm.category, 'medRecCxReq',"Category must be present with a value of 'medRecCxReq'")
+        checkCCCodeFixedValue(comm.statusReason, 'medRecCxReq',"Category must be present with a value of 'statusReason'")
+        checkReferencePresent(comm.subject,"There must be a subject reference to the Patient")
+        checkReferencePresent(comm.sender,"There must be a sender reference")
+        checkReferencePresent(comm.recipient,"There must be a recipient reference")
+
+        function checkReferencePresent(ref,msg) {
+            if (! ref  || ! ref.reference) {
+                oo.issue.push({severity:'fatal',code:'invalid',details:{text:msg}})
+                return;
+            }
+
+        }
+
+        //check that a cc element is present, with a fixed value
+        function checkCCCodeFixedValue(cc,code,msg) {
+            //if an array, get the first element
+            if (! cc ) {
+                oo.issue.push({severity:'fatal',code:'invalid',details:{text:msg}})
+                return;
+            }
+            let ccValue;
+            if (cc.isArray()) {
+                if (cc.length < 1) {
+                    oo.issue.push({severity:'fatal',code:'invalid',details:{text:msg}})
+                    return;
+                } else {
+                    ccValue = cc[0]
+                }
+
+            } else {
+                ccValue = cc
+            }
+
+            if (!ccValue.coding || (ccValue.coding.length < 1) || (ccValue.coding[0].code !== code)) {
+                oo.issue.push({severity:'fatal',code:'invalid',details:{text:msg}})
+            }
+        }
+
+    }
 
     app.get('/ctOpenTasks',function(req,res){
 
@@ -518,7 +567,7 @@ console.log(response.statusCode)
 
 
     function makeOO(text) {
-        let oo = {resourceType:'OperationOutcome',issue:[{severity:'fatal',code:'',details:{text:text}}]}
+        let oo = {resourceType:'OperationOutcome',issue:[{severity:'fatal',code:'invalid',details:{text:text}}]}
         return oo
     }
 
