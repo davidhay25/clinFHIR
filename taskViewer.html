@@ -106,9 +106,14 @@
         </div>
     </nav>
 
+        <div class="row rounded-box">
+            <div class="col-md-2">
+                <input type="text" class="form-control" ng-model=" thisUserId"/>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-md-2">
-
 
                 <h3>Requests for correction</h3>
                 <uib-tabset>
@@ -219,6 +224,44 @@
                                 <uib-tab heading="Graph"  select="fitGraph()">
                                     <div id="graph"></div>
                                 </uib-tab>
+
+                                <uib-tab heading="Task history">
+                                    <br/>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="list-group">
+                                                <div ng-class="{'list-group-item':true}"
+                                                     style="cursor: pointer"
+                                                     ng-click="selectTaskVersion(version)"
+                                                     ng-repeat = "version in taskHistory.entry">
+                                                    {{version.resource.meta.versionId}}
+                                                    {{version.resource.businessStatus.coding[0].code}}
+
+                                                    <div
+                                                         uib-popover="{{version.resource.meta.lastUpdated}}"
+                                                         popover-placement="top"
+                                                         popover-trigger="'mouseenter'">
+                                                        {{moment(version.resource.meta.lastUpdated).fromNow()}}
+                                                    </div>
+
+
+                                                </div>
+                                            </div>
+                                            <button class="btn btn-link" ng-click="getTaskHistory(primaryTask )">Refresh list</button>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <pre ng-show="selectedTaskVersion">{{selectedTaskVersion | json}}</pre>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div ng-show="selectedTaskVersionCommunication">
+                                                <strong>Communication of Focus</strong>
+                                                <pre>{{selectedTaskVersionCommunication | json}}</pre>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </uib-tab>
                             </uib-tabset>
                         </div>
                         <div class="col-md-4">
@@ -256,11 +299,9 @@
 
                     <br />
 
-                    <button class="btn btn-primary" ng-click="addTask()">Add request</button>
+                    <button class="btn btn-primary pull-right" ng-click="addTask()">Add request</button>
                     <em>Create a new Task and a Communication resource. Simulates the initial receipt of a Communication from a client</em>
 
-                    <br />
-                    <pre>{{generatedCommunication | json}}</pre>
 
                 </div>
 

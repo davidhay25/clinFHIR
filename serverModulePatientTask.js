@@ -6,6 +6,20 @@ let serverUrl =  "http://home.clinfhir.com:8054/baseR4/"
 
 function setup(app) {
 
+    //get a
+    app.get('/fhir/Task/:id/_history',function(req,res){
+        let qry = serverUrl + "Task/" + req.params.id + "/_history?_count=50";
+        executeQuery(qry,function(vo){
+            if (vo.status == 200) {
+                res.json(vo.response)
+            } else {
+                res.json(vo.status).json(vo.response)
+            }
+        })
+
+    })
+
+
     //the implementation of Task?reasonReference
     app.get('/fhir/Task',function(req,res){
         let qry = req.query;
@@ -24,15 +38,13 @@ function setup(app) {
         res.send(qry)
     })
 
-
-
     //get a single Communication by id
     app.get('/fhir/Communication/:id',function(req,res){
         let id = req.params.id
         let url = serverUrl + "Communication/" + id
-        executeQuery(url,function (resource) {
-            if (resource) {
-                res.json(resource)
+        executeQuery(url,function (vo) {
+            if (vo) {
+                res.json(vo.response)
 
 
 
@@ -134,8 +146,9 @@ function setup(app) {
        // res.send(qry)
     })
 
-    //return a single resource
+    //execute the given query
     function executeQuery(url,cb) {
+        let log = {query:url}
         console.log(url)
         let options = {
             method: 'GET',
@@ -146,22 +159,61 @@ function setup(app) {
         };
 
         request(options, function (error, response, body) {
-
-            if (body) {      //should always be 201...
-
+//console.log(body)
+            if (body) {
                 try {
-                    cb(JSON.parse(body))
+                    let json = JSON.parse(body)
+console.log(response.statusCode)
+                    cb({response:json, status:response.statusCode})
+                    return;
                 } catch(ex) {
+                    console.log('invalid json', ex)
                     cb(null)
                 }
 
             } else {
+                console.log('no body')
                 cb(null)
             }
 
         })
     }
 
+    //retrieve the task that is associated with the primaryCommunication
+    function getTaskForPrimaryCommunication(commId,cb) {
+        //first, get the Communication
+        let qry = serverUrl +commId ;//  id has type "Communication/"+ commId
+        executeQuery(qry,function(vo){
+            if (vo && vo.response) {
+                //now get the Task from communication.about
+                let communication = vo.response
+                console.log(communication.id)
+                if (communication.about) {
+                    let t = communication.about[0].reference;
+                    console.log(t)
+
+                    let ar = t.split('/')
+                    let qry1 = serverUrl + "Task/" + ar[1]
+                    console.log(qry1)
+                    executeQuery(qry1,function(vo1){
+                        if (vo1) {
+                            cb(vo1.response)
+                        } else {
+                            cb()
+                        }
+
+                    })
+                } else {
+                    cb()
+                }
+            } else {
+                cb()
+            }
+        })
+
+    }
+
+    //todo same as execute query
     function getBundle(url,cb) {
         //console.log(url)
         let options = {
@@ -216,39 +268,99 @@ function setup(app) {
 
             //todo - validate that the communication has the reqired fields to create a Task...
 
-            console.log('communication',communication)
+            //console.log('communication',communication)
 
-            //set the Id's so we can create the references...
-            let taskId = 'cf-' + new Date().getTime() + "t"
+            //always create an id for this communication
             let communicationId = 'cf-' + new Date().getTime() + "c"
-
-
             communication.id = communicationId;
+
             console.log('communication.about',communication.about)
 
             if (communication.about) {
+                //This communication is on an existing trail (ie it won't create a task)
                 console.log('saving communication that has an about of ', communication.about)
                 //This is a communication about an existing task. Just save it...
+
+                //first, get the task as we're going to need to update it
+                // we forst have to get the primary Communication (what the .about refers to)
+                //then the primary will have an .about reference to the task
+
+
+                let ref = communication.about.reference;
+                //let qry = serverUrl + "Task?focus=" + ref;      //has the type, but still seems to work OK
+
+                //will return the task
+                getTaskForPrimaryCommunication(ref,function(task){
+                    if (task) {
+
+                        console.log(task.id)
+                        //need to look at the Communication.inResponseTo to determine the business status.
+                        //if it exists, then it is a reply to a question...
+                        if (communication.inResponseTo) {
+                            task.businessStatus = {coding:[{code:'reply-received',system:'http://clinfhir.com/cs/corrections'}]}
+                        } else {
+                            task.businessStatus = {coding:[{code:'waiting-for-info',system:'http://clinfhir.com/cs/corrections'}]}
+                            console.log(task.businessStatus)
+                        }
+
+                        task.status = "in-progress"
+                        task.focus = {reference:'Communication/'+ communication.id}
+                        //now create the update bundle
+
+                        let bundle = {resourceType:'Bundle',type:'transaction',entry:[]}
+                        let comEntry = {resource:communication,request:{method:'PUT',url:'Communication/' + communication.id}}
+                        bundle.entry.push(comEntry)
+                        let taskEntry = {resource:task,request:{method:'PUT',url:'Task/' + task.id}}
+                        bundle.entry.push(taskEntry)
+
+                        console.log('about to post transaction...')
+
+                        POSTBundle(bundle,function(vo) {
+                            console.log('posted update transaction')
+                            let status = vo.status
+                            let response = vo.response
+                            if (status == 200) {
+                                res.json(communication)
+                            } else {
+                                res.status(status).json(response)
+                            }
+
+                        })
+
+                    } else {
+                        //there was an error getting the Task
+                        res.status(500).json(makeOO('There was no Task that had a focus reference to ' + ref))
+                    }
+
+                })
+
+/*
                 saveCommunication(communication,function(vo1){
                     if (vo1.status == 200) {
                         res.json(vo1.response)
                     } else {
                         res.status(vo1.status).json(vo1.response)
                     }
-
                 })
+                */
 
             } else {
                 //This is a new request, so make a task
-                console.log('Creating as task...')
+                console.log('Creating a new task...')
+
+                //set the Id's so we can create the references...
+                let taskId = 'cf-' + new Date().getTime() + "t"
+
+
 
                 //need to update the communication so it refers to the task
                 communication.about = {reference:"Task/"+taskId }
 
                 let task = {resourceType:'Task',id:taskId}
-                task.code = {coding:[{system:"https://www.maxmddirect.com/fhir/us/mmdtempterminology/6qlB89NQ/CodeSystem/FHIRPatientCorrectionTemp",
+                task.code = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",
                         code:"medRecCxReq"}]}
                 task.status = "ready"
+                task.businessStatus = {Coding:[{code:"for-initial-review", system:"http://clinfhir.com/cs/corrections"}]}
                 task.intent = "order"
                 task.focus = {reference:"Communication/"+communicationId}
                 //task.input = {reference:"Communication/"+communicationId}
@@ -272,12 +384,30 @@ function setup(app) {
 
                 let inp = {}
                 inp.type = {text:"Original communication"}
-                inp.valueReference = {reference:"Communication/"+communicationId }
+                inp.valueReference = {reference:"Communication/"+communication.id }
                 task.input = [inp]
 
 
+                //create a bundle which will be POSTed to the server root...
+                let bundle = {resourceType:'Bundle',type:'transaction',entry:[]}
+                let comEntry = {resource:communication,request:{method:'PUT',url:'Communication/' + communication.id}}
+                bundle.entry.push(comEntry)
+                let taskEntry = {resource:task,request:{method:'PUT',url:'Task/' + task.id}}
+                bundle.entry.push(taskEntry)
 
-                console.log('about to save task...')
+                console.log('about to post transaction...')
+
+                POSTBundle(bundle,function(vo){
+                    let status = vo.status
+                    let response = vo.response
+                    if (status == 200) {
+                        res.json(communication)     //as this is a call to the Communication EP
+                    } else {
+                        res.status(400).json(response)
+                    }
+                })
+
+                /*
                 saveTask(task,function(vo){
                     console.log("Return from save Task: " + vo.status)
                     if (vo.status == '201') {
@@ -301,6 +431,8 @@ function setup(app) {
                         return
                     }
                 })
+
+                */
 
             }
         })
@@ -408,6 +540,23 @@ function setup(app) {
         })
     }
 
+    function POSTBundle(bundle,cb) {
+        let options = {
+            method:'POST',
+            uri : serverUrl,        //ie the transaction root
+            body : JSON.stringify(bundle),
+            headers: {
+                'Accept': 'application/json+fhir',
+                'Content-type': 'application/json+fhir'
+            }
+        };
+
+        request(options,function(error,response,body){
+            console.log(response.statusCode)
+            cb({status: response.statusCode, response:JSON.parse(body)})
+
+        })
+    }
 
     //============= proxy endpoints
 
@@ -440,177 +589,6 @@ function setup(app) {
     })
 
 
-    /*
-    app.post('/myTask/addTask/:taskId',function(req,res){
-        var body = "";
-        req.on('data', function (data) {
-            body += data;
-        });
-        req.on('end', function (data) {
-            if (data) {
-                body += data;
-            }
-
-
-            let vo;
-            try {
-                vo = JSON.parse(body);
-            } catch (ex) {
-                res.status(500).send({msg: 'Unable to parse input'})
-                return
-            }
-
-            let task = vo.task;
-           // let ip = req.connection.remoteAddress;
-           // sendSocketBroadcast(task, ip);
-
-            let url = vo.fhirServer + "Task/"+task.id;
-            let options = {
-                method:'PUT',
-                body: JSON.stringify(task),
-                rejectUnauthorized: false,
-                uri : url,
-                headers: {
-                    'Content-Type': 'application/fhir+json'
-                }
-            };
-
-            request(options,function(error,response,body){
-
-                if (response && (response.statusCode == '200' || response.statusCode == '201') ) {      //should always be 201...
-
-                    let tsk = vo.task;
-                    tsk.ip = req.connection.remoteAddress;
-                    sendSocketBroadcast(tsk);
-                    res.send()
-                } else {
-                    res.status(500).send({msg:'Unable to save task'})
-                }
-            })
-
-
-        })
-
-    });
-
-    app.post('/myTask/addNote/:taskId',function(req,res){
-        var body = "";
-        req.on('data', function (data) {
-            body += data;
-        });
-        req.on('end', function (data) {
-
-
-
-            let obj;
-            try {
-                obj = JSON.parse(body);
-            } catch (ex) {
-                res.status(500).send({msg:'Unable to parse input'})
-                return
-            }
-
-            //let ip = req.connection.remoteAddress;
-            //sendSocketBroadcast(obj,ip);
-
-
-            //console.log(obj.note,req.params.taskId,obj.fhirServer)
-            let vo = {};
-            vo.res = res;
-            vo.data = obj.note;
-            vo.fhirServer =  obj.fhirServer;
-            vo.taskId = req.params.taskId
-            vo.socketObj = obj;
-            vo.socketObj.ip = req.connection.remoteAddress;
-
-
-
-
-
-            //console.log(obj.note,req.params.taskId,obj.fhirServer)
-            //let url = obj.fhirServer + "Task/"+req.params.taskId;
-
-            //function to actually apply the task update
-
-            vo.updateFunction =  function(task,note) {
-                task.note = task.note || [];
-                task.note.push(note);
-
-            };
-
-            updateTask(vo)
-        })
-
-    });
-
-    app.post('/myTask/changeStatus/:taskId',function(req,res){
-        var body = "";
-        req.on('data', function (data) {
-            body += data;
-        });
-        req.on('end', function (data) {
-
-            try {
-                var obj = JSON.parse(body);
-                //{note:, fhirServer:, status:, email:, who:}
-            } catch (ex) {
-                res.status(500).send({msg:'Unable to parse input'})
-                return
-            }
-
-            //let ip = req.connection.remoteAddress;
-            //sendSocketBroadcast(obj,ip);
-
-            //console.log(obj.note,req.params.taskId,obj.fhirServer)
-            let vo = {};
-            vo.res = res;
-            vo.data = {status: obj.status, note:obj.note, who: obj.who};
-            vo.fhirServer =  obj.fhirServer;
-            vo.taskId = req.params.taskId;
-            vo.createProvenance = false;
-            vo.email = obj.email;
-
-            vo.socketObj = obj;
-            vo.socketObj.ip = req.connection.remoteAddress;
-
-
-            let url = obj.fhirServer + "Task/"+req.params.taskId;
-
-            vo.updateFunction = function(task,obj) {
-                //obj = {note:, status:}
-                task.status = obj.status;       //the new status
-                if (obj.who) {
-                    //this is an extension   {url:, valueReference: }
-                    task.extension = task.extension || []
-                    //remove any existing with this url
-                    let found = false;
-                    for (var ext in task.extension) {
-                        if (ext.url == obj.who.url) {
-                            ext.valueReference = obj.who.valueReference;
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (! found) {
-                        task.extension.push(obj.who)
-                    }
-
-                    //task.extension.push
-                }
-                if (obj.note) {
-                    task.statusReason = {text:obj.note.text};       //is a CC
-                    task.note = task.note || [];
-                    task.note.push(obj.note);
-
-                }
-            };
-
-            updateTask(vo)
-        })
-
-    });
-
-*/
 }
 
 //function updateTask(taskId, fhirServer, updateFn, res) {

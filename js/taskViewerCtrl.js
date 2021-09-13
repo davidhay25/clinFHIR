@@ -9,7 +9,7 @@ angular.module("sampleApp")
             $scope.state = 'view';
             //possible states: view, newtask
 
-            $scope.thisUserId = $localStorage.pcUserId || "Practitioner/practitioner1"
+            $scope.thisUserId = $localStorage.pcUserId || "Organization/cmdhb"
 
             function getAllTasks() {
                 let url = "/ctAllTasks"
@@ -44,6 +44,42 @@ angular.module("sampleApp")
             getActiveTasks()
 */
 
+            $scope.getTaskHistory = function(task) {
+                let qry = "/fhir/Task/" + task.id + "/_history"
+                $scope.showWaiting = true;
+                $http.get(qry).then(
+                    function(data) {
+                        $scope.taskHistory = data.data;
+
+                    }, function(err) {
+                        alert(angular.toJson(err.data))
+                    }
+                ).finally(function(){
+                    $scope.showWaiting = false
+                })
+            }
+
+            $scope.selectTaskVersion = function(entry) {
+                delete $scope.selectedTaskVersionCommunication;
+                $scope.selectedTaskVersion = entry.resource;    //the Task resource
+
+
+                //now go look for the Communication that it is the focus of
+                //Note that the input isn't right as it is the original Comm
+                if ($scope.selectedTaskVersion.focus) {
+                    let commId = $scope.selectedTaskVersion.focus.reference
+                    let ar = commId.split('/')
+                    $scope.allResourcesForRequest.forEach(function (resource) {
+                        if (resource.id == ar[1]) {
+                            $scope.selectedTaskVersionCommunication = resource;
+                        }
+                    })
+                }
+
+                //selectedTaskVersionCommunication
+
+            }
+
             $scope.newTask = function () {
                 $scope.state = "newtask"
             }
@@ -57,21 +93,23 @@ angular.module("sampleApp")
 
                 let communication = {resourceType:'Communication'}
                 communication.status = "completed"
-                communication.category = {coding:[{system:"https://www.maxmddirect.com/fhir/us/mmdtempterminology/6qlB89NQ/CodeSystem/FHIRPatientCorrectionTemp",code:"medRecCxReq"}]}
-                //communication.about = {reference:"Task/"+taskId } //<<< added by server
+                communication.category = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",code:"medRecCxReq"}]}
+                communication.recipient = {reference:$scope.thisUserId}
                 communication.subject = {reference:"Patient/"+$scope.input.patientId }
                 communication.sender = {reference:"Patient/"+$scope.input.patientId }
-                communication.reasonCode = {coding:[{system:"\"https://www.maxmddirect.com/fhir/us/mmdtempterminology/6qlB89NQ/CodeSystem/FHIRPatientCorrectionTemp",code:"medRecCxReq"}]}
-                //communication.payload = [{ContentReference:{reference:'DocumentReference/'+docRefId}}]
+                communication.reasonCode = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",code:"medRecCxReq"}]}
                 communication.payload = [{contentString:description}]
 
 
 
-                $scope.generatedCommunication = communication;
+
+                //$scope.generatedCommunication = communication;
 
                 $http.post('/fhir/Communication',communication).then(
                     function() {
+                        getAllTasks();
                         alert("saved!")
+
                     }, function(err) {
                         alert(angular.toJson( err.data))
                     }
@@ -123,6 +161,8 @@ angular.module("sampleApp")
 
                 delete $scope.primaryCommunication;
                 delete $scope.selectedResource;
+                delete $scope.selectedTaskVersion;
+                delete $scope.taskHistory
 
 
                 //get the Primary communication (has an 'input' link)
@@ -200,40 +240,29 @@ angular.module("sampleApp")
 
                     let communication = {resourceType:'Communication'}
                     communication.status = "completed"
-                    communication.category = {coding:[{system:"https://www.maxmddirect.com/fhir/us/mmdtempterminology/6qlB89NQ/CodeSystem/FHIRPatientCorrectionTemp",code:"medRecCxReq"}]}
+                    communication.category = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",code:"medRecCxReq"}]}
                     communication.about = {reference:"Communication/"+$scope.primaryCommunication.id }
                     communication.subject = $scope.primaryCommunication.subject
                     communication.recipient = [$scope.primaryCommunication.subject]
                     communication.sender = {reference:$scope.thisUserId }  //the UI user
-                    communication.reasonCode = {coding:[{system:"https://www.maxmddirect.com/fhir/us/mmdtempterminology/6qlB89NQ/CodeSystem/FHIRPatientCorrectionTemp",code:"medRecCxReq"}]}
+                    communication.reasonCode = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",code:"medRecCxReq"}]}
                     communication.payload = {contentString:comment}
 
                     $http.post('/fhir/Communication',communication).then(
                         function(data) {
-                            let updatedCommunication = data.data   //the communication is returned
-                            //set the task owner to be the patient
-
-                            //todo - move this Task update to the API
-
-                            let clone = angular.copy($scope.primaryTask)
-                            clone.owner = $scope.primaryCommunication.subject;
-                            clone.status = "in-progress"
-                            clone.focus = {reference : "Communication/"+ updatedCommunication.id}
-                            updateTask(clone,function(){
-                                $scope.selectPrimaryTask($scope.primaryTask);
-                                alert("The Communication has been saved, and the Task updated.")
-                            })
+                            //let updatedCommunication = data.data   //the communication is returned
+                            $scope.selectPrimaryTask($scope.primaryTask);
+                            alert("The Communication has been saved, and the Task updated.")
 
                         }, function(err) {
-                            alert(angular.toJson("Error creating Communication " + err.data))
+                            alert(angular.toJson("Error creating Communication " + angular.toJson(err.data)))
                         }
                     )
-
                 }
             }
 
             //enter a response from a patient to a request for more info
-            $scope.respondToRequestInfo = function(communication) {
+            $scope.respondToRequestInfo = function(communicationToRespondTo) {
                 let comment = prompt("How did the patient respond?")
                 if (comment) {
                     //construct a Communication with an 'about' link to the primary one...
@@ -241,29 +270,22 @@ angular.module("sampleApp")
 
                     let communication = {resourceType:'Communication'}
                     communication.status = "completed"
-                    communication.category = {coding:[{system:"https://www.maxmddirect.com/fhir/us/mmdtempterminology/6qlB89NQ/CodeSystem/FHIRPatientCorrectionTemp",code:"medRecCxReq"}]}
+                    communication.inResponseTo = [{reference:"Communication/"+communicationToRespondTo.id}]
+                    communication.category = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",code:"medRecCxReq"}]}
                     communication.about = {reference:"Communication/"+$scope.primaryCommunication.id }
                     communication.subject = $scope.primaryCommunication.subject
                     communication.recipient = [{reference:$scope.thisUserId }]
                     communication.sender = $scope.primaryCommunication.subject  //the UI user
-                    communication.reasonCode = {coding:[{system:"https://www.maxmddirect.com/fhir/us/mmdtempterminology/6qlB89NQ/CodeSystem/FHIRPatientCorrectionTemp",code:"medRecCxReq"}]}
+                    communication.reasonCode = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",code:"medRecCxReq"}]}
                     communication.payload = {contentString:comment}
 
                     $http.post('/fhir/Communication',communication).then(
                         function(data) {
-
+                            $scope.selectPrimaryTask($scope.primaryTask);
+                            alert("The Communication has been saved, and the Task updated.")
                             //todo - move this Task update to the API
 
 
-                            let updatedCommunication = data.data   //the communication is returned
-                            let clone = angular.copy($scope.primaryTask)
-                            clone.owner = {reference:$scope.thisUserId};        //change the owner to this user
-                            clone.status = "in-progress"            //likely the same..
-                            clone.focus = {reference : "Communication/"+ updatedCommunication.id}
-                            updateTask(clone,function(){
-                                $scope.selectPrimaryTask($scope.primaryTask);
-                                alert("The Communication has been saved, and the Task updated.")
-                            })
 
                         }, function(err) {
                             alert(angular.toJson( err.data))
@@ -283,12 +305,12 @@ angular.module("sampleApp")
 
                     let communication = {resourceType:'Communication'}
                     communication.status = "completed"
-                    communication.category = {coding:[{system:"https://www.maxmddirect.com/fhir/us/mmdtempterminology/6qlB89NQ/CodeSystem/FHIRPatientCorrectionTemp",code:"medRecCxReq"}]}
+                    communication.category = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",code:"medRecCxReq"}]}
                     communication.about = {reference:"Communication/"+$scope.primaryCommunication.id }
                     communication.subject = $scope.primaryCommunication.subject
                     communication.recipient = $scope.primaryCommunication.subject
                     communication.sender = {reference : $scope.thisUserId} //the UI user
-                    communication.reasonCode = {coding:[{system:"https://www.maxmddirect.com/fhir/us/mmdtempterminology/6qlB89NQ/CodeSystem/FHIRPatientCorrectionTemp",code:"medRecCxReq"}]}
+                    communication.reasonCode = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",code:"medRecCxReq"}]}
                     communication.payload = {contentString:comment}
 
                     $http.post('/fhir/Communication',communication).then(
@@ -302,14 +324,14 @@ angular.module("sampleApp")
                             clone.focus = {reference : "Communication/"+ updatedCommunication.id}
                             updateTask(clone,function(){
                                 $scope.selectPrimaryTask($scope.primaryTask);
-                                alert("The Communication has been saved, and the Task updated.")
+                                getAllTasks();
+                                alert("The Communication has been saved, and the Task status set to 'completed'.")
                             })
 
                         }, function(err) {
                             alert(angular.toJson( err.data))
                         }
                     )
-
                 }
             }
 
