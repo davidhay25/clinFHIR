@@ -3,8 +3,6 @@
 let request  = require('request');
 let serverUrl =  "http://home.clinfhir.com:8054/baseR4/"
 
-
-
 function setup(app,db) {
 
 
@@ -109,6 +107,7 @@ function setup(app,db) {
     //a simple implementation of an 'about' SP
     app.get('/fhir/Communication',function(req,res){
         let qry = req.query;
+        console.log(qry)
         if (qry.about) {
             //there is a query on about. This will return all the Communications which have an 'about link to the supplied one (a token)
             //assume the about only has the ie - eg [host]/Communication?about={communication id}
@@ -118,8 +117,8 @@ function setup(app,db) {
             let url = serverUrl + "Communication?_id="+qry.about;   //todo check for type in query
 
             //add an _include for the patient and sender...
-            url += "&_include=Communication:patient&_include=Communication:sender"
-
+          //  url += "&_include=Communication:patient&_include=Communication:sender"
+console.log(url)
             getBundle(url,function(bundle1){
 
                 if (bundle1) {
@@ -151,22 +150,24 @@ function setup(app,db) {
                         //then go through each one, looking for those that have an 'about' reference to the primary
                         let searchReference = 'Communication/' + qry.about;
                         //console.log('looking for ' + searchReference)
-                        set.entry.forEach(function (entry){
-                            //console.log(entry.resource.about)
-                            if ( entry.resource.about) {
-                                //about is an array
-                                entry.resource.about.forEach(function (ref) {
-                                    //console.log(ref)
-                                    if (ref.reference == searchReference) {
-                                        //yep - this resources references the target one
-                                        //console.log('match ' + entry.resource.id)
-                                        resultBundle.entry.push({resource:entry.resource})
-                                    }
+                        if (set) {
+                            set.entry.forEach(function (entry) {
+                                //console.log(entry.resource.about)
+                                if (entry.resource.about) {
+                                    //about is an array
+                                    entry.resource.about.forEach(function (ref) {
+                                        //console.log(ref)
+                                        if (ref.reference == searchReference) {
+                                            //yep - this resources references the target one
+                                            //console.log('match ' + entry.resource.id)
+                                            resultBundle.entry.push({resource: entry.resource})
+                                        }
 
-                                })
-                            }
+                                    })
+                                }
 
-                        })
+                            })
+                        }
                         console.log('done')
 
                         //at this point we should have all Communications that have an 'about' reference to the target

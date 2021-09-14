@@ -35,6 +35,9 @@
             background-color:red;
             color:white;
         }
+        .inReplyTo {
+            background-color: #FFF8DC;
+        }
     </style>
 
     <script>
@@ -45,6 +48,9 @@
             $locationProvider.hashPrefix('!');
         });
         angular.module("sampleApp").constant("moment", moment);
+        angular.module("sampleApp").config(['$compileProvider', function ($compileProvider) {
+            $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|blob):/);
+        }]);
 
     </script>
     <script src="js/libs/ngStorage.min.js"></script>
@@ -138,7 +144,23 @@
                     </div>
                 </div>
                 <div class="col-md-5">
-                    <strong>Resource posted to {{selectedLogItem.url}}</strong>
+                    <div class="row">
+                        <div class="col-md-10">
+                            <strong>Resource posted to {{selectedLogItem.url}}</strong>
+                        </div>
+                        <div class="col-md-2">
+                            <a class="btn btn-link pull-right" download="{{downloadLinkJsonName}}"
+                               href="{{downloadLinkJsonContent}}" title="{{downloadLinkJsonName}}" >
+                                Download
+                            </a>
+                        </div>
+                    </div>
+
+
+
+
+
+
                     <pre>{{selectedLogItem.fromClient | json}}</pre>
                 </div>
                 <div class="col-md-5">
@@ -207,18 +229,26 @@
                                     <div class="row">
                                         <div class="col-md-8">
 
+
+
                                             <table class="table table-condensed">
                                                 <tr><th>Resource type</th><th>Sender / Recipient /About</th><th>Payload (string only)</th><th></th></tr>
-                                                <tr ng-repeat="resource in allResourcesForRequest">
-                                                    <td ng-click="selectResource(resource)" style="cursor: pointer">
+                                                <tr ng-repeat="resource in allResourcesForRequest"
+                                                    ng-class="{inReplyTo:resource.inResponseTo}"
+                                                    ng-click="selectResource(resource)" style="cursor: pointer">
+                                                    <td>
+
                                                         {{resource.resourceType}}
+                                                        <!--
                                                         <div><em>{{resource.id}}</em></div>
+                                                        -->
                                                         <div ng-show = "resource.sent"
                                                              uib-popover="{{resource.sent}}"
                                                              popover-placement="top"
                                                              popover-trigger="'mouseenter'">
                                                             {{moment(resource.sent).fromNow()}}
                                                         </div>
+
                                                     </td>
                                                     <td>
                                                         <div ng-show="resource.resourceType == 'Communication'">
@@ -242,18 +272,28 @@
                                                     <td>
                                                         <div ng-hide="primaryTask.status == 'completed'">
                                                             <button class="btn btn-primary" ng-click="respondToRequestInfo(resource)"
+
+                                                                    uib-popover="Enter a response from the Patient to a request info Communication (mimic receiving a Communication). Will populate 'inResponseTo'"
+                                                                    popover-placement="top"
+                                                                    popover-trigger="'mouseenter'">
+                                                                Reply
+                                                            </button>
+                                                            <!--                                                             <button class="btn btn-primary" ng-click="respondToRequestInfo(resource)"
                                                                     ng-show="resource.recipient[0].reference.indexOf('Patient') > -1"
                                                                     uib-popover="Enter a response from the Patient to a request info Communication (mimic receiving a Communication)"
                                                                     popover-placement="top"
                                                                     popover-trigger="'mouseenter'">
                                                                 Reply
-                                                            </button>
+                                                            </button>-->
                                                         </div>
 
 
                                                     </td>
                                                 </tr>
                                             </table>
+
+
+
 
                                             <div ng-hide="primaryTask.status == 'completed'">
                                                 <button class="btn btn-primary" ng-click="requestInfo()"
@@ -361,7 +401,7 @@
                         </div>
                         <div class="col-md-2">
                             <label>Gender</label>
-                            <input class="text form-control" ng-model="input.patientLName"
+                            <input class="text form-control" ng-model="input.patientGender"
                                    placeholder="male or female"/>
                         </div>
 

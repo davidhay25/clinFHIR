@@ -212,12 +212,61 @@ angular.module("sampleApp")
                                 function (data) {
                                     $scope.showWaiting = false;
                                     console.log(data.data)
+                                    let hash = {}
                                     if (data.data.entry) {      //A Bundle is returned
                                         //add each resource to the
+
+
+                                        //order the communications so the reply is below the request
+
+
+                                        //first populate the has with coms that are not responses
                                         data.data.entry.forEach(function (entry) {
-                                            $scope.allResourcesForRequest.push(entry.resource)
+                                            let com = entry.resource
+                                            //either inResponse is empty or an empty array
+                                            if (! com.inResponseTo || (com.inResponseTo && com.inResponseTo.length == 0)) {
+                                                hash['Communication/' + com.id] = {rfi:com}
+                                            }
+                                        })
+
+                                        //now, add the responses to those rfi
+                                        data.data.entry.forEach(function (entry) {
+                                            let com = entry.resource
+                                            if (com.inResponseTo && com.inResponseTo.length > 0) {
+                                                //first irt
+                                                let rfiComId = com.inResponseTo[0].reference       //eg Communication/{id}
+                                                if (hash[rfiComId]) {
+                                                    //there could be multiple replies...
+                                                    hash[rfiComId].reply = hash[rfiComId].reply || []
+                                                    hash[rfiComId].reply.push(com)
+                                                } else {
+                                                    console.log(rfiComId + ' not in hash')
+                                                    //hmm suggests an error if the rfi is not present. Add it to the hash so it will go in the list
+                                                    hash[rfiComId] = {rfi:com}
+                                                }
+
+                                                //hash[com.id] = {rfi:com}
+                                            }
                                         })
                                     }
+
+
+                                    //convert the hash into an array for display
+                                    Object.keys(hash).forEach(function (key) {
+                                        let rfi = hash[key].rfi
+                                        $scope.allResourcesForRequest.push(rfi)
+                                        if (hash[key].reply) {
+                                            hash[key].reply.forEach(function (reply){
+                                                //reply.isReply = true    //todo move to meta
+                                                $scope.allResourcesForRequest.push(reply)
+                                            })
+                                        }
+
+                                    })
+
+
+                                    //$scope.hashCommunications = hash
+                                    //copy to $scope.allResourcesForRequest
 
                                     //make pseudo=bundle for graph
                                     let bundle = {entry:[]}
@@ -425,6 +474,7 @@ angular.module("sampleApp")
 
 
             $scope.loadLog = function() {
+                $scope.showWaiting = true;
                 $http.get('/manage/getLog').then(
                     function(data) {
                         //all log entries
@@ -452,13 +502,23 @@ angular.module("sampleApp")
                         })
 
 
-
-
+                }).finally(function () {
+                    $scope.showWaiting = false;
                 })
             }
 
             $scope.selectLogItem = function(log){
                 $scope.selectedLogItem = log;
+
+                //make the download link
+
+                $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(log.fromClient)],
+                    {type: "application/json"}));
+
+                //$scope.downloadLinkJsonName = "downloaded"
+                var now = moment().format();
+                $scope.downloadLinkJsonName = 'log-' + now + '.json';
+
             }
 
         }
