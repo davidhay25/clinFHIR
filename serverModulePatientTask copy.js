@@ -4,8 +4,7 @@ let request  = require('request');
 let serverUrl =  "http://home.clinfhir.com:8054/baseR4/"
 
 
-
-function setup(app,db) {
+function setup(app) {
 
 
     app.get('/fhir/metadata',function(req,res){
@@ -45,30 +44,6 @@ function setup(app,db) {
 
     //the implementation of Task?reasonReference
     app.get('/fhir/Task',function(req,res){
-
-
-        //proxy to the server
-        var fhirQuery = req.originalUrl
-        console.log(fhirQuery)
-
-        fhirQuery = fhirQuery.replace('/fhir/Task','Task')
-        let url = serverUrl + fhirQuery
-        executeQuery(url,function (vo) {
-            if (vo) {
-                res.json(vo.response)
-
-            } else {
-                res.status(404)
-            }
-        })
-
-        return;
-
-        console.log(fhirQuery)
-        res.send(fhirQuery)
-
-
-
         res.json(makeOO("Query against Task not supported. Try the FHIR server"))
         return
         let qry = req.query;
@@ -138,10 +113,11 @@ function setup(app,db) {
 
                     //got the target communication resource
 
+                    //let patientId = resource.subject.reference;     //eg Patient/patient2
+
                     console.log('patientid',patientId)
                     //get all communication resources for this patient
                     url =  serverUrl + "Communication?subject="+ patientId
-                    url += "&_sort=sent"
                     url += "&_count=50"
 
                     //console.log(url)
@@ -302,10 +278,9 @@ console.log(response.statusCode)
 
     }
 
-    //receive a Bundle containing a Communication resource and others. If the about is empty, then create a new task as well...
-    app.post('/fhir/Communication/\[$]process-medRecCxReq',function(req,res) {
+    //receive a Communication resource. If the about is empty, then create a new task as well...
+    app.post('/fhir/Communication',function(req,res) {
         var body = "";
-        let loggerId = new Date().getTime() + 'l'
         req.on('data', function (data) {
             body += data;
         });
@@ -313,46 +288,13 @@ console.log(response.statusCode)
             if (data) {
                 body += data;
             }
-            let inputBundle;
+            let communication;
             try {
-                inputBundle = JSON.parse(body)
+                communication = JSON.parse(body)
             } catch (ex) {
-                res.status(400).json(makeOO('Unable to parse bundle as JSON'))
+                res.status(400).json(makeOO('Unable to parse as JSON'))
                 return
             }
-
-            logger(loggerId,inputBundle,'/fhir/Communication/$process-medRecCxReq');        //copy the input bundle to the log
-            if (inputBundle.resourceType !== 'Bundle' ) {
-                console.log('not bundle')
-                res.status(400).json(makeOO("Must be a Bundle"))
-                return
-            }
-
-            //this is the bundle that will be sent to the server
-            let bundle = {resourceType:'Bundle',type:'transaction',entry:[]}
-
-
-
-            //extract all of the non-Communication resources and add them to the transaction bundle to be sent to the server...
-            let communication;  //this will be the communication in the bundle
-            inputBundle.entry.forEach(function (entry){
-                if (entry.resource.resourceType == 'Communication') {
-                    communication = entry.resource
-                } else {
-                    let resource = entry.resource;
-                    let type = resource.resourceType;
-                    //might need to think further about id's...
-                    let rEntry = {resource:resource,request:{method:'POST',url: type + "/" }}
-                    bundle.entry.push(rEntry)
-                }
-            })
-
-            if (! communication ) {
-                console.log('no communication')
-                res.status(400).json(makeOO("These must be a Communication in the Bundle..."))
-                return
-            }
-            //at this point we've got a communication and added any extra resources to the bundle
 
             communication.sent = new Date().toISOString();      //server side, so all the same...
 
@@ -367,7 +309,6 @@ console.log(response.statusCode)
 
 
             //always create an id for this communication
-            //todo - should this be a uuid so the server will adjust id's correctly
             let communicationId = 'cf-' + new Date().getTime() + "c"
             communication.id = communicationId;
 
@@ -379,7 +320,7 @@ console.log(response.statusCode)
                 //This is a communication about an existing task. Just save it...
 
                 //first, get the task as we're going to need to update it
-                // we first have to get the primary Communication (what the .about refers to)
+                // we forst have to get the primary Communication (what the .about refers to)
                 //then the primary will have an .about reference to the task
 
 
@@ -404,7 +345,7 @@ console.log(response.statusCode)
                         task.focus = {reference:'Communication/'+ communication.id}
                         //now create the update bundle
 
-                      //  let bundle = {resourceType:'Bundle',type:'transaction',entry:[]}
+                        let bundle = {resourceType:'Bundle',type:'transaction',entry:[]}
                         let comEntry = {resource:communication,request:{method:'PUT',url:'Communication/' + communication.id}}
                         bundle.entry.push(comEntry)
                         let taskEntry = {resource:task,request:{method:'PUT',url:'Task/' + task.id}}
@@ -417,11 +358,8 @@ console.log(response.statusCode)
                             let status = vo.status
                             let response = vo.response
                             if (status == 200) {
-                                logger(loggerId,bundle,'/fhir/Communication/$process-medRecCxReq',status);
                                 res.json(communication)
-
                             } else {
-                                logger(loggerId,bundle,'/fhir/Communication/$process-medRecCxReq',status);
                                 res.status(status).json(response)
                             }
 
@@ -431,14 +369,24 @@ console.log(response.statusCode)
                         //there was an error getting the Task
                         res.status(500).json(makeOO('There was no Task that had a focus reference to ' + ref))
                     }
+
                 })
+
+/*
+                saveCommunication(communication,function(vo1){
+                    if (vo1.status == 200) {
+                        res.json(vo1.response)
+                    } else {
+                        res.status(vo1.status).json(vo1.response)
+                    }
+                })
+                */
 
             } else {
                 //This is a new request, so make a task
                 console.log('Creating a new task...')
 
                 //set the Id's so we can create the references...
-                //todo should this be a uuid
                 let taskId = 'cf-' + new Date().getTime() + "t"
 
                 //need to update the communication so it refers to the task
@@ -481,7 +429,7 @@ console.log(response.statusCode)
 
 
                 //create a bundle which will be POSTed to the server root...
-               // let bundle = {resourceType:'Bundle',type:'transaction',entry:[]}
+                let bundle = {resourceType:'Bundle',type:'transaction',entry:[]}
                 let comEntry = {resource:communication,request:{method:'PUT',url:'Communication/' + communication.id}}
                 bundle.entry.push(comEntry)
                 let taskEntry = {resource:task,request:{method:'PUT',url:'Task/' + task.id}}
@@ -493,18 +441,53 @@ console.log(response.statusCode)
                     let status = vo.status
                     let response = vo.response
                     if (status == 200) {
-                        logger(loggerId,bundle,'/fhir/Communication/$process-medRecCxReq',status);
                         res.json(communication)     //as this is a call to the Communication EP
                     } else {
-                        logger(loggerId,bundle,'/fhir/Communication/$process-medRecCxReq',status);
                         res.status(400).json(response)
                     }
                 })
+
+
+
             }
         })
+/*
+        function saveTask(task,cb) {
+            let options = {
+                method:'PUT',
+                uri : serverUrl + "Task/"+ task.id,
+                body : JSON.stringify(task),
+                headers: {
+                    'Accept': 'application/json+fhir',
+                    'Content-type': 'application/json+fhir'
+                }
+            };
 
+            request(options,function(error,response,body){
+                cb({status: response.statusCode, response:JSON.parse(body)})
+            })
+        }
+
+        //todo - could this be putResource?
+        function saveCommunication(communication,cb) {
+            let options = {
+                method:'PUT',
+                uri : serverUrl + "Communication/"+ communication.id,
+                body : JSON.stringify(communication),
+                headers: {
+                    'Accept': 'application/json+fhir',
+                    'Content-type': 'application/json+fhir'
+                }
+            };
+
+            request(options,function(error,response,body){
+                console.log(response.statusCode)
+                cb({status: response.statusCode, response:JSON.parse(body)})
+
+            })
+        }
+*/
     })
-
 
     function validateCommunication(comm) {
         let oo = {resourceType : 'OperationOutcome',issue:[]}
@@ -522,15 +505,8 @@ console.log(response.statusCode)
 
         function checkReferencePresent(ref,msg) {
 
-            console.log('check reference',ref)
 
-            let checkRef = ref;
-
-            if (Array.isArray(ref)){
-                checkRef = ref[0]
-            }
-
-            if (! checkRef  || ! checkRef.reference) {
+            if (! ref  || ! ref.reference) {
                 //console.log(oo)
                 oo.issue.push({severity:'fatal',code:'invalid',details:{text:msg}})
                 return;
@@ -595,30 +571,9 @@ console.log('ccValue',JSON.stringify(ccValue))
 
     })
 
-    app.get('/ctCompletedTasks',function(req,res){
-
-        let url = serverUrl + "Task?status=completed&code=medRecCxReq";
-
-        console.log(url)
-        let options = {
-            method:'GET',
-            rejectUnauthorized: false,
-            uri : url,
-            headers: {
-                'Accept': 'application/json+fhir'
-            }
-        };
-
-        request(options,function(error,response,body){
-
-            res.json(JSON.parse(body))
-        })
-
-    })
-
     app.get('/ctAllTasks',function(req,res){
 
-        let url = serverUrl + "Task?code=medRecCxReq&_count=50";
+        let url = serverUrl + "Task?code=medRecCxReq";
 
         console.log(url)
         let options = {
@@ -631,6 +586,7 @@ console.log('ccValue',JSON.stringify(ccValue))
         };
 
         request(options,function(error,response,body){
+
             res.json(JSON.parse(body))
         })
 
@@ -708,38 +664,89 @@ console.log('ccValue',JSON.stringify(ccValue))
         })
     })
 
-    app.get('/manage/getLog', function (req,res){
-
-        db.collection("corrections").find({}).sort({date:-1}).toArray(function(err,doc){
-            if (err) {
-                console.log('Error getting log ')
-                res.end();
-            } else {
-                //limit to the last 30 entries
-
-                res.json(doc.slice(0,30))
-
-            }
-        });
-    })
-
-    function logger(id,resource,url,status) {
-        let vo = {corrId:id,resource:resource,date:new Date(),url:url}
-        if (status) {
-            vo.status = status;
-        }
-        db.collection("corrections").insert(vo, function (err, result) {
-            if (err) {
-                console.log('Error logging resource ',resource)
-            } else {
-
-
-            }
-        });
-    }
-
 
 }
+
+//function updateTask(taskId, fhirServer, updateFn, res) {
+function updateTaskDEP(vo) {
+    try {
+
+        //console.log (vo)
+
+        let url = vo.fhirServer + "Task/"+vo.taskId;
+        let options = {
+            method:'GET',
+            rejectUnauthorized: false,
+            uri : url,
+            headers: {
+                'Accept': 'application/json+fhir'
+            }
+        };
+
+        request(options,function(error,response,body){
+
+            if (body) {
+                //console.log(body)
+                try {
+                    let task = JSON.parse(body)
+                    vo.updateFunction(task,vo.data);
+
+                    options.method = 'PUT';
+                    options.body = JSON.stringify(task);
+                    request(options,function(error,response,body){
+                        if (response && response.statusCode == '200' ) {
+
+                            //Create provenance. needs to be version specific...
+                            if (1==2 && vo.createProvenance && vo.email) {
+                                let provenance = {resourceType:'Provenance',target:[],agent:[]}
+                                provenance.recorded = new Date().toISOString();
+                                provenance.target.push({reference:response.headers.location});  //from the previous call
+                               // provenance.target.push({reference:'Task/'+task.id});  //from the previous call
+                               // provenance.target.push('Task/'+task.id);
+                                provenance.agent.push({whoReference : {display:vo.email}});
+                                options.method = 'POST';
+                                options.body = JSON.stringify(provenance);
+                                options.uri = vo.fhirServer + "Provenance/";
+                                request(options,function(error,response,body) {
+                                    if (response && response.statusCode == '201') {
+                                        vo.res.send();
+                                    } else {
+                                        vo.res.status(500).send({
+                                            msg: 'Error creating Provenance ' + ex.message,
+                                            oo: body
+                                        })
+                                    }
+                                })
+
+
+                            } else {
+                                if (vo.socketObj) {
+                                    sendSocketBroadcast(vo.socketObj);
+                                }
+                                vo.res.send();
+                            }
+
+
+                        } else {
+                            vo.res.status(500).send({msg:'Unable to PUT updated task. ',oo:body})
+                        }
+                    })
+                } catch (ex) {
+                    vo.res.status(500).send({msg:ex.message})
+                }
+
+
+            } else {
+                vo.res.status(500).send({})
+            }
+
+        });
+
+    } catch (ex) {
+        vo.res.status(500).send({msg:'Unexpected error: ' + ex.message})
+    }
+}
+
 
 
 

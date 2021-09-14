@@ -7,12 +7,13 @@ angular.module("sampleApp")
             $scope.moment = moment;
 
             $scope.state = 'view';
-            //possible states: view, newtask
+            //possible states: view, newtask, viewlog
 
             $scope.thisUserId = $localStorage.pcUserId || "Organization/cmdhb"
-
+/*
             function getAllTasks() {
                 let url = "/ctAllTasks"
+                $scope.showWaiting = true;
                 $http.get(url).then(
                     function(data) {
                         console.log(data.data)
@@ -26,11 +27,15 @@ angular.module("sampleApp")
                             }
                         })
                     }
+                ).finally(
+                    function () {
+                        $scope.showWaiting = false;
+                    }
                 )
             }
 
             getAllTasks();
-            /*
+        */
             function getActiveTasks() {
                 let url = "/ctOpenTasks"
                 $http.get(url).then(
@@ -42,7 +47,18 @@ angular.module("sampleApp")
 
             }
             getActiveTasks()
-*/
+
+            function getCompletedTasks() {
+                let url = "/ctCompletedTasks"
+                $http.get(url).then(
+                    function(data) {
+                        console.log(data.data)
+                        $scope.completedTasks = data.data
+                    }
+                )
+
+            }
+            getCompletedTasks()
 
             $scope.getTaskHistory = function(task) {
                 delete $scope.selectedTaskVersionCommunication;
@@ -90,23 +106,38 @@ angular.module("sampleApp")
                 //create a Communication and POST it to this endpoint (will create the Task as well)
                 //'from' the patient
 
+                let bundle = {resourceType:'Bundle','type':'collection',entry:[]}
+
+                //add patient resurce
+                let patient = {resourceType:'Patient'}
+                patient.id = uuidv4();
+                patient.name = [{family:$scope.input.patientLName,given:[$scope.input.patientFName]}]
+                if ($scope.input.patientIdentifier) {
+                    patient.identifier = [$scope.input.patientIdentifier]
+                }
+
+                bundle.entry.push({resource:patient})
+
+
+
+
                 let description = $scope.input.description;
 
                 let communication = {resourceType:'Communication'}
                 communication.status = "completed"
                 communication.category = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",code:"medRecCxReq"}]}
                 communication.recipient = {reference:$scope.thisUserId}
-                communication.subject = {reference:"Patient/"+$scope.input.patientId }
-                communication.sender = {reference:"Patient/"+$scope.input.patientId }
+                communication.subject = {reference:"Patient/"+patient.id }
+                communication.sender = {reference:"Patient/"+patient.id }
                 communication.reasonCode = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",code:"medRecCxReq"}]}
                 communication.payload = [{contentString:description}]
-
+                bundle.entry.push({resource:communication})
 
 
 
                 //$scope.generatedCommunication = communication;
 
-                $http.post('/fhir/Communication',communication).then(
+                $http.post('/fhir/Communication/$process-medRecCxReq',bundle).then(
                     function() {
                         getAllTasks();
                         alert("saved!")
@@ -116,35 +147,15 @@ angular.module("sampleApp")
                     }
                 )
 
-                /*
+                function uuidv4() {
+                    //https://intellipaat.com/community/22734/create-guid-uuid-in-javascript
+                    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                        return v.toString(16);
 
-                let taskId = 'cf-' + new Date().getTime() + "t"
-                let communicationId = 'cf-' + new Date().getTime() + "c"
-                let docRefId = 'cf-' + new Date().getTime() + "d"
+                    });
 
-
-
-                let task = {resourceType:'Task'}
-                task.code = {coding:[{system:"\"https://www.maxmddirect.com/fhir/us/mmdtempterminology/6qlB89NQ/CodeSystem/FHIRPatientCorrectionTemp",code:"medRecCxReq"}]}
-                task.status = "received"
-                task.intent = "proposal"
-                task.description = description
-                task.for = {reference:"Patient/"+$scope.input.patientId }
-                task.requester = {reference:"Patient/"+$scope.input.patientId }     //assume requested by the patient
-                task.owner = {reference:"Practitioner/"+$scope.input.ownerId }
-
-                let inp = {}
-                inp.type = {text:"Original communication"}
-                inp.valueReference = {reference:"Communication/"+communicationId }
-                task.input = [inp]
-
-
-
-
-                //let docRef = {resourceType:'DocumentReference'};
-                let bundle = {resourceType: description}
-
-*/
+                }
 
             }
 
@@ -239,6 +250,7 @@ angular.module("sampleApp")
                 if (comment) {
                     //construct a Communication with an 'about' link to the primary one...
                     //the server will add the 'sent' element - so tz consistent across users...
+                    let bundle = {resourceType:'Bundle','type':'collection',entry:[]}
 
                     let communication = {resourceType:'Communication'}
                     communication.status = "completed"
@@ -249,8 +261,9 @@ angular.module("sampleApp")
                     communication.sender = {reference:$scope.thisUserId }  //the UI user
                     communication.reasonCode = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",code:"medRecCxReq"}]}
                     communication.payload = {contentString:comment}
+                    bundle.entry.push({resource:communication})
 
-                    $http.post('/fhir/Communication',communication).then(
+                    $http.post('/fhir/Communication/$process-medRecCxReq',bundle).then(
                         function(data) {
                             //let updatedCommunication = data.data   //the communication is returned
                             $scope.selectPrimaryTask($scope.primaryTask);
@@ -269,7 +282,7 @@ angular.module("sampleApp")
                 if (comment) {
                     //construct a Communication with an 'about' link to the primary one...
                     //the server will add the 'sent' element - so tz consistent across users...
-
+                    let bundle = {resourceType:'Bundle','type':'collection',entry:[]}
                     let communication = {resourceType:'Communication'}
                     communication.status = "completed"
                     communication.inResponseTo = [{reference:"Communication/"+communicationToRespondTo.id}]
@@ -281,7 +294,9 @@ angular.module("sampleApp")
                     communication.reasonCode = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",code:"medRecCxReq"}]}
                     communication.payload = {contentString:comment}
 
-                    $http.post('/fhir/Communication',communication).then(
+                    bundle.entry.push({resource:communication})
+
+                    $http.post('/fhir/Communication/$process-medRecCxReq',bundle).then(
                         function(data) {
                             $scope.selectPrimaryTask($scope.primaryTask);
                             alert("The Communication has been saved, and the Task updated.")
@@ -400,6 +415,51 @@ angular.module("sampleApp")
                     }
                 },1000)
             };
+
+            //============ log functions
+
+            $scope.showLog = function() {
+                $scope.loadLog()
+                $scope.state='viewlog'
+            }
+
+
+            $scope.loadLog = function() {
+                $http.get('/manage/getLog').then(
+                    function(data) {
+                        //all log entries
+                        let hash = {}
+                        data.data.forEach(function (log) {
+                            hash[log.corrId] = hash[log.corrId] || {}
+                            let item = hash[log.corrId]
+                            if (log.status) {
+                                //this is the log of the bundle sent to the server
+                                item.status = log.status;
+                                item.toServer = log.resource
+                            } else {
+                                //this is the initial request
+                                item.url = log.url
+                                item.date = log.date
+                                item.fromClient = log.resource
+
+                            }
+                        })
+                        $scope.apiLog = []
+                        Object.keys(hash).forEach(function (key) {
+                            let item = hash[key];
+
+                            $scope.apiLog.push(item)
+                        })
+
+
+
+
+                })
+            }
+
+            $scope.selectLogItem = function(log){
+                $scope.selectedLogItem = log;
+            }
 
         }
     )

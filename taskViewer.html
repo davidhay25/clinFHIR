@@ -70,15 +70,15 @@
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
 
         <div class="container-fluid">
-            <div class="col-md-4 col-sm-4">
+            <div class="col-md-5 col-sm-5">
                     <span>
                         <a class="navbar-brand" href="#">
-                            Patient corrections reference server
+                            clinFHIR patient corrections reference server
                         </a>
                     </span>
             </div>
 
-            <div class="col-md-3 col-sm-3">
+            <div class="col-md-2 col-sm-2">
                 <div class="navbar-text">
                     {{thisUserId}}
 
@@ -110,7 +110,53 @@
             <div class="col-md-2">
                 <input type="text" class="form-control" ng-model=" thisUserId"/>
             </div>
+            <div class="col-md-8">
+
+            </div>
+            <div class="col-md-2">
+               <div ng-show="state !== 'viewlog'">
+                   <button class="btn btn-link pull-right" ng-click="showLog()">View log</button>
+               </div>
+                <div ng-show="state == 'viewlog'">
+                    <button class="btn btn-link pull-right" ng-click="state='view'">View Tasks</button>
+                </div>
+            </div>
         </div>
+
+        <div ng-show="state == 'viewlog'">
+            <button class="btn btn-link" ng-click="loadLog()">Refresh log (last 30 entries only) </button>
+
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="list-group">
+                        <div ng-class="{'list-group-item':true}"
+                             style="cursor: pointer"
+                             ng-click="selectLogItem(log)"
+                             ng-repeat="log in apiLog">
+                            {{log.date}}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <strong>Resource posted to {{selectedLogItem.url}}</strong>
+                    <pre>{{selectedLogItem.fromClient | json}}</pre>
+                </div>
+                <div class="col-md-5">
+                    <strong>Bundle sent by API to client.  Status:{{selectedLogItem.status}}</strong>
+                    <pre>{{selectedLogItem.toServer | json}}</pre>
+                    <!--
+                    <div ng-repeat="entry in selectedLogItem.resource.entry">
+                        <pre>{{entry.resource | json}}</pre>
+                        <br/>
+                    </div>
+-->
+                </div>
+            </div>
+
+        </div>
+
+        <div ng-hide="state == 'viewlog'">
+
 
         <div class="row">
             <div class="col-md-2">
@@ -294,17 +340,51 @@
                 <div ng-show="state=='newtask'">
                     <br/>
                     <div class="row">
-                        <div class="col-md-6">
+                        <!--
+                        <div class="col-md-2">
                             <label>Patient Id</label>
                             <input class="text form-control" ng-model="input.patientId"
                                    placeholder="Patient Id (just the id, not the type)"/>
                         </div>
+                        -->
+
+                        <div class="col-md-2">
+                            <label>First Name</label>
+                            <input class="text form-control" ng-model="input.patientFName"
+                                   placeholder=""/>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label>Last Name</label>
+                            <input class="text form-control" ng-model="input.patientLName"
+                                   placeholder=""/>
+                        </div>
+                        <div class="col-md-2">
+                            <label>Gender</label>
+                            <input class="text form-control" ng-model="input.patientLName"
+                                   placeholder="male or female"/>
+                        </div>
+
                         <div class="col-md-6">
                             <label>Description of issue</label>
-                            <textarea class="form-control" ng-model="input.description" placeholder="Description of the correction requested"></textarea>
+                            <textarea class="form-control" ng-model="input.description"
+                                      placeholder="Description of the correction requested"></textarea>
                         </div>
                     </div>
                     <br/>
+
+                    <div class="row">
+                        <div class="col-md-2">
+
+                            <label>Identifier</label>
+                            <input class="text form-control" ng-model="input.patientIdentifier"
+                                   placeholder="system|value"/>
+                        </div>
+                        <div class="col-md-6">
+
+                        </div>
+                    </div>
+
 
                     <!--
                     <div class="row">
@@ -321,8 +401,17 @@
 
                     <br />
 
-                    <button class="btn btn-primary pull-right" ng-click="addTask()">Add request</button>
-                    <em>Create a new Task and a Communication resource. Simulates the initial receipt of a Communication from a client</em>
+                    <div ng-show="input.patientFName && input.patientLName && input.description">
+                        <button class="btn btn-primary pull-right" ng-click="addTask()">Add request</button>
+                    </div>
+
+                    <em>
+
+                        Create a new Patient, Task and a Communication resource. Simulates the initial receipt of a Communication from a client.
+
+                    At least the name of th epatient must be entered - enter an identifier to make it easier to search on the FHIR
+                        server if you want to do that...
+                    </em>
 
 
                 </div>
@@ -331,7 +420,7 @@
 
         </div>
 
-
+        </div>
 
 </div>
 

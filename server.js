@@ -22,12 +22,13 @@ let registryModule = require('./serverModuleRegistry.js');
 registryModule.setup(app)
 
 const patientCorectionsModule = require("./serverModulePatientTask.js")
-patientCorectionsModule.setup(app)
 
+
+/* temp !!!
 process.on('uncaughtException', function(err) {
     console.log('>>>>>>>>>>>>>>> Caught exception: ' + err);
 });
-
+*/
 
 
 var db;
@@ -76,6 +77,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/clinfhir', function(err, ldb) {
         lantanaModule.setup(app)
         testingModule.setup(app,db);
         proxyModule.setup(app);
+        patientCorectionsModule.setup(app,db)
     }
 });
 
