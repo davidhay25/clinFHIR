@@ -447,6 +447,7 @@ angular.module("sampleApp")
                     var svr = $localStorage.config.allKnownServers[i];
                     if (svr.url == $localStorage.config.servers.data) {
                         return svr;
+                        break;
                     }
                 }
 

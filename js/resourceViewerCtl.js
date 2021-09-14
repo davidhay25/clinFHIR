@@ -62,6 +62,7 @@ angular.module("sampleApp")
             $scope.ResourceUtilsSvc = ResourceUtilsSvc; //needed for 1 line summary
             $scope.appConfigSvc = appConfigSvc;     //for displaying the patient json
 
+            console.log(appConfigSvc.getCurrentDataServer())
 
 
             //for the side by sude

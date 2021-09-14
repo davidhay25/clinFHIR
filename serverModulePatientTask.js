@@ -23,6 +23,7 @@ function setup(app,db) {
         let resource2 = {type:'Task',interaction:[]}
         resource2.interaction.push([{code:'history-instance'}])
         resource2.interaction.push([{code:'update'}])
+        resource2.interaction.push([{code:'read'}])
         cs.rest[0].resource.push(resource2)
 
         res.json(cs)
@@ -335,17 +336,28 @@ console.log(response.statusCode)
 
             //extract all of the non-Communication resources and add them to the transaction bundle to be sent to the server...
             let communication;  //this will be the communication in the bundle
+            let error;
             inputBundle.entry.forEach(function (entry){
-                if (entry.resource.resourceType == 'Communication') {
-                    communication = entry.resource
+                if (entry.resource) {
+                    if (entry.resource.resourceType == 'Communication') {
+                        communication = entry.resource
+                    } else {
+                        let resource = entry.resource;
+                        let type = resource.resourceType;
+                        //might need to think further about id's...
+                        let rEntry = {resource: resource, request: {method: 'POST', url: type + "/"}}
+                        bundle.entry.push(rEntry)
+                    }
                 } else {
-                    let resource = entry.resource;
-                    let type = resource.resourceType;
-                    //might need to think further about id's...
-                    let rEntry = {resource:resource,request:{method:'POST',url: type + "/" }}
-                    bundle.entry.push(rEntry)
+                    error = "The bundle is invalid"
                 }
             })
+
+            if ( error ) {
+                console.log('invalid bundle')
+                res.status(400).json(makeOO(error))
+                return
+            }
 
             if (! communication ) {
                 console.log('no communication')

@@ -24,11 +24,11 @@ registryModule.setup(app)
 const patientCorectionsModule = require("./serverModulePatientTask.js")
 
 
-/* temp !!!
+
 process.on('uncaughtException', function(err) {
     console.log('>>>>>>>>>>>>>>> Caught exception: ' + err);
 });
-*/
+
 
 
 var db;
