@@ -36,6 +36,7 @@ angular.module("sampleApp")
 
             getAllTasks();
         */
+
             function getActiveTasks() {
                 let url = "/ctOpenTasks"
                 $http.get(url).then(
@@ -101,7 +102,7 @@ angular.module("sampleApp")
                 $scope.state = "newtask"
             }
 
-            //create the new task abd a communication
+            //create the new task and a communication
             $scope.addTask = function () {
                 //create a Communication and POST it to this endpoint (will create the Task as well)
                 //'from' the patient
@@ -118,12 +119,13 @@ angular.module("sampleApp")
 
                 bundle.entry.push({resource:patient})
 
-
-
-
                 let description = $scope.input.description;
-
                 let communication = {resourceType:'Communication'}
+
+
+                let text = "<div xmlns='http://www.w3.org/1999/xhtml'>Initial request</div>"
+                communication.text = {div:text}
+
                 communication.status = "completed"
                 communication.category = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",code:"medRecCxReq"}]}
                 communication.recipient = {reference:$scope.thisUserId}
@@ -134,12 +136,9 @@ angular.module("sampleApp")
                 bundle.entry.push({resource:communication})
 
 
-
-                //$scope.generatedCommunication = communication;
-
                 $http.post('/fhir/Communication/$process-medRecCxReq',bundle).then(
                     function() {
-                        getAllTasks();
+                        getActiveTasks()
                         alert("saved!")
 
                     }, function(err) {
@@ -294,7 +293,7 @@ angular.module("sampleApp")
 
 
             //add a communication that has a link to the primary one...
-            $scope.requestInfo = function() {
+            $scope.requestInfoDEP = function() {
                 let comment = prompt("What do you want to say?")
                 if (comment) {
                     //construct a Communication with an 'about' link to the primary one...
@@ -302,14 +301,15 @@ angular.module("sampleApp")
                     let bundle = {resourceType:'Bundle','type':'collection',entry:[]}
 
                     let communication = {resourceType:'Communication'}
+                    communication.inResponseTo = [{reference:"Communication/"+$scope.primaryCommunication.id}]
                     communication.status = "completed"
                     communication.category = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",code:"medRecCxReq"}]}
-                    communication.about = {reference:"Communication/"+$scope.primaryCommunication.id }
+                    communication.about = [{reference:"Communication/"+$scope.primaryCommunication.id }]
                     communication.subject = $scope.primaryCommunication.subject
                     communication.recipient = [$scope.primaryCommunication.subject]
                     communication.sender = {reference:$scope.thisUserId }  //the UI user
                     communication.reasonCode = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",code:"medRecCxReq"}]}
-                    communication.payload = {contentString:comment}
+                    communication.payload = [{contentString:comment}]
                     bundle.entry.push({resource:communication})
 
                     $http.post('/fhir/Communication/$process-medRecCxReq',bundle).then(
@@ -327,21 +327,45 @@ angular.module("sampleApp")
 
             //enter a response from a patient to a request for more info
             $scope.respondToRequestInfo = function(communicationToRespondTo) {
-                let comment = prompt("How did the patient respond?")
+
+                if (! communicationToRespondTo.sender) {
+                    alert("No sender found...")
+                    return
+                }
+
+
+                let msg = "How did the patient respond?"
+                let text = "<div xmlns='http://www.w3.org/1999/xhtml'>From Patient</div>"
+                //look at the sender of the communication to respond to.
+                if (communicationToRespondTo.sender.reference.indexOf('Patient') > -1) {
+                    //the sender was the patient
+                    msg = "How do you want to reply to the Patient?"
+                    text = "<div xmlns='http://www.w3.org/1999/xhtml'>To Patient</div>"
+                }
+
+                let comment = prompt(msg)
                 if (comment) {
                     //construct a Communication with an 'about' link to the primary one...
                     //the server will add the 'sent' element - so tz consistent across users...
                     let bundle = {resourceType:'Bundle','type':'collection',entry:[]}
                     let communication = {resourceType:'Communication'}
+
+
+                    communication.text = {div:text}
+
                     communication.status = "completed"
                     communication.inResponseTo = [{reference:"Communication/"+communicationToRespondTo.id}]
                     communication.category = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",code:"medRecCxReq"}]}
-                    communication.about = {reference:"Communication/"+$scope.primaryCommunication.id }
+                    communication.about = [{reference:"Communication/"+$scope.primaryCommunication.id }]
                     communication.subject = $scope.primaryCommunication.subject
-                    communication.recipient = [{reference:$scope.thisUserId }]
-                    communication.sender = $scope.primaryCommunication.subject  //the UI user
+
+                    //The revipient of this comm is the sender of the one being replied to...
+                    communication.recipient = [communicationToRespondTo.sender] //  [{reference:$scope.thisUserId }]
+
+                    //The sender of this comm is the recipient of the one being replied to...
+                    communication.sender = communicationToRespondTo.recipient[0]; //$scope.primaryCommunication.subject  //the UI user
                     communication.reasonCode = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",code:"medRecCxReq"}]}
-                    communication.payload = {contentString:comment}
+                    communication.payload = [{contentString:comment}]
 
                     bundle.entry.push({resource:communication})
 
@@ -370,16 +394,21 @@ angular.module("sampleApp")
                     //the server will add the 'sent' element - so tz consistent across users...
 
                     let communication = {resourceType:'Communication'}
+                    let text = "<div xmlns='http://www.w3.org/1999/xhtml'>From Patient</div>"
+                    communication.text = {div:text}
+
                     communication.status = "completed"
                     communication.category = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",code:"medRecCxReq"}]}
-                    communication.about = {reference:"Communication/"+$scope.primaryCommunication.id }
+                    communication.about = [{reference:"Communication/"+$scope.primaryCommunication.id }]
                     communication.subject = $scope.primaryCommunication.subject
                     communication.recipient = $scope.primaryCommunication.subject
                     communication.sender = {reference : $scope.thisUserId} //the UI user
                     communication.reasonCode = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",code:"medRecCxReq"}]}
-                    communication.payload = {contentString:comment}
+                    communication.payload = [{contentString:comment}]
+                    let bundle = {resourceType:'Bundle','type':'collection',entry:[]}
+                    bundle.entry.push({resource:communication})
 
-                    $http.post('/fhir/Communication',communication).then(
+                    $http.post('/fhir/Communication/$process-medRecCxReq',bundle).then(
                         function(data) {
                             let updatedCommunication = data.data   //the communication is returned
                             let clone = angular.copy($scope.primaryTask)
@@ -390,7 +419,7 @@ angular.module("sampleApp")
                             clone.focus = {reference : "Communication/"+ updatedCommunication.id}
                             updateTask(clone,function(){
                                 $scope.selectPrimaryTask($scope.primaryTask);
-                                getAllTasks();
+                                getActiveTasks();
                                 alert("The Communication has been saved, and the Task status set to 'completed'.")
                             })
 
@@ -483,7 +512,7 @@ angular.module("sampleApp")
                             hash[log.corrId] = hash[log.corrId] || {}
                             let item = hash[log.corrId]
                             if (log.status) {
-                                //this is the log of the bundle sent to the server
+                                //this is the log of the bundle sent to the server (ie this is the one with the status)
                                 item.status = log.status;
                                 item.toServer = log.resource
                             } else {
@@ -491,6 +520,15 @@ angular.module("sampleApp")
                                 item.url = log.url
                                 item.date = log.date
                                 item.fromClient = log.resource
+
+                                //locate the Communication resource in the bundle (if it exists). Add the identifier to the display
+                                if (log.resource.entry) {
+                                    log.resource.entry.forEach(function (entry) {
+                                        if (entry.resource && entry.resource.resourceType == 'Communication') {
+                                            item.communication = entry.resource;
+                                        }
+                                    })
+                                }
 
                             }
                         })

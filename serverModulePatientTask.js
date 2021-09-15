@@ -1,7 +1,9 @@
 //endpoints for patient corrections Task functionality
 
 let request  = require('request');
-let serverUrl =  "http://home.clinfhir.com:8054/baseR4/"
+//let serverUrl =  "http://home.clinfhir.com:8054/baseR4/"
+
+let serverUrl =  "http://survey.clinfhir.com:8091/baseR4/"
 
 function setup(app,db) {
 
@@ -396,7 +398,14 @@ console.log(response.statusCode)
                 //then the primary will have an .about reference to the task
 
 
-                let ref = communication.about.reference;
+                if (! Array.isArray(communication.about) || communication.about.length == 0) {
+                    console.log('about not array')
+                    res.status(400).json(makeOO("The about element is an array with at least one entry..."))
+                    return
+                }
+
+
+                let ref = communication.about[0].reference;
                 //let qry = serverUrl + "Task?focus=" + ref;      //has the type, but still seems to work OK
 
                 //will return the task

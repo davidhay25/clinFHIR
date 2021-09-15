@@ -38,6 +38,9 @@
         .inReplyTo {
             background-color: #FFF8DC;
         }
+        .resourceSelected {
+            font-weight: bold;
+        }
     </style>
 
     <script>
@@ -135,14 +138,26 @@
             <div class="row">
                 <div class="col-md-2">
                     <div class="list-group">
-                        <div ng-class="{'list-group-item':true}"
+                        <div ng-class="{'list-group-item':true,listItemSelected:selectedLogItem == log}"
                              style="cursor: pointer"
                              ng-click="selectLogItem(log)"
                              ng-repeat="log in apiLog">
                             {{log.date}}
+
+                            <div ng-repeat="identifier in log.communication.identifier">
+
+                                <span uib-popover="{{identifier.system}}"
+                                        popover-placement="right"
+                                        popover-trigger="'mouseenter'">
+                                    {{identifier.value}}
+                                </span>
+                            </div>
+
                         </div>
+
                     </div>
                 </div>
+
                 <div class="col-md-5">
                     <div class="row">
                         <div class="col-md-10">
@@ -213,10 +228,9 @@
                     </uib-tab>
                 </uib-tabset>
 
-                <button class="btn btn-link" ng-click="newTask()">New correction request</button>
+                <button class="btn btn-primary" ng-click="newTask()">New correction request</button>
                 <br/>
-                <em>Will create 2 resources to emulate the initial request for
-                correction - Communication & Task </em>
+                <em>Simulates the Patient making a Correction request</em>
             </div>
             <div class="col-md-10">
                 <div ng-show="state=='view'">
@@ -232,9 +246,9 @@
 
 
                                             <table class="table table-condensed">
-                                                <tr><th>Resource type</th><th>Sender / Recipient /About</th><th>Payload (string only)</th><th></th></tr>
+                                                <tr><th>Resource type</th><th>Sender / Recipient</th><th>Payload (string only)</th><th></th></tr>
                                                 <tr ng-repeat="resource in allResourcesForRequest"
-                                                    ng-class="{inReplyTo:resource.inResponseTo}"
+                                                    ng-class="{inReplyTo:resource.inResponseTo,resourceSelected:selectedResource.id == resource.id}"
                                                     ng-click="selectResource(resource)" style="cursor: pointer">
                                                     <td>
 
@@ -258,9 +272,11 @@
                                                                 Rcp:{{recip.reference}}
                                                             </div>
 
+                                                            <!--
                                                             <div ng-repeat = "abt in resource.about">
                                                                 Abt:{{abt.reference}}
                                                             </div>
+                                                            -->
 
                                                         </div>
 
@@ -272,12 +288,14 @@
                                                     <td>
                                                         <div ng-hide="primaryTask.status == 'completed'">
                                                             <button class="btn btn-primary" ng-click="respondToRequestInfo(resource)"
-
-                                                                    uib-popover="Enter a response from the Patient to a request info Communication (mimic receiving a Communication). Will populate 'inResponseTo'"
+                                                                    ng-hide = "resource.resourceType == 'Task'"
+                                                                    uib-popover="A reply to this Communication by patient (mimic them replying to a Communication) or EHR. Will populate 'inResponseTo'"
                                                                     popover-placement="top"
                                                                     popover-trigger="'mouseenter'">
                                                                 Reply
                                                             </button>
+
+
                                                             <!--                                                             <button class="btn btn-primary" ng-click="respondToRequestInfo(resource)"
                                                                     ng-show="resource.recipient[0].reference.indexOf('Patient') > -1"
                                                                     uib-popover="Enter a response from the Patient to a request info Communication (mimic receiving a Communication)"
@@ -296,6 +314,7 @@
 
 
                                             <div ng-hide="primaryTask.status == 'completed'">
+                                                <!--
                                                 <button class="btn btn-primary" ng-click="requestInfo()"
                                                         uib-popover="Generate a request from the Fulfiller for more info from the Patient"
                                                         popover-placement="top"
@@ -303,17 +322,22 @@
                                                     Request more information
                                                 </button>
 
+                                                -->
+
                                                 <button class="btn btn-danger pull-right" ng-click="closeRequest()"
                                                         uib-popover="Close the Task, creating a Communication for the patient"
                                                         popover-placement="top"
                                                         popover-trigger="'mouseenter'">
-                                                    Close Task
+                                                    Close Request
                                                 </button>
                                             </div>
 
                                         </div>
                                         <div class="col-md-4">
-                                            <pre ng-show="selectedResource">{{selectedResource | json}}</pre>
+                                            <div class="myScroll">
+                                                <pre ng-show="selectedResource">{{selectedResource | json}}</pre>
+                                            </div>
+
                                         </div>
 
                                     </div>
