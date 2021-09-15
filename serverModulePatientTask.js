@@ -1,9 +1,9 @@
 //endpoints for patient corrections Task functionality
 
 let request  = require('request');
-//let serverUrl =  "http://home.clinfhir.com:8054/baseR4/"
+let serverUrl =  "http://home.clinfhir.com:8054/baseR4/"
 
-let serverUrl =  "http://survey.clinfhir.com:8091/baseR4/"
+//let serverUrl =  "http://survey.clinfhir.com:8091/baseR4/"
 
 function setup(app,db) {
 
