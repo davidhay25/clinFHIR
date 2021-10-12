@@ -115,41 +115,7 @@
         angular.module("sampleApp").config(['$compileProvider', function ($compileProvider) {
             $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|blob):/);
         }]);
-/*
 
-//http://www.webdeveasy.com/interceptors-in-angularjs-and-useful-examples/
-        angular.module('sampleApp').factory('sessionRecoverer', ['$q', '$injector', function($q, $injector) {
-            var sessionRecoverer = {
-                responseError: function(response) {
-                    // Session has expired
-
-                    console.log('intercept HTTP error! '+ response.status)
-
-                    if (response.status == 401){
-                        var projectService = $injector.get('projectSvc');
-                        var $http = $injector.get('$http');
-                        var deferred = $q.defer();
-
-                        // generate a new token
-
-                        projectService.refresh().then(deferred.resolve, deferred.reject);
-
-                        // When the session recovered, make the same backend call again and chain the request
-                        return deferred.promise.then(function() {
-                            return $http(response.config);
-                        });
-                    }
-
-                    return $q.reject(response);
-                }
-            };
-            return sessionRecoverer;
-        }]);
-
-        angular.module('sampleApp').config(['$httpProvider', function($httpProvider) {
-            $httpProvider.interceptors.push('sessionRecoverer');
-        }]);
-*/
 
 
         window.onerror = function(message, url, linenumber) {
@@ -193,12 +159,7 @@
     <script src="js/components/extensionDirective.js"></script>
     <script src="js/newExtensionDefinitionCtrl.js"></script>
     <script src="js/edBuilderSvc.js"></script>
-<!--
- <script src="js/editLMDocCtl.js"></script>
-    <script src="js/questionnaireSvc.js"></script>
 
-    <script src="directive/questionnaire/questionnaireCtl.js"></script>
--->
     <script src="js/newBuilderCtl.js"></script>
     <script src="js/newBuilderSvc.js"></script>
 
@@ -217,7 +178,7 @@
     <script src="js/task.js"></script>
     <script src="js/taskSvc.js"></script>
 
-
+    <script src="js/setServerCtrl.js"></script>
 
     <script>
         var config = {
@@ -227,7 +188,7 @@
             storageBucket: ""
         };
 
-        //  console.log(firebase)
+
         if (firebase) {
             firebase.initializeApp(config);
 
@@ -256,19 +217,16 @@
 
                         </a>
                     </span>
-                    <span>
 
-                    </span>
 
                 </div>
-                <div class="col-md-2 col-sm-2">
+                <div class="col-md-3 col-sm-3">
 
-                    <span style="cursor:pointer"
+                    <span class ="navbar-text ">
+                        <i class="glyphicon glyphicon-edit clickable" ng-click="selectServer()"></i>
+                            {{appConfigSvc.getCurrentConformanceServer().url}}
 
-                          uib-popover-html="displayServers()"
-                          popover-trigger="'mouseenter'"
-                          popover-placement="bottom"
-                           class="navbar-text pull-right"> {{appConfigSvc.getCurrentConformanceServer().name}}</span>
+                    </span>
 
 
                 </div>
@@ -286,7 +244,7 @@
 
                 </div>
 
-                <div class="col-md-5 col-sm-5">
+                <div class="col-md-4 col-sm-4">
                     <div ng-hide = "loadedFromBookmark">
                         <div class="navbar-text clickable" ng-show="LMSelectorVisible" ng-click="hideLMSelector()">Hide Selector</div>
                         <div class="navbar-text clickable" ng-hide="LMSelectorVisible" ng-click="showLMSelector()">Show Selector</div>
@@ -294,13 +252,9 @@
 
                     <div class="navbar-text clickable" ng-show="LMDetailVisible" ng-click="hideDetailSelector()">Hide Detail</div>
                     <div class="navbar-text clickable" ng-hide="LMDetailVisible" ng-click="showDetailSelector()">Show Detail</div>
-<!--
 
-                    <div class="navbar-text clickable" ng-show="input.showComments" ng-click="input.showComments = ! input.showComments">Hide Comments</div>
-                    <div class="navbar-text clickable" ng-hide="input.showComments" ng-click="input.showComments = ! input.showComments">Show Comments</div>
--->
                     <form ng-show="isDirty" class="navbar-form">
-                        <button ng-show="isDirty && canSaveModel"
+                        <button ng-show="isDirty && currentUserIsEditor"
                                 class="btn btn-success pull-right" ng-click="saveModel()">Save model</button>
                     </form>
 
@@ -311,8 +265,8 @@
 
                 <div class="col-md-1 col-sm-1">
 
-                    <div class="nav navbar-form navbar-right" ng-hide="Practitioner">
-                        <span style="font-size:1.8em; cursor: pointer"uib-popover="Click to log in"
+                    <div class="nav navbar-form navbar-right" ng-hide="currentUser">
+                        <span style="font-size:1.8em; cursor: pointer" uib-popover="Click to log in"
                               popover-placement="left"
                               popover-trigger="'mouseenter'">
                             <div ng-click="login()">
@@ -321,9 +275,9 @@
                         </span>
                     </div>
 
-                    <div class="nav navbar-form navbar-right" ng-show="Practitioner">
+                    <div class="nav navbar-form navbar-right" ng-show="currentUser">
                         <span style="font-size:1.8em; cursor: pointer"
-                              uib-popover="Current user: {{Practitioner.telecom[0].value}}. Click to log out"
+                              uib-popover="Current user: {{currentUser.email}}. Click to log out"
                               popover-placement="left"
                               popover-trigger="'mouseenter'">
 
@@ -339,13 +293,14 @@
 
     <div class="row" ng-show="showNotLoggedIn">
         <div class="col-md-12 col-sm-12">
-            <!--  ?? why hide if a practitioner<div ng-hide="Practitioner" class="alert alert-warning">-->
-            <div class="alert alert-warning">
-                <p>As you have not logged in, you are able to view Models, but not edit them.
-                To log in, click the  <i class="glyphicon glyphicon-log-in"></i>  icon to the upper right. You can create an account there if you don't already
-                    have one - all you need is an email address.</p>
+            <div ng-hide="currentUser" class="alert alert-warning">
+                <div class="alert alert-warning">
+                    <p>As you have not logged in, you are able to view Models, but not edit them.
+                    To log in, click the  <i class="glyphicon glyphicon-log-in"></i>  icon to the upper right. You can create an account there if you don't already
+                        have one - all you need is an email address.</p>
             </div>
         </div>
+    </div>
     </div>
 
 
@@ -360,7 +315,8 @@
                 </div>
                 <div class="col-md-4 col-sm-4">
 
-                    <button ng-show="Practitioner" class="btn btn-link pull-right" ng-click="newModel()">New Model</button>
+                    <button ng-show="currentUser"
+                            class="btn btn-link pull-right" ng-click="newModel()">New Model</button>
 
 
                 </div>
@@ -372,13 +328,16 @@
                 <uib-tab heading="Palette" >
 
                     <ul class="list-group" style=" height:500px; overflow: auto;" >
-                        <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':SD.id == entry.item.display}"
-                            ng-repeat="entry in lmPalette.entry"
-                            ng-click="selectFromPalette(entry.item)">
+                        <li style="cursor: pointer"
+                            ng-class="{'list-group-item':1==1,'list-group-item-info':SD.id == item.id}"
+                            ng-repeat="item in newPalette"
+                            ng-show="item.server == conformanceServer.url"
+                            ng-click="selectFromPalette(item)">
+
 
                             <div class="row">
                                 <div class="col-md-9 col-sm-9">
-                                    <h4>{{entry.item.reference | getLogicalID}}</h4>
+                                    <h4>{{item.id}}</h4>
                                 </div>
 
                             </div>
@@ -388,10 +347,29 @@
                     </ul>
 
 
-                </uib-tab>
-                <uib-tab heading="All">
 
-                    <div><input type="text" class="form-control" placeholder="Filter model list by id" ng-model="input.filter" ng-change="filterModelList(input.filter)"/> </div>
+
+                </uib-tab>
+                <uib-tab heading="Search">
+
+
+                    <div>
+                        <div class="row">
+                            <div class="col-md-10">
+                                <input type="text" class="form-control" placeholder="Search string"
+                                       ng-model="input.filter"/>
+                            </div>
+                            <div class="col-md-2">
+                                <i class="glyphicon glyphicon-search clickable"
+                                   style="padding-top: 8px"
+                                   ng-click="searchForModel(input.filter)"></i>
+                            </div>
+                        </div>
+                        <div ng-hide="bundleModels">
+                            <em>The search is on model name - 'starts with'</em>
+                        </div>
+
+                    </div>
 
                     <ul class="list-group" style=" height:700px; overflow: auto;" >
                         <li style="cursor: pointer" ng-class="{'list-group-item':1==1,'list-group-item-info':SD.id == entry.resource.id}"
@@ -447,10 +425,13 @@
                         <div class="col-md-12 col-sm-12">
                              <span class="pull-right">
                                  <button class="btn btn-link" ng-click="expandAll()">Expand All</button>
-                                 <button class="btn btn-link" ng-click="resetLayout()">Collapse Layout</button>
+                                 <button class="btn btn-link" ng-click="collapseLayout()">Collapse Layout</button>
                                <!--  <button class="btn btn-link" ng-click="showQuest()">Form</button>-->
-                                 <button ng-hide="isInPalette || isDirty" class="btn btn-link" ng-click="addToPalette()">Add to Palette</button>
-                                 <button ng-show="isInPalette" class="btn btn-link" ng-click="removeFromPalette()">Remove from Palette</button>
+                                 <button ng-hide="isInPalette"
+                                         class="btn btn-link" ng-click="addToPalette()">Add to Palette</button>
+
+                                 <button ng-show="isInPalette"
+                                         class="btn btn-link" ng-click="removeFromPalette()">Remove from Palette</button>
 
 
                                  <a class="btn btn-link pull-right" download="{{downloadSDJsonName}}"
@@ -521,6 +502,8 @@
 
 
                 </uib-tab>
+
+
 
 
                 <uib-tab heading="Analysis">
@@ -869,6 +852,20 @@
                     </uib-tabset>
 
 
+                </uib-tab>
+
+                <uib-tab heading="FSH">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button class="btn btn-link pull-right" ng-click="makeFSH()">Refresh</button>
+                        </div>
+
+                    </div>
+
+                    <br/>
+
+                    <pre>{{fsh}}</pre>
+                    <br/>
                 </uib-tab>
 
                 <uib-tab heading="Report">
@@ -1268,7 +1265,7 @@
                                 <tr><td>Actions</td><td>
 
 
-                                    <div ng-show="!Practitioner">
+                                    <div ng-show="!currentUser">
                                         Not logged in - read only mode
                                     </div>
 
@@ -1276,7 +1273,7 @@
                                         Viewing Historical value, read only mode
                                     </div>
 
-                                    <div ng-show = "treeData[0].data.header.editor && (Practitioner.telecom[0].value !== treeData[0].data.header.editor)">
+                                    <div ng-hide = "currentUserIsEditor">
                                         The model editor is {{treeData[0].data.header.editor}}. Only they can make changes
                                     </div>
 
@@ -1416,7 +1413,7 @@
                                         <td>Model Editor</td>
                                         <td>
 
-                                                <div ng-show="((Practitioner.telecom[0].value.toLowerCase() == treeData[0].data.header.editor.toLowerCase()) || Practitioner.telecom[0].value && !  treeData[0].data.header.editor)">
+                                            <div ng-show="currentUserIsEditor">
                                                 <!-- IF the current user is the editor, or there is a current user but no editor-->
 
                                                 <div style="cursor: hand" class="pull-right clickable"  ng-click="changeEditor()">Change</div>
@@ -1426,8 +1423,7 @@
                                         </td>
                                     </tr>
 
-                                    <tr ng-show="((Practitioner.telecom[0].value == treeData[0].data.header.editor) ||
-                                            Practitioner.telecom[0].value && !  treeData[0].data.header.editor)">
+                                    <tr ng-show="currentUserIsEditor">
                                         <td>Allow comments</td>
                                         <td>
                                                <checkbox ng-model="input.showComments" ng-click="setAllowComments(input.showComments)"></checkbox>
@@ -1435,8 +1431,7 @@
                                         </td>
                                     </tr>
 
-                                    <tr ng-show="((Practitioner.telecom[0].value == treeData[0].data.header.editor) ||
-                                            Practitioner.telecom[0].value && !  treeData[0].data.header.editor)">
+                                    <tr ng-show="currentUserIsEditor">
                                         <td>Delete model</td>
                                         <td>
 

@@ -65,6 +65,30 @@ angular.module("sampleApp")
             console.log(appConfigSvc.getCurrentDataServer())
 
 
+            //select server
+            $scope.selectServer = function(){
+
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/setServer.html',
+                    backdrop: 'static',
+                    controller: 'setServerCtrl',
+                    resolve: {
+                        appConfigSvc: function () {
+
+                            return appConfigSvc
+                        },
+                        type: function(){
+                            return 'data'
+                        }
+
+                    }
+                }).result.then(
+                    function(vo) {
+
+                        // setServerType : function(type,url,name) {
+                    })
+            }
+
             //for the side by sude
             $scope.zoomResourceHistory = function(entries) {
                 console.log(entries)
@@ -310,7 +334,9 @@ angular.module("sampleApp")
 
             $scope.showGQL = appConfigSvc.getCurrentDataServer().name == 'Grahames STU3 server';
 
+
             $scope.displayServers = "<div>Data: " + appConfigSvc.getCurrentDataServer().name + "</div>"
+
 
             //when a new scenario is selected with a patient from the server. passes in all data for that patient
             $scope.$on('patientSelected',function(event,patientResource){

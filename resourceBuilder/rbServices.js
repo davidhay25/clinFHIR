@@ -169,8 +169,7 @@ angular.module("sampleApp").
         getListForPractitioner : function(practitioner,type) {
             var deferred = $q.defer();
             var listTypeSystem = appConfigSvc.config().standardSystem.listTypes;
-       //     var url = appConfigSvc.getCurrentDataServer().url +
-            //    "List?source:Practitioner="+ encodeURIComponent( practitioner.id + "&code=" + listTypeSystem + '|' + type);
+
             var url = appConfigSvc.getCurrentDataServer().url +
                 "List?source:Practitioner="+ practitioner.id + "&code="  + type;
 

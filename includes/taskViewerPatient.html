@@ -1,0 +1,226 @@
+<div>
+    <style>
+        .fromEHR {
+            background-color: #FFF8DC;
+        }
+    </style>
+
+    <div class="row rounded-box">
+        <div class="col-md-4">
+
+            <select class = "form-control" ng-model="input.selectedPatientItem"
+                    ng-options="item.display for item in allPatients"
+                    ng-change="selectPatient()"
+            ></select>
+        </div>
+        <div class="col-md-6">
+            <button class="btn btn-link" ng-click="SelectPatientFromServer()">Select patient from server</button>
+        </div>
+        <div class="col-md-2">
+
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2">
+
+            <div class="list-group">
+                <div ng-class="{'list-group-item':true,listItemSelected:entry.resource.id == primaryTask.id}"
+                     style="cursor:pointer;"
+                     ng-click="selectPatientTask(task)"
+                     ng-repeat="task in tasksForPatient track by $index">
+
+                    {{task.description | limitTo: 30}}{{task.description.length > 30 ? '...' : ''}}
+                    <div><em>{{task.id}}</em></div>
+                    <div>{{task.businessStatus.coding[0].code}}</div>
+
+
+                </div>
+            </div>
+
+            <button class="btn btn-link" ng-click="newTask()">New correction request</button>
+
+        </div>
+        <div class="col-md-10">
+
+
+            <div ng-hide="state=='newtask'">
+
+                <div ng-show="allResourceItemsForTask.length > 0">
+                    <table class="table">
+                        <tr><th>Date</th><th>Sender</th><th>Contents</th></tr>
+                        <tr ng-repeat="item in allResourceItemsForTask"
+                            ng-class="{fromEHR:! item.fromPatient}">
+
+                            <td>{{item.resource.sent}}</td>
+                            <td>{{item.resource.sender.reference}}</td>
+
+                            <td>{{item.resource.payload[0].contentString}}</td>
+                            <td>
+                                <div ng-hide="primaryTask.status == 'completed' || (item.resource.sender.reference.indexOf('Patient') > -1)">
+                                    <button class="btn btn-primary" ng-click="patientReply(item)">
+                                        Reply
+                                    </button>
+
+                                </div>
+
+
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+
+
+            </div>
+
+            <div ng-show="state=='newtask'">
+                <br/>
+
+
+
+
+                <div class="row">
+                    <div class="col-md-2">
+                        Who is the request for?
+                    </div>
+                    <div class="col-md-10">
+                        <div class="btn-group">
+                            <label class="btn btn-default" ng-model="input.newRequestTarget" uib-btn-radio="'me'">Me </label>
+                            <label class="btn btn-default" ng-model="input.newRequestTarget" uib-btn-radio="'else'">Someone else</label>
+                        </div>
+
+                        <div  ng-hide="input.newRequestTarget == 'me'" >
+                            <br/>
+                            <div>Sending this correction on behalf of someone else. It will appear in their list after saving</div>
+                            <div class="row">
+
+                                <div class="col-md-2">
+                                    <label>First Name</label>
+                                    <input class="text form-control" ng-model="input.patientFName"
+                                           placeholder=""/>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label>Last Name</label>
+                                    <input class="text form-control" ng-model="input.patientLName"
+                                           placeholder=""/>
+                                </div>
+                                <div class="col-md-2">
+                                    <label>Gender</label>
+                                    <input class="text form-control" ng-model="input.patientGender"
+                                           placeholder="male or female"/>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>Identifier</label>
+                                    <input class="text form-control" ng-model="input.patientIdentifier"
+                                           placeholder="system|value"/>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+
+
+                <br/>
+                <div class="row">
+                    <div class="col-md-2">
+                        Where to?
+                    </div>
+                    <div class="col-md-4">
+                        <select class = "form-control" ng-model="recipientOrganization"
+                                ng-options="org.name for org in organizations"
+                                ng-change="selectOrganization(org)"
+                        ></select>
+
+                    </div>
+                    <div class="col-md-4">
+                        <em>Which organization has the error</em>
+
+                    </div>
+                </div>
+
+                <br/>
+                <div class="row">
+                    <div class="col-md-2">
+                        Topic
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" ng-model="input.topic" class="form-control"
+                        placeholder="eg the medication list is incorrect"/>
+                    </div>
+                    <div class="col-md-4">
+                        <em>A short description of the issue</em>
+                    </div>
+
+                </div>
+                <br/>
+                <div class="row">
+                    <div class="col-md-2">
+                        More details
+                    </div>
+                    <div class="col-md-4">
+
+                         <textarea class="form-control" ng-model="input.description"
+                                   placeholder="More details about the correction requested"></textarea>
+                    </div>
+
+                    <div class="col-md-4">
+                        <em>Try to give as much detail as possible to help the people working on this request</em>
+                    </div>
+
+                </div>
+                <br/>
+                <div class="row">
+                    <div class="col-md-2">
+                        Attachments
+                    </div>
+                    <div class="col-md-10">
+                        To be implemented...  Might also be references...
+                    </div>
+                </div>
+
+                <br />
+
+                <div ng-show="input.newRequestTarget == 'me' || (input.patientFName && input.patientLName && input.description)">
+                    <button class="btn btn-danger" ng-click="addTask()">Send request</button>
+                </div>
+
+
+            </div>
+
+                <br/>
+
+
+
+
+                <!--
+                <div class="row">
+                    <div class="col-md-6">
+                        <label>Recipient Id</label>
+                        <input class="text form-control" ng-model="input.ownerId"
+                               placeholder="A practitioner id. Will be Communication.recipient & Task.owner"/>
+                    </div>
+                    <div class="col-md-6">
+
+                    </div>
+                </div>
+                -->
+
+
+
+
+
+
+            </div>
+        </div>
+
+    </div>
+
+
+
+
+</div>

@@ -1,0 +1,134 @@
+<!--  Set the server. Used in place of the option on clinfhir.com  -->
+<div>
+    <!--<div ng-controller="newResourceCtrl">-->
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-6 col-sm-6 col-xs-6">
+                <h3 class="modal-title">Set server</h3>
+
+            </div>
+            <div class="col-md-1 col-sm-1 ">
+                <div class="pull-right navbar-form" ng-show="waiting">
+                    <img src="css/ajax_loader_blue_32.gif"/>
+                </div>
+            </div>
+            <div class="col-md-5 col-sm-5">
+
+                <button class="btn btn-link pull-right" ng-click="$dismiss()">Cancel</button>
+                <button ng-show="input.valid"
+                        class="btn btn-success pull-right" ng-click="addServer()">Add server</button>
+            </div>
+
+
+        </div>
+
+    </div>
+    <div class="modal-body">
+
+
+        <uib-tabset>
+            <uib-tab heading="Ad hoc server">
+                <br/>
+                <div class="row" style="margin-bottom: 8px">
+                    <div class="col-md-2 col-sm-2">
+                        <div>Url</div>
+                    </div>
+                    <div class="col-md-8 col-sm-8">
+                        <input class='form-control' type="text"
+                               placeholder="Server Url"
+                               ng-model="input.url"/>
+                    </div>
+                    <div class="col-md-2 col-sm-2">
+                        <button ng-hide="input.valid || ! input.url" class="btn btn-primary" ng-click="test()">Test</button>
+                    </div>
+                </div>
+                <br/>
+                <div class="row" style="margin-bottom: 8px">
+                    <div class="col-md-2 col-sm-2">
+                        <div>Name</div>
+                    </div>
+
+                    <div class="col-md-10 col-sm-10">
+                        <input class='form-control' type="text"
+                               placeholder="A display name for the server"
+                               ng-model="input.name"/>
+                    </div>
+                </div>
+
+                <div class="row" style="margin-bottom: 8px">
+                    <div class="col-md-2 col-sm-2">
+                        <div>Access Token</div>
+                    </div>
+
+                    <div class="col-md-10 col-sm-10">
+                        <input class='form-control' type="text"
+                               placeholder="If the server requires an access token"
+                               ng-model="input.accessToken"/>
+                    </div>
+                </div>
+
+
+                <div class="row">
+                    <div class="col-md-3 col-sm-3">
+                        <div>Support $everything</div>
+                    </div>
+                    <div class="col-md-1 col-sm-1">
+                        <input type="checkbox" class="form-control" ng-model="input.everything"/>
+                    </div>
+                    <div class="col-md-8 col-sm-8">
+                        Set true if this server supports the $everything operation against Patient (Needed for Patient Data viewer)
+                    </div>
+
+                </div>
+
+
+                <br/>
+                <hr/>
+                <div class="row">
+                    <div class="col-md-12 col-sm-6 col-xs-12">
+                        <strong>Note that the server must support
+                            <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS" target="_blank">CORS</a>  as clinFHIR is a web application</strong>
+                        <div>
+                            <br/>
+                            There are 2 headers needed in particular:
+                            <ul>
+                                <li><strong>Access-Control-Allow-Origin:*</strong></li>
+                                <li><strong>Access-Control-Expose-Headers:Location, Content-Location</strong></li>
+                            </ul>
+
+                        </div>
+                    </div>
+                </div>
+
+            </uib-tab>
+
+            <uib-tab heading="Predefined">
+                <!-- <pre>{{allServers | json}}</pre>-->
+                <table class="table">
+                    <tr ng-repeat="row in allServers">
+                        <td>{{row.name}}</td>
+                        <td>{{row.url}}</td>
+                        <td>
+                            <div class="clickable" ng-click="selectServer(row)">Select</div>
+                        </td>
+                    </tr>
+                </table>
+
+            </uib-tab>
+
+        </uib-tabset>
+
+
+
+
+
+</div>
+
+    <div class="modal-header">
+
+
+
+</div>
+    </div>
+    </div>

@@ -63,6 +63,10 @@
         });
         angular.module("sampleApp").constant("moment", moment);
 
+        angular.module("sampleApp").config(['$compileProvider', function ($compileProvider) {
+            $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|blob):/);
+        }]);
+
         //http://www.devblogrbmz.com/angular-default-request-headers-and-interceptors/
         //http://www.webdeveasy.com/interceptors-in-angularjs-and-useful-examples/
         angular.module("sampleApp").factory('authIntercept',['sessionSvc',function(sessionSvc){
@@ -115,7 +119,7 @@
     <script src="js/sessionSvc.js"></script>
 
     <script src="js/pvTaskCtrl.js"></script>
-
+    <script src="js/setServerCtrl.js"></script>
 
     <script src="resourceBuilder/vsBrowser.js"></script>
 
@@ -172,6 +176,13 @@
             </div>
 
             <div class="col-md-5 col-sm-5">
+                <div class="navbar-text">
+                    <i class="glyphicon glyphicon-edit clickable" ng-click="selectServer()"> </i>
+                     {{appConfigSvc.getCurrentDataServer().url}}
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-3">
 
                 <div class="navbar-text" ng-show="currentPatient">
                     {{ResourceUtilsSvc.getOneLineSummaryOfResource(currentPatient)}} ({{currentPatient.id}})
@@ -184,26 +195,38 @@
                     <img src="css/ajax_loader_blue_32.gif"/>
                 </div>
             </div>
-            <div class="col-md-4 col-sm-4">
 
+            <div class="col-md-1 col-sm-1">
+<!--
                 <form ng-show = "appConfigSvc.getCurrentDataServer().smart && ! oauthAccessToken" class="navbar-form navbar-right">
                     <button class="btn btn-danger" ng-click="smartLogin()">Logon</button>
                 </form>
 
                 <div class="navbar-text " ng-show="currentPatient && !loadedFromBookmark" ng-click="generateShortCut()">
                     <span class="clickable">Share</span> </div>
+                -->
+
 
                 <form ng-hide = "loadedFromBookmark" class="navbar-form navbar-right">
 
                     <button class="btn btn-primary pull-right" ng-click="findPatient()">Select Patient</button>
-                    <button class="btn btn-primary pull-right" style="margin-right: 8px" ng-click="selectScenario()">Select Scenario</button>
 
+                    <!--
+                    <button class="btn btn-primary pull-right" style="margin-right: 8px" ng-click="selectScenario()">Select Scenario</button>
+-->
                 </form>
             </div>
         </div>
+
+
+
     </nav>
 
+    <div >
 
+
+
+    </div>
 
 
 
@@ -213,6 +236,11 @@
 
     <div ng-hide="appConfigSvc.getCurrentPatient() || loadedFromBookmark">
 
+        <p>
+            Click the 'Select Patient' button at the upper right to select the patient. If you want to add a new patient, then click the 'Select Patient' button, and in the modal dialog
+            that appears, there's a link to add a new patient.
+        </p>
+<!--
         <p>There are 2 ways to select a patient to view</p>
 
         <ul>
@@ -221,7 +249,7 @@
             <li>Click the 'Select scenario' button. This will display a list of scenarios that have been created that you can view.
                 This still selects the patient for whom the scenario was created, and will display all their resources - not just those in the scenario</li>
         </ul>
-
+-->
 <!--
         <p>Please select a patient using the 'Select Patient' button at the upper right</p>
         <p>If you want to add a new patient, then click the 'Select Patient' button, and in the modal dialog

@@ -229,11 +229,7 @@ angular.module("sampleApp")
 
         return {
             setToDefault : function(){
-                //this.setServerType('terminology',"http://fhir3.healthintersections.com.au/open/");
-          /*      this.setServerType('terminology',"https://ontoserver.csiro.au/stu3-latest/");
-                this.setServerType('data',"http://fhirtest.uhn.ca/baseDstu3/");
-                this.setServerType('conformance',"http://fhirtest.uhn.ca/baseDstu3/");
-*/
+
                 this.setServerType('terminology',"https://r4.ontoserver.csiro.au/fhir/");
                 this.setServerType('data',"http://hapi.fhir.org/baseR4/");
                 this.setServerType('conformance',"http://hapi.fhir.org/baseR4/");

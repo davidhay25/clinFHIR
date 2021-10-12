@@ -30,9 +30,69 @@ angular.module("sampleApp")
                 $localStorage.clinicalView = state;//! $localStorage.clinicalView;
             };
 
+            //todo >>>>>>>> just for testing
+
+           // $localStorage.newPalette = [{server:'http://home.clinfhir.com:8054/baseR4/',id:'CCondition'}]
+           // $localStorage.newPalette.push({server:'http://hapi.fhir.org/baseR4/',id:'GdmPatient'})
+
+
+
+            //This replaces the lmPallette. It is an array of objects: {server (url): id: }
+            $scope.newPalette = $localStorage.newPalette || [];
+
 
             $scope.appConfigSvc = appConfigSvc
             $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
+
+
+            //search for model on the current server where the name is the given string
+            $scope.searchForModel = function(filter) {
+                let qry = $scope.conformanceServer.url + "StructureDefinition?kind=logical"
+                if (filter) {
+                    qry += "&name="+filter ;
+                }
+                $scope.showWaiting = true
+                $http.get(qry).then(
+                    function(data) {
+                        $scope.bundleModels = data.data
+                    }, function(err) {
+                        alert('There was an error searching for models: ' + angular.toJson(err))
+                    }
+                ).finally(
+                    function () {
+                        $scope.showWaiting = false
+                    }
+                )
+            }
+
+            //select the server to store the models on. This is the conformance server
+            //the expectation is that the 'core' models are there as well. todo - support other base models...
+            $scope.selectServer = function(){
+
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/setServer.html',
+                    backdrop: 'static',
+                    controller: 'setServerCtrl',
+                    resolve: {
+                        appConfigSvc: function () {
+                            return appConfigSvc
+                        },
+                        type: function(){
+                            return 'conformance'
+                        }
+                    }
+                }).result.then(
+                    function(vo) {
+                        //this will have been set in the controller - need to set the local scope copy...
+                        $scope.conformanceServer = appConfigSvc.getCurrentConformanceServer();
+                        // setServerType : function(type,url,name) {
+                    })
+            }
+
+            $scope.makeFSH = function(){
+                $scope.fsh = logicalModelSvc.makeFSH($scope.treeData)
+                //console.log(fsh)
+            }
 
             //whether or not to show the comments (and allow them to be created)
             $scope.input.showComments = false;  //default is no
@@ -158,7 +218,7 @@ angular.module("sampleApp")
 
             GetDataFromServer.registerAccess('logical');
 
-            $scope.displayServers = function(){
+            $scope.displayServersDEP = function(){
                 let servers = "";
                 servers += '<div>Data: ' + appConfigSvc.getCurrentDataServer().name + "</div>"
                 servers += '<div>Conf: ' + appConfigSvc.getCurrentConformanceServer().name + "</div>"
@@ -182,7 +242,6 @@ angular.module("sampleApp")
 
             $scope.lmEditTask = function(task) {
                 $scope.$broadcast('editTask',task)  //will be picked up by the task controller...
-
             };
 
             //change the email of the model editor. Would be nice to be able to check that the email is valid...
@@ -197,6 +256,15 @@ angular.module("sampleApp")
 
             //can the current user edit the model. todo - this has become cruftly...
             $scope.canEdit = function() {
+                if ($scope.isHistory) {
+                    return false
+                }
+
+                if ($scope.currentUserIsEditor) {
+                    return true;
+                }
+/*
+
                 if ($scope.isHistory || !$scope.Practitioner || ! $scope.canSaveModel) {
                     return false
                 }
@@ -205,6 +273,7 @@ angular.module("sampleApp")
                     if ($scope.treeData[0].data.header.editor) {
                         //there is an editor - then it must match the editor in the model
                         let editorEmail = $scope.treeData[0].data.header.editor.toLowerCase();
+
                         if ($scope.Practitioner && $scope.Practitioner.telecom &&  $scope.Practitioner.telecom[0].value) {
                             let practitionerTelecom = $scope.Practitioner.telecom[0].value.toLowerCase();
                             if (editorEmail == practitionerTelecom) {
@@ -213,6 +282,7 @@ angular.module("sampleApp")
                                 return false
                             }
                         }
+
 
                     }
 
@@ -224,10 +294,18 @@ angular.module("sampleApp")
                 } catch (ex) {
                     return false;
                 }
+
+                */
             };
 
             //load all the models. Called whne a shortcut is NOT used...
-            let loadAllModels = function() {
+
+            let loadAllModelsDEP = function() {
+
+
+
+
+
                 logicalModelSvc.loadAllModels($scope.conformanceServer.url).then(
                     function(bundle) {
                         $scope.bundleModels = bundle
@@ -253,7 +331,7 @@ angular.module("sampleApp")
 
             $scope.logout=function(){
                 firebase.auth().signOut().then(function() {
-                    delete $rootScope.userProfile;
+                    delete $scope.userProfile;
                     modalService.showModal({}, {bodyText: 'You have been logged out of clinFHIR'})
 
                 }, function(error) {
@@ -261,9 +339,6 @@ angular.module("sampleApp")
                 });
 
             };
-
-
-
 
             //if a shortcut has been used there will be a hash so load that
             var hash = $location.hash();
@@ -320,10 +395,7 @@ angular.module("sampleApp")
                         ).finally(function(){
                             $scope.showWaiting = false;
                         })
-
                     }
-
-
 
                 } else {
 
@@ -378,10 +450,11 @@ angular.module("sampleApp")
                 //loadAllModels();
 
             }
-            loadAllModels();
+            //loadAllModels();
 
             //called whenever the auth state changes - eg login/out, initial load, create user etc.
             firebase.auth().onAuthStateChanged(function(user) {
+                $scope.currentUser = user;
                 //if there's a hash starting with $$$ then this has been started from the project, with an authenticted user...
                 //todo - remove
                 if (1==2 && hash && hash.substr(0, 3) == '$$$') {
@@ -392,10 +465,14 @@ angular.module("sampleApp")
 
 
                     if (user) {
-                        $rootScope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
-                        logicalModelSvc.setCurrentUser(user);
-                        securitySvc.setCurrentUser(user);
+                        $scope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
 
+
+                        //todo - are these needed???
+                        //logicalModelSvc.setCurrentUser(user);
+                       // securitySvc.setCurrentUser(user);
+
+                        /* no longer using a Practitiooner resource for the user....
 
                         //return the practitioner resource that corresponds to the current user (the service will create if absent)
                         GetDataFromServer.getPractitionerByLogin(user).then(
@@ -410,14 +487,16 @@ angular.module("sampleApp")
                                 alert("Error loading user's Practitioner resource from the data server. This can occur when the data server is unavailable. You should correct before continuing.")// + angular.toJson(err))
                                 //swallow errorsalert(err)
                             }
-                        );
+                        )
+
+                        */;
 
                         delete $scope.showNotLoggedIn;
 
 
                     } else {
 
-                        logicalModelSvc.setCurrentUser(null);
+                        //logicalModelSvc.setCurrentUser(null);
                         $scope.showNotLoggedIn = true;
                         delete $scope.Practitioner;
                         delete $scope.taskOutputs;
@@ -637,6 +716,7 @@ angular.module("sampleApp")
 
             $scope.resetLayout = function(){
                 logicalModelSvc.resetTreeState($scope.treeData);
+
                 $scope.treeData.forEach(function (item) {
 
                     if (item.data && item.data.ed && item.data.ed.type) {
@@ -652,7 +732,10 @@ angular.module("sampleApp")
 
             };
             $scope.collapseLayout = function(){
-                logicalModelSvc.resetTreeState($scope.treeData);
+
+
+                logicalModelSvc.openTopLevelOnly($scope.treeData);
+                //logicalModelSvc.resetTreeState($scope.treeData);
 
                 drawTree();
 
@@ -1153,7 +1236,7 @@ angular.module("sampleApp")
 
 
             //retrieve the list of models on the users current palette...
-            function getPalette(practitioner)  {
+            function getPaletteDEP(practitioner)  {
                 delete $scope.palette;
                 GetDataFromServer.getListForPractitioner(practitioner,$scope.code.lmPalette).then(
                     function(list) {
@@ -1188,6 +1271,23 @@ angular.module("sampleApp")
             
             //remove the current model from the palette
             $scope.removeFromPalette = function() {
+
+                $scope.newPalette.forEach(function(item,inx){
+
+                    if (item.id == $scope.SD.id) {
+                        pos = inx;
+                    }
+                })
+
+                if (pos > -1) {
+                    $scope.newPalette.splice(pos,1)
+                    $scope.isInPalette = false;
+                    alert("Model has been removed from the palette")
+                } else {
+                    alert("Model was not found on the palette")
+                }
+
+                /*
                 if ($scope.lmPalette) {
                     var pos = -1;
                     $scope.lmPalette.entry.forEach(function(entry,inx){
@@ -1210,6 +1310,7 @@ angular.module("sampleApp")
                         )
                     }
                 }
+                */
             };
 
             $scope.selectFromPalette = function(item) {
@@ -1234,7 +1335,26 @@ angular.module("sampleApp")
                 }
 
 
+
+
+                //this has been re-written to support the new load
+                //item  is {server: id:}
+
                 function selectFromPalette(item) {
+                    let url = item.server + "StructureDefinition/" + item.id
+                    $scope.showWaiting = true;
+                    $http.get(url).then(
+                        function(data) {
+                            //update the UI
+                            selectEntry({resource:data.data})
+                        }, function (err) {
+                            alert('error loading model: ' +url+ '. It may not be present on the current server');
+                        }
+                    ).finally(function () {
+                        $scope.showWaiting = false;
+                    })
+
+                    /*
                     var url = appConfigSvc.getCurrentConformanceServer().url+item.reference;
                     $scope.showWaiting = true;
                     projectSvc.smartGet(url).then(
@@ -1250,12 +1370,20 @@ angular.module("sampleApp")
                             $scope.showWaiting = false;
                         }
                     );
+                    */
                 }
 
             };
 
             //add the current model to the current users palette of models
+            //uopdated to new palette
             $scope.addToPalette = function() {
+                let newPaletteEntry = {server:$scope.conformanceServer.url,id:$scope.SD.id}
+                $localStorage.newPalette.push(newPaletteEntry)
+                $scope.isInPalette = true;
+                alert("Model has been added to the Palette")
+                //$scope.newPalette = $localStorage.newPalette;
+                /*
                 if ($scope.Practitioner && $scope.currentType) {
                     //create the palette if it doesn't exist
                     if (!$scope.lmPalette) {
@@ -1287,6 +1415,7 @@ angular.module("sampleApp")
                     )
 
                 }
+                */
             };
 
 
@@ -1429,7 +1558,7 @@ angular.module("sampleApp")
 
 
             //used to provide the filtering capability...
-            $scope.filterModelList = function(filter) {
+            $scope.filterModelListDEP = function(filter) {
                 filter = filter.toLowerCase();
                 $scope.bundleModels = {entry:[]};   //a mnimal bundle
                 $scope.originalAllModels.entry.forEach(function(entry){
@@ -1593,13 +1722,12 @@ angular.module("sampleApp")
             };
 
             $scope.newModel = function(){
-                
                 editModel();
             };
 
             //edit the model description. Create a new one if 'header' is null...
             var editModel = function(SD){
-                $scope.canSaveModel = true;     //allow edits to the model to be saved
+               // $scope.canSaveModel = true;     //allow edits to the model to be saved
                 $uibModal.open({
                     templateUrl: 'modalTemplates/newLogicalModel.html',
                         size: 'lg',
@@ -1872,6 +2000,8 @@ angular.module("sampleApp")
                 });
 
 
+                //just save the model
+
 
 
                 //smartPut will attempt to refresh the access token if the endpoint is protected by SMART
@@ -1924,37 +2054,58 @@ angular.module("sampleApp")
                 }
             };
 
-            //select a model - whether from the 'all' list or the palette
+            //select a model - whether from the 'all' list or the palette. entry is Bundle.entry
             function selectEntry(entry) {
+                $scope.currentUserIsEditor = false
                 delete $scope.modelHistory;
                 delete $scope.selectedNode;
                 delete $scope.commentTask;      //the task to comment on this model...
-                //delete $scope.input.mdComment;  //the comment
                 delete $scope.taskOutputs;      //the outputs of the task (Communication resource currently)
-                //delete $scope.isFilteredModel;  //true if this model is filtered...
-
-               // $scope.$broadcast('loadTasks',entry)
-
-
+                delete $scope.fsh;
 
                 $('#htmlDD').contents().find('html').html("")
                 delete $scope.downloadLinkDoc;
                 delete $scope.downloadLinkDocName;
 
-
-
-
-
-
-                $scope.canSaveModel = true;     //allow edits to the model to be saved
+               // $scope.canSaveModel = true;     //allow edits to the model to be saved
 
                 $scope.isDirty = false;
+
+                if (! entry.resource.snapshot) {
+                    alert('This resource has no snapshot element, so cannot be used by this app')
+                    return;
+                }
+
+
                 $scope.treeData = logicalModelSvc.createTreeArrayFromSD(entry.resource);
 
                 if ($scope.treeData.length == 0 ) {
                     alert("There's a problem with the model structure. Please contact David Hay for assistance - david.hay25@gmail.com")
                 }
 
+
+                //see if the current user is set as the editor for this model
+
+                let modelEditor = $scope.treeData[0].data.header.editor
+                if (modelEditor) {
+                    //an editor has been set
+                    if ($scope.currentUser && ( $scope.treeData[0].data.header.editor == $scope.currentUser.email)) {
+                        $scope.currentUserIsEditor = true;
+                    }
+                } else {
+                    //no editor in the model - anyone can update
+                    $scope.currentUserIsEditor = true;
+                }
+
+
+
+                //see if the item is in the palette
+                $scope.isInPalette = false
+                $scope.newPalette.forEach(function (item){
+                    if (item.id == entry.resource.id) {
+                        $scope.isInPalette = true
+                    }
+                })
 
 
                 let item = $scope.treeData[0]
@@ -2055,7 +2206,7 @@ angular.module("sampleApp")
                 */
 
 
-                checkInPalette();
+               // checkInPalette();
                 //updateInstanceGraph();
                 $scope.hidePatientFlag = false;
 
@@ -2170,7 +2321,7 @@ angular.module("sampleApp")
             }
 
             //check if the current model is in the current users palette
-            function checkInPalette() {
+            function checkInPaletteDEP() {
                 delete $scope.isInPalette;      //true if the model is in the
 
                 if ($scope.currentType && $scope.lmPalette) {

@@ -1,15 +1,16 @@
 angular.module("sampleApp")
     .controller('taskViewerCtrl',
-        function ($scope,$http,v2ToFhirSvc,$timeout,$localStorage) {
+        function ($scope,$http,v2ToFhirSvc,$timeout,taskViewerSvc, $localStorage) {
 
             $scope.input = {}
-
+            $scope.taskViewerSvc = taskViewerSvc
             $scope.moment = moment;
 
             $scope.state = 'view';
             //possible states: view, newtask, viewlog
 
-            $scope.thisUserId = $localStorage.pcUserId || "Organization/cmdhb"
+            //$scope.thisUserId = $localStorage.pcUserId || "Organization/cmdhb"
+
 /*
             function getAllTasks() {
                 let url = "/ctAllTasks"
@@ -37,15 +38,44 @@ angular.module("sampleApp")
             getAllTasks();
         */
 
+            //will be a list of all patients for whom there is an active task
+            $scope.allPatients = []
+
             function getActiveTasks() {
                 let url = "/ctOpenTasks"
                 $http.get(url).then(
                     function(data) {
                         console.log(data.data)
-                        $scope.bundleTasks = data.data
+                        $scope.bundleTasks = {entry:[]} //todo - make this a simple list...
+                        data.data.entry.forEach(function (entry) {
+                            if (entry.resource.resourceType == 'Task') {
+                                $scope.bundleTasks.entry.push(entry)
+                            } else {
+                                let patient = entry.resource
+                                let display = "Id=" + patient.id
+                                if (patient.name) {
+                                    display = ""
+                                    if (patient.name[0].given) {
+                                        display += patient.name[0].given[0]
+                                    }
+                                    display += " " + patient.name[0].family + " (Id:" + patient.id + ")"
+                                     //display = patient.name[0].familypatient.name[0].family
+                                }
+
+                                //used for patient perspective...
+                                $scope.allPatients.push({resource:patient,display:display,ref:'Patient/'+patient.id})
+                            }
+                            //$scope.bundleTasks = data.data
+                        })
+                        $scope.$broadcast('patsLoaded', { });
+
+
+
+                        //get the list of patients
+
+
                     }
                 )
-
             }
             getActiveTasks()
 
@@ -60,6 +90,32 @@ angular.module("sampleApp")
 
             }
             getCompletedTasks()
+
+            //Get the organizations that can receive correction requests
+            $http.get("/ctOrganizations").then(
+                function(data) {
+                    console.log(data.data)
+                    $scope.organizations = []
+                    if (data.data.entry && data.data.entry.length > 0) {
+                        data.data.entry.forEach(function (entry) {
+                            $scope.organizations.push(entry.resource)
+                        })
+                        $scope.selectedOrganization = $scope.organizations[0]
+
+                        $scope.$broadcast('orgsLoaded', { });
+
+
+                    } else {
+                        alert("There are no organizations configured to receive correction requests")
+                    }
+                    //$scope.organizations = data.data
+
+                }
+            )
+            $scope.selectOrganization = function (org){
+                $scope.selectedOrganization = org
+            }
+
 
             $scope.getTaskHistory = function(task) {
                 delete $scope.selectedTaskVersionCommunication;
@@ -98,6 +154,8 @@ angular.module("sampleApp")
 
             }
 
+            /*
+
             $scope.newTask = function () {
                 $scope.state = "newtask"
             }
@@ -128,7 +186,7 @@ angular.module("sampleApp")
 
                 communication.status = "completed"
                 communication.category = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",code:"medRecCxReq"}]}
-                communication.recipient = {reference:$scope.thisUserId}
+                communication.recipient = {reference:"Organization/" + $scope.selectedOrganization.id}
                 communication.subject = {reference:"Patient/"+patient.id }
                 communication.sender = {reference:"Patient/"+patient.id }
                 communication.reasonCode = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",code:"medRecCxReq"}]}
@@ -158,13 +216,16 @@ angular.module("sampleApp")
 
             }
 
+
+            */
+
             //A resource has been selected in the correction set
             $scope.selectResource = function (resource) {
                 $scope.selectedResource = resource;
             }
 
             //A task has been selected in the list to the left. Get all the communications that
-            $scope.selectPrimaryTask = function(task) {
+            $scope.selectPrimaryTask = function(task,cb) {
                 $scope.state = 'view';
 
                 $scope.primaryTask = task
@@ -175,6 +236,24 @@ angular.module("sampleApp")
                 delete $scope.selectedTaskVersion;
                 delete $scope.selectedTaskVersionCommunication;
                 delete $scope.taskHistory
+                delete $scope.ehrSelectedPatient
+
+
+                //Get the patient as a separate request. Could be a better way...
+                if (task.for && task.for.reference) {
+                    let ref = task.for.reference;
+                    let ar = ref.split('/')
+                    let qry = "/proxy/Patient/"+ ar[ar.length-1]  //the id
+                    $http.get(qry).then(
+                        function(data) {
+                            $scope.ehrSelectedPatient = data.data
+                        },
+                        function(err) {
+                            console.log(err)
+                        }
+
+                    )
+                }
 
 
                 //get the Primary communication (has an 'input' link)
@@ -198,8 +277,10 @@ angular.module("sampleApp")
                     $http.get(url).then(
                         function (data) {
                             $scope.primaryCommunication = data.data
+
                             //Don't add here - it gets added in the 'about' call
-                            //$scope.allResourcesForRequest.push(data.data)
+                            // = not when using the 'real' about query!
+                            $scope.allResourcesForRequest.push(data.data)
 
                             //now get the other Communication resources with an 'about' reference to the primary one
                             //nested so know when to draw the graph - todo more performant options are possible
@@ -219,7 +300,7 @@ angular.module("sampleApp")
                                         //order the communications so the reply is below the request
 
 
-                                        //first populate the has with coms that are not responses
+                                        //first populate the hash with coms that are not responses
                                         data.data.entry.forEach(function (entry) {
                                             let com = entry.resource
                                             //either inResponse is empty or an empty array
@@ -276,6 +357,10 @@ angular.module("sampleApp")
                                     let options = {bundle:bundle,hashErrors:{},serverRoot:""}
 
                                     drawGraph(options)
+                                    //used in patient tab to return the list of matching resources...
+                                    if (cb) {
+                                        cb($scope.allResourcesForRequest)
+                                    }
 
                                 }, function(err) {
 
@@ -307,7 +392,7 @@ angular.module("sampleApp")
                     communication.about = [{reference:"Communication/"+$scope.primaryCommunication.id }]
                     communication.subject = $scope.primaryCommunication.subject
                     communication.recipient = [$scope.primaryCommunication.subject]
-                    communication.sender = {reference:$scope.thisUserId }  //the UI user
+                    communication.sender = {reference:"Organization/" + $scope.selectedOrganization.id }  //the UI user
                     communication.reasonCode = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",code:"medRecCxReq"}]}
                     communication.payload = [{contentString:comment}]
                     bundle.entry.push({resource:communication})
@@ -332,7 +417,6 @@ angular.module("sampleApp")
                     alert("No sender found...")
                     return
                 }
-
 
                 let msg = "How did the patient respond?"
                 let text = "<div xmlns='http://www.w3.org/1999/xhtml'>From Patient</div>"
@@ -402,7 +486,7 @@ angular.module("sampleApp")
                     communication.about = [{reference:"Communication/"+$scope.primaryCommunication.id }]
                     communication.subject = $scope.primaryCommunication.subject
                     communication.recipient = $scope.primaryCommunication.subject
-                    communication.sender = {reference : $scope.thisUserId} //the UI user
+                    communication.sender = {reference : "Organization/" + $scope.selectedOrganization.id} //the UI user
                     communication.reasonCode = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",code:"medRecCxReq"}]}
                     communication.payload = [{contentString:comment}]
                     let bundle = {resourceType:'Bundle','type':'collection',entry:[]}

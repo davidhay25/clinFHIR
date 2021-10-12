@@ -1,9 +1,11 @@
 //endpoints for patient corrections Task functionality
 
 let request  = require('request');
-let serverUrl =  "http://home.clinfhir.com:8054/baseR4/"
+//let serverUrl =  "http://home.clinfhir.com:8054/baseR4/"
 
 //let serverUrl =  "http://survey.clinfhir.com:8091/baseR4/"
+
+let serverUrl =  "http://localhost:8091/baseR4/"
 
 function setup(app,db) {
 
@@ -30,7 +32,7 @@ function setup(app,db) {
 
     })
 
-    //get a
+    //get the full history of a task
     app.get('/fhir/Task/:id/_history',function(req,res){
         let qry = serverUrl + "Task/" + req.params.id + "/_history?_count=50";
         executeQuery(qry,function(vo){
@@ -46,7 +48,6 @@ function setup(app,db) {
 
     //the implementation of Task?reasonReference
     app.get('/fhir/Task',function(req,res){
-
 
         //proxy to the server
         var fhirQuery = req.originalUrl
@@ -88,8 +89,39 @@ function setup(app,db) {
         res.send(qry)
     })
 
+
+    //proxy for Communication requests
+    app.get('/fhir/Communication*', function (req,res){
+        console.log('orig',req.url)
+        let qry = serverUrl + req.url.replace("/fhir/","")      //remove the leading /
+        console.log('about',qry)
+        let options = {
+            method:'GET',
+            uri : qry,
+            headers: {
+                'Accept': 'application/json+fhir',
+                'Content-type': 'application/json+fhir'
+            }
+        };
+
+        request(options,function(error,response,body){
+            console.log(response.statusCode)
+            if (body) {
+                try {
+                    let json = JSON.parse(body)
+                    res.json(json)
+                } catch (ex) {
+                    res.status(500).send(error)
+                }
+
+            } else {
+                res.status(500).json(error)
+            }
+        })
+    })
+
     //get a single Communication by id
-    app.get('/fhir/Communication/:id',function(req,res){
+    app.get('/XXfhir/Communication/:id',function(req,res){
         let id = req.params.id
         let url = serverUrl + "Communication/" + id
         executeQuery(url,function (vo) {
@@ -105,9 +137,8 @@ function setup(app,db) {
 
     })
 
-
     //a simple implementation of an 'about' SP
-    app.get('/fhir/Communication',function(req,res){
+    app.get('/XXfhir/Communication',function(req,res){
         let qry = req.query;
         console.log(qry)
         if (qry.about) {
@@ -470,7 +501,7 @@ console.log(response.statusCode)
                 task.code = {coding:[{system:"http://hl7.org/fhir/uv/patient-corrections/CodeSystem/PatientCorrectionTaskTypes",
                         code:"medRecCxReq"}]}
                 task.status = "ready"
-                task.businessStatus = {Coding:[{code:"for-initial-review", system:"http://clinfhir.com/cs/corrections"}]}
+                task.businessStatus = {coding:[{code:"for-initial-review", system:"http://clinfhir.com/cs/corrections"}]}
                 task.intent = "order"
                 task.focus = {reference:"Communication/"+communicationId}
                 //task.input = {reference:"Communication/"+communicationId}
@@ -596,9 +627,32 @@ console.log('ccValue',JSON.stringify(ccValue))
 
     }
 
+    //========= functions that are specific to the app...
+
+    //these are the organizations that a correction requests can be sent to.
+    //May add more logic later...
+    app.get('/ctOrganizations',function(req,res){
+
+        let url = serverUrl + "Organization";
+
+        console.log(url)
+        let options = {
+            method:'GET',
+            uri : url,
+            headers: {
+                'Accept': 'application/json+fhir'
+            }
+        };
+
+        request(options,function(error,response,body){
+            res.json(JSON.parse(body))
+        })
+
+    })
+
     app.get('/ctOpenTasks',function(req,res){
 
-        let url = serverUrl + "Task?status:not=completed&code=medRecCxReq";
+        let url = serverUrl + "Task?status:not=completed&code=medRecCxReq&_include=Task:subject&_count=100";
 
         console.log(url)
         let options = {
@@ -701,6 +755,36 @@ console.log('ccValue',JSON.stringify(ccValue))
     }
 
     //============= proxy endpoints
+
+
+    app.get('/proxy/*', function (req,res){
+
+        let qry = serverUrl + req.url.replace("/proxy/","")      //remove the leading /
+
+        let options = {
+            method:'GET',
+            uri : qry,
+            headers: {
+                'Accept': 'application/json+fhir',
+                'Content-type': 'application/json+fhir'
+            }
+        };
+
+        request(options,function(error,response,body){
+            console.log(response.statusCode)
+            if (body) {
+                try {
+                    let json = JSON.parse(body)
+                    res.json(json)
+                } catch (ex) {
+                    res.status(500).send(error)
+                }
+
+            } else {
+                res.status(500).json(error)
+            }
+        })
+    })
 
     //update a resource - eg a task
     app.put('/fhir/:type/:id',function(req,res){

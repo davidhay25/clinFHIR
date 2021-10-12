@@ -120,6 +120,62 @@ angular.module("sampleApp")
 
         return {
 
+            makeFSH : function(tree){
+                let result = []
+                let root = tree[0]
+
+                result.push("Logical:       "+root.text)
+                result.push("Id:            " + "logical-" + root.text)
+                if (root.data && root.data.header) {
+                    if (root.data.header.title) {
+                        result.push("Title:         "+root.data.header.title)
+                    }
+                    if (root.data.header.purpose) {
+                        result.push("Description:   "+root.purpose)
+                    }
+
+
+                }
+
+                result.push("")
+                tree.forEach(function(node,inx){
+                    console.log(node)
+                    if (inx > 0) {
+                        //skip the first
+                        let text = node.text
+                        let data = node.data
+                        let indent = node.id.split('.').length -2;    //how deeply indented
+                        let lne = ""
+                        for (var i=0; i< indent; i++) {
+                            lne = "  " + lne
+                        }
+                        lne += "* " + text
+                        lne += " " + data.min + '..' + data.max
+                        if (data.type && data.type.length > 0) {
+                            lne += " " + data.type[0].code
+                            if (data.type[0].targetProfile) {
+                                let tp = data.type[0].targetProfile[0]
+                                    if (tp) {
+                                        let ar1 = tp.split('/')
+                                        let targetType = ar1[ar1.length -1]
+                                        lne += "(" + targetType + ")"
+                                    }
+
+
+                            }
+
+                        }
+
+                        lne += ' "' + data.short + '"'
+
+
+                        result.push(lne)
+                    }
+
+                })
+                return result.join('\n')
+            },
+
             createDataModel : function(treeData) {
                 //determine type (Heading, group, item for each id
                 let hash = {}
@@ -1430,6 +1486,7 @@ angular.module("sampleApp")
                 }
 
             },
+
             openTopLevelOnly : function(tree) {
                 tree.forEach(function (node,inx) {
                     node.state = node.state || {}
