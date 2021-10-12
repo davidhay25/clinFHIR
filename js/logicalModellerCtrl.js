@@ -38,8 +38,8 @@ angular.module("sampleApp")
 
 
             //This replaces the lmPallette. It is an array of objects: {server (url): id: }
-
-            $scope.newPalette = $localStorage.newPalette || [];
+            $localStorage.newPalette = $localStorage.newPalette || []
+            $scope.newPalette = $localStorage.newPalette 
 
 
             $scope.appConfigSvc = appConfigSvc
@@ -1380,7 +1380,7 @@ angular.module("sampleApp")
             //uopdated to new palette
             $scope.addToPalette = function() {
                 let newPaletteEntry = {server:$scope.conformanceServer.url,id:$scope.SD.id}
-                $scope.newPalette.push(newPaletteEntry)
+               $localStorage.newPalette.push(newPaletteEntry)
                 $scope.isInPalette = true;
                 alert("Model has been added to the Palette")
                 //$scope.newPalette = $localStorage.newPalette;
