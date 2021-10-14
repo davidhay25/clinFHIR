@@ -495,7 +495,7 @@
                                                             <div ng-repeat="(k,v) in hashEntries">
                                                                 <div><strong>{{k}}</strong></div>
                                                                 <div ng-repeat = "entry in v"
-                                                                    ng-class="'list-group-item':true">
+                                                                    ng-class="{'list-group-item':true}">
                                                                     <div style="padding-left: 10px; cursor: pointer"
                                                                          ng-click="selectBundleEntry(entry,hashErrors[$index])">
                                                                         <div> {{entry.resource.text.div | cleanTextDiv | limitTo:50}}</div>

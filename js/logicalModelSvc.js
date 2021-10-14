@@ -2799,8 +2799,6 @@ angular.module("sampleApp")
 
             },
             getModelHistory: function (id) {
-
-
                 var url = appConfigSvc.getCurrentConformanceServer().url + "StructureDefinition/" + id + "/_history";
                 return GetDataFromServer.adHocFHIRQueryFollowingPaging(url)
 

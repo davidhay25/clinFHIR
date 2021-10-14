@@ -39,7 +39,7 @@ angular.module("sampleApp")
 
             //This replaces the lmPallette. It is an array of objects: {server (url): id: }
             $localStorage.newPalette = $localStorage.newPalette || []
-            $scope.newPalette = $localStorage.newPalette 
+            $scope.newPalette = $localStorage.newPalette
 
 
             $scope.appConfigSvc = appConfigSvc
@@ -1898,6 +1898,7 @@ angular.module("sampleApp")
 
                             } else {
                                 //this is a new model
+                                $scope.currentUserIsEditor = true;  //regardless, this yser can edit
 
                                 $scope.rootName = result.name;      //this is the 'type' of the logical model - like 'Condition'
 
@@ -1962,6 +1963,8 @@ angular.module("sampleApp")
                                     drawTree();
                                     makeSD();
                                     //add it to the list so we can see it
+                                    $scope.bundleModels = $scope.bundleModels || {entry:[]}
+
                                     $scope.bundleModels.entry.push({resource:$scope.SD})
                                     $scope.currentType = angular.copy($scope.SD);     //keep a copy so that we can return to it from the history..
                                 }
@@ -2349,14 +2352,15 @@ angular.module("sampleApp")
             }
 
             function loadHistory(id) {
+                //$scope.modelHistory
                 logicalModelSvc.getModelHistory(id).then(
                     function(data){
-
                         $scope.modelHistory =data.data;
                     },
                     function(err) {
-                        msg = "There was an error loading the history of changes for this model.";
-                        msg += angular.toJson(err)
+                        msg = "There was an error loading the history of changes for this model. You can still continue.";
+                        //msg += angular.toJson(err)
+
                         alert(msg);
                     }
                 )
