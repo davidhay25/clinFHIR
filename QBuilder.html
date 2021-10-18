@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!--
+    <script src="js/libs/jquery-1.9.0.min.js"></script>
+    !-->
+    <script src="js/libs/jquery-1.9.0.min.js"></script>
+    <script src="js/libs/angular.min1-5.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+
+    <script src="js/libs/firebase.js"></script>
+    <script src="js/libs/angularfire.min.js"></script>
+    <script src="js/libs/moment.min.js"></script>
+
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+
+    <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
+    <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
+
+    <title>Questionnaire Builder</title>
+
+
+    <script>
+
+
+        angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase','ui.checkbox']).config(function($locationProvider) {
+
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+        });
+
+        angular.module("sampleApp").constant("moment", moment);
+
+
+    </script>
+
+    <script>
+        var config = {
+            apiKey: "AIzaSyBNMohLbPiSKwpGwfARopdeW_6LLXujcUo",
+            authDomain: "clinfhir.firebaseapp.com",
+            databaseURL: "https://clinfhir.firebaseio.com",
+            storageBucket: ""
+        };
+
+        if (firebase) {
+            firebase.initializeApp(config);
+
+        }
+    </script>
+
+
+    <script src="js/libs/ngStorage.min.js"></script>
+    <script src="js/modalDialogSvc.js"></script>
+    <script src="js/QBuilderCtrl.js"></script>
+
+    <script src="js/filters.js"></script>
+    <script src="js/libs/jstree.min.js"></script>
+
+    <script src="js/q-editVS.js"></script>
+    <script src="js/q-editItem.js"></script>
+    <script src="js/QBuilderSvc.js"></script>
+    <script src="js/libs/angular-bootstrap-checkbox.js"></script>
+
+    <style>
+        .q-required {
+            color: red;
+        }
+
+        .qbold {
+            font-weight: bold;
+        }
+        .qindent {
+            padding-left: 8px;
+        }
+
+        TH {
+           background-color: lightgrey;
+        }
+    </style>
+
+</head>
+<body style="padding: 8px;padding-top: 80px">
+
+
+<div ng-app="sampleApp" ng-controller="QBuilderCtrl" class="container-fluid" ng-cloak>
+
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="col-md-8">
+            <a class="navbar-brand" href="#">Questionnaire Builder</a>
+        </div>
+
+
+
+        <div class="col-md-4 col-sm-4">
+            <div class="navbar-text">
+
+                    <select ng-model="input.QEntry" class="form-control "
+                            ng-options = "entry.resource.name for entry in bundleQ.entry"
+                            ng-change="selectQ()">
+
+                    </select>
+              
+
+            </div>
+
+        </div>
+
+
+    </nav>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="banner">Q Design</div>
+            <uib-tabset>
+                <uib-tab heading="Q tree" select="drawTree()">
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div id="designTree"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <div ng-show="selectedNode">
+
+                                <div class="banner">{{selectedNode.text}}</div>
+                                <br/>
+                                <div>Type: {{selectedNode.data.type}}</div>
+
+                                <div>Mult: {{selectedNode.data.mult}}</div>
+
+                                <div>Description: {{selectedNode.data.description}}</div>
+
+
+                                <div ng-show="selectedNode.data.vsName">
+                                    VS: {{selectedNode.data.vsName}}
+                                </div>
+
+                                <hr/>
+
+                                <div ng-show="false">
+                                    <button class="btn btn-link" ng-click="deleteItem()">Delete item</button>
+
+                                    <button class="btn btn-link" ng-click="editItem()">Edit item</button>
+
+                                    <button class="btn btn-link" ng-click="moveUp()">Up</button>
+
+                                    <button class="btn btn-link" ng-click="moveDn()">Down</button>
+
+                                    <button class="btn btn-link" ng-click="moveRight()">Right</button>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+
+                    <br />
+                    <hr/>
+
+                    <!-- Only from the root or first level nodes - hidden for now
+                    <div class="row" ng-show="false || selectedNode && (selectedNode.parent == 'root' || selectedNode.parent == '#')">
+-->
+                    <div class="row" ng-show="false">
+
+                        <div>
+                            <strong>Add a child element to {{selectedNode.text}}</strong>
+                        </div>
+                        <div class="col-md-3">
+                            Element Name
+                            <input type="text" class="form-control" ng-model="input.text" placeholder="Name"/>
+                        </div>
+                        <div class="col-md-2">
+                            Element type
+                            <select ng-model="input.type" class="form-control"
+                                    ng-options="type for type in qtypes"></select>
+
+                        </div>
+
+                        <div class="col-md-2">
+                            Multiplicity
+                            <select ng-model="input.mult" class="form-control"
+                                    ng-options="mult for mult in multiplicities"></select>
+
+                        </div>
+
+                        <div class="col-md-3">
+                            <div ng-show="input.type == 'choice'">
+                                ValueSet
+                                <select ng-model="input.choiceVS" class="form-control"
+                                        ng-options = "vs.name for vs in QVS">
+
+                                </select>
+                            </div>
+
+
+                        </div>
+                        <div class="col-md-2">
+                            <button ng-show="input.text" class="btn btn-primary" ng-click="addItem()">Add</button>
+                        </div>
+
+                    </div>
+
+
+
+
+                </uib-tab>
+
+                <uib-tab heading="Q table">
+
+
+                    <table class="table table-bordered">
+                        <tr><th>Text</th><th>Type</th><th>Mult</th><th>Details</th></tr>
+                        <tr ng-repeat="item in formDef" >
+                            <td>
+                                <span ng-class="{qbold:item.data.type == 'group',qindent:item.data.type !== 'group'}">
+                                    {{item.text}}
+                                </span>
+
+                            </td>
+                            <td>{{item.data.type}}</td>
+                            <td>{{item.data.mult}}</td>
+                            <td>
+                                {{item.data.description}}
+                                {{item.data.vsName}}
+                            </td>
+                        </tr>
+                    </table>
+                </uib-tab>
+
+                <uib-tab ng-show = "false" heading="ValueSets">
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="list-group">
+                                <div class="list-group-item" ng-repeat="vs in QVS"
+                                     ng-click="selectVS(vs)" style="cursor: pointer">
+                                    {{vs.name}}
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div ng-show="selectedVS">
+                                <table class="table table-bordered">
+                                    <tr><th>Code</th><th>Display</th><th>System</th></tr>
+                                    <tr ng-repeat="concept in selectedVS.concepts">
+                                        <td>{{concept.code}}</td>
+                                        <td>{{concept.display}}</td>
+                                        <td>{{concept.system}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-link" ng-click="addVS()">Add VS</button>
+
+                </uib-tab>
+
+                <uib-tab heading="Q resource">
+                    <pre>{{qResource | json}}</pre>
+                </uib-tab>
+
+
+                <uib-tab heading="Logical Model">
+                    <pre>{{LM}}</pre>
+                </uib-tab>
+
+
+                <uib-tab  ng-show = "false" heading="treeData">
+                    <pre>{{selectedNode | json}}</pre>
+                    <pre>{{treeData | json}}</pre>
+                </uib-tab>
+
+                <uib-tab heading="Paste Q">
+                    <button ng-show="input.import" class="btn btn-link pull-right" ng-click="importQ(input.import)">Import</button>
+                    <br/>
+                    <div class="clearfix"></div>
+                    <textarea ng-model="input.import" rows="20" class="form-control"></textarea>
+                </uib-tab>
+
+            </uib-tabset>
+
+
+
+        </div>
+
+
+        <div class="col-md-6">
+            <div class="banner">Q Preview </div>
+
+            <uib-tabset>
+                <uib-tab heading="Form" >
+                    <div ng-repeat="item in formDef">
+                        <div class="row">
+                            <div class="col-md-4">
+
+                                <div ng-show="item.data.type == 'group'">
+                                    <strong>  {{item.text}}</strong>
+                                </div>
+
+
+                                <div ng-hide="item.data.type == 'group'">
+                                    <div style="padding-left: 8px">{{item.text}}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div ng-switch="item.data.type">
+
+                                    <div ng-switch-when="group">
+
+                                    </div>
+
+                                    <div ng-switch-when="text">
+
+                                        <textarea ng-model="form[item.id]" class="form-control"
+                                            ng-blur="makeQR(item.id)"
+                                        ></textarea>
+                                    </div>
+
+                                    <div ng-switch-when="boolean">
+
+                                        <checkbox ng-model="form[item.id]"  ng-blur="makeQR(item.id)"></checkbox>
+                                    </div>
+
+
+                                    <div ng-switch-when="choice">
+
+
+                                        <select class="form-control" ng-model="form[item.id]"
+                                                ng-change="makeQR(item.id)"
+                                                ng-options = "concept.valueCoding.display for concept in item.data.answerOption">
+
+                                        </select>
+
+                                        <!--  <select class="form-control" ng-model="form[item.id]"
+                                            ng-options = "concept.display for concept in item.data.vs.concepts">
+
+                                        </select>-->
+
+
+                                    </div>
+                                    <div ng-switch-default>
+                                        <input type="text"  ng-blur="makeQR(item.id)"
+                                               ng-model="form[item.id]" class="form-control"/>
+                                    </div>
+
+                                </div>
+                                <br/>
+
+
+
+                            </div>
+                        </div>
+                    </div>
+
+                </uib-tab>
+                <uib-tab heading="QR" >
+                    <pre>{{QR | json}}</pre>
+
+                </uib-tab>
+            </uib-tabset>
+
+
+
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

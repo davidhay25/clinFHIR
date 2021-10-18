@@ -1,0 +1,86 @@
+<div>
+
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+                <h3 class="modal-title">Edit item</h3>
+            </div>
+
+            <div class="col-md-4 col-sm-4">
+                <div class="pull-right">
+                    <button class="btn btn-success pull-right" ng-click="close()">
+                        Update
+                    </button>
+                    <button class="btn btn-link pull-right" ng-click="$dismiss()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-body">
+
+        <div class="row">
+            <div class="col-md-3 col-sm-3">
+                <span>Text</span>
+            </div>
+            <div class="col-md-8 col-sm-8">
+                <input type="text" class="form-control"  ng-model="currentItem.text"/>
+            </div>
+        </div>
+        <br/>
+        <div class="row">
+            <div class="col-md-3 col-sm-3">
+                <span>Type</span>
+            </div>
+            <div class="col-md-8 col-sm-8">
+                <select class="form-control" ng-model="input.type"
+                        ng-options = "type for type in qtypes"></select>
+
+            </div>
+        </div>
+
+        <br/>
+
+        <div class="row">
+            <div class="col-md-3 col-sm-3">
+                <span>Multiplicity</span>
+            </div>
+            <div class="col-md-8 col-sm-8">
+                <select class="form-control" ng-model="input.mult"
+                        ng-options = "mult for mult in multiplicities"></select>
+
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3 col-sm-3">
+                <span>ValueSet</span>
+            </div>
+            <div class="col-md-8 col-sm-8">
+                <select class="form-control" ng-model="input.vsName"
+                        ng-options = "name for name in arVsName"></select>
+
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal-header">
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+
+
+
+
+
+
+            </div>
+
+        </div>
+
+
+
+    </div>
+</div>
