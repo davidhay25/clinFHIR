@@ -1,9 +1,16 @@
 angular.module("sampleApp")
     .controller('QBuilderCtrl',
-        function ($scope,$firebaseAuth,$uibModal,modalService,$localStorage,$http,$timeout,QBuilderSvc) {
+        function ($scope,$firebaseAuth,$uibModal,modalService,
+                  $localStorage,$http,$timeout,QBuilderSvc,v2ToFhirSvc) {
 
+
+        //http://localhost:8091/baseR4/Task?_id=57&_include=Task:patient&_include=Task:owner&_include=Task:focus
+            //http://localhost:8091/baseR4/Task?_id=67&_include=Task:patient&_include=Task:owner&_include=Task:focus&_include=Task:requester
             $scope.input = {}
             $scope.form = {}
+
+            //main data server (not necessarily the Forms Manager)
+            $scope.dataServer = "http://localhost:8091/baseR4"
 
             $scope.multiplicities = ["0..1","0..*","1..1","1..*"]
             $scope.mult = $scope.multiplicities[0] //first time in default to optional
@@ -11,18 +18,67 @@ angular.module("sampleApp")
             $scope.qtypes = $scope.qtypes.concat(["url","choice","open-choice","attachment","reference","quantity"])
             $scope.input.type = $scope.qtypes[0]
 
-            /* temp
-            //The questionnaire - currently only one. Will need to support multiple eventually...
-            if ($localStorage.Q) {
-                $scope.treeData = $localStorage.Q
-            } else {
-                $scope.treeData = []
-                let root = {id:'root',text:'Root',parent:'#',state:{},data:{}}
-                $scope.treeData.push(root)
-                $localStorage.Q = $scope.treeData
+            //todo - load path from server - or set Id. Really need to use query  on HealthCareService
+            $scope.pathologistOrg = {resourceType:"Organization",id:'org100',name:"Path-R-Us"}
+            $scope.requester = {resourceType:"Practitioner",id:"prac-ss", name:{family:"Surgeon",first:["Steve"],text:"Steve Surgeon"}}
+            $scope.patient = {resourceType:"Patient",id:"8479",name:{text:"Levi Hay"}}
+            $scope.specimen = {resourceType:"Specimen",id:"spec-100",
+                subject:{reference:"Patient/" + $scope.patient.id},
+                type:{text:"Biopsy",coding:[{code:"BX",system:"http://terminology.hl7.org/CodeSystem/v2-0487"}]}}
+
+            $scope.getReportedOrders = function() {
+                QBuilderSvc.getReportedOrders($scope.dataServer).then(
+                    function(data) {
+                        $scope.reportedOrders = data;
+                    }, function (err) {
+                        alert(angular.toJson(err.data))
+                    }
+                )
             }
 
-            */
+            $scope.placeOrder = function() {
+                let url = $scope.dataServer //it's a transaction
+                $http.post(url,$scope.orderTransaction).then(
+                    function(){
+                        alert("Order submitted")
+                    }, function (err) {
+                        alert(angular.toJson(err.data))
+                    }
+                )
+            }
+            //retrieve orders that
+            $scope.getOrders = function() {
+                QBuilderSvc.getNewOrders($scope.dataServer).then(
+                    function(data) {
+                        $scope.pathOrdersList = data
+                    }, function(err) {
+                        alert(angular.toJson(err.data))
+                    }
+                )
+            }
+
+            $scope.selectPathRequest = function(item) {
+                $scope.selectedPathOrder = item
+            }
+
+            $scope.selectReport = function(item) {
+                $scope.selectedPathReport = item
+            }
+
+            //when the pathologist creates the report...
+            //Just have a DR for now, do need to update task
+            $scope.sendReport = function(task,text) {
+                QBuilderSvc.sendReport(task,text,$scope.dataServer).then(
+                    function(){
+                        $scope.getOrders()
+                        alert("Report saved on server and task updated")
+                    },function(err) {
+                        alert(angular.toJson(err.data))
+                    }
+                )
+
+
+            }
 
             //load the Q's from the server
             QBuilderSvc.getQFromServer().then(
@@ -47,7 +103,7 @@ angular.module("sampleApp")
 
             //select Q from the server
             $scope.selectQ = function(){
-
+                $scope.form = {}
                 console.log($scope.input.QEntry)
                 let Q = $scope.input.QEntry.resource
 
@@ -92,7 +148,69 @@ angular.module("sampleApp")
                     $scope.form['lname'] = "Doe"
                 }
 
-                $scope.QR = QBuilderSvc.makeQR($scope.form,$scope.hashItem)
+
+                //todo - load path from server - or set Id. Really need to use query  on HealthCareService
+                $scope.pathologistOrg = {resourceType:"Organization",id:'org100',name:"Path-R-Us"}
+
+                $scope.patient = {resourceType:"Patient",id:"8479",name:{family:"Hay",first:["Levi"],text:"Levi Hay"}}
+
+                $scope.QR = QBuilderSvc.makeQR($scope.qResource,$scope.form,$scope.hashItem)
+                $scope.QR.subject = {reference:"Patient/" + $scope.patient.id}
+
+                //let requester = {resourceType:"Practitioner",id:"prac-ss", name:{family:"Surgeon",first:["Steve"],text:"Steve Surgeon"}}
+
+                let serviceRequest = {resourceType: "ServiceRequest", id:'sr'+ new Date().getTime(),status:'active',
+                    performer:{reference:"Organization/" + $scope.pathologistOrg.id},
+                    requester:{reference:"Practitioner/" + $scope.requester.id},
+                    supportingInfo:[{reference:"QuestionnaireResponse/" + $scope.QR.id}],
+                    subject:{reference:"Patient/" + $scope.patient.id},
+                    specimen:{reference:"Specimen/" + $scope.specimen.id}}
+
+                let task = {resourceType: "Task", id:'tsk'+ new Date().getTime(), status:'requested',intent:"order",
+                    code : {coding:{system:'http://clinfhir.com',code:'pathrequest'},text:'Path request'},
+                    businessStatus :{coding:[{system:'http://clinfhir.com',code:"requestmade"}]},
+                    owner:{reference:"Organization/"+$scope.pathologistOrg.id},
+                    focus:{reference:"ServiceRequest/" + serviceRequest.id},
+                    for:{reference:"Patient/" + $scope.patient.id}}
+
+                let bundle = {resourceType : "Bundle",type:'transaction',entry:[]}
+
+                bundle.entry.push({resource:$scope.QR,request:{method:'PUT',
+                        url:"QuestionnaireResponse/"+$scope.QR.id}})
+
+                bundle.entry.push({resource:task,request:{method:'POST',url:"Task"}})
+
+                bundle.entry.push({resource:serviceRequest,request:{method:'POST',url:"ServiceRequest"}})
+
+                bundle.entry.push({resource:$scope.pathologistOrg,request:{method:'POST',url:"Organization"}})
+
+                bundle.entry.push({resource:$scope.requester,request:{
+                    method:'POST',
+                    url:"Practitioner",
+                    ifNoneExist:"_id="+$scope.requester.id
+                    }}
+                )
+
+                bundle.entry.push({resource:$scope.patient,request:{
+                        method:'POST',
+                        url:"ServiceRequest",
+                        ifNoneExist:"_id="+$scope.patient.id
+                    }}
+                )
+
+                bundle.entry.push({resource:$scope.specimen,request:{
+                        method:'POST',
+                        url:"Specimen"
+                    }}
+                )
+
+                $scope.orderTransaction = bundle
+
+                //temp
+                let options = {bundle:bundle,hashErrors: {},serverRoot:{}}
+                drawGraph(options)
+
+
             }
 
 
@@ -159,6 +277,92 @@ angular.module("sampleApp")
             $scope.qResource =  QBuilderSvc.makeQ($scope.treeData)  //The Q resource
 */
 
+
+            $scope.drawTree = function(){
+                if (! $scope.treeData) {
+                    return
+                }
+
+                expandAll()
+                deSelectExcept()
+                $('#designTree').jstree('destroy');
+                let x = $('#designTree').jstree(
+                    {'core': {'multiple': false, 'data': $scope.treeData, 'themes': {name: 'proton', responsive: true}}}
+                ).on('changed.jstree', function (e, data) {
+                    //seems to be the node selection event...
+
+                    if (data.node) {
+                        $scope.selectedNode = data.node;
+                        console.log(data.node)
+                    }
+
+                    $scope.$digest();       //as the event occurred outside of angular...
+                })
+                console.log($scope.treeData)
+
+            }
+
+
+            function drawGraph(options) {
+                let vo = v2ToFhirSvc.makeGraph(options)
+
+                var container = document.getElementById('bundleGraph');
+                var graphOptions = {
+                    physics: {
+                        enabled: true,
+                        barnesHut: {
+                            gravitationalConstant: -10000,
+                        }
+                    }
+                };
+                $scope.chart = new vis.Network(container, vo.graphData, graphOptions);
+
+                $scope.chart.on("click", function (obj) {
+
+                    var nodeId = obj.nodes[0];  //get the first node
+                    var node = vo.graphData.nodes.get(nodeId);
+                    $scope.selectedNode = node;
+
+                    //this is the entry that is selected from the 'bundle entries' tab...
+                    //$scope.selectedBundleEntry = node.entry;
+
+                    $scope.selectEntry(node.entry)
+
+                    $scope.$digest();
+                });
+            }
+
+
+            $scope.fitGraph = function(){
+                $timeout(function(){
+                    if ($scope.chart) {
+                        $scope.chart.fit();
+                    }
+                },1000)
+            };
+
+
+
+
+            let deSelectExcept = function() {
+                $scope.treeData.forEach(function (item) {
+                    if ($scope.selectedNode && $scope.selectedNode.id && item.id == $scope.selectedNode.id) {
+                        item.state.selected = true;
+                    } else {
+                        item.state.selected = false;
+                    }
+
+                })
+            }
+
+            let expandAll = function() {
+                $scope.treeData.forEach(function (item) {
+                    item.state.opened = true;
+                })
+
+            }
+
+
             function findById(id) {
                 let pos = -1, node = {}
                 $scope.treeData.forEach(function (item,inx) {
@@ -208,7 +412,7 @@ angular.module("sampleApp")
                         $scope.treeData.splice(pos+1,0,nodeToInsert)
                     }
 
-                       updateModelRepresentations()
+                    updateModelRepresentations()
                 }
             }
 
@@ -219,11 +423,11 @@ angular.module("sampleApp")
                 //check the item immediatly above - it must be a group
                 if (pos > 0) {
                     let parent = $scope.treeData[pos-1]
-                   if (parent.data.type !== 'group') {
-                       alert("The item above this one must be a group")
-                       return
-                   }
-                   // change the parent to be the id of the parent
+                    if (parent.data.type !== 'group') {
+                        alert("The item above this one must be a group")
+                        return
+                    }
+                    // change the parent to be the id of the parent
                     $scope.treeData[pos].parent = parent.id
                     updateModelRepresentations()
 
@@ -405,55 +609,6 @@ angular.module("sampleApp")
 
 
 
-
-            $scope.drawTree = function(){
-                if (! $scope.treeData) {
-                    return
-                }
-
-                expandAll()
-                deSelectExcept()
-                $('#designTree').jstree('destroy');
-                let x = $('#designTree').jstree(
-                    {'core': {'multiple': false, 'data': $scope.treeData, 'themes': {name: 'proton', responsive: true}}}
-                ).on('changed.jstree', function (e, data) {
-                    //seems to be the node selection event...
-
-                    if (data.node) {
-                        $scope.selectedNode = data.node;
-                        console.log(data.node)
-                    }
-
-                    $scope.$digest();       //as the event occurred outside of angular...
-                })
-                console.log($scope.treeData)
-
-            }
-
-            let deSelectExcept = function() {
-                $scope.treeData.forEach(function (item) {
-                    if ($scope.selectedNode && $scope.selectedNode.id && item.id == $scope.selectedNode.id) {
-                        item.state.selected = true;
-                    } else {
-                        item.state.selected = false;
-                    }
-
-                })
-            }
-
-            let expandAll = function() {
-                $scope.treeData.forEach(function (item) {
-                    item.state.opened = true;
-                })
-
-            }
-
-            /*
-            $timeout(function(){
-                $scope.drawTree()
-            },1000)
-
-*/
 
         }
     );

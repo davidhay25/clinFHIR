@@ -3,7 +3,7 @@ angular.module("sampleApp")
     .service('QBuilderSvc', function($q,$http,$filter,moment) {
 
 
-        let Qlung = `
+        let QlungDEP = `
     {
   "resourceType": "Questionnaire",
   "id": "QLungCancer",
@@ -226,6 +226,141 @@ angular.module("sampleApp")
 
         return {
 
+            //get all reports that have been created but not yet viewed by the creator
+            getReportedOrders : function(server){
+                let deferred = $q.defer()
+
+                let qry = server + "/Task?code=pathrequest&"
+                //qry += "status=in-progress&"
+                qry += "business-status=reportdone&"
+                qry += "_include=Task:patient&_include=Task:owner&_include=Task:focus"
+                $http.get(qry).then(
+                    function(data){
+
+                        let arReport = []
+                        if (data.data && data.data.entry) {
+                            let hash = {}
+
+                            data.data.entry.forEach(function (entry) {
+                                let key = entry.resource.resourceType + "/" + entry.resource.id
+                                hash[key] = entry.resource
+                            })
+
+                            data.data.entry.forEach(function (entry) {
+                                let resource = entry.resource
+                                if (resource.resourceType == "Task") {
+                                    let report = {}
+                                    report.task = resource
+                                    //now get the patient associated with the order
+                                    let patientReference = resource.for
+                                    if (patientReference && hash[patientReference]) {
+                                        report.patient = hash[patientReference]
+                                    }
+                                    //order.patient =
+                                    //    order.serviceRequest =
+
+                                    arReport.push(report)
+                                }
+                            })
+                        }
+
+                        deferred.resolve(arReport)
+
+                    }, function(err) {
+                        deferred.reject(err)
+                    })
+                return deferred.promise
+            },
+
+            //add a diagnostic report and update the task
+            sendReport : function(task,text,server) {
+                let deferred = $q.defer()
+                let bundle = {resourceType : "Bundle",type:'transaction',entry:[]}
+
+                let dr = {resourceType:'DiagnosticReport',status:'final'}
+                dr.code = {coding:[{system:'http://clinfhir.com',code:'pathreport'}]}
+                dr.presentedForm = {data:btoa(text),'content-type':'text/text'}
+
+                bundle.entry.push({resource:dr,request:{method:'POST',url:"DiagnosticReport"}})
+
+                //change the business status - but the task is still active
+                //todo change the owner to the ordering cliniciab
+
+                //todo - the task status is critical - and depends on the scope of the task -
+                //is it just the pathologist creating the report, or does it include the orderer viewing it?
+                //it may be better to have 2 tasks...
+                task.status = "in-progress"
+
+                task.businessStatus = {coding:[{system:'http://clinfhir.com',code:"reportdone"}]}
+
+                bundle.entry.push({resource:task,request:{
+                        method:'PUT',
+                        url:"Task/" + task.id
+                    }}
+                )
+                $http.post(server,bundle).then(
+                    function (data) {
+                        deferred.resolve(data)
+                    },function (err) {
+                        deferred.reject(err)
+                    }
+                )
+                let qry = server
+
+                return deferred.promise
+
+            },
+
+            //retrieve oriders that have not yet been actioned
+            getNewOrders : function(server) {
+                let deferred = $q.defer()
+
+                let qry = server + "/Task?code=pathrequest&status=requested&"
+                qry += "business-status=requestmade&"
+                qry += "_include=Task:patient&_include=Task:owner&_include=Task:focus&_include=Task:requester"
+                $http.get(qry).then(
+                    function(data){
+                        //create hash of all resources based on type/id
+                        let hash = {}
+                        let arOrders = []
+
+                        if (data.data.entry) {
+                            data.data.entry.forEach(function (entry) {
+                                let key = entry.resource.resourceType + "/" + entry.resource.id
+                                hash[key] = entry.resource
+                            })
+
+                            //now create an item for each task...
+                            data.data.entry.forEach(function (entry) {
+                            let resource = entry.resource
+                            if (resource.resourceType == "Task") {
+                                let order = {}
+                                order.task = resource
+                                //now get the patient associated with the order
+                                let patientReference = resource.for
+                                if (patientReference && hash[patientReference]) {
+                                    order.patient = hash[patientReference]
+                                }
+                                //order.patient =
+                                //    order.serviceRequest =
+
+                                arOrders.push(order)
+                            }
+
+
+                        })
+                        }
+
+                        deferred.resolve(arOrders)
+
+                    }, function(err) {
+                        alert(angular.toJson(err.data))
+                    }
+                )
+
+                return deferred.promise
+            },
+
             setItemDescriptionDEP : function(item) {
                 let extUrl = "http://clinfhir.com/structureDefinition/q-item-description"
                 if (item.extension) {
@@ -254,25 +389,71 @@ angular.module("sampleApp")
 
             },
 
-            makeQR : function(form,hash) {
+            makeQR : function(Q,form,hash) {
                 //make the QuestionnaireResponse from the form data
-                console.log(form,hash)
-                let QR = {resourceType:'QuestionnaireResponse',status:'in-progress',answer : []}
+                //hash is items from the Q keyed by linkId
+                //form is the data enterd keyed by linkId
+                let err = false
+                console.log(form)
+                console.log(hash)
+                let QR = {resourceType:'QuestionnaireResponse',id:"qr-" + new Date().getTime(),status:'in-progress',item : []}
+                QR.questionnaire = Q.url
+                Q.item.forEach(function (parent) {
+                    let parentItem = {linkId : parent.linkId,text:parent.text,item: []}
+                    QR.item.push(parentItem)
+                    parent.item.forEach(function (child) {
+                        let key = child.linkId  //the key for this Q item
+                        let value = form[key]
+                        switch (child.type) {
+                            case "boolean" :
+                                //regardless, push the answer
+                                parentItem.item.push({linkId:key,valueBoolean : value,text:child.text})
+                                break
+                            case "choice" :
+                                if ( value && value.code) {
+                                    parentItem.item.push({linkId: key, valueCoding: value.valueCoding,text:child.text})
+                                }
+                                break
+                            default:
+                                if ( value) {
+                                    parentItem.item.push({linkId:key,valueString : value,text:child.text})
+                                }
+                                break
+                        }
 
+
+
+                    })
+                })
+
+
+                return QR
+/*
                 Object.keys(form).forEach(function (key) {
                     let value = form[key]
                     let item = hash[key]  //the definition of the question
-                    let answer = {linkId : key}
-                    switch (item.type) {
+                    if (item) {
+                        let answer = {linkId : key}
+                        switch (item.type) {
 
-                        case "choice":
-                            answer = value      //will be a coding
-                            break;
-                        default :
-                            answer.valueString = value
+                            case "choice":
+                                answer = value      //will be a coding
+                                break;
+                            default :
+                                answer.valueString = value
+                        }
+                        QR.answer.push(answer)
+                    } else {
+                        err = true
+                        console.log("The hash entry for " + key + ' is missing')
                     }
-                    QR.answer.push(answer)
+
                 })
+
+                */
+                if (err) {
+                    //alert("there was an error creating the QR - see the browser console for details")
+                }
 
                 return QR
 
@@ -285,7 +466,7 @@ angular.module("sampleApp")
                 let root = {id:'root',text:'Root',parent:'#',state:{},data:{}}
                 treeData.push(root)
 
-                Q = Q_text || Qlung
+                Q = Q_text // || Qlung
                 let json = angular.fromJson(Q)
 
                 json.item.forEach(function(parentItem){
@@ -297,7 +478,6 @@ angular.module("sampleApp")
                     item.data.mult = makeMult(parentItem) //mult
                     item.answerValueSet = parentItem.answerValueSet
                     item.data.description = getDescription(parentItem)
-
 
                     hash[item.id] = item.data;
                     treeData.push(item)
@@ -313,8 +493,6 @@ angular.module("sampleApp")
                             item.data.description = getDescription(child)
                             hash[item.id] = item.data;
                             treeData.push(item)
-
-
                         })
 
                     }

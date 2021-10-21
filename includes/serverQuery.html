@@ -556,6 +556,12 @@
                                         </ul>
                                     </div>
 
+                                    <div class="pull-right" ng-show="selectedResource">
+                                        <a target = "_blank" ng-href="http://hl7.org/fhir/{{selectedResource.resourceType}}">
+                                            Spec entry for {{selectedResource.resourceType}}
+                                        </a>
+                                    </div>
+
                                     <uib-tabset ng-show="selectedResource">
                                         <uib-tab heading="Json">
                                             <br/>
