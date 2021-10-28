@@ -277,11 +277,11 @@ angular.module("sampleApp")
                 let deferred = $q.defer()
                 let bundle = {resourceType : "Bundle",type:'transaction',entry:[]}
 
-                let dr = {resourceType:'DiagnosticReport',status:'final'}
+                let dr = {resourceType:'DiagnosticReport',id: "dr-" + new Date().getTime(), status:'final'}
                 dr.code = {coding:[{system:'http://clinfhir.com',code:'pathreport'}]}
                 dr.presentedForm = {data:btoa(text),'content-type':'text/text'}
 
-                bundle.entry.push({resource:dr,request:{method:'POST',url:"DiagnosticReport"}})
+                bundle.entry.push({resource:dr,request:{method:'PUT',url:"DiagnosticReport/"+dr.id}})
 
                 //change the business status - but the task is still active
                 //todo change the owner to the ordering cliniciab
@@ -292,6 +292,10 @@ angular.module("sampleApp")
                 task.status = "in-progress"
 
                 task.businessStatus = {coding:[{system:'http://clinfhir.com',code:"reportdone"}]}
+
+                //add the DR as an output to the Task
+                task.output = task.output || []
+                task.output.push({type:{text:'Lab report',valueReference:{reference:"DiagnosticReport/"+dr.id}}})
 
                 bundle.entry.push({resource:task,request:{
                         method:'PUT',
@@ -338,9 +342,16 @@ angular.module("sampleApp")
                                 order.task = resource
                                 //now get the patient associated with the order
                                 let patientReference = resource.for
-                                if (patientReference && hash[patientReference]) {
-                                    order.patient = hash[patientReference]
+                                if (patientReference && patientReference.reference && hash[patientReference.reference]) {
+                                    order.patient = hash[patientReference.reference]
                                 }
+
+                                let srReference = resource.focus
+                                if (srReference && srReference.reference && hash[srReference.reference]) {
+                                    order.sr = hash[srReference.reference]
+                                }
+
+
                                 //order.patient =
                                 //    order.serviceRequest =
 
@@ -407,16 +418,16 @@ angular.module("sampleApp")
                         switch (child.type) {
                             case "boolean" :
                                 //regardless, push the answer
-                                parentItem.item.push({linkId:key,valueBoolean : value,text:child.text})
+                                parentItem.item.push({linkId:key,answer:[{valueBoolean : value}],text:child.text})
                                 break
                             case "choice" :
                                 if ( value && value.code) {
-                                    parentItem.item.push({linkId: key, valueCoding: value.valueCoding,text:child.text})
+                                    parentItem.item.push({linkId: key, answer:[{valueCoding: value.valueCoding}],text:child.text})
                                 }
                                 break
                             default:
                                 if ( value) {
-                                    parentItem.item.push({linkId:key,valueString : value,text:child.text})
+                                    parentItem.item.push({linkId:key,answer:[{valueString : value}],text:child.text})
                                 }
                                 break
                         }
@@ -459,6 +470,7 @@ angular.module("sampleApp")
 
             },
 
+            //make the treeData from the Q
             importQ : function(Q_text) {
                 let extUrl = "http://clinfhir.com/structureDefinition/q-item-description"
                 let treeData = []

@@ -112,16 +112,13 @@
 
                     <select ng-model="input.QEntry" class="form-control "
                             ng-options = "entry.resource.name for entry in bundleQ.entry"
-                            ng-change="selectQ()">
+                            ng-change="selectQ(input.QEntry)">
 
                     </select>
 
 
             </div>
-
         </div>
-
-
     </nav>
 
     <uib-tabset>
@@ -279,7 +276,7 @@
                         </uib-tab>
 
                         <uib-tab heading="Q resource">
-                            <pre>{{qResource | json}}</pre>
+                            <pre>{{QFromServer | json}}</pre>
                         </uib-tab>
 
 
@@ -448,9 +445,6 @@
                             <pre>{{orderTransaction | json}}</pre>
                         </uib-tab>
                     </uib-tabset>
-
-
-
                 </div>
             </div>
         </uib-tab>
@@ -467,11 +461,33 @@
                 </div>
                 <div class="col-md-7">
                     <div ng-show="selectedPathOrder">
-                        <strong>Task</strong>
-                        <pre>{{selectedPathOrder.task | json}}</pre>
+                        <uib-tabset>
+                            <uib-tab heading="Form data">
+                                <table class="table table-bordered">
+                                    <tr ng-repeat="item in selectedPathOrderQRTable">
+                                        <td width="20%"><strong>{{item.col1}}</strong></td>
+                                        <td>{{item.col2}}</td>
+                                        <td>{{item.col3}}</td>
+                                    </tr>
+                                </table>
+                            </uib-tab>
+                            <uib-tab heading="Resources">
+                                <strong>Task</strong>
+                                <pre>{{selectedPathOrder.task | json}}</pre>
 
-                        <strong>Patient</strong>
-                        <pre>{{selectedPathOrder.patient | json}}</pre>
+                                <strong>Patient</strong>
+                                <pre>{{selectedPathOrder.patient | json}}</pre>
+
+                                <strong>ServiceRequest</strong>
+                                <pre>{{selectedPathOrder.sr | json}}</pre>
+
+                                <strong>QuestionnaireResponse</strong>
+                                <pre>{{selectedPathOrderQR | json}}</pre>
+
+
+                            </uib-tab>
+                        </uib-tabset>
+
 
                     </div>
 
@@ -528,9 +544,10 @@
                         {{btoa(selectedPathReport)}}
 
                         <button class="btn btn-primary pull-right"
-                                ng-click="sendReport(selectedPathOrder.task,input.reportText)">
-                            Save Report & update task
+                                ng-click="closeTask(selectedPathOrder.task,input.reportText)">
+                            Close task
                         </button>
+
                     </div>
                 </div>
             </div>

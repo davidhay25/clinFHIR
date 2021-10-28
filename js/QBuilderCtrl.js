@@ -26,6 +26,8 @@ angular.module("sampleApp")
                 subject:{reference:"Patient/" + $scope.patient.id},
                 type:{text:"Biopsy",coding:[{code:"BX",system:"http://terminology.hl7.org/CodeSystem/v2-0487"}]}}
 
+
+            //tab 3 - get all the orders where the report has been generated
             $scope.getReportedOrders = function() {
                 QBuilderSvc.getReportedOrders($scope.dataServer).then(
                     function(data) {
@@ -36,6 +38,7 @@ angular.module("sampleApp")
                 )
             }
 
+            //tab 1 - place the order/request. Only called when orderTransactio is there
             $scope.placeOrder = function() {
                 let url = $scope.dataServer //it's a transaction
                 $http.post(url,$scope.orderTransaction).then(
@@ -46,7 +49,8 @@ angular.module("sampleApp")
                     }
                 )
             }
-            //retrieve orders that
+
+            //step 2 retrieve new orders that have been made
             $scope.getOrders = function() {
                 QBuilderSvc.getNewOrders($scope.dataServer).then(
                     function(data) {
@@ -57,12 +61,71 @@ angular.module("sampleApp")
                 )
             }
 
+            //step 2 - when the pathologist views the request
             $scope.selectPathRequest = function(item) {
+                delete $scope.selectedPathOrderQR
+                delete $scope.selectedPathOrderQRTable
                 $scope.selectedPathOrder = item
+              //  let siRef = item.sr.supportingInfo[0]
+              //  let ar = siRef.split('/')
+               // let siId = ar[1]
+                let url = $scope.dataServer + '/' + item.sr.supportingInfo[0].reference
+                $http.get(url).then(
+                    function(data){
+                        $scope.selectedPathOrderQR = data.data
+
+                        //make display table
+                        let ar = []
+                        $scope.selectedPathOrderQR.item.forEach(function (parent) {
+                            ar.push({col1:parent.text})
+                            if (parent.item) {
+                                parent.item.forEach(function (child) {
+                                    let text = ""
+                                    child.answer.forEach(function (ans) {
+                                        if (ans.valueString) {
+                                            text +=ans.valueString
+                                        }
+
+                                        if (ans.valueBoolean) {
+                                            text += ans.valueBoolean
+                                        }
+
+                                        if (ans.valueCoding) {
+                                            ans.valueCoding.forEach(function(c){
+                                                text += c.code
+                                            })
+                                        }
+
+                                    })
+                                    ar.push({col2:child.text,col3:text})
+                                })
+                            }
+
+                        })
+                        $scope.selectedPathOrderQRTable = ar
+
+
+                    }, function (err) {
+                        alert(angular.toJson(err.data))
+                    }
+                )
+
+
+
             }
 
+            //select the task with the report
             $scope.selectReport = function(item) {
+                //need to retrieve the DiagnosticReport
+
                 $scope.selectedPathReport = item
+                if (item.task.output) {
+                    let ref = item.task.output[0].valueReference.reference
+                    console.log(ref)
+
+                }
+
+
             }
 
             //when the pathologist creates the report...
@@ -105,8 +168,11 @@ angular.module("sampleApp")
             $scope.selectQ = function(){
                 $scope.form = {}
                 console.log($scope.input.QEntry)
-                let Q = $scope.input.QEntry.resource
 
+                let Q = $scope.input.QEntry.resource
+                $scope.QFromServer = Q
+
+                //generate the tree and item hash
                 let vo = QBuilderSvc.importQ(angular.toJson(Q))
                 $scope.treeData = vo.treeData
                 $scope.hashItem = vo.hash
@@ -155,6 +221,7 @@ angular.module("sampleApp")
                 $scope.patient = {resourceType:"Patient",id:"8479",name:{family:"Hay",first:["Levi"],text:"Levi Hay"}}
 
                 $scope.QR = QBuilderSvc.makeQR($scope.qResource,$scope.form,$scope.hashItem)
+
                 $scope.QR.subject = {reference:"Patient/" + $scope.patient.id}
 
                 //let requester = {resourceType:"Practitioner",id:"prac-ss", name:{family:"Surgeon",first:["Steve"],text:"Steve Surgeon"}}
@@ -171,6 +238,7 @@ angular.module("sampleApp")
                     businessStatus :{coding:[{system:'http://clinfhir.com',code:"requestmade"}]},
                     owner:{reference:"Organization/"+$scope.pathologistOrg.id},
                     focus:{reference:"ServiceRequest/" + serviceRequest.id},
+                    input: [{type:{text:"new request"},valueReference:{reference:"ServiceRequest/"+serviceRequest.id}}],
                     for:{reference:"Patient/" + $scope.patient.id}}
 
                 let bundle = {resourceType : "Bundle",type:'transaction',entry:[]}
@@ -180,9 +248,9 @@ angular.module("sampleApp")
 
                 bundle.entry.push({resource:task,request:{method:'POST',url:"Task"}})
 
-                bundle.entry.push({resource:serviceRequest,request:{method:'POST',url:"ServiceRequest"}})
+                bundle.entry.push({resource:serviceRequest,request:{method:'PUT',url:"ServiceRequest/"+serviceRequest.id}})
 
-                bundle.entry.push({resource:$scope.pathologistOrg,request:{method:'POST',url:"Organization"}})
+                bundle.entry.push({resource:$scope.pathologistOrg,request:{method:'PUT',url:"Organization/"+$scope.pathologistOrg.id}})
 
                 bundle.entry.push({resource:$scope.requester,request:{
                     method:'POST',
@@ -217,7 +285,7 @@ angular.module("sampleApp")
             let updateModelRepresentations = function() {
                 $scope.drawTree()
                 makeFormDef()
-                $scope.qResource =  QBuilderSvc.makeQ($scope.treeData)
+                $scope.qResource =  QBuilderSvc.makeQ($scope.treeData)      //this is a cut down version of the Q
                 $scope.LM = QBuilderSvc.makeLM($scope.treeData)
             }
 /*
@@ -317,17 +385,16 @@ angular.module("sampleApp")
                 };
                 $scope.chart = new vis.Network(container, vo.graphData, graphOptions);
 
+                //https://stackoverflow.com/questions/32403578/stop-vis-js-physics-after-nodes-load-but-allow-drag-able-nodes
+                $scope.chart.on("stabilizationIterationsDone", function () {
+                    $scope.chart.setOptions( { physics: false } );
+                });
+
                 $scope.chart.on("click", function (obj) {
 
                     var nodeId = obj.nodes[0];  //get the first node
                     var node = vo.graphData.nodes.get(nodeId);
-                    $scope.selectedNode = node;
-
-                    //this is the entry that is selected from the 'bundle entries' tab...
-                    //$scope.selectedBundleEntry = node.entry;
-
-                    $scope.selectEntry(node.entry)
-
+                   console.log(node)
                     $scope.$digest();
                 });
             }
