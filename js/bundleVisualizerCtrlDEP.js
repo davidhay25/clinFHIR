@@ -26,12 +26,93 @@ angular.module("sampleApp")
 
             //queries now stored in local browser cache
             $scope.savedQueries = $localStorage.bvQueries || []
-            //$scope.bvConfig = $localStorage.bvConfig || {}
-
-            $scope.localStorage = $localStorage     //so can easily update
 
             console.log($scope.savedQueries)
 
+            //---------- login stuff
+            $scope.firebase = firebase;
+            //called whenever the auth state changes - eg login/out, initial load, create user etc.
+            firebase.auth().onAuthStateChanged(function(user) {
+
+                if (user) {
+                    //$scope.userProfile = $firebaseObject(firebase.database().ref().child("users").child(user.uid));
+                    $scope.user = {email:user.email}
+                    //delete $scope.showNotLoggedIn;
+
+                    if (! $scope.urlPassedIn) {
+                        //If a url was passed in then don't load anything else - even if the user is logged in
+                        //get any saved bundles for this user. These are saved against the Bundle endpoint where
+                        //Bundle.identifier.system = the users email
+                        //Bundle.identifier.value = name of the bundle
+
+                        //todo We may want to move to a List of bundles rather than retrieving them all for performance...
+                        let url = $scope.dataServer.url + "Bundle?identifier=" + user.email + '|'
+
+                        $http.get(url).then(
+                            function(data) {
+                                //scope.userBundles = data.data;
+                                $scope.savedBundles = []
+                                data.data.entry.forEach(function (entry) {
+                                    let bundle = entry.resource
+                                    let item = {"name":bundle.identifier.value,bundle : bundle}
+                                    $scope.savedBundles.push(item)
+                                })
+                                console.log(data.data)
+                            }, function (err) {
+                                console.log(err)
+                            }
+                        )
+
+                       /*
+
+                        //get any queries. Stored in DocumentReferences
+                        let queryUrl = $scope.dataServer.url + "DocumentReference?identifier=" + user.email + '|'
+                        $http.get(queryUrl).then(
+                            function(data) {
+                                $scope.savedQueries = []
+                                if (data.data.entry) {
+                                    data.data.entry.forEach(function(entry){
+                                        let item = {"name":entry.resource.identifier[0].value}
+                                        item.qry = atob(entry.resource.content[0].attachment.data)
+                                        $scope.savedQueries.push(item)
+                                    })
+
+                                }
+
+                                console.log(data.data)
+                            }, function (err) {
+                                console.log(err)
+                            }
+                        )
+
+                        */
+                    }
+
+                    $scope.$digest()
+                } else {
+                    console.log('no user')
+                    delete $scope.user
+
+                    $scope.$digest()
+                }
+            });
+
+            $scope.login=function(){
+                $uibModal.open({
+                    backdrop: 'static',      //means can't close by clicking on the backdrop.
+                    keyboard: false,       //same as above.
+                    templateUrl: 'modalTemplates/login.html',
+                    controller: 'loginCtrl'
+                })
+            };
+
+            $scope.logout=function(){
+                firebase.auth().signOut().then(function() {
+                    modalService.showModal({}, {bodyText: 'You have been logged out of clinFHIR'})
+                }, function(error) {
+                    modalService.showModal({}, {bodyText: 'Sorry, there was an error logging out - please try again'})
+                });
+            };
 
 
             let search = $window.location.search;
@@ -85,9 +166,6 @@ angular.module("sampleApp")
 
             //-------- related to queries
             $scope.testNewQuery = function(qry) {
-
-                delete $scope.executedQueryBundle
-
                 if (qry.substr(0,4) !== 'http') {
                     qry = $scope.dataServer.url + qry
                 }
@@ -123,8 +201,30 @@ angular.module("sampleApp")
 
                 processBundle($scope.executedQueryBundle);      //set when the query is tested
 
+/*
+                let b64 = btoa(qry)
+                let dr = {resourceType:'DocumentReference'}
 
+                dr.identifier = {system:$scope.user.email,value:name};
+                dr.id = 'cf-' + getHashCode('cf' + $scope.user.email + name)
+                dr.status = 'current'
+                dr.category = {text:'clinFHIR query'}
+                dr.content = [{attachment:{data:b64}}]
 
+                let url = $scope.dataServer.url + "DocumentReference/" + dr.id
+                console.log(dr)
+                //console.log(bundleToSave.identifer)
+
+                $http.put(url,dr).then(
+                    function (data) {
+                        console.log('saved OK')
+                        processBundle($scope.executedQueryBundle)
+                    },
+                    function (err) {
+                        alert(angular.toJson(err))
+                    }
+                )
+                */
             }
 
             $scope.viewNewQueryBundle = function(bundle) {
@@ -133,31 +233,13 @@ angular.module("sampleApp")
 
             $scope.executeSavedQuery = function (item) {
                 //this is a DR resource
-                $scope.waiting = true;
                 $http.get(item.qry).then(
                     function (data) {
-                        console.log(data)
                         //todo - same logic as when query supplied - might be to a FHIR server or not
-
-                        //if 'set validation server' is true, then supply the validation server in the call
-                        validationServer = null
-                        /*
-                        if ($localStorage.bvConfig.setValidate) {
-                            let url = new URL(item.qry)
-
-
-                            validationServer = url.protocol
-                            console.log(validationServer)
-                        }
-*/
-                        processBundle(data.data,validationServer)
+                        processBundle(data.data)
                     },
                     function (err) {
                         alert(angular.toJson(err))
-                    }
-                ).finally(
-                    function(){
-                        $scope.waiting = false;
                     }
                 )
 
@@ -168,7 +250,6 @@ angular.module("sampleApp")
             }
 
             //------- passed a bundle in json or xml ------
-
             $scope.viewNewBundle = function(bundle,name) {
                 //view a bundle directly. If 'name' is not null, then save for this user
                 //todo - convert from XML if needed
@@ -214,9 +295,44 @@ angular.module("sampleApp")
                     // $scope.showSelector = false
                     processBundle(json);
 
+                    if (name) {
+                        //save the bundle on the dataserver. Use a put. will overwrite
+                        let bundleToSave = angular.copy(json)
+                        bundleToSave.type = "collection"
+                        bundleToSave.identifier = {system:$scope.user.email,value:name};
+                        bundleToSave.id = 'cf-' + getHashCode('cf' + $scope.user.email + name)
 
+                        let url = $scope.dataServer.url + "Bundle/" + bundleToSave.id
+                        //console.log(url)
+                        //console.log(bundleToSave.identifer)
+
+                        $http.put(url,bundleToSave).then(
+                            function (data) {
+                                console.log('saved OK')
+                            },
+                            function (err) {
+                                alert(angular.toJson(err))
+                            }
+                        )
+                }
             }
+/*
+            $scope.leftPaneClass = "col-sm-2 col-md-2"
+            $scope.rightPaneClass = "col-md-10 col-sm-10";
 
+            $scope.showSidePane = true;
+            $scope.toggleSidePane = function(){
+                if (! $scope.showSidePane) {
+                    $scope.leftPaneClass = "col-sm-2 col-md-2"
+                    $scope.rightPaneClass = "col-md-10 col-sm-10";
+                } else {
+                    $scope.leftPaneClass = "hidden"
+                    $scope.rightPaneClass = "col-md-12 col-sm-12";
+                }
+                $scope.showSidePane = !$scope.showSidePane
+            };
+
+            */
 
 
 
@@ -267,8 +383,78 @@ angular.module("sampleApp")
             };
 
 
+            $scope.addQueryDEP = function(){
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/addQuery.html',
+                    size: 'lg',
+                    controller: function ($scope,dataServer,$http) {
+                        $scope.input = {};
+                        $scope.dataServer = dataServer
 
-            $scope.deleteQuery = function(inx) {
+                        $scope.canSave = function() {
+                            if (! $scope.response || ! $scope.input.name) {
+                                return false;
+                            }
+
+                            if ($scope.response) {
+                                if ($scope.response.resourceType !== 'Bundle') {
+                                    return false;
+                                } else {
+                                    if (! $scope.response.entry || $scope.response.entry.length ==0) {
+                                        return false;
+                                    }
+                                }
+                            }
+                            return true;
+                        };
+
+
+                        $scope.save = function(){
+                            $scope.$close({query:$scope.input.query,display:$scope.input.name,description:$scope.input.description})
+                        };
+
+                        $scope.execute = function(qry) {
+
+                            let options = {headers: {'Accept':'application/fhir+json'}};
+                            let fullQry = qry
+
+                            if (qry.substr(0,4) !== 'http') {
+                                 fullQry = dataServer.url + qry
+                            }
+
+                            $scope.actualQuery = fullQry;
+
+                            $scope.waiting = true;
+                            $http.get(fullQry,options).then(
+                                function(data) {
+                                    $scope.response = data.data;
+                                },
+                                function(err) {
+                                    $scope.response = err.data;
+                                }
+                            ).finally(
+                                function(){
+                                    $scope.waiting = false;
+                                }
+                            )
+
+                        }
+                    },
+                    resolve : {
+                        dataServer: function () {          //the default config
+                            return $scope.dataServer;
+
+                        }
+                    }
+                }).result.then(function(vo) {
+                        $localStorage.bvQueries = $localStorage.bvQueries || []
+                        $localStorage.bvQueries.push(vo);
+                        $scope.queries = $localStorage.bvQueries
+                    }
+                )
+            };
+
+            $scope.deleteQueryDEP = function(inx) {
                 if (confirm('Are you sure you wish to remove this query')){
                     $localStorage.bvQueries.splice(inx,1)
                 }
@@ -285,7 +471,8 @@ angular.module("sampleApp")
                         $scope.input = {};
                         $scope.serverType = serverType
 
-
+                        //$scope.input.dataServer = dataServer;
+                        //$scope.input.validationServer = validationServer;
 
                         $scope.checkServer = function(url) {
                             $scope.canSave = false
@@ -357,7 +544,213 @@ angular.module("sampleApp")
 
 
 
-            $scope.selectIssueDEP = function(issue){
+            $scope.importBundleDEP = function() {
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/importBundle.html',
+                    size: 'lg',
+                    controller: function($scope,appConfigSvc,modalService,dataServer) {
+                        $scope.input = {};
+                        $scope.identiferChecked = true;     //false if the identifier has been checked (or is null)
+
+                        let identifierSystem = appConfigSvc.config().standardSystem.bundleIdentifierSystem;
+                        //let cfCreatedExt = appConfigSvc.config().standardExtensionUrl.clinFHIRCreated;
+
+                        if (!identifierSystem) {
+                            alert('identifier system null')
+                            return;
+                        }
+
+                        $scope.canSave = function() {
+                            if (!$scope.identiferChecked) {
+                                return false
+                            }
+                            if (! $scope.input.raw) {
+                                return false
+                            }
+                            return true;
+                        };
+
+
+
+
+                        //see if the identifier already exists
+                        $scope.testIdentifier = function(){
+                            let identifier = $scope.input.identifier;
+                            var url = dataServer.url+"Bundle?identifier=";
+                            url += identifierSystem + "|" + $scope.input.identifier ;
+
+                            var config = {headers:{'content-type':'application/fhir+json'}}
+                            $http.get(url,config).then(
+                                function(data) {
+                                    if (data.data && data.data.entry && data.data.entry.length > 0) {
+                                        alert("This identifier has already been used. Try another.");
+                                        delete $scope.input.identifier;
+                                        return;
+                                    } else {
+                                        $scope.identiferChecked = true;
+                                        alert("This identifier is ok to use.")
+                                    }
+                                })
+                        };
+
+                        $scope.import = function() {
+                            var raw = $scope.input.raw;
+
+                            var g = raw.indexOf('xmlns="http://hl7.org/fhir"') || raw.indexOf("xmlns='http://hl7.org/fhir'");
+                            if (g > -1) {
+                                //this is Xml (I think!) Use the Bundle endpoint
+                                $scope.waiting = true;
+                                var url = dataServer.url+"Bundle";
+
+                                var config = {headers:{'content-type':'application/fhir+xml'}}
+                                $http.post(url,raw,config).then(
+                                    function(data) {
+                                        //the bundle was saved - now read it back from the server in Json format...
+
+                                        let serverId = data.headers('Content-Location');
+                                        serverId = serverId || data.headers('content-location');
+                                        serverId = serverId || data.headers('location');
+                                        serverId = serverId || data.headers('Location');
+
+                                        console.log(serverId);
+                                        //this seems to be a full URl - is this always the case?
+
+                                        if (serverId) {
+
+                                            //url += "/"+serverId;
+                                            config = {headers:{'accept':'application/fhir+json'}};
+                                            $http.get(serverId).then(
+                                                function(data){
+                                                    //now we can import the bundle
+                                                    importFromJson(data.data);
+
+                                                }, function (err) {
+                                                    var msg = "The bundle was saved Ok, but couldn't be retrieved from the server";
+                                                    modalService.showModal({}, {bodyText:msg});
+                                                    //$scope.$cancel()
+                                                }
+                                            ).finally(function(){
+                                                $scope.waiting = false;
+                                            });
+
+                                        } else {
+                                            var msg = "The bundle was saved Ok, but I couldn't determine which Id was assigned to it, so cannot import it. Sorry about that."
+                                            modalService.showModal({}, {bodyText:msg});
+                                        }
+                                    },
+                                    function(err) {
+
+                                        var msg = "The server couldn't process the Xml. Is it valid FHIR and a valid bundle?";
+                                        var config = {bodyText:msg}
+                                        try {
+                                            var oo = angular.fromJson(err.data);
+                                            console.log(oo);
+                                            config.oo = oo;
+                                        } catch (ex){
+                                            msg += angular.toJson(err);
+                                        }
+
+                                        modalService.showModal({}, config);
+                                        $scope.waiting = false;
+                                    }
+                                )
+                            } else {
+                                //this is json - just return if
+                                importFromJson(raw,true)
+                            }
+
+                        };
+
+                        let importFromJson = function(json,stripText) {
+
+                            try {
+                                var res = angular.fromJson(json)
+
+                            } catch (ex) {
+                                modalService.showModal({}, {bodyText:'This is not valid JSON'});
+                                return;
+                            }
+
+                            delete res.id;      //we'll create our own
+                            if (! res.resourceType) {
+                                modalService.showModal({}, {bodyText:"The element 'resourceType' must exist."});
+                                return;
+                            }
+
+                            if (res.resourceType !== 'Bundle') {
+                                modalService.showModal({}, {bodyText:"The 'resourceType' must be 'Bundle'."});
+                                return;
+                            }
+
+                            if (! res.entry || res.entry.length == 0) {
+                                modalService.showModal({}, {bodyText:"There must be at least one entry in the bundle"});
+                                return;
+                            }
+
+                            if (res.entry && res.entry.length > 200) {
+                                modalService.showModal({}, {bodyText:"The maximum number of entries in a saved bundle is 200."});
+                                return;
+                            }
+
+
+                            if ($scope.input.identifier) {
+
+                                res.identifier = {"system":identifierSystem,value:$scope.input.identifier}
+
+                                if (res.type == 'transaction') {
+                                    res.type = 'collection'
+                                    alert("Changing bundle type to 'collection' as transactions can't be saved directly")
+                                }
+
+                                var url = dataServer.url+"Bundle";
+                                var config = {headers:{'content-type':'application/fhir+json'}}
+                                $http.post(url,res,config).then(
+                                    function() {
+                                        alert("Bundle has been saved,")
+                                    },
+                                    function(err){
+                                        console.log(err)
+                                        alert("Sorry, there was an error and the bundle wasn't saved:" + angular.toJson(err.data))
+                                    }
+                                ).finally(
+                                    function(){
+                                        $scope.$close(res);
+                                    }
+                                )
+
+                                //identifierSystem + "|" + $scope.input.identifier ;
+                            } else {
+                                $scope.$close(res);     //close the dialog, passing across the resource
+                            }
+
+
+
+
+                        }
+
+                    },
+                    resolve : {
+                        dataServer: function () {          //the default config
+                            return $scope.dataServer;
+
+                        }
+                    }
+
+                }).result.then(function (bundle) {
+                    //the importer will return a resource that is the one to be selected...  (might have been a bundle)
+
+                    let newBundle = deDupeBundle(bundle)
+
+
+                    console.log(newBundle)
+                    processBundle(newBundle);
+
+
+                })
+
+            };
+
+            $scope.selectIssue = function(issue){
 
                 console.log(issue)
                 //find the actual entry - a bit of a hack tttt
@@ -492,16 +885,61 @@ angular.module("sampleApp")
                 processBundle(entry.resource);
 
             };
+/*
+            $scope.selectQueryDEP = function(query) {
+                delete $scope.selectedBundleEntryErrors;
+                delete $scope.selectedBundleEntry;
+                $scope.selectedQuery = query;
+                $scope.waiting = true;
+                let url = query.query;
 
+                if (url.indexOf('http') == -1) {
+                    url = $scope.dataServer.url + url;
+                }
+
+                var config = {
+                    closeButtonText: "No thankyou",
+                    actionButtonText: 'Yes please',
+                    headerText: 'Execute query',
+                    bodyText: "Do you want to execute the query: " + url
+                };
+
+                modalService.showModal({}, config).then(
+                    function() {
+                        $scope.waiting = true;
+                        GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
+                            function(data) {
+                                //console.log(data)
+
+                                let newBundle = deDupeBundle(data.data)
+                                //console.log(newBundle)
+                                processBundle(newBundle);
+                            },
+                            function(err) {
+                                console.log(err);
+                            }
+                        ).finally(function(){
+                            $scope.waiting = false;
+                        })
+                    }
+                );
+            };
+*/
             //validate the resources in the bundle, then draw the graph (which needs the errors to display)
-            let processBundle = function(oBundle,validationServer) {
+            let processBundle = function(oBundle) {
 
                 $scope.showSelector = false     //hide the selector
 
                 delete $scope.serverRoot;
+
+                //hide the side pane
+                //$scope.showSidePane = true;
+                //$scope.toggleSidePane();
+
                 $scope.fhir = oBundle;
 
                 //create a hash for bundle by name
+
                 $scope.hashByName = {}
                 if (oBundle.entry) {
                     oBundle.entry.forEach(function(entry) {
@@ -525,6 +963,10 @@ angular.module("sampleApp")
                             }
                         })
                     })
+
+
+
+
                 }
 
                 //create hash by type
@@ -562,13 +1004,17 @@ angular.module("sampleApp")
                     $scope.selectedCanResource = node.resource;
 
 
+                   // todo - set the entry for the 'main' graph as well...$scope.selectBundleEntry = function(entry,entryErrors) {
+
+                   // }
+
 
                     $scope.$digest();
                 });
 
 
                 //note that this function is defined on the root...
-                validate(oBundle, validationServer,function(hashErrors){
+                validate(oBundle,function(hashErrors){
                     //returns a hash by position in bundle with errors...
 
                     $scope.hashErrors = hashErrors;
@@ -721,33 +1167,31 @@ angular.module("sampleApp")
                 });
             }
 
+            //when validate called from the UI
+            $scope.validate = function() {
 
+            };
 
 
             //validate each entry
+            //return hashErrors in callback - keyed by index within the bundle
+            let validate = function(bundle,cb) {
+                //temp - disable validation - make a user initiated function
+                //cb({})
+                //return;
 
-            let validate = function(bundle,inValidationServer,cb) {
-                $scope.valErrors = 0
-                $scope.valWarnings=0;
-
-                let validationServer = inValidationServer || $scope.validationServer.url
-
-
-                if ($localStorage.noValidate) {
-                    return
-                }
-
+                //validateBundle(bundle) - just validates the whole bundle
 
                 $scope.waiting = true;
 
-
+                $scope.valErrors = 0, $scope.valWarnings=0;
 
                 //this is the 'per entry' validation
                 let arQuery = []
                 let hashErrors = {};    //related to position in bundle...
                 bundle.entry.forEach(function (entry,inx) {
                     let resource = entry.resource
-                    let url = validationServer+resource.resourceType +"/$validate";
+                    let url = $scope.validationServer.url+resource.resourceType +"/$validate";
                     arQuery.push(processValidation(url,resource,hashErrors,inx))
                 });
 
@@ -954,7 +1398,7 @@ angular.module("sampleApp")
 
             };
 
-            function deDupeBundleDEP(bundle) {
+            function deDupeBundle(bundle) {
                 let newBundle = angular.copy(bundle)
 
                 return newBundle

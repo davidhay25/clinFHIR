@@ -27,6 +27,11 @@ angular.module("sampleApp")
                 type:{text:"Biopsy",coding:[{code:"BX",system:"http://terminology.hl7.org/CodeSystem/v2-0487"}]}}
 
 
+            //select patient - make NHI call
+            $scope.selectPatient = function (nhi) {
+                $scope.selectedPatient = {name:"John Doe"}
+            }
+
             //tab 3 - get all the orders where the report has been generated
             $scope.getReportedOrders = function() {
                 QBuilderSvc.getReportedOrders($scope.dataServer).then(

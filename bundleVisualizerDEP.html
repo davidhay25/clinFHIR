@@ -57,6 +57,19 @@
 
     </script>
 
+    <script>
+        var config = {
+            apiKey: "AIzaSyBNMohLbPiSKwpGwfARopdeW_6LLXujcUo",
+            authDomain: "clinfhir.firebaseapp.com",
+            databaseURL: "https://clinfhir.firebaseio.com",
+            storageBucket: ""
+        };
+
+        if (firebase) {
+            firebase.initializeApp(config);
+
+        }
+    </script>
     <script src="js/loginCtrl.js"></script>
     <script src="js/bundleVisualizerCtrl.js"></script>
     <script src="js/v2ToFhirSvc.js"></script>
@@ -146,14 +159,30 @@
                 </div>
             </div>
 
+<!--
+            <div class="col-md-5">
+                <div class="navbar-text">
+                    <strong>Validation server:</strong> {{validationServer.name}} ({{validationServer.url}}) <span class="clickable" ng-click="changeServer('validation')">Change</span>
 
+                    <div><strong>Data and XML Conversion server:</strong> {{dataServer.name}} ({{dataServer.url}}) <span class="clickable" ng-click="changeServer('convert')">Change</span> </div>
+                </div>
+
+            </div>
+-->
             <div class="col-md-2">
 
             </div>
 
 
             <div class="col-md-1">
-
+                <!--
+                <div class="navbar-text">
+                    <div ng-show="fhir">
+                        <div class="clickable" ng-hide="input.showHelp" ng-click="input.showHelp = true">Show Help</div>
+                        <div class="clickable" ng-show="input.showHelp" ng-click="input.showHelp = false">Hide Help</div>
+                    </div>
+                </div>
+                -->
             </div>
 
 
@@ -166,6 +195,24 @@
 
             <div class="col-md-1 col-sm-1">
 
+
+                <div class="nav navbar-form navbar-right" ng-hide="firebase.auth().currentUser">
+                <span style="font-size:1.8em; cursor: pointer">
+                    <div ng-click="login()">
+                        <i class="glyphicon glyphicon-log-in clickable"></i>
+                    </div>
+                </span>
+                </div>
+
+                <div class="nav navbar-form navbar-right" ng-show="firebase.auth().currentUser">
+                    <span style="font-size:1.8em; cursor: pointer"
+                          uib-popover="{{firebase.auth().currentUser.email}}"
+                          popover-placement="left"
+                          popover-trigger="'mouseenter'">
+
+                        <div ng-click="logout()"> <i class="glyphicon glyphicon-log-out clickable"></i></div>
+                    </span>
+                </div>
 
             </div>
 
@@ -189,92 +236,76 @@
         <uib-tabset>
             <uib-tab>
                 <uib-tab-heading>
-                    Home
+                    Saved Bundles & Queries <span class="badge">{{userBundles.entry.length}}</span>
                 </uib-tab-heading>
 
                 <div class="row">
-
                     <div class="col-md-6">
+                        <div ng-hide="user">
+                            <br/>
+                            <p>You need to log in using the icon on the navbar (or click here:
 
-                        <h4>Description</h4>
+                                <span ng-click="login()">
+                                <i class="glyphicon glyphicon-log-in clickable"></i>
+                            </span>
 
-                        <p>Displays the contents of a FHIR Bundle in a number of different visualizations.</p>
-
-                        There are 2 ways to specify the bundle:
-                        <ul>
-                            <li>By entering a query url that will return a Bundle. Generally this will be to
-                            a FHIR server, but it can be any Bundle accessible via HTTP. Url's can be saved in
-                            the browser cache for easy access if needed. Saved queries are in the list to the
-                            right, use the 'enter query' tab above to enter a new one</li>
-                            <li>You can paste a bundle directly into the tab above - either Json or XML is
-                            supported.</li>
-                        </ul>
-
-                        <br/>
-                        <h4>Configuration</h4>
-
-                        <div><strong>Data server:</strong> {{dataServer.name}} ({{dataServer.url}}) <span class="clickable" ng-click="changeServer('data')">Change</span> </div>
-                        <br/>
-
-                        <p>The data server is the 'default' server when creating a query. You can however specify any server you want by using the
-                            full url when creating the query.</p>
-
-                        <br/>
-
-
-
-                        <h4>Validation options</h4>
-
-                        <strong>Validation server:</strong>
-
-                        {{validationServer.name}} ({{validationServer.url}})
-                        <span class="clickable" ng-click="changeServer('validation')">Change</span>
-                        <br/><br/>
-                        <p>Used when validating the bundle and its contents. This occurs automatically when a bundle is
-                            processed and displayed, unless disabled using the otion below. </p>
-                        <br/>
-
-
-                        <div>
-                            <checkbox ng-model="localStorage.bvConfig.noValidate"></checkbox>
-                            Don't validate.
+                                ) to be able to save Bundles and Queries for later
+                                use.</p>
+                            <p>You can still paste in a Bundle - or locate one using a query -
+                                from the two tabs above and it will still work just fine, but it won't be saved in your
+                                personal account.</p>
                         </div>
 
-<!--
-                        <div>
-                            <checkbox ng-model="localStorage.bvConfig.setValidate"></checkbox>
-                            Set validation server to the same server as the url.
+                        <div  ng-show="user">
+                            <h4>Saved bundles</h4>
+
+                            <table class="table table-bordered">
+                                <tr ng-repeat = "item in savedBundles">
+                                    <td>{{item.name}}</td>
+                                    <td width="80"><button class="btn btn-link" ng-click="displaySavedBundle(item)">Load</button> </td>
+                                </tr>
+                            </table>
+
+
+                            <h4>Saved queries</h4>
+                            <table class="table table-bordered">
+                                <tr ng-repeat = "item in savedQueries">
+                                    <td>{{item.name}}</td>
+                                    <td>{{item.qry}}</td>
+                                    <td width="80"><button class="btn btn-link" ng-click="executeSavedQuery(item)">Execute</button> </td>
+                                </tr>
+                            </table>
                         </div>
--->
-
-
-
-
-                    </div>
-
-                    <div class="col-md-6">
-
-
-                        <h4>Saved queries</h4>
-                        <table class="table table-bordered">
-                            <tr ng-repeat = "item in savedQueries">
-                                <td>{{item.name}}</td>
-                                <td>{{item.qry}}</td>
-                                <td><i class="glyphicon glyphicon-remove-sign clickable" ng-click="deleteQuery($index)"></i>
-                                </td>
-                                <td width="80"><button class="btn btn-link" ng-click="executeSavedQuery(item)">Execute</button> </td>
-                            </tr>
-                        </table>
-
 
                         <div>
                             <em>Queries are saved in the local browser cache</em>
+                            <!--
+                            <em>Saved bundles and queries are stored on the data server - currently {{dataServer.name}} ({{dataServer.url}}). </em>
+                        -->
                         </div>
 
+                        <em>Bundles are stored at the [host]/Bundle endpoint, and queries at [host]/DocumentReference</em>
 
 
                     </div>
+                    <div class="col-md-6">
+                        <h4>Configuration</h4>
 
+                        <div><strong>Data server:</strong> {{dataServer.name}} ({{dataServer.url}}) <span class="clickable" ng-click="changeServer('data')">Change</span> </div>
+                        <p>The data server serves 2 main purposes:</p>
+                        <ul>
+                            <li>Saved bundles and queries are stored there.</li>
+                            <li>It is the 'default' server when creating a query. You can however specify any server you want by using the
+                                full url when creating the query.</li>
+                        </ul>
+
+                        <strong>Validation server:</strong>
+
+                        {{validationServer.name}} ({{validationServer.url}}) <span class="clickable" ng-click="changeServer('validation')">Change</span>
+                        <p>Used when validating the bundle and its contents. This occurs automatically when a bundle is processed and displayed. </p>
+                        <br/>
+
+                    </div>
                 </div>
 
 
@@ -294,7 +325,28 @@
                         <button ng-show = "input.newBundle" class="btn btn-success"
                                 ng-click="viewNewBundle(input.newBundle)">View bundle</button>
 
+                        <div ng-show = "user">
 
+                            <label>Bundle name</label>
+                            <input type="text" ng-model="input.newBundleName" class="form-control"
+                                   placeholder="Bundle name, if to be saved"/>
+
+                            <span class="help-block pull-right">Required if the bundle is to be saved</span>
+
+                            <button ng-show = "executedQueryBundle && input.newBundleName && user" class="btn btn-danger"
+                                    ng-click="viewNewBundle(input.newBundle,input.newBundleName)">Save and view</button>
+
+
+
+
+
+                        </div>
+
+<!--
+                        <div><button class="btn btn-primary"
+                                     ng-click="viewNewBundle(input.newBundle,input.newBundleName)">
+                            View Bundle</button></div>
+                        -->
                     </div>
                     <div class="col-md-8">
                         <textarea class="form-control" rows = '20' ng-model="input.newBundle"></textarea>
@@ -311,13 +363,12 @@
                     <div class="col-md-6">
                         <p>Enter a query that returns a FHIR bundle</p>
                         <p>The query can be to a FHIR server or standard server (like a bundle stored in Github)</p>
-                        <p>You can use the currently configured data server (<strong>{{dataServer.url}}</strong>) or any other server. To specify another server
+                        <p>You can use the currently configured data server ({{dataServer.url}}) or any other server. To specify another server
                             simply use the full url - eg http://myserver/mybundle. If you leave off the 'http' the app will assume
                             you are making standard <a href="http://hl7.org/fhir/http.html#search" target="_blank">FHIR query</a> (Only a GET is supported)</p>
                         <p>You can change the configured server <span class="clickable">here.</span> </p>
-                        <p>If you want to save the query (so it will appear in your personal list, you need to specify
-                            a name in the box below and click the 'Add query to list' button that appears after testing
-                            the query.</p>
+                        <p>If you want to save the query (so it will appear in your personal list, you need to be logged in,
+                        and specify a name in the box below.</p>
 
                         <!--
                         <label>Data server url</label>
@@ -343,7 +394,7 @@
                             <button ng-show = "executedQueryBundle" class="btn btn-warning"
                                     ng-click="clearQuery()">Clear</button>
 
-                            <button ng-show = "executedQueryBundle && input.newQueryName" class="btn btn-danger"
+                            <button ng-show = "executedQueryBundle && input.newQueryName && user" class="btn btn-danger"
                                     ng-click="addNewQuery(input.newQuery,input.newQueryName)">Add query to list and view</button>
 
                             <button ng-show = "executedQueryBundle" class="btn btn-success"
@@ -486,12 +537,15 @@
 
                                         </div>
 
+
+
+
                                         <div class="col-md-8">
 
                                             <div class="pull-right">
                                                 <a target="_blank"
                                                    ng-show="selectedBundleEntry"
-                                                   ng-href="http://hl7.org/fhir/{{selectedBundleEntry.resource.resourceType}}.html#resource">{{selectedBundleEntry.resource.resourceType}} in the Spec</a>
+                                                   ng-href="http://hl7.org/fhir/{{selectedBundleEntry.resource.resourceType}}.html#resource">{{selectedBundleEntry.resource.resourceType}} Spec</a>
                                             </div>
 
                                             <uib-tabset>

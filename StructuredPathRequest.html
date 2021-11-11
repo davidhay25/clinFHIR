@@ -307,6 +307,22 @@
                 <div class="col-md-6">
                     <div class="banner">Q Preview </div>
 
+                    <div class="rounded-box">
+                        <div><strong>Patient</strong></div>
+                        <div class="row">
+                            <div class="col-md-1">
+                                NHI
+                            </div>
+                            <div class="col-md-2">
+                                <input type="text" class="form-control" ng-click="selectPatient(input.nhi)"  ng-model="input.nhi"/>
+                            </div>
+                            <div class="col-md-9">
+                                {{selectedPatient.name}}
+
+                            </div>
+                        </div>
+                    </div>
+
                     <uib-tabset>
                         <uib-tab heading="Form" >
                             <div ng-repeat="item in formDef">

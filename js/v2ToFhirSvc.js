@@ -381,7 +381,10 @@ angular.module("sampleApp")
                         include = true;
                     }
 
+
                     arNodes.push(node);
+
+
 
                     if (centralResourceId && url == centralResourceId) {
                         //this is the central id
@@ -457,7 +460,7 @@ angular.module("sampleApp")
                     }
                 });
 
-                var nodes;
+                let nodes;
                 let edges;
                 if (centralResourceId) {
                     //only include the nodes that have a reference to or from the central node
@@ -473,7 +476,9 @@ angular.module("sampleApp")
                         }
                     });
 
-                    nodes = new vis.DataSet(nodesToInclude);
+                    nodes = makeNodeDataSet(nodesToInclude,hidePatient)
+
+                    //nodes = new vis.DataSet(nodesToInclude);
 
                     //if not recursive, remove edges where there isn't a direct reference to or from the centrlal resource id.
                     if (! options.recursiveRef) {
@@ -491,7 +496,8 @@ angular.module("sampleApp")
 
                     //edges = new vis.DataSet(arEdges);
                 } else {
-                    nodes = new vis.DataSet(arNodes);
+                    //nodes = new vis.DataSet(arNodes);
+                    nodes = makeNodeDataSet(arNodes,hidePatient)
                     edges = new vis.DataSet(arEdges);
                 }
 
@@ -503,6 +509,22 @@ angular.module("sampleApp")
 
 
                 return {graphData : data, allReferences:allReferences, nodes: arNodes, visNodes:nodes,visEdges:edges};
+
+
+                function makeNodeDataSet(arNodes,hidePatient) {
+                    if (! hidePatient) {
+                        return new vis.DataSet(arNodes);
+                    } else {
+                        //remove the patient node
+                        let ar = []
+                        arNodes.forEach(function (node){
+                            if (node.resource &&  node.resource.resourceType !== 'Patient') {
+                                ar.push(node)
+                            }
+                        })
+                        return new vis.DataSet(ar);
+                    }
+                }
 
 
                 function findReferences(refs,node,nodePath,index) {
