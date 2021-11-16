@@ -600,6 +600,18 @@
                                                             </tr>
                                                         </table>
                                                     </div>
+
+                                                    <br/>
+                                                    <div><strong>Notes</strong></div>
+                                                    <ul>
+
+                                                        <li>
+                                                            "Resource should narrative" means you're missing the .text element
+                                                        </li>
+
+                                                        <li>"Unable to resolve resource" errors simply mean that the referenced
+                                                        resource was not found on the Validation server. These can generally be ignored.</li>
+                                                    </ul>
                                                 </uib-tab>
 
                                                 <uib-tab ng-show="selectedBundleEntry.resource.resourceType == 'ValueSet' && selectedBundleEntry.resource.expansion">
@@ -769,40 +781,123 @@
                         </uib-tab>
 
 
-                        <uib-tab ng-show = "fhir.type == 'document'" heading="Document">
 
-                            <strong>Subject</strong>
-                            <p  style="margin-left: 10px" ng-bind-html="document.subject.text.div"></p>
+                        <uib-tab heading = "Observations">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <strong>Observation Codes</strong>
+                                    <div class="list-group">
+                                        <div class="list-group-item"
+                                             ng-click="selectObservationCode(hashObservations[k])"
+                                             ng-repeat="(k,v) in hashObservations">
 
-                            <strong>Document metadata</strong>
-                            <p  style="margin-left: 10px" ng-bind-html="document.composition.text.div"></p>
-
-                            <div ng-repeat = "section in document.composition.section">
-                                <hr style="border-top: 1px solid grey; margin: 1px"/>
-                                <strong>{{section.title}}</strong>
-
-                                <div class="row">
-
-                                    <div class="col-md-5">
-                                        <p style="margin-left: 10px" ng-bind-html="section.text.div"></p>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div ng-repeat = "resource in section.realResources">
-                                            <div class="rounded-box">
-                                                {{resource.display}}
-                                                <em><p ng-bind-html="resource.resource.text.div"></p></em>
+                                            <div class="pull-right badge">
+                                                {{v.resources.length}}
                                             </div>
+                                            <div>{{v.code.display}}</div>
+                                            <div>{{v.code.code}} </div>
+
                                         </div>
                                     </div>
                                 </div>
+                                <div class="col-md-5">
+                                    <strong>{{selectedObservations[0].code.coding[0].code}} {{selectedObservations[0].code.coding[0].display}}</strong>
+                                    <table class="table-bordered table">
+                                        <tr>
+                                            <th>Date</th><th>Age</th><th>Result</th><th>Reference Range</th>
+                                        </tr>
+                                        <tr ng-repeat="obs in selectedObservations"
+                                            ng-click="selectObservation(obs)">
+                                            <td>
+                                                {{moment(obs.effectiveDateTime).format('YYYY-MM-DD')}}
 
 
 
+                                                {{obs.effectivePeriod.start}} {{obs.effectivePeriod.end}}
+                                            </td>
+                                            <td>{{obs.effectiveDateTime | getAgeSeconds}}</td>
+                                            <td>{{obs.valueString}}
+                                                {{obs.valueCodeableConcept}}
+                                                {{obs.valueQuantity.value}} {{obs.valueQuantity.unit}}
 
+                                            </td>
+                                            <td>
+                                                <div ng-repeat = "rr in obs.referenceRange">
+                                                    {{rr.text}}
+                                                </div>
 
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Selected Observation</strong>
+                                    <pre>{{selectedObservation | json}}</pre>
+                                </div>
                             </div>
 
-                            <div><em>Derived from the Composition and Subject text elements as per the spec</em></div>
+                        </uib-tab>
+
+                        <uib-tab ng-show = "fhir.type == 'document'" heading="Document">
+
+                            <uib-tabset>
+                                <uib-tab heading="Rendering">
+                                    <strong>Subject</strong>
+                                    <p  style="margin-left: 10px" ng-bind-html="document.subject.text.div"></p>
+
+                                    <strong>Document metadata</strong>
+                                    <p  style="margin-left: 10px" ng-bind-html="document.composition.text.div"></p>
+
+                                    <div ng-repeat = "section in document.composition.section">
+                                        <hr style="border-top: 1px solid grey; margin: 1px"/>
+                                        <strong>{{section.title}}</strong>
+
+                                        <div class="row">
+
+                                            <div class="col-md-5">
+                                                <p style="margin-left: 10px" ng-bind-html="section.text.div"></p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div ng-repeat = "resource in section.realResources">
+                                                    <div class="rounded-box">
+                                                        {{resource.display}}
+                                                        <em><p ng-bind-html="resource.resource.text.div"></p></em>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+
+
+                                    </div>
+
+                                    <div><em>Derived from the Composition and Subject text elements as per the spec</em></div>
+
+                                </uib-tab>
+                                <uib-tab heading="By Section">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="list-group">
+                                                <div ng-class="{'list-group-item':true}"
+                                                     ng-repeat = "section in document.composition.section">
+                                                    {{section.title}}
+                                                    <div class="pull-right badge">{{section.entry.length}}</div>
+                                                    <div>{{section.code.coding[0].system}} {{section.code.coding[0].code}}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-9">
+
+                                        </div>
+                                    </div>
+
+
+                                </uib-tab>
+                            </uib-tabset>
+
 
                         </uib-tab>
 

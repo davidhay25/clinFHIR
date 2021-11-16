@@ -29,6 +29,50 @@ angular.module("sampleApp")
         objColours.Immunization = '#aeb76c';
 
         return {
+            makeObservationsHash : function(bundle){
+                let hash = {}
+                if (bundle.entry){
+                    bundle.entry.forEach(function (entry) {
+                        let resource = entry.resource
+                        if (resource.resourceType == "Observation") {
+                            let code = "unknown"
+                            cc = {}
+                            if (resource.code && resource.code.coding) {
+                                code = resource.code.coding[0].code
+                                cc = resource.code.coding[0]
+                            }
+                            hash[code] = hash[code] || {code:cc,resources:[]}
+                            hash[code].resources.push(resource)
+                        }
+
+                    })
+                }
+
+                //within each code, sort by date
+                Object.keys(hash).forEach(function (code){
+
+                    hash[code].resources.sort(function(o1,o2){
+                        let date1 = o1.effectiveDateTime;
+                        let date2 = o2.effectiveDateTime;
+                        if (date1 && date2) {
+                            if (o1.effectiveDateTime > o2.effectiveDateTime) {
+                                return -1
+                            } else {
+                                return 1
+                            }
+                        } else {
+                            return 0
+                        }
+
+
+                    })
+                })
+
+
+
+                return hash
+
+            },
             validateBundleDEP : function(validationServer,bundle) {
                 //validate the contents of a bundle by making separate calls for each resource in it...
                 let deferred = $q.defer();

@@ -1,12 +1,10 @@
 angular.module("sampleApp")
     .controller('bundleVisualizerCtrl',
         function ($scope,$uibModal,$http,v2ToFhirSvc,$timeout,modalService,
-                  GetDataFromServer,$window,appConfigSvc,$localStorage,$q) {
+                  GetDataFromServer,$window,appConfigSvc,$localStorage,$q,moment) {
 
 
-            //console.log($window.location)
-            //todo - default to a new 'main clinfhir' server that is only availalble to apps on the clinfir server
-
+            $scope.moment = moment
             $scope.dataServer = $localStorage.dataServer || {url:"http://hapi.fhir.org/baseR4/"}
             $scope.validationServer = $localStorage.validationServer || appConfigSvc.getCurrentConformanceServer();
 
@@ -141,15 +139,7 @@ angular.module("sampleApp")
 
                         //if 'set validation server' is true, then supply the validation server in the call
                         validationServer = null
-                        /*
-                        if ($localStorage.bvConfig.setValidate) {
-                            let url = new URL(item.qry)
 
-
-                            validationServer = url.protocol
-                            console.log(validationServer)
-                        }
-*/
                         processBundle(data.data,validationServer)
                     },
                     function (err) {
@@ -527,6 +517,19 @@ angular.module("sampleApp")
                     })
                 }
 
+                //hash of observations by code
+                $scope.hashObservations = v2ToFhirSvc.makeObservationsHash(oBundle)
+                console.log($scope.hashObservations)
+
+                $scope.selectObservationCode = function(item) {
+                    console.log(item)
+                    $scope.selectedObservations = item.resources
+                }
+
+                $scope.selectObservation = function(obs){
+                    $scope.selectedObservation = obs
+                }
+
                 //create hash by type
                 $scope.hashEntries = {}
                 if (oBundle.entry) {
@@ -733,7 +736,7 @@ angular.module("sampleApp")
                 let validationServer = inValidationServer || $scope.validationServer.url
 
 
-                if ($localStorage.noValidate) {
+                if ($localStorage.bvConfig && $localStorage.bvConfig.noValidate) {
                     return
                 }
 
