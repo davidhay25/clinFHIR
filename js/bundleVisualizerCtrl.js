@@ -1,7 +1,7 @@
 angular.module("sampleApp")
     .controller('bundleVisualizerCtrl',
         function ($scope,$uibModal,$http,v2ToFhirSvc,$timeout,modalService,
-                  GetDataFromServer,$window,appConfigSvc,$localStorage,$q,moment) {
+                  GetDataFromServer,$window,appConfigSvc,$localStorage,$q,moment,bundleVisualizerSvc) {
 
 
             $scope.moment = moment
@@ -80,6 +80,39 @@ angular.module("sampleApp")
 
             }
 
+            $scope.deepValidate = function(){
+                $scope.waiting = true
+                bundleVisualizerSvc.deepValidation($scope.fhir,$scope.validationServer.url).then(
+                    function(data) {
+                        console.log(data)
+                        $scope.deepValidationResult = data
+                    }, function(err) {
+                        $scope.deepValidationResult = err
+                        console.log(err)
+                    }
+                ).then(function (){
+                    $scope.waiting = false
+                })
+            }
+
+            $scope.selectFromDeepValidate = function (iss) {
+                console.log(iss)
+                if (iss.location) {
+                    //get the index of the enry in the bundle
+                    let ar = iss.location[0].split('.')     //entry[n]
+                    if (ar.length > 1) {
+                        let t = ar[1]
+                        let g = t.indexOf('[')
+                        let inx = t.substr(g+1,t.length -g -2)
+                        console.log(inx)
+                        $scope.selectedDeepValidationEntry = $scope.fhir.entry[inx]
+                    }
+
+                }
+
+
+
+            }
 
             //-------- related to queries
             $scope.testNewQuery = function(qry) {

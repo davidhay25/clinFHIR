@@ -5,9 +5,92 @@ angular.module("sampleApp")
     //also holds the current patient and all their resources...
     //note that the current profile is maintained by resourceCreatorSvc
 
-    .service('bundleVisualizerSvc', function($localStorage,$http,$timeout,$q) {
+
+
+    .service('bundleVisualizerSvc', function($http,$q) {
+
+            let deepValidateMax = 30    //maximum number of resources allowed in deep validation
 
         return {
+            deepValidation : function (bundle,serverUrl) {
+                //performs a validation by copying all the bundle contents to a server, then using $validate against Bundle
+                //each resource must have an id
+                //returns an OO
+                let deferred = $q.defer();
+                let arQuery = [];
+                let arResult = [];
+                let OOerrors = {issue:[]}
+
+                if (!bundle.entry ||  bundle.entry.length > deepValidateMax) {
+                    OOerrors.issue.push({diagnostics:"The bundle must have a maximum number of " + deepValidateMax + " entries."})
+                    deferred.reject(OOerrors)
+                    return
+                }
+
+                //save each resource to the validation server, using minimal validation
+                bundle.entry.forEach(function (entry,inx) {
+                    if (entry.resource) {
+                        let resource = entry.resource;
+                        if (resource.id) {
+                            arQuery.push(saveResource(serverUrl,resource))
+                        } else {
+                            OOerrors.issue.push({diagnostics:"The resource at entry #" + inx + " does not have an id"})
+                        }
+
+                    } else {
+                        OOerrors.issue.push({diagnostics:"entry #" + inx + " has no resource"})
+                    }
+                });
+
+                if (OOerrors.issue.length > 0) {
+                    deferred.reject(OOerrors)
+                    return
+                }
+
+
+                $q.all(arQuery).then(
+                    function(data){
+                        //all of the resources saved correctly. Now invoke the Bundle validate
+                        console.log(data)
+                        let validateUrl = serverUrl + "/Bundle/$validate"
+                        //now we can POST the bundle
+                        $http.post(validateUrl,bundle).then(
+                            function(data) {
+                                deferred.resolve(data.data)
+                            }, function(err) {
+                                deferred.reject(err.data)
+                            }
+                        )
+
+                    },function(err) {
+                        //some of the resources were not saved
+console.log(err)
+                        deferred.reject(err.data)
+                    }
+                );
+
+                return deferred.promise
+
+
+                function saveResource(serverUrl,resource) {
+                    let deferred1 = $q.defer();
+                    let url = serverUrl + resource.resourceType + "/" + resource.id
+                    console.log(url)
+                    $http.put(url,resource).then(
+                        function(data) {
+                            deferred1.resolve(data.data)
+                        },
+                        function(err) {
+                            deferred1.reject(err.data)
+                        }
+                    )
+
+                    return deferred1.promise
+
+                }
+
+
+            },
             performQueryFollowingPaging : function(url,limit,accessToken){
                 //Get all the resurces specified by a query, following any paging...
                 //http://stackoverflow.com/questions/28549164/how-can-i-do-pagination-with-bluebird-promises

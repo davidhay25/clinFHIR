@@ -65,6 +65,8 @@
     <script src="resourceBuilder/rbServices.js"></script>
     <script src="js/libs/angular-bootstrap-checkbox.js"></script>
 
+    <script src="js/bundleVisualizerSvc.js"></script>
+
     <style>
         .myForm {
             padding: 8px;
@@ -110,6 +112,12 @@
         }
         thead {
             font-weight: bold;
+        }
+        .error {
+            color: red;
+        }
+        .warning {
+            color: #ec971f;
         }
 
     </style>
@@ -803,32 +811,54 @@
 
                         </uib-tab>
 
-                        <uib-tab ng-show = "false" heading="Bundle validation">
-                            <div class="row">
-                                <div class="col-md-10">
+                        <uib-tab heading="Deep validation">
+                            <button class="btn btn-link pull-right" ng-click="deepValidate()">Perform validation</button>
 
-                                </div>
-                                <div class="col-md-2">
-                                    <button class="btn btn-primary" ng-click="validateBundle()">Validate</button>
-                                </div>
+
+                            <div ng-hide="deepValidationResult">
+                                The deep validation will save all the resources in the bundle to the Validation Server
+                                ( {{}} ) and then validate the entire bundle.
                             </div>
 
+                            <uib-tabset ng-show="deepValidationResult">
+                                <uib-tab heading="OO">
+                                    <pre>{{deepValidationResult | json}}</pre>
+                                </uib-tab>
+                                <uib-tab heading="Table">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <div class="modelScroll">
+                                                <table class="table table-condensed table-bordered">
+                                                    <tr ng-repeat="iss in deepValidationResult.issue"
+                                                        ng-click="selectFromDeepValidate(iss)">
 
-                            <pre>{{hashErrors | json}}</pre>
+                                                        <td>
+                                                            <div ng-class="{error:iss.severity == 'error',warning:iss.severity == 'information'}">
+                                                                {{iss.diagnostics}}</div>
+                                                        </td>
+                                                        <td>
+                                                            <div ng-repeat="loc in iss.location">
+                                                                {{loc}}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </div>
 
-
-                            <table class="table table-condensed">
-                                <tr ng-repeat="iss in bundleValidationResult.issue">
-                                    <td>{{iss.severity}}</td>
-                                    <td>{{iss.diagnostics}}</td>
-                                    <td>
-                                        <div ng-repeat="loc in iss.location">
-                                            {{loc}}
                                         </div>
-                                    </td>
-                                </tr>
-                            </table>
-                            <pre>{{bundleValidationResult | json}}</pre>
+                                        <div class="col-md-4">
+                                            <pre>{{selectedDeepValidationEntry | json}}</pre>
+                                        </div>
+                                    </div>
+
+
+                                </uib-tab>
+                            </uib-tabset>
+
+
+
+
+
                         </uib-tab>
 
 
