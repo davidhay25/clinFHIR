@@ -262,7 +262,7 @@
                                 <td>{{item.qry}}</td>
                                 <td><i class="glyphicon glyphicon-remove-sign clickable" ng-click="deleteQuery($index)"></i>
                                 </td>
-                                <td width="80"><button class="btn btn-link" ng-click="executeSavedQuery(item)">Execute</button> </td>
+                                <td width="80"><button class="btn btn-link" ng-click="executeSavedQuery(item)">Load</button> </td>
                             </tr>
                         </table>
 
@@ -449,7 +449,7 @@
                                                             <div ng-repeat="(k,v) in hashEntries">
                                                                 <div><strong>{{k}}</strong></div>
                                                                 <div ng-repeat = "entry in v"
-                                                                    ng-class="{'list-group-item':true}">
+                                                                     ng-class="{'list-group-item':true,'listItemSelected':selectedBundleEntry == entry}">
                                                                     <div style="padding-left: 10px; cursor: pointer"
                                                                          ng-click="selectBundleEntry(entry,hashErrors[$index])">
                                                                         <div> {{entry.resource.text.div | cleanTextDiv | limitTo:50}}</div>
@@ -606,12 +606,63 @@
                                                     <ul>
 
                                                         <li>
-                                                            "Resource should narrative" means you're missing the .text element
+                                                            "Resource should have narrative..." means you're missing the .text element
                                                         </li>
 
-                                                        <li>"Unable to resolve resource" errors simply mean that the referenced
+                                                        <li>"Unable to resolve resource..." errors simply mean that the referenced
                                                         resource was not found on the Validation server. These can generally be ignored.</li>
                                                     </ul>
+                                                </uib-tab>
+
+                                                <uib-tab ng-show="selectedBundleEntry.resource.resourceType == 'Composition'" heading="Sections"  >
+
+
+                                                    <div class="col-md-6 col-sm-6">
+
+                                                        <div ng-repeat="section in selectedBundleEntry.resource.section">
+                                                            <strong>{{section.title}}</strong>
+
+
+                                                            <div class="list-group">
+
+
+
+                                                                <div ng-class="{'list-group-item':true,'listItemSelected':entry.reference == selectedRef}"
+                                                                     ng-repeat="entry in section.entry">
+                                                                    <div class="clickable" ng-click="selectResourceFromSection(entry.reference)">
+                                                                        {{entry.reference}}</div>
+
+
+                                                                </div>
+                                                            </div>
+
+
+                                                        </div>
+
+<!--
+                                                        <table class="table table-bordered">
+                                                            <tr><th>Title</th><th>References</th></tr>
+                                                            <tr ng-repeat="section in selectedBundleEntry.resource.section">
+                                                                <td>{{section.title}}</td>
+                                                                <td>
+
+                                                                    <div ng-repeat="entry in section.entry">
+                                                                        <div class="clickable" ng-click="selectResourceFromSection(entry.reference)">
+                                                                            {{entry.reference}}</div>
+                                                                    </div>
+                                                                </td>
+
+
+                                                            </tr>
+                                                        </table>
+-->
+
+
+                                                    </div>
+                                                    <div class="col-md-6 col-sm-6">
+                                                        <pre>{{resourceFromSection | json}}</pre>
+                                                    </div>
+
                                                 </uib-tab>
 
                                                 <uib-tab ng-show="selectedBundleEntry.resource.resourceType == 'ValueSet' && selectedBundleEntry.resource.expansion">
@@ -817,8 +868,15 @@
                                             </td>
                                             <td>{{obs.effectiveDateTime | getAgeSeconds}}</td>
                                             <td>{{obs.valueString}}
-                                                {{obs.valueCodeableConcept}}
+
+                                                <div ng-repeat="coding in obs.valueCodeableConcept.coding">
+                                                    {{coding.system}} {{coding.code}}
+                                                    {{coding.display}}
+                                                </div>
+                                                {{obs.valueCodeableConcept.text}}
+
                                                 {{obs.valueQuantity.value}} {{obs.valueQuantity.unit}}
+
 
                                             </td>
                                             <td>

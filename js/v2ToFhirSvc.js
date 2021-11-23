@@ -16,13 +16,14 @@ angular.module("sampleApp")
         objColours.CareTeam = '#FFFFCC';
         objColours.Condition = '#cc9900';
         objColours.LogicalModel = '#ff8080';
-
+        objColours.ServiceRequest = '#ff8080';
+        objColours.Composition = '#ff8080';
         objColours.Organization = '#FF9900';
         objColours.ProviderRole = '#FFFFCC';
         objColours.Location = '#cc9900';
         objColours.HealthcareService = '#FFFFCC';
         objColours.MedicationDispense = '#FFFFCC';
-        objColours.Composition = '#FFFFCC';
+        //objColours.Composition = '#FFFFCC';
         objColours.Medication = '#FF9900';
         objColours.Measure = '#FF9900';
         objColours.Task = '#FF9900';

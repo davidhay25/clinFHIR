@@ -132,6 +132,18 @@ angular.module("sampleApp")
             $scope.executeSavedQuery = function (item) {
                 //this is a DR resource
                 $scope.waiting = true;
+
+                var req = {
+                    method: 'GET',
+                    url: item.qry,
+                    headers: {
+                        'Cache-Control': 'no-cache'
+                        //'Pragma':'no-cache'
+                    }
+                }
+
+               // $http(req).then(
+
                 $http.get(item.qry).then(
                     function (data) {
                         console.log(data)
@@ -440,8 +452,6 @@ angular.module("sampleApp")
                 });
 
 
-                //
-
             };
 
 
@@ -474,7 +484,7 @@ angular.module("sampleApp")
                 },1000)
             };
 
-            $scope.selectBundleFromList = function(entry) {
+            $scope.selectBundleFromListDEP = function(entry) {
                 delete $scope.selectedBundleEntryErrors;
                 delete $scope.selectedBundleEntry;
 
@@ -483,9 +493,24 @@ angular.module("sampleApp")
 
             };
 
+            $scope.selectObservationCode = function(item) {
+                console.log(item)
+                $scope.selectedObservations = item.resources
+            }
+
+            $scope.selectObservation = function(obs){
+                $scope.selectedObservation = obs
+            }
+
+            $scope.selectResourceFromSection = function(ref){
+                $scope.selectedRef = ref        //to highlight under sections
+                $scope.resourceFromSection = $scope.hashByRef[ref]
+            }
+
             //validate the resources in the bundle, then draw the graph (which needs the errors to display)
             let processBundle = function(oBundle,validationServer) {
 
+                delete $scope.hashErrors
                 $scope.showSelector = false     //hide the selector
 
                 delete $scope.serverRoot;
@@ -493,11 +518,12 @@ angular.module("sampleApp")
 
                 //create a hash for bundle by name
                 $scope.hashByName = {}
+                $scope.hashByRef = {}       //the target of a reference {type}/{id}
                 if (oBundle.entry) {
                     oBundle.entry.forEach(function(entry) {
                         let resource = entry.resource;
                         $scope.hashByName[resource.resourceType] = $scope.hashByName[resource.resourceType] || []
-
+                        $scope.hashByRef[resource.resourceType + "/" + resource.id] = resource
                         if (resource.name) {
                             let item = {entry:entry}
                             item.display = resource.name;     //todo - maybe check datatype?
@@ -520,7 +546,7 @@ angular.module("sampleApp")
                 //hash of observations by code
                 $scope.hashObservations = v2ToFhirSvc.makeObservationsHash(oBundle)
                 console.log($scope.hashObservations)
-
+/*
                 $scope.selectObservationCode = function(item) {
                     console.log(item)
                     $scope.selectedObservations = item.resources
@@ -529,7 +555,7 @@ angular.module("sampleApp")
                 $scope.selectObservation = function(obs){
                     $scope.selectedObservation = obs
                 }
-
+*/
                 //create hash by type
                 $scope.hashEntries = {}
                 if (oBundle.entry) {
@@ -543,9 +569,8 @@ angular.module("sampleApp")
                     })
                 }
 
-                //construct the graph based on canonical references
+                //------------- construct the graph based on canonical references
                 let vo = v2ToFhirSvc.makeGraphCanonical(oBundle)
-
                 $scope.hashRefsByResource = vo.hashRefsByResource;  //the set of canonical resources from this resource
                 var container = document.getElementById('canonicalGraph');
                 var graphOptions = {
@@ -560,15 +585,46 @@ angular.module("sampleApp")
                 $scope.canonicalGraph.on("click", function (obj) {
 
                     var nodeId = obj.nodes[0];  //get the first node
-
                     var node = vo.graphData.nodes.get(nodeId);
                     $scope.selectedCanResource = node.resource;
-
-
-
                     $scope.$digest();
                 });
 
+
+
+
+                //---------- draw the main graph
+
+
+                //the serverRoot is needed to figure out the references when the reference is relative
+                //we assume that all the resources are from the same server, so figure out the server root
+                //by looking at the first fullUrl (remove the /{type}/{id} at the end of the url
+
+                let serverRoot = "";
+                if ($scope.fhir && $scope.fhir.entry) {
+                    //work out the server root from the first entry
+                    let first = $scope.fhir.entry[0]
+                    if (first && first.fullUrl) {
+                        console.log(first.fullUrl)
+                        let ar = first.fullUrl.split('/')
+                        ar.pop();
+                        ar.pop();
+                        serverRoot = ar.join('/') + "/"
+                        console.log(serverRoot)
+                        $scope.serverRoot = serverRoot;
+
+                    } else {
+                        //todo - do we really need the fullUrl
+                        // alert('All entries need the fullUrl for the graph generation to work properly. The graph may be incomplete..')
+                    }
+                }
+
+                let options = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:serverRoot}
+                drawGraph(options)
+
+
+               // let options = {bundle:$scope.fhir,hashErrors:{},serverRoot:serverRoot}
+               // drawGraph(options)
 
                 //note that this function is defined on the root...
                 validate(oBundle, validationServer,function(hashErrors){
@@ -576,7 +632,7 @@ angular.module("sampleApp")
 
                     $scope.hashErrors = hashErrors;
                     //$scope.validationResult = hashErrors
-
+/*
                     //the serverRoot is needed to figure out the references when the reference is relative
                     //we assume that all the resources are from the same server, so figure out the server root
                     //by looking at the first fullUrl (remove the /{type}/{id} at the end of the url
@@ -602,7 +658,7 @@ angular.module("sampleApp")
 
                     let options = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:serverRoot}
                     drawGraph(options)
-
+*/
                 });
 
                 let bundle=angular.copy(oBundle)
