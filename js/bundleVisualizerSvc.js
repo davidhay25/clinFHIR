@@ -64,8 +64,8 @@ angular.module("sampleApp")
 
                     },function(err) {
                         //some of the resources were not saved
-console.log(err)
-                        deferred.reject(err.data)
+                        console.log(err)
+                        deferred.reject(err)
                     }
                 );
 

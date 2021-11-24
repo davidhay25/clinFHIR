@@ -95,6 +95,8 @@ angular.module("sampleApp")
                 })
             }
 
+
+
             $scope.selectFromDeepValidate = function (iss) {
                 console.log(iss)
                 if (iss.location) {
@@ -109,9 +111,21 @@ angular.module("sampleApp")
                     }
 
                 }
+            }
+
+            $scope.selectSection = function(section) {
+                delete $scope.selectedEntryFromSection
+                $scope.selectedSection = section
+            }
+            $scope.selectEntryFromSection = function(oReference) {
+                let reference = oReference.reference;
 
 
+                $scope.selectedEntryFromSection = $scope.hashByRef[reference]
+            }
 
+            $scope.selectResourceFromRender = function(resource) {
+                $scope.selectedResourceFromRender = resource.resource
             }
 
             //-------- related to queries
@@ -544,6 +558,10 @@ angular.module("sampleApp")
             let processBundle = function(oBundle,validationServer) {
 
                 delete $scope.hashErrors
+
+                delete $scope.selectedDeepValidationEntry
+                delete $scope.deepValidationResult
+
                 $scope.showSelector = false     //hide the selector
 
                 delete $scope.serverRoot;

@@ -29,9 +29,10 @@
     <script src="js/libs/angular-sanitize.js"></script>
     <script src="js/libs/firebase.js"></script>
     <script src="js/libs/angularfire.min.js"></script>
-    <script src="js/libs/angular-sanitize.js"></script>
+
     <script src="js/libs/jstree.min.js"></script>
 <!--
+<script src="js/libs/angular-sanitize.js"></script>
     <script src="js/libs/handlebars-v4.1.2.js"></script>
     -->
 
@@ -812,13 +813,27 @@
                         </uib-tab>
 
                         <uib-tab heading="Deep validation">
-                            <button class="btn btn-link pull-right" ng-click="deepValidate()">Perform validation</button>
+                            <br/>
+                            <button class="btn btn-primary pull-right" ng-click="deepValidate()">Perform validation</button>
 
 
                             <div ng-hide="deepValidationResult">
+                                <br/>
                                 The deep validation will save all the resources in the bundle to the Validation Server
-                                ( {{}} ) and then validate the entire bundle.
+                                ( <strong>{{validationServer.url}}</strong> ) and then validate the entire bundle.
+                                <br/> <br/>
+                                <em>
+                                In some cases, the server might not save
+                                a resource if it has a reference to a resource that has not been saved. In that case,
+                                simply repeat the 'Perform Validation' step (you may need to do this multiple times)
+                                and eventually all resources will be saved)
+                                </em>
+                                <br/>
+                                <br/>
+                                Todo: change to allow a transaction as update as well (if the server supports it)
                             </div>
+
+
 
                             <uib-tabset ng-show="deepValidationResult">
                                 <uib-tab heading="OO">
@@ -945,15 +960,24 @@
 
                                             <div class="col-md-5">
                                                 <p style="margin-left: 10px" ng-bind-html="section.text.div"></p>
+
                                             </div>
-                                            <div class="col-md-6">
-                                                <div ng-repeat = "resource in section.realResources">
+                                            <div class="col-md-3">
+
+                                                <div ng-repeat = "resource in section.realResources"
+                                                     ng-click="selectResourceFromRender(resource)">
                                                     <div class="rounded-box">
                                                         {{resource.display}}
+
                                                         <em><p ng-bind-html="resource.resource.text.div"></p></em>
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="col-md-3">
+                                             <!--   <pre>{{selectedResourceFromRender | json}}</pre> -->
+                                            </div>
+
+
                                         </div>
 
 
@@ -970,15 +994,28 @@
                                         <div class="col-md-3">
                                             <div class="list-group">
                                                 <div ng-class="{'list-group-item':true}"
-                                                     ng-repeat = "section in document.composition.section">
+                                                     ng-repeat = "section in document.composition.section"
+                                                    ng-click="selectSection(section)">
                                                     {{section.title}}
                                                     <div class="pull-right badge">{{section.entry.length}}</div>
                                                     <div>{{section.code.coding[0].system}} {{section.code.coding[0].code}}</div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-md-9">
+                                        <div class="col-md-3">
 
+                                            <table>
+                                                <div class="list-group">
+                                                    <div class="list-group-item" ng-repeat = "entry in selectedSection.entry">
+                                                        <div ng-click="selectEntryFromSection(entry) ">{{entry.reference}}</div>
+                                                    </div>
+                                                </div>
+
+                                            </table>
+
+                                        </div>
+                                        <div class="col-md-6">
+                                            <pre>{{selectedEntryFromSection | json}}</pre>
                                         </div>
                                     </div>
 
