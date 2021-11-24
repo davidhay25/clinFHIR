@@ -958,8 +958,9 @@
 
                                         <div class="row">
 
-                                            <div class="col-md-5">
-                                                <p style="margin-left: 10px" ng-bind-html="section.text.div"></p>
+                                            <div class="col-md-8">
+                                                <p style="margin-left: 10px" ng-bind-html="to_trusted(section.text.div)"></p>
+                                                <!-- <p style="margin-left: 10px" ng-bind-html="section.text.div"></p> -->
 
                                             </div>
                                             <div class="col-md-3">
@@ -972,9 +973,6 @@
                                                         <em><p ng-bind-html="resource.resource.text.div"></p></em>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="col-md-3">
-                                             <!--   <pre>{{selectedResourceFromRender | json}}</pre> -->
                                             </div>
 
 

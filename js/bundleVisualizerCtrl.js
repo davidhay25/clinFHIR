@@ -1,7 +1,12 @@
 angular.module("sampleApp")
     .controller('bundleVisualizerCtrl',
         function ($scope,$uibModal,$http,v2ToFhirSvc,$timeout,modalService,
-                  GetDataFromServer,$window,appConfigSvc,$localStorage,$q,moment,bundleVisualizerSvc) {
+                  GetDataFromServer,$window,appConfigSvc,$localStorage,$q,moment,bundleVisualizerSvc,$sce) {
+
+
+            $scope.to_trusted = function(html_code) {
+                return $sce.trustAsHtml(html_code);
+            }
 
 
             $scope.moment = moment
