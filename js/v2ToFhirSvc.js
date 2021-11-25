@@ -388,6 +388,12 @@ angular.module("sampleApp")
                                 url = resource.resourceType + "/" + resource.id;
                             }
                         }
+                    } else {
+                        //check if the full url is actually a guid. If it is, then set the url to {type}/{id} as the guid is ignored
+                        if (url.indexOf("urn:uuid:") > -1) {
+                            url = resource.resourceType + "/" + resource.id
+
+                        }
                     }
 
                     let node = {id: arNodes.length +1, label: resource.resourceType,
@@ -426,11 +432,13 @@ angular.module("sampleApp")
                         include = true;
                     }
 
-
                     arNodes.push(node);
-
-
-
+/*
+                    if (centralResourceId && url == centralResourceId) {
+                        //this is the central id
+                        centralResourceNodeId = arNodes.length;
+                    }
+*/
                     if (centralResourceId && url == centralResourceId) {
                         //this is the central id
                         centralResourceNodeId = arNodes.length;

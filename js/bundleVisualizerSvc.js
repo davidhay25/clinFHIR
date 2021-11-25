@@ -12,6 +12,18 @@ angular.module("sampleApp")
             let deepValidateMax = 30    //maximum number of resources allowed in deep validation
 
         return {
+                makeGraph : function(bundle,options) {
+                    let dummyBase = "http://dummybase/"
+                    let hashByFullUrl = {}
+                    //create a hash indexed on fullUrl. If there is no fullUrl, then create one using a dummy base
+                    bundle.entry.forEach(function (entry){
+                        let resource = entry.resource
+                        let fullUrl = entry.fullUrl || dummyBase + resource.resourceType + "/" + resource.id
+                        hashByFullUrl[fullUrl] = resource
+                        
+                    })
+
+                },
             deepValidation : function (bundle,serverUrl) {
                 //performs a validation by copying all the bundle contents to a server, then using $validate against Bundle
                 //each resource must have an id

@@ -4,6 +4,7 @@ angular.module("sampleApp")
                   GetDataFromServer,$window,appConfigSvc,$localStorage,$q,moment,bundleVisualizerSvc,$sce) {
 
 
+            //used to display the HTML when displaying a document
             $scope.to_trusted = function(html_code) {
                 return $sce.trustAsHtml(html_code);
             }
@@ -465,6 +466,9 @@ angular.module("sampleApp")
                             url = resource.resourceType + "/" + resource.id;
                         }
                     }
+                } else {
+                    //if there is a full url, then strip of any guid marker
+                    url = url.replace("urn:uuid:","")
                 }
 
                 let options = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:$scope.serverRoot,centralResourceId:url}
@@ -661,17 +665,29 @@ angular.module("sampleApp")
                     //work out the server root from the first entry
                     let first = $scope.fhir.entry[0]
                     if (first && first.fullUrl) {
-                        console.log(first.fullUrl)
-                        let ar = first.fullUrl.split('/')
-                        ar.pop();
-                        ar.pop();
-                        serverRoot = ar.join('/') + "/"
-                        console.log(serverRoot)
+                        let fullUrl = first.fullUrl
+                        console.log(fullUrl)
+                        let serverRoot
+                        //the 'serverRoot' may actually be urn:uuid: - meaning that GUIDs are in play, or may be an actual server base address
+                        if (fullUrl.indexOf("urn:uuid:") > -1) {
+                            //not a server
+                           // serverRoot = ""  //fullUrl.substr(8)      //strip off the guid
+                        } else {
+                            let ar = first.fullUrl.split('/')
+                            ar.pop();
+                            ar.pop();
+                            serverRoot = ar.join('/') + "/"
+                            console.log(serverRoot)
+                        }
+
+
+
                         $scope.serverRoot = serverRoot;
 
                     } else {
                         //todo - do we really need the fullUrl
                         // alert('All entries need the fullUrl for the graph generation to work properly. The graph may be incomplete..')
+
                     }
                 }
 
