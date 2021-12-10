@@ -9,7 +9,6 @@
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-
         gtag('config', 'G-YD055VEN8K');
     </script>
 
@@ -31,6 +30,7 @@
     <script src="js/libs/angularfire.min.js"></script>
 
     <script src="js/libs/jstree.min.js"></script>
+    <script src="js/libs/vkbeautify.0.99.00.beta.js"></script>
 <!--
 <script src="js/libs/angular-sanitize.js"></script>
     <script src="js/libs/handlebars-v4.1.2.js"></script>
@@ -619,6 +619,14 @@
                                                     </ul>
                                                 </uib-tab>
 
+                                                <uib-tab ng-show="fshText" heading="FSH (transformed)">
+                                                    <pre>{{fshText}}</pre>
+                                                </uib-tab>
+
+                                                <uib-tab ng-show="xmlText"  heading="XML (transformed)">
+                                                    <pre>{{xmlText}}</pre>
+                                                </uib-tab>
+
                                                 <uib-tab ng-show="selectedBundleEntry.resource.resourceType == 'Composition'" heading="Sections"  >
 
 
@@ -841,6 +849,7 @@
                                             <div class="modelScroll">
                                                 <table class="table table-condensed table-bordered">
                                                     <tr ng-repeat="iss in deepValidationResult.issue"
+                                                        style="cursor: pointer"
                                                         ng-click="selectFromDeepValidate(iss)">
 
                                                         <td>
@@ -1043,16 +1052,6 @@
                         </uib-tab>
 
 
-<!--
-                        <uib-tab ng-show = "1==2 && fhir.type == 'document' " heading="HandleBars Document">
-
-                            <button class="btn btn-primary" ng-click="hbDoc()">Load HandleBars template and render document</button>
-                            <hr/>
-
-
-                            <ng-include src="hbTemplate"></ng-include>
-                        </uib-tab>
-                        -->
 
 
 

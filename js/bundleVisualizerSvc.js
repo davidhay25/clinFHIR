@@ -20,7 +20,7 @@ angular.module("sampleApp")
                         let resource = entry.resource
                         let fullUrl = entry.fullUrl || dummyBase + resource.resourceType + "/" + resource.id
                         hashByFullUrl[fullUrl] = resource
-                        
+
                     })
 
                 },

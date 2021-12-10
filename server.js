@@ -18,6 +18,8 @@ var smartModule = require("./serverModuleSMART.js")
 let testingModule = require("./serverModuleTesting.js")
 const proxyModule = require("./serverModuleProxy.js")
 
+const fshModule = require("./serverModuleFSH.js")
+
 let registryModule = require('./serverModuleRegistry.js');
 registryModule.setup(app)
 
@@ -78,6 +80,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/clinfhir', function(err, ldb) {
         testingModule.setup(app,db);
         proxyModule.setup(app);
         patientCorectionsModule.setup(app,db)
+        fshModule.setup(app)
     }
 });
 

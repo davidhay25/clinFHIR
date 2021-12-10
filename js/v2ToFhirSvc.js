@@ -378,6 +378,9 @@ angular.module("sampleApp")
                     //If the fullUrl exists then it is the url for the resource. Otherwise, constructs from the server rool
                     let url = entry.fullUrl;// || resource.resourceType + "/" + resource.id;
 
+
+
+
                     if (! url) {
                         //If the resource has an id, then construct the url from that.
                         //If a serverRoot has been passed in, then make the url an absolute one.
@@ -392,6 +395,16 @@ angular.module("sampleApp")
                         //check if the full url is actually a guid. If it is, then set the url to {type}/{id} as the guid is ignored
                         if (url.indexOf("urn:uuid:") > -1) {
                             url = resource.resourceType + "/" + resource.id
+
+                        } else {
+                            //not a urn
+                            //set the serverRoot here - it only applies to this entry and is used for resolving references per the spec...
+
+                            let ar1 = url.split('/')
+                            ar1.pop()
+                            ar1.pop()
+                            serverRoot = ar1.join('/')
+                            url = serverRoot + resource.resourceType + "/" + resource.id;
 
                         }
                     }
@@ -602,6 +615,11 @@ angular.module("sampleApp")
                                                 refs.push({path: lpath, reference: obj.reference})
                                             } else {
                                                 //construct an absolute reference from the server root if possible
+                                                //get the 'serverRoot' from the fullUrl of the entry
+
+
+
+
                                                 if (serverRoot) {
                                                     //if there's a serverRoot and it this is a relative reference, then convert to an absolute reference
 

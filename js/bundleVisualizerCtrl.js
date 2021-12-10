@@ -431,10 +431,51 @@ angular.module("sampleApp")
 
             $scope.selectBundleEntry = function(entry,entryErrors) {
                 delete $scope.selectedFromSingleGraph;
+                delete $scope.fshText
+                delete $scope.xmlText
                 $scope.selectedBundleEntry = entry
                 $scope.selectedBundleEntryErrors = entryErrors;
 
                 $scope.createGraphOneEntry();
+
+                //get the FSH of the resource
+                $http.post("./fsh/transformJsonToFsh",entry.resource).then(
+                    function(data) {
+                        console.log(data.data)
+                        try {
+                            let response = data.data
+                            $scope.fshText = response.fsh.instances[entry.resource.id]
+                            if (response.fsh.aliases) {
+                                $scope.fshText = response.fsh.aliases + "\n\n" +$scope.fshText
+                            }
+
+
+                        } catch (ex) {
+                            $scope.fshText = "Unable to transform into FSH"
+                        }
+
+                    }, function(err) {
+                        console.log("FSH Transform error")
+
+                    }
+                )
+
+                //get the Xml
+                $http.post("./transformXML",entry.resource).then(
+                    function(data) {
+                       // console.log(data.data)
+                        try {
+                            $scope.xmlText = vkbeautify.xml(data.data)
+                        } catch (ex) {
+                            $scope.xmlText = "Unable to transform into XML"
+                        }
+
+                    }, function(err) {
+                        console.log("FSH Transform error")
+
+                    }
+                )
+
 
 
                 let treeData = v2ToFhirSvc.buildResourceTree(entry.resource);
@@ -734,7 +775,6 @@ angular.module("sampleApp")
                 });
 
                 let bundle=angular.copy(oBundle)
-
 
                 //if this is a document, then
                 delete $scope.document;     //contains the document specific resources suitable for layout

@@ -1,0 +1,30 @@
+{
+    "name": "opener",
+    "libraryName": "opener",
+    "sourceRepoURL": "https://www.github.com/DefinitelyTyped/DefinitelyTyped",
+    "data": {
+        "authors": "Rahul Ravikumar <https://github.com/tikurahul>",
+        "dependencies": {
+            "child_process": "*",
+            "node": "*"
+        },
+        "pathMappings": {},
+        "libraryMajorVersion": 1,
+        "libraryMinorVersion": 4,
+        "typeScriptVersion": "2.0",
+        "libraryName": "opener",
+        "typingsPackageName": "opener",
+        "projectName": "https://github.com/domenic/opener",
+        "sourceRepoURL": "https://www.github.com/DefinitelyTyped/DefinitelyTyped",
+        "globals": [],
+        "declaredModules": [
+            "opener/."
+        ],
+        "files": [
+            "index.d.ts"
+        ],
+        "hasPackageJson": false,
+        "contentHash": "629b1a33db3abdb2246ba2e02963376493626866d9cc88d67535e76175e7e787"
+    },
+    "isLatest": true
+}
