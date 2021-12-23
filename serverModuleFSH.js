@@ -18,7 +18,7 @@ function setup(app) {
             void async function() {
                 let results;
                 console.log(body)
-                let result = await gofshClient.fhirToFsh([body],{style:'map',dependencies: ['hl7.fhir.r4.core#4.0.1'],logLevel:'debug'})
+                let result = await gofshClient.fhirToFsh([body],{style:'map',dependencies: ['hl7.fhir.r4.core#4.0.1'],logLevel:'error'})
 
                 //result.dhInstances = Object.fromEntries(result.fsh.instances);
 

@@ -356,11 +356,12 @@ angular.module("sampleApp")
 
 
 
-                let hashErrors = options.hashErrors;
+                let hashErrors = options.hashErrors;        //errors from validation prior to invoking graph
                 let serverRoot = options.serverRoot;
                 let hidePatient = options.hidePatient;
                 let centralResourceId = options.centralResourceId;
 
+                let missingReferences = {}      //where a resource references a missing entry...
 
                 //serverRoot is used when the bundle comes from a server, and we want to convert
                 //user to convert relative to absolute references so the fullUrls work
@@ -522,6 +523,11 @@ angular.module("sampleApp")
                         var label = $filter('dropFirstInPath')(ref.path);
                         arEdges.push({id: 'e' + arEdges.length +1,from: ref.src.id, to: targetNode.id, label: label,arrows : {to:true}})
                     } else {
+                        /* - Not sure how useful this is...
+                        missingReferences[ref.targ] = missingReferences[ref.targ] || []
+                        let err = {ref:ref}
+                        missingReferences[ref.targ].push(err)
+*/
                         console.log('>>>>>>> error Node Id '+ref.targ + ' is not present')
                     }
                 });
@@ -574,7 +580,8 @@ angular.module("sampleApp")
                 };
 
 
-                return {graphData : data, allReferences:allReferences, nodes: arNodes, visNodes:nodes,visEdges:edges};
+                console.log(missingReferences)
+                return {graphData : data, allReferences:allReferences, nodes: arNodes, visNodes:nodes,visEdges:edges, missingReferences:missingReferences};
 
 
                 function makeNodeDataSet(arNodes,hidePatient) {

@@ -348,7 +348,7 @@ angular.module("sampleApp")
                                 url += '/';
                                 $scope.input.url += '/'
                             }
-                            url += "meta";
+                            url += "metadata";
                             $http.get(url).then(
                                 function(data) {
                                     if (data.data && data.data.resourceType == 'CapabilityStatement' ) {
@@ -471,10 +471,13 @@ angular.module("sampleApp")
                         }
 
                     }, function(err) {
-                        console.log("FSH Transform error")
+                        console.log("Xml Transform error")
 
                     }
                 )
+
+
+
 
 
 
