@@ -101,6 +101,52 @@ angular.module("sampleApp")
                 })
             }
 
+            $scope.validateWithInferno = function(){
+                //curl 'https://inferno-dev.healthit.gov/validatorapi/validate?profile=http://hl7.org/fhir/uv/ips/StructureDefinition/Composition-uv-ips' -X POST -H 'Content-Type: application/fhir+json' --data-raw $'{\n  "resourceType" : "Composition"\n}'
+                let url = "/proxyfhir/https://inferno-dev.healthit.gov/validatorapi/validate?profile=http://hl7.org/fhir/uv/ips/StructureDefinition/Composition-uv-ips"
+
+                $scope.validatingWithInferno = true;
+                delete $scope.infernoError
+                delete $scope.infernoValidationResult
+
+                $http.post(url,$scope.fhir).then(
+                    function (data){
+                        $scope.infernoValidationResult = data.data
+                        console.log(data.data)
+                    }, function(err) {
+                        $scope.infernoError = err.data
+                        console.log(err.data)
+                    }
+                ).finally(
+                    function(){
+                        $scope.validatingWithInferno = false
+                    }
+                )
+
+            }
+
+            $scope.selectFromInfernoValidate = function (iss) {
+                console.log(iss)
+                if (iss.expression) {
+                    //get the index of the enry in the bundle
+
+                    $scope.selectedInfernoValidationEntry = fhirpath.evaluate($scope.fhir, iss.expression[0])
+/*
+                    console.log(fhirpath.evaluate($scope.fhir, iss.expression[0]));
+
+
+                    let ar = iss.expression[0].split('.')     //entry[n]
+                    if (ar.length > 1) {
+                        let t = ar[1]
+                        let g = t.indexOf('[')
+                        let inx = t.substr(g+1,t.length -g -2)
+                        console.log(inx)
+                        $scope.selectedInfernoValidationEntry = $scope.fhir.entry[inx]
+                    }
+            */
+
+                }
+            }
 
 
             $scope.selectFromDeepValidate = function (iss) {
@@ -358,7 +404,7 @@ angular.module("sampleApp")
                                     }
                                 },
                                 function (err) {
-                                    alert("This url did not return a CapabilityStataement from "+ url)
+                                    alert("This url did not return a CapabilityStatement from "+ url)
                                 }
                             )
 

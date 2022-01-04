@@ -3163,9 +3163,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                             })
                         }
 
-
-
-
                         if (include) {
                             var node = {id: inx, start: resource.period.start, resource: resource};
                             var klass = resource.class || 'unknown';

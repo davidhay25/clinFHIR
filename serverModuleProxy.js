@@ -28,6 +28,7 @@ function setup(app,indb) {
             }
         })
     });
+
     app.post('/proxyfhir/*', function (req, res) {
         var fhirQuery = req.originalUrl.substr(11); //strip off /proxyfhir
 

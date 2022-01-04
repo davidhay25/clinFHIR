@@ -31,6 +31,9 @@
 
     <script src="js/libs/jstree.min.js"></script>
     <script src="js/libs/vkbeautify.0.99.00.beta.js"></script>
+
+    <script src="js/libs/fhirpath.min.js"></script>
+
 <!--
 <script src="js/libs/angular-sanitize.js"></script>
     <script src="js/libs/handlebars-v4.1.2.js"></script>
@@ -883,67 +886,78 @@
 
 
 
-                        <uib-tab heading = "Observations">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <strong>Observation Codes</strong>
-                                    <div class="list-group">
-                                        <div class="list-group-item"
-                                             ng-click="selectObservationCode(hashObservations[k])"
-                                             ng-repeat="(k,v) in hashObservations">
 
-                                            <div class="pull-right badge">
-                                                {{v.resources.length}}
+                        <uib-tab ng-show = "fhir.type == 'document'" heading="Inferno">
+                            <br/>
+                            <button class="btn btn-primary pull-right" ng-click="validateWithInferno()">Perform validation</button>
+
+
+                            <div ng-show="validatingWithInferno">
+                                Calling the Inferno API - please be patient!
+                                <br/><br/>
+                            </div>
+
+                            <div ng-show="infernoError">
+                                Oops, there was an error from inferno (likely a timeout)
+                                <pre>{{infernoError | json}}</pre>
+                            </div>
+
+                            <div ng-hide="infernoValidationResult">
+
+                                <p>This function will call the Inferno API to perfrom validation.</p>
+                                <p>Note that this is an experimental feature so may not be correct or
+                                may fail (currently it seems to be timing out on large documents</p>
+                                <br/>
+                                <br/>
+
+                            </div>
+
+
+
+                            <uib-tabset ng-show="infernoValidationResult">
+                                <uib-tab heading="Table">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <div class="modelScroll">
+                                                <table class="table table-condensed table-bordered">
+                                                    <tr ng-repeat="iss in infernoValidationResult.issue"
+                                                        style="cursor: pointer"
+                                                        ng-click="selectFromInfernoValidate(iss)">
+
+                                                        <td>
+                                                            <div ng-class="{error:iss.severity == 'error',warning:iss.severity == 'information'}">
+                                                                {{iss.details.text}}</div>
+                                                        </td>
+                                                        <td>
+
+                                                            <div ng-repeat="exp in iss.expression">
+                                                                {{exp}}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </table>
                                             </div>
-                                            <div>{{v.code.display}}</div>
-                                            <div>{{v.code.code}} </div>
+
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div ng-repeat="src in selectedInfernoValidationEntry">
+                                                <pre>{{src | json}}</pre>
+                                            </div>
 
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-md-5">
-                                    <strong>{{selectedObservations[0].code.coding[0].code}} {{selectedObservations[0].code.coding[0].display}}</strong>
-                                    <table class="table-bordered table">
-                                        <tr>
-                                            <th>Date</th><th>Age</th><th>Result</th><th>Reference Range</th>
-                                        </tr>
-                                        <tr ng-repeat="obs in selectedObservations"
-                                            ng-click="selectObservation(obs)">
-                                            <td>
-                                                {{moment(obs.effectiveDateTime).format('YYYY-MM-DD')}}
+
+
+                                </uib-tab>
+                                <uib-tab heading="OO">
+                                    <pre>{{infernoValidationResult | json}}</pre>
+                                </uib-tab>
+
+                            </uib-tabset>
 
 
 
-                                                {{obs.effectivePeriod.start}} {{obs.effectivePeriod.end}}
-                                            </td>
-                                            <td>{{obs.effectiveDateTime | getAgeSeconds}}</td>
-                                            <td>{{obs.valueString}}
 
-                                                <div ng-repeat="coding in obs.valueCodeableConcept.coding">
-                                                    {{coding.system}} {{coding.code}}
-                                                    {{coding.display}}
-                                                </div>
-                                                {{obs.valueCodeableConcept.text}}
-
-                                                {{obs.valueQuantity.value}} {{obs.valueQuantity.unit}}
-
-
-                                            </td>
-                                            <td>
-                                                <div ng-repeat = "rr in obs.referenceRange">
-                                                    {{rr.text}}
-                                                </div>
-
-                                            </td>
-                                        </tr>
-                                    </table>
-
-                                </div>
-                                <div class="col-md-4">
-                                    <strong>Selected Observation</strong>
-                                    <pre>{{selectedObservation | json}}</pre>
-                                </div>
-                            </div>
 
                         </uib-tab>
 
@@ -1028,6 +1042,74 @@
 
 
                         </uib-tab>
+
+
+
+
+                        <uib-tab heading = "Observations">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <strong>Observation Codes</strong>
+                                    <div class="list-group">
+                                        <div class="list-group-item"
+                                             ng-click="selectObservationCode(hashObservations[k])"
+                                             ng-repeat="(k,v) in hashObservations">
+
+                                            <div class="pull-right badge">
+                                                {{v.resources.length}}
+                                            </div>
+                                            <div>{{v.code.display}}</div>
+                                            <div>{{v.code.code}} </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <strong>{{selectedObservations[0].code.coding[0].code}} {{selectedObservations[0].code.coding[0].display}}</strong>
+                                    <table class="table-bordered table">
+                                        <tr>
+                                            <th>Date</th><th>Age</th><th>Result</th><th>Reference Range</th>
+                                        </tr>
+                                        <tr ng-repeat="obs in selectedObservations"
+                                            ng-click="selectObservation(obs)">
+                                            <td>
+                                                {{moment(obs.effectiveDateTime).format('YYYY-MM-DD')}}
+
+
+
+                                                {{obs.effectivePeriod.start}} {{obs.effectivePeriod.end}}
+                                            </td>
+                                            <td>{{obs.effectiveDateTime | getAgeSeconds}}</td>
+                                            <td>{{obs.valueString}}
+
+                                                <div ng-repeat="coding in obs.valueCodeableConcept.coding">
+                                                    {{coding.system}} {{coding.code}}
+                                                    {{coding.display}}
+                                                </div>
+                                                {{obs.valueCodeableConcept.text}}
+
+                                                {{obs.valueQuantity.value}} {{obs.valueQuantity.unit}}
+
+
+                                            </td>
+                                            <td>
+                                                <div ng-repeat = "rr in obs.referenceRange">
+                                                    {{rr.text}}
+                                                </div>
+
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Selected Observation</strong>
+                                    <pre>{{selectedObservation | json}}</pre>
+                                </div>
+                            </div>
+
+                        </uib-tab>
+
 
 
                         <uib-tab ng-show = "false" heading="Table">
