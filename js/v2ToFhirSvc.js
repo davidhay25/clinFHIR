@@ -402,9 +402,9 @@ angular.module("sampleApp")
                             //set the serverRoot here - it only applies to this entry and is used for resolving references per the spec...
 
                             let ar1 = url.split('/')
-                            ar1.pop()
-                            ar1.pop()
-                            serverRoot = ar1.join('/')
+                            ar1.pop()   //remove the id
+                            ar1.pop()   //remove the type
+                            serverRoot = ar1.join('/') + "/" //added "/" after sean
                             url = serverRoot + resource.resourceType + "/" + resource.id;
 
                         }
