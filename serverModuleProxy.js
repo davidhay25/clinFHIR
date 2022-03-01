@@ -13,7 +13,7 @@ function setup(app,indb) {
         };
 
         //options.headers = {accept: 'application/fhir+json'};
-        options.headers = {accept: 'application/fhir+json','content-type':'application/json}'};
+        options.headers = {accept: 'application/fhir+json, application/json','content-type':'application/json}'};
         //options.headers[{'content-type':'application/json}']
         request(options, function (error, response, body) {
             if (error) {
@@ -21,7 +21,7 @@ function setup(app,indb) {
                 var err = error || body;
                 res.send(err, 500)
             } else if (response && response.statusCode !== 200) {
-                //console.log(response.statusCode)
+                console.log(response.statusCode)
                 res.send(body, response.statusCode);//,'binary')
             } else {
                 res.send(body);//,'binary')
@@ -31,6 +31,8 @@ function setup(app,indb) {
 
     app.post('/proxyfhir/*', function (req, res) {
         var fhirQuery = req.originalUrl.substr(11); //strip off /proxyfhir
+
+
 
         let payload= "";
         req.on('data', function (data) {

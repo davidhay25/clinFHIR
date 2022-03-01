@@ -190,7 +190,10 @@ angular.module("sampleApp")
                 }
                 $scope.executedQuery = qry
 
-                $http.get(qry).then(
+
+                let proxiedQuery = "/proxyfhir/" + qry
+                //$http.get(qry).then(
+                $http.get(proxiedQuery).then(
                     function (data) {
                         //todo - same logic as when query supplied - might be to a FHIR server or not
                         $scope.executedQueryBundle = data.data;
@@ -926,6 +929,9 @@ angular.module("sampleApp")
                         }
                     }
                 };
+
+
+
                 $scope.chart = new vis.Network(container, vo.graphData, graphOptions);
 
                 $scope.chart.on("click", function (obj) {
@@ -939,6 +945,13 @@ angular.module("sampleApp")
 
                     $scope.$digest();
                 });
+
+                //https://stackoverflow.com/questions/32403578/stop-vis-js-physics-after-nodes-load-but-allow-drag-able-nodes
+                $scope.chart.on("stabilizationIterationsDone", function () {
+                    $scope.chart.setOptions( { physics: false } );
+                });
+
+
             }
 
 
