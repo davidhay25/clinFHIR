@@ -9,9 +9,34 @@ angular.module("sampleApp")
 
     .service('bundleVisualizerSvc', function($http,$q) {
 
-            let deepValidateMax = 30    //maximum number of resources allowed in deep validation
+        let deepValidateMax = 30    //maximum number of resources allowed in deep validation
 
         return {
+                makeCarePlanSummaryDEP : function(arCarePlans,hashResources) {
+                    //create hieracchy
+                    let hashCP = {}     //a hash of CP's that don't have a 'partOf' value
+
+                    //a hash keyed on id
+                    arCarePlans.forEach(function (cp){
+                        hashCP['CarePlan/'+ cp.id] = {cp:cp,children:[]}
+                    })
+
+                    //now fill in the details
+                    arCarePlans.forEach(function (cp) {
+                        if (cp.partOf) {
+                            let parent = hashCP[cp.partOf]
+                            if (parent) {
+                                parent.children.push(cp)
+                            } else {
+                                console.log("error: parent CP not found")
+                            }
+                        }
+                    })
+
+
+
+
+                },
                 makeGraph : function(bundle,options) {
                     let dummyBase = "http://dummybase/"
                     let hashByFullUrl = {}

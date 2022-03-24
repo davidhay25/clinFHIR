@@ -13,7 +13,7 @@ angular.module("sampleApp")
         objColours.MedicationRequest = '#ffb3ff';
         objColours.CarePlan = '#FF9900';
         objColours.Sequence = '#FF9900';
-        objColours.CareTeam = '#FFFFCC';
+        objColours.CareTeam = '#ffe6ff'
         objColours.Condition = '#cc9900';
         objColours.LogicalModel = '#ff8080';
         objColours.ServiceRequest = '#ff8080';
@@ -28,6 +28,7 @@ angular.module("sampleApp")
         objColours.Measure = '#FF9900';
         objColours.Task = '#FF9900';
         objColours.Immunization = '#aeb76c';
+
 
         return {
             makeObservationsHash : function(bundle){
@@ -209,6 +210,10 @@ angular.module("sampleApp")
             },
             makeGraphCanonical : function (bundle) {
                 //make a graph using canonical references
+
+                if (! bundle.entry || bundle.entry.length < 1) {
+                    return
+                }
 
                 //this is a hash of all resources in the bundle with a url.
                 //It will be used by the canonical reference function (if an element has a value in this hash key, it is considered a canonical reference)
@@ -612,12 +617,21 @@ angular.module("sampleApp")
                                     var lpath = nodePath + '.' + key;
                                     if (obj.reference) {
                                         //this is a reference!
+//console.log(obj)
+                                        //there are also circumstances where this is an element name
+                                        //mar 15 - 2022
+                                        let thing = obj.reference;
+                                        if (thing.reference) {
+                                            thing = thing.reference
+                                        }
 
-                                        if (obj.reference && obj.reference.indexOf('urn:uuid') !== -1) {
+                                        //if (obj.reference && obj.reference.indexOf('urn:uuid') !== -1) {
+                                        if (thing.indexOf('urn:uuid') !== -1) {
                                             // this is an uuid
                                             refs.push({path: lpath, reference: obj.reference})
                                         } else {
-                                            if (obj.reference.indexOf('http') == 0) {
+                                            if (thing.indexOf('http') == 0) {
+                                                //if (obj.reference.indexOf('http') == 0) {
                                                 //this is an absolute reference
                                                 refs.push({path: lpath, reference: obj.reference})
                                             } else {

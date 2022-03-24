@@ -132,7 +132,7 @@
     <script src="js/filters.js"></script>
     <script src="js/bundleVisualizerCtrl.js"></script>
 
-    <title>Bundle Viewer</title>
+    <title>Bundle Visualizer</title>
 
 </head>
 
@@ -147,7 +147,7 @@
             <div class="col-md-2 ">
                 <span>
                     <a class="navbar-brand" href="#" ng-click="showVersion()">
-                        Bundle visualizer
+                        Bundle Visualizer
                     </a>
                 </span>
 
@@ -270,11 +270,15 @@
                         <h4>Saved queries</h4>
                         <table class="table table-bordered">
                             <tr ng-repeat = "item in savedQueries">
-                                <td>{{item.name}}</td>
+                                <td>
+                                    <div class = 'clickable' ng-click="executeSavedQuery(item)">{{item.name}}</div>
+                                </td>
                                 <td>{{item.qry}}</td>
                                 <td><i class="glyphicon glyphicon-remove-sign clickable" ng-click="deleteQuery($index)"></i>
                                 </td>
+                                <!--
                                 <td width="80"><button class="btn btn-link" ng-click="executeSavedQuery(item)">Load</button> </td>
+                                -->
                             </tr>
                         </table>
 
@@ -326,7 +330,7 @@
                         <p>You can use the currently configured data server (<strong>{{dataServer.url}}</strong>) or any other server. To specify another server
                             simply use the full url - eg http://myserver/mybundle. If you leave off the 'http' the app will assume
                             you are making standard <a href="http://hl7.org/fhir/http.html#search" target="_blank">FHIR query</a> (Only a GET is supported)</p>
-                        <p>You can change the configured server <span class="clickable">here.</span> </p>
+                        <p>You can change the configured server <span class="clickable" ng-click="changeServer('data')">here.</span> </p>
                         <p>If you want to save the query (so it will appear in your personal list, you need to specify
                             a name in the box below and click the 'Add query to list' button that appears after testing
                             the query.</p>
@@ -337,7 +341,7 @@
                         -->
                         <br/><br/>
                         <label>Query to execute</label>
-                        <input class="form-control" ng-model="input.newQuery" placeholder="The query."/>
+                        <textarea class="form-control" ng-model="input.newQuery" placeholder="The query."></textarea>
                         <span class="help-block pull-right">Use full query (incl. http) if to a different server</span>
 
                         <br/><br/>
@@ -419,7 +423,7 @@
 
                     </div>
 
-                    <uib-tabset ng-show="fhir">
+                    <uib-tabset active="setTab.mainTabActive" ng-show="fhir" >
 
                         <uib-tab>
                             <br/>
@@ -430,7 +434,7 @@
 
 
                             <div class="row">
-                                        <div class="col-md-4">
+                                        <div class="col-md-3">
 
                                             <uib-tabset>
                                                 <uib-tab heading="Bundle Order">
@@ -455,7 +459,30 @@
                                                     </div>
 
                                                 </uib-tab>
-                                                <uib-tab heading="Resource Type, Id">
+
+
+
+
+                                                <uib-tab heading="Type, Id">
+                                                    <div class="entryListScroll">
+                                                        <div ng-repeat="es in sortedEntries">
+                                                            <strong>{{es.type}}</strong>
+                                                            <div class="list-group">
+                                                                <div ng-repeat = "entry in es.entries"
+                                                                     ng-class="{'list-group-item':true,'listItemSelected':selectedBundleEntry == entry}">
+                                                                    <div style="padding-left: 10px; cursor: pointer"
+                                                                         ng-click="selectBundleEntry(entry,[])">
+                                                                        <div> {{entry.resource.text.div | cleanTextDiv | limitTo:50}}</div>
+                                                                        <div style="padding-left: 10px"><em>Id: {{entry.resource.id}}</em></div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </uib-tab>
+<!--
+                                                <uib-tab heading="TDEPype, Id">
                                                     <div class="entryListScroll">
                                                         <div class="list-group">
                                                             <div ng-repeat="(k,v) in hashEntries">
@@ -473,8 +500,9 @@
 
                                                     </div>
                                                 </uib-tab>
+                                                -->
 
-                                                <uib-tab heading="Resource Type, Name">
+                                                <uib-tab heading="Type, Name">
                                                     <div class="entryListScroll">
                                                         <div ng-repeat="(k,v) in hashByName">
                                                             <div><strong>{{k}}</strong></div>
@@ -498,7 +526,7 @@
 
                                         </div>
 
-                                        <div class="col-md-8">
+                                        <div class="col-md-9">
 
                                             <div class="pull-right">
                                                 <a target="_blank"
@@ -570,11 +598,24 @@
                                                     <br/>
 
                                                     <div class="row">
-                                                        <div class="col-md-8 col-sm-8">
+                                                        <div class="col-md-7 col-sm-7">
                                                             <div id="singleResourceGraph"></div>
                                                         </div>
-                                                        <div class="col-md-4 col-sm-4">
-                                                            <pre>{{selectedFromSingleGraph | json}}</pre>
+                                                        <div class="col-md-5 col-sm-5">
+                                                            <button class="btn btn-link pull-right"
+                                                                    ng-show="selectedFromSingleGraph"
+                                                                    ng-click="selectFromSingleGraph()">Select</button>
+                                                            <uib-tabset>
+                                                                <uib-tab heading="Json">
+                                                                    <pre>{{selectedFromSingleGraph | json}}</pre>
+                                                                </uib-tab>
+                                                                <uib-tab ng-show="selectedFshFromSingleGraph" heading="Fsh">
+                                                                    <pre>{{selectedFshFromSingleGraph}}</pre>
+                                                                </uib-tab>
+                                                            </uib-tabset>
+
+
+
                                                         </div>
                                                     </div>
 
@@ -722,8 +763,6 @@
                             <div class="row">
                                 <div class="col-md-8">
 
-
-
                                     <div>
                                         <div class="pull-right">
                                             <input ng-model="input.showHidePatient" type="checkbox"
@@ -753,6 +792,10 @@
                                     </div>
 
                                     -->
+
+                                    <div class="pull-right">
+                                        <button class="btn btn-link" ng-click="selectFromMainGraph(selectedNode.entry.resource)">Details</button>
+                                    </div>
 
                                     <uib-tabset>
                                         <uib-tab heading="Resource">
@@ -885,6 +928,9 @@
                         </uib-tab>
 
 
+                        <uib-tab heading="CarePlan view" ng-show="false && CarePlans.length > 0">
+                            <pre>{{cpSummary | json}}</pre>
+                        </uib-tab>
 
 
                         <uib-tab ng-show = "fhir.type == 'document'" heading="Inferno">

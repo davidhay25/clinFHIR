@@ -954,7 +954,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             var dataServer = appConfigSvc.getCurrentDataServer();
             var resourceHash = {};      //this is used to avoid duplications that $everything can return...
 
-            if (dataServer.everythingOperation) {
+            if (dataServer.everythingOperation || dataServer.everything) {
                 //The everything operation will return all patient related resources. not all servers recognize this, and
                 //some implement paging and small default sizes (hapi) and some don't (grahame)
 

@@ -9,6 +9,9 @@ angular.module("sampleApp")
                 return $sce.trustAsHtml(html_code);
             }
 
+            $scope.ui = {}
+            $scope.ui.tabEntries = 0
+            $scope.setTab = {}          //for setting the tab from code
 
             $scope.moment = moment
             $scope.dataServer = $localStorage.dataServer || {url:"http://hapi.fhir.org/baseR4/"}
@@ -46,7 +49,8 @@ angular.module("sampleApp")
                 console.log(search)
 
                 let qry = search.substr(1); //remove the leading '?'
-                $http.get(qry).then(
+                let proxiedQuery = "/proxyfhir/" + qry
+                $http.get(proxiedQuery).then(
                     function (data) {
                         //assume that the query in the url was a full search url - eg
                         //If this is to a FHIR server with a stored Bundle it ww\ill be a bundle of bundles
@@ -196,7 +200,14 @@ angular.module("sampleApp")
                 $http.get(proxiedQuery).then(
                     function (data) {
                         //todo - same logic as when query supplied - might be to a FHIR server or not
-                        $scope.executedQueryBundle = data.data;
+                        let bundle = data.data
+                        if (bundle.resourceType !== 'Bundle' || ! bundle.entry || bundle.entry.length < 1 ) {
+                            alert("Must return a Bundle with at least one entry")
+                        } else {
+                            $scope.executedQueryBundle = data.data;
+                        }
+
+
                     },
                     function (err) {
                         alert(angular.toJson(err))
@@ -588,13 +599,35 @@ angular.module("sampleApp")
                 $scope.singleResourceChart = new vis.Network(container, vo.graphData, graphOptions);
 
                 $scope.singleResourceChart.on("click", function (obj) {
-
+                    delete $scope.selectedFshFromSingleGraph
                     var nodeId = obj.nodes[0];  //get the first node
 
                     var node = vo.graphData.nodes.get(nodeId);
 
                     $scope.selectedFromSingleGraph = node.resource;
 
+                    //create FSH of selected resource
+                    $http.post("./fsh/transformJsonToFsh",node.resource).then(
+                        function(data) {
+                            //console.log(data.data)
+                            try {
+                                let response = data.data
+                                $scope.selectedFshFromSingleGraph = response.fsh.instances[node.resource.id]
+                                if (response.fsh.aliases) {
+                                    $scope.selectedFshFromSingleGraph = response.fsh.aliases + "\n\n" +$scope.selectedFshFromSingleGraph
+                                }
+
+
+                            } catch (ex) {
+                                $scope.selectedFshFromSingleGraph = "Unable to transform into FSH"
+                            }
+
+                        }, function(err) {
+                            console.log("FSH Transform error")
+
+                        }
+                    )
+                    //selectedFshFromSingleGraph
 
 
                     $scope.$digest();
@@ -603,6 +636,42 @@ angular.module("sampleApp")
 
             };
 
+
+            //From the 'references graph' when a resource is clicked, then selected for view in bundle entries tab
+            $scope.selectFromMainGraph = function (resource){
+
+                //if ($scope.selectedFromSingleGraph) {
+
+                    $scope.fhir.entry.forEach(function (entry){
+                        if (entry.resource && (entry.resource.id == resource.id)) {
+                            //$scope.selectedBundleEntry = entry
+                            $scope.selectBundleEntry (entry,[])
+                            $scope.setTab.mainTabActive = $scope.ui.tabEntries
+                        }
+                    })
+
+               // }
+
+                //$scope.setTab.mainTabActive = $scope.ui.tabEntries
+            }
+
+            //$scope.setTab = {}
+            //$scope.setTab.mainTabActive = 3
+
+            //when a resource has been selected from the 'single resource' graph
+            $scope.selectFromSingleGraph = function() {
+                // fhir.entry - all entries in bundle
+                // $scope.selectedBundleEntry - current bundle entry being displayed
+                // $scope.selectedFromSingleGraph - resource selected from graph
+                if ($scope.selectedFromSingleGraph) {
+                    $scope.fhir.entry.forEach(function (entry){
+                        if (entry.resource && (entry.resource.id == $scope.selectedFromSingleGraph.id)) {
+                            //$scope.selectedBundleEntry = entry
+                            $scope.selectBundleEntry (entry,[])
+                        }
+                    })
+                }
+            }
 
             $scope.fitSingleGraph = function(){
                 $timeout(function(){
@@ -660,6 +729,7 @@ angular.module("sampleApp")
             let processBundle = function(oBundle,validationServer) {
 
                 delete $scope.hashErrors
+               // $scope.CarePlans = []       //a list of all Careplans in the bundle (
 
                 delete $scope.selectedDeepValidationEntry
                 delete $scope.deepValidationResult
@@ -675,6 +745,11 @@ angular.module("sampleApp")
                 if (oBundle.entry) {
                     oBundle.entry.forEach(function(entry) {
                         let resource = entry.resource;
+
+                        if (resource.resourceType == "CarePlan") {
+                           // $scope.CarePlans.push(entry)
+                        }
+
                         $scope.hashByName[resource.resourceType] = $scope.hashByName[resource.resourceType] || []
                         $scope.hashByRef[resource.resourceType + "/" + resource.id] = resource
                         if (resource.name) {
@@ -683,7 +758,11 @@ angular.module("sampleApp")
                             $scope.hashByName[resource.resourceType].push(item)
                         }
                     })
-
+/*
+                    if ($scope.CarePlans.length > 0) {
+                        $scope.cpSummary = bundleVisualizerSvc.makeCarePlanSummary($scope.CarePlans,$scope.hashByRef)
+                    }
+*/
                     Object.keys($scope.hashByName).forEach(function (k,v) {
                         let ar = $scope.hashByName[k]
                         ar.sort(function(a,b){
@@ -711,6 +790,9 @@ angular.module("sampleApp")
 */
                 //create hash by type
                 $scope.hashEntries = {}
+
+
+
                 if (oBundle.entry) {
                     oBundle.entry.forEach(function(entry) {
                         let resource = entry.resource;
@@ -720,6 +802,21 @@ angular.module("sampleApp")
                             $scope.hashEntries[type].push(entry)
                         }
                     })
+
+                    //sorted by type
+                    $scope.sortedEntries = []
+                    Object.keys($scope.hashEntries).forEach(function (key) {
+                        let h = $scope.hashEntries[key]
+                        $scope.sortedEntries.push({type:key,entries:h})
+                    })
+                    $scope.sortedEntries.sort(function (a,b){
+                        if (a.type > b.type) {
+                            return 1
+                        } else {
+                            return -1
+                        }
+                    })
+                    console.log($scope.sortedEntries)
                 }
 
                 //------------- construct the graph based on canonical references
