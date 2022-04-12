@@ -175,14 +175,14 @@
 
             </div>
 
-            <div class="col-md-5 col-sm-5">
+            <div class="col-md-3 col-sm-3">
                 <div class="navbar-text">
                     <i class="glyphicon glyphicon-edit clickable" ng-click="selectServer()"> </i>
                      {{appConfigSvc.getCurrentDataServer().url}}
                 </div>
             </div>
 
-            <div class="col-md-3 col-sm-3">
+            <div class="col-md-2 col-sm-2">
 
                 <div class="navbar-text" ng-show="currentPatient">
                     {{ResourceUtilsSvc.getOneLineSummaryOfResource(currentPatient)}} ({{currentPatient.id}})
@@ -215,6 +215,16 @@
                     <button class="btn btn-primary pull-right" style="margin-right: 8px" ng-click="selectScenario()">Select Scenario</button>
 -->
                 </form>
+            </div>
+
+            <div class="col-md-3">
+                <div class="navbar-text pull-right">
+                    <a href="https://www.lyniate.com/" target="_blank">
+                        <img  src="/icons/supported_by_lyniate.png"/>
+                    </a>
+
+                </div>
+
             </div>
         </div>
 
