@@ -672,6 +672,7 @@ angular.module("sampleApp")
                 var timelineData =resourceCreatorSvc.createTimeLine($scope.allResourcesAsList,$scope.allResources['Condition'],reference);
 
                 // console.log(timelineData)
+
                 $('#encTimeline').empty();     //otherwise the new timeline is added below the first...
                 var tlContainer = document.getElementById('encTimeline');
 

@@ -581,8 +581,6 @@ angular.module("sampleApp")
                 options.recursiveRef = $scope.input.recursiveRef;
                 options.hidePatient = $scope.input.showHidePatient;
 
-
-
                 let vo = v2ToFhirSvc.makeGraph(options);
                 //let vo = v2ToFhirSvc.makeGraph($scope.fhir,$scope.hashErrors,$scope.serverRoot,false,id)
                 //console.log(vo);
@@ -1077,7 +1075,7 @@ angular.module("sampleApp")
                 let hashErrors = {};    //related to position in bundle...
                 bundle.entry.forEach(function (entry,inx) {
                     let resource = entry.resource
-                    let url = validationServer+resource.resourceType +"/$validate";
+                    let url =  validationServer+resource.resourceType +"/$validate";  // "/proxyfhir/" +
                     arQuery.push(processValidation(url,resource,hashErrors,inx))
                 });
 
@@ -1108,6 +1106,7 @@ angular.module("sampleApp")
 
                 function processValidation(url,resource,hash,inx){
                     let deferred = $q.defer();
+
                     $http.post(url,resource).then(
                         function(data){
                             //no errors
