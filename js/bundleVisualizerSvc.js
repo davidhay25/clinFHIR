@@ -12,43 +12,55 @@ angular.module("sampleApp")
         let deepValidateMax = 30    //maximum number of resources allowed in deep validation
 
         return {
-                makeCarePlanSummaryDEP : function(arCarePlans,hashResources) {
-                    //create hieracchy
-                    let hashCP = {}     //a hash of CP's that don't have a 'partOf' value
+            makeDRSummary : function(DR,hashResourcesByRef) {
+                //create an object to make it easy to list DiagnosticReports
+                let vo = {DR:DR,obs:[]}
+                DR.result.forEach(function (ref) {
+                    let obs = hashResourcesByRef[ref.reference]
+                    if (obs) {
+                        vo.obs.push(obs)
+                    }
 
-                    //a hash keyed on id
-                    arCarePlans.forEach(function (cp){
-                        hashCP['CarePlan/'+ cp.id] = {cp:cp,children:[]}
-                    })
+                })
+                return vo
+            },
+            makeCarePlanSummaryDEP : function(arCarePlans,hashResources) {
+                //create hieracchy
+                let hashCP = {}     //a hash of CP's that don't have a 'partOf' value
 
-                    //now fill in the details
-                    arCarePlans.forEach(function (cp) {
-                        if (cp.partOf) {
-                            let parent = hashCP[cp.partOf]
-                            if (parent) {
-                                parent.children.push(cp)
-                            } else {
-                                console.log("error: parent CP not found")
-                            }
+                //a hash keyed on id
+                arCarePlans.forEach(function (cp){
+                    hashCP['CarePlan/'+ cp.id] = {cp:cp,children:[]}
+                })
+
+                //now fill in the details
+                arCarePlans.forEach(function (cp) {
+                    if (cp.partOf) {
+                        let parent = hashCP[cp.partOf]
+                        if (parent) {
+                            parent.children.push(cp)
+                        } else {
+                            console.log("error: parent CP not found")
                         }
-                    })
+                    }
+                })
 
 
 
 
-                },
-                makeGraph : function(bundle,options) {
-                    let dummyBase = "http://dummybase/"
-                    let hashByFullUrl = {}
-                    //create a hash indexed on fullUrl. If there is no fullUrl, then create one using a dummy base
-                    bundle.entry.forEach(function (entry){
-                        let resource = entry.resource
-                        let fullUrl = entry.fullUrl || dummyBase + resource.resourceType + "/" + resource.id
-                        hashByFullUrl[fullUrl] = resource
+            },
+            makeGraphDEP : function(bundle,options) {
+                let dummyBase = "http://dummybase/"
+                let hashByFullUrl = {}
+                //create a hash indexed on fullUrl. If there is no fullUrl, then create one using a dummy base
+                bundle.entry.forEach(function (entry){
+                    let resource = entry.resource
+                    let fullUrl = entry.fullUrl || dummyBase + resource.resourceType + "/" + resource.id
+                    hashByFullUrl[fullUrl] = resource
 
-                    })
+                })
 
-                },
+            },
             deepValidation : function (bundle,serverUrl) {
                 //performs a validation by copying all the bundle contents to a server, then using $validate against Bundle
                 //each resource must have an id

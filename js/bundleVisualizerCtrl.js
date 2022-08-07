@@ -50,6 +50,9 @@ angular.module("sampleApp")
 
                 let qry = search.substr(1); //remove the leading '?'
                 let proxiedQuery = "/proxyfhir/" + qry
+
+                console.log(proxiedQuery)
+
                 $http.get(proxiedQuery).then(
                     function (data) {
                         //assume that the query in the url was a full search url - eg
@@ -88,6 +91,10 @@ angular.module("sampleApp")
             } else {
                 //nothing passed in when the app was started- read bundles from the defined server
 
+            }
+
+            $scope.selectDRObs = function(obs) {
+                $scope.selectedDRObservation = obs
             }
 
             $scope.deepValidate = function(){
@@ -490,7 +497,8 @@ angular.module("sampleApp")
 
 
             $scope.selectBundleEntry = function(entry,entryErrors) {
-                delete $scope.selectedFromSingleGraph;
+                delete $scope.selectedFromSingleGraph;  //does this need to be done?
+                $scope.selectedFromSingleGraph = entry.resource
                 delete $scope.fshText
                 delete $scope.xmlText
                 $scope.selectedBundleEntry = entry
@@ -728,7 +736,7 @@ angular.module("sampleApp")
 
                 delete $scope.hashErrors
                // $scope.CarePlans = []       //a list of all Careplans in the bundle (
-
+                $scope.DR = []          //list of DiagnosticReports
                 delete $scope.selectedDeepValidationEntry
                 delete $scope.deepValidationResult
 
@@ -748,6 +756,11 @@ angular.module("sampleApp")
                            // $scope.CarePlans.push(entry)
                         }
 
+                        if (resource.resourceType == "DiagnosticReport") {
+                           // let vo = bundleVisualizerSvc.makeDRSummary()
+                             $scope.DR.push({DR:entry.resource})
+                        }
+
                         $scope.hashByName[resource.resourceType] = $scope.hashByName[resource.resourceType] || []
                         $scope.hashByRef[resource.resourceType + "/" + resource.id] = resource
                         if (resource.name) {
@@ -756,6 +769,17 @@ angular.module("sampleApp")
                             $scope.hashByName[resource.resourceType].push(item)
                         }
                     })
+
+                    if ($scope.DR.length > 0) {
+                        $scope.DR.forEach(function (item) {
+                            let vo = bundleVisualizerSvc.makeDRSummary(item.DR,$scope.hashByRef)
+                            item.obs = vo.obs
+
+                            console.log(item)
+
+                        })
+                    }
+
 /*
                     if ($scope.CarePlans.length > 0) {
                         $scope.cpSummary = bundleVisualizerSvc.makeCarePlanSummary($scope.CarePlans,$scope.hashByRef)
@@ -776,16 +800,7 @@ angular.module("sampleApp")
                 //hash of observations by code
                 $scope.hashObservations = v2ToFhirSvc.makeObservationsHash(oBundle)
                 console.log($scope.hashObservations)
-/*
-                $scope.selectObservationCode = function(item) {
-                    console.log(item)
-                    $scope.selectedObservations = item.resources
-                }
 
-                $scope.selectObservation = function(obs){
-                    $scope.selectedObservation = obs
-                }
-*/
                 //create hash by type
                 $scope.hashEntries = {}
 

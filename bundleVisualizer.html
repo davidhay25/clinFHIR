@@ -612,6 +612,25 @@
                                                                 <uib-tab ng-show="selectedFshFromSingleGraph" heading="Fsh">
                                                                     <pre>{{selectedFshFromSingleGraph}}</pre>
                                                                 </uib-tab>
+
+                                                                <uib-tab ng-show="selectedFromSingleGraph.resourceType == 'DiagnosticReport'" heading="DiagnosticReport">
+                                                                    <br/>
+                                                                    <div class="banner">Observations linked to this DiagnosticReport</div>
+                                                                    <div ng-repeat="item in DR" ng-show="item.DR.id == selectedFromSingleGraph.id">
+                                                                        <table class="table-bordered table">
+                                                                            <tr ng-repeat = "obs in item.obs">
+                                                                                <td>{{obs.text.div | cleanTextDiv}}</td>
+                                                                                <td>
+                                                                                    {{obs.valueCodeableConcept.text}} {{obs.valueString}}   {{obs.valueQuantity.value}}
+                                                                                </td>
+                                                                            </tr>
+                                                                        </table>
+
+
+
+                                                                    </div>
+                                                                </uib-tab>
+
                                                             </uib-tabset>
 
 
@@ -794,7 +813,8 @@
                                     -->
 
                                     <div class="pull-right">
-                                        <button class="btn btn-link" ng-click="selectFromMainGraph(selectedNode.entry.resource)">Details</button>
+                                        <button class="btn btn-link"
+                                                ng-click="selectFromMainGraph(selectedNode.entry.resource)">Details</button>
                                     </div>
 
                                     <uib-tabset>
@@ -804,6 +824,32 @@
                                         <uib-tab heading="Entry">
                                             <pre>{{selectedNode.entry | json}}</pre>
                                         </uib-tab>
+
+                                        <uib-tab ng-show="selectedNode.entry.resource.resourceType == 'DiagnosticReport'" heading="DiagnosticReport">
+                                            <br/>
+                                            <div class="banner">Observations linked to this DiagnosticReport</div>
+
+                                            <div ng-repeat="item in DR" ng-show="item.DR.id == selectedNode.entry.resource.id">
+                                                <table class="table-bordered table">
+                                                    <tr ng-repeat = "obs in item.obs">
+                                                        <td>{{obs.text.div | cleanTextDiv}}</td>
+                                                        <td>
+                                                            {{obs.valueCodeableConcept.text}} {{obs.valueString}}   {{obs.valueQuantity.value}}
+                                                        </td>
+                                                    </tr>
+                                                </table>
+
+                                            <!--
+                                                <div ng-repeat = "obs in item.obs">
+                                                    <strong>{{obs.text.div | cleanTextDiv}}</strong>
+                                                    <div style="margin-left: 8px">{{obs.valueCodeableConcept.text}} {{obs.valueString}}   {{obs.valueQuantity.value}}</div>
+                                                </div>
+                                                -->
+
+                                            </div>
+
+                                        </uib-tab>
+
                                     </uib-tabset>
 
 
@@ -927,11 +973,13 @@
 
                         </uib-tab>
 
+                        <uib-tab heading="DiagnosticReport" ng-show="DR.length > 0">
+                            <ng-include src = "'includes/bvDiagnosticReport.html'"></ng-include>
+                        </uib-tab>
 
                         <uib-tab heading="CarePlan view" ng-show="false && CarePlans.length > 0">
                             <pre>{{cpSummary | json}}</pre>
                         </uib-tab>
-
 
                         <uib-tab ng-show = "false || fhir.type == 'document'" heading="Inferno">
                             <br/>
@@ -1088,9 +1136,6 @@
 
 
                         </uib-tab>
-
-
-
 
                         <uib-tab heading = "Observations">
                             <div class="row">

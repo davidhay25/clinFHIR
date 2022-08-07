@@ -14,7 +14,7 @@ angular.module("sampleApp")
         objColours.CarePlan = '#FF9900';
         objColours.Sequence = '#FF9900';
         objColours.CareTeam = '#ffe6ff'
-        objColours.Condition = '#cc9900';
+        objColours.Condition = '#ff00cc'
         objColours.LogicalModel = '#ff8080';
         objColours.ServiceRequest = '#ff8080';
         objColours.Composition = '#ff8080';
@@ -28,6 +28,8 @@ angular.module("sampleApp")
         objColours.Measure = '#FF9900';
         objColours.Task = '#FF9900';
         objColours.Immunization = '#aeb76c';
+        objColours.DiagnosticReport = '#ff8080';
+        objColours.Specimen = '#cc9900';
 
 
         return {
