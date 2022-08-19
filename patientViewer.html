@@ -69,6 +69,10 @@
 
         //http://www.devblogrbmz.com/angular-default-request-headers-and-interceptors/
         //http://www.webdeveasy.com/interceptors-in-angularjs-and-useful-examples/
+
+        //pretty sure this isn't used...
+
+        /*
         angular.module("sampleApp").factory('authIntercept',['sessionSvc',function(sessionSvc){
             return {
                 'request': function(config){
@@ -79,16 +83,14 @@
                     if (sessionSvc.getAuthToken()) {
                         config.headers['Authorization'] = sessionSvc.getAuthToken();
                         config.headers['myAuth'] = sessionSvc.getAuthToken();
-
                     }
                     return config
                 }
-
             }
         }]).config(function($httpProvider){
             $httpProvider.interceptors.push('authIntercept')
         })
-
+*/
 
     </script>
 
@@ -120,6 +122,8 @@
 
     <script src="js/pvTaskCtrl.js"></script>
     <script src="js/setServerCtrl.js"></script>
+
+    <script src="js/serverInteractionSvc.js"></script>
 
     <script src="resourceBuilder/vsBrowser.js"></script>
 

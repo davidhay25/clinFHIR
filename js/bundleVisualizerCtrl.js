@@ -9,6 +9,15 @@ angular.module("sampleApp")
                 return $sce.trustAsHtml(html_code);
             }
 
+            //$scope.btoa = btoa
+
+            $scope.base64Decode = function (b64) {
+                if (b64) {
+                    return atob(b64)
+                }
+
+            }
+
             $scope.ui = {}
             $scope.ui.tabEntries = 0
             $scope.setTab = {}          //for setting the tab from code
@@ -665,13 +674,15 @@ angular.module("sampleApp")
             //$scope.setTab.mainTabActive = 3
 
             //when a resource has been selected from the 'single resource' graph
-            $scope.selectFromSingleGraph = function() {
+            $scope.selectFromSingleGraph = function(resource) {
+
+                resource = resource || $scope.selectedFromSingleGraph
                 // fhir.entry - all entries in bundle
                 // $scope.selectedBundleEntry - current bundle entry being displayed
                 // $scope.selectedFromSingleGraph - resource selected from graph
-                if ($scope.selectedFromSingleGraph) {
+                if (resource) {
                     $scope.fhir.entry.forEach(function (entry){
-                        if (entry.resource && (entry.resource.id == $scope.selectedFromSingleGraph.id)) {
+                        if (entry.resource && (entry.resource.id == resource.id)) {
                             //$scope.selectedBundleEntry = entry
                             $scope.selectBundleEntry (entry,[])
                         }

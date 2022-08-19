@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2021-04-16';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2022-08-19';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -109,7 +109,7 @@ angular.module("sampleApp")
 
         //these are the default servers....
         defaultConfig.servers.terminology = "https://r4.ontoserver.csiro.au/fhir/";//
-        defaultConfig.servers.data = "http://hapi.fhir.org/baseR4/";
+        defaultConfig.servers.data = "https://fhir.s37vcloskatg.static-test-account.isccloud.io/";
         defaultConfig.servers.conformance = "http://hapi.fhir.org/baseR4/";
 
         //defaultConfig.servers.terminology = "https://ontoserver.csiro.au/stu3-latest/";//
@@ -119,9 +119,6 @@ angular.module("sampleApp")
         //defaultConfig.defaultTerminologyServerUrl = "http://fhirtest.uhn.ca/baseDstu3/";
 
         defaultConfig.defaultTerminologyServerUrl = "https://ontoserver.csiro.au/stu3-latest/";
-
-
-
 
         //terminology servers. Order is significant as the first one will be selected by default...
         defaultConfig.terminologyServers = [];
@@ -139,6 +136,12 @@ angular.module("sampleApp")
         defaultConfig.terminologyServers.push({name:"Ontoserver",url:"https://ontoserver.csiro.au/stu3-latest/",version:3});
         defaultConfig.terminologyServers.push({name:"Ontoserver-PC",url:"https://primarycare.ontoserver.csiro.au/fhir/",version:3});
 
+        defaultConfig.allKnownServers.push({name:'InterSystems',version:4,
+            url:"https://fhir.s37vcloskatg.static-test-account.isccloud.io/",
+            apiKey:"sJdH2KXzI14lWunvyxTQhEDQLTf54z396LtIyVya",
+            everythingOperation:true});
+
+
         defaultConfig.allKnownServers.push({name:"Grahames STU2 server",url:"http://test.fhir.org/r2/",version:2,everythingOperation:true,isTerminology:true});
         defaultConfig.allKnownServers.push({name:"Grahames STU3 server",url:"http://test.fhir.org/r3/",version:3,everythingOperation:true,isTerminology:true});
         defaultConfig.allKnownServers.push({name:"Grahames R4 server",url:"http://test.fhir.org/r4/",version:4,everythingOperation:true,isTerminology:true});
@@ -150,9 +153,6 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:"Public HAPI STU3 server",url:"http://fhirtest.uhn.ca/baseDstu3/",version:3,everythingOperation:true,isTerminology:true});
 
         defaultConfig.allKnownServers.push({name:"Public HAPI R4 server",url:"http://hapi.fhir.org/baseR4/",version:4,everythingOperation:true,isTerminology:true});
-
-
-
 
         defaultConfig.allKnownServers.push({name:"Vonk STU3 server",url:"http://vonk.fire.ly/",version:3,everythingOperation:false});
         defaultConfig.allKnownServers.push({name:"Vonk R4 server",url:" https://vonk.fire.ly/R4/",version:4,everythingOperation:false});
@@ -231,7 +231,11 @@ angular.module("sampleApp")
             setToDefault : function(){
 
                 this.setServerType('terminology',"https://r4.ontoserver.csiro.au/fhir/");
-                this.setServerType('data',"http://hapi.fhir.org/baseR4/");
+                //this.setServerType('data',"http://hapi.fhir.org/baseR4/");
+                this.setServerType('data',"https://fhir.s37vcloskatg.static-test-account.isccloud.io/");
+
+
+
                 this.setServerType('conformance',"http://hapi.fhir.org/baseR4/");
 
 
@@ -475,6 +479,12 @@ angular.module("sampleApp")
                 return {url:$localStorage.config.servers.data,name:$localStorage.config.servers.data}
             },
             getCurrentFhirVersion : function() {
+
+                return 4
+
+                //don't imagine that there are any r3 servers out there - and don't really care!
+
+                /*
                 var version = 3;       //default to v3
                 var vConf,vData;
 
@@ -490,6 +500,7 @@ angular.module("sampleApp")
 
 
                 return version;
+                */
             },
             setCurrentPatient : function(patient) {
                 currentPatient = patient;

@@ -1,4 +1,5 @@
-angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc,GetDataFromServer,ResourceUtilsSvc ,Utilities) {
+angular.module("sampleApp").service('supportSvc', function(
+    $http,$q,appConfigSvc,GetDataFromServer,ResourceUtilsSvc ,Utilities,serverInteractionSvc) {
 
     //options for building the samples that will come from a UI
     var buildConfig = {};
@@ -77,9 +78,9 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             referenceResources.push({resourceType:'Organization',name:'clinFHIR Sample creator',
                 identifier : [{value:'cf',system:identifierSystem}],text:{status:'generated',div:"<div xmlns='http://www.w3.org/1999/xhtml'>clinFhir</div>"}});
         } else {
-            referenceResources.push({resourceType:'Practitioner',name:{text:'Dr John Doe'},
+            referenceResources.push({resourceType:'Practitioner',name:[{text:'Dr John Doe'}],
                 identifier : [{value:'jd',system:identifierSystem}],text:{status:'generated',div:"<div>Dr John Doe</div>"}});
-            referenceResources.push({resourceType:'Practitioner',name:{text:'Dr Annette Jones'},
+            referenceResources.push({resourceType:'Practitioner',name:[{text:'Dr Annette Jones'}],
                 identifier : [{value:'aj',system:identifierSystem}],text:{status:'generated',div:"<div>Dr Annette Jones</div>"}});
             referenceResources.push({resourceType:'Organization',name:'clinFHIR Sample creator',
                 identifier : [{value:'cf',system:identifierSystem}],text:{status:'generated',div:"<div>clinFhir</div>"}});
@@ -93,7 +94,18 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
     if (serverObject) {
         fhirVersion = serverObject.version;
     }
+
     setUpReferenceResources(fhirVersion);
+
+    //return a config ojbect. needed for IS apikey
+    function getServerConfigDEP() {
+        let config = {}
+        let dataServer = appConfigSvc.getCurrentDataServer()
+        if (dataServer.apiKey) {
+            config.headers = {'x-api-key':dataServer.apiKey}
+        }
+        return config
+    }
 
     return {
         getResourceIdFromHeaders : getResourceIdFromHeaders,
@@ -143,7 +155,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
             var uri = appConfigSvc.getCurrentDataServerBase() + "Patient";
 
-            $http.post(uri,patient).then(
+            $http.post(uri,patient,serverInteractionSvc.getServerConfig() ).then(
                 function(data) {
 
                     var id = getResourceIdFromHeaders(data.headers)
@@ -370,7 +382,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             
             // ... and save
             var url = appConfigSvc.getCurrentDataServerBase()+ "List";
-            $http.post(url,problemList).then(
+            $http.post(url,problemList,serverInteractionSvc.getServerConfig()).then(
                 function (data) {
                     deferred.resolve();
                 },
@@ -435,7 +447,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
                     // ... and save - as a transaction
                     var url = appConfigSvc.getCurrentDataServerBase();
-                    $http.post(url,bundle).then(
+                    $http.post(url,bundle,serverInteractionSvc.getServerConfig()).then(
                         function (data) {
                             if (options.logFn) {
                                 options.logFn('Added Allergies List')
@@ -514,9 +526,10 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
                     });
 
+                    console.log(angular.toJson(bundle))
                     // ... and save - as a transaction
                     var url = appConfigSvc.getCurrentDataServerBase();
-                    $http.post(url,bundle).then(
+                    $http.post(url,bundle,serverInteractionSvc.getServerConfig()).then(
                         function (data) {
                             //deferred.resolve(refList);
                             if (options.logFn) {
@@ -589,7 +602,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
                     // ... and save - as a transaction
                     var url = appConfigSvc.getCurrentDataServerBase();
-                    $http.post(url,bundle).then(
+                    $http.post(url,bundle,serverInteractionSvc.getServerConfig()).then(
                         function (data) {
                             if (options.logFn) {
                                 options.logFn('Added Medications List')
@@ -783,15 +796,16 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
                 var url = appConfigSvc.getCurrentDataServerBase() + res.resourceType + "?identifier="+identifierQuery;
 
-                $http.get(url).then(
+                $http.get(url,serverInteractionSvc.getServerConfig()).then(
                     function(data) {
                         if (data.data && data.data) {
                             var cnt = data.data.total;
                             switch (cnt) {
                                 case 0 :
                                     //need to add this one
+                                    console.log("Adding " + res.resourceType,res)
                                     var postUrl = appConfigSvc.getCurrentDataServerBase() + res.resourceType;
-                                    $http.post(postUrl,res).then(
+                                    $http.post(postUrl,res,serverInteractionSvc.getServerConfig()).then(
                                         function(data){
                                             //need to get the resource id
                                             var id = getResourceIdFromHeaders(data.headers)
@@ -877,7 +891,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
             return deferred.promise;
         },
 
-        getAllResourcesFollowingPaging : function(url,limit,oauthAccessToken){
+        getAllResourcesFollowingPaging : function(url,limit,oauthAccessToken,apiKey){
             //Get all the resurces specified by a query, following any paging...
             //http://stackoverflow.com/questions/28549164/how-can-i-do-pagination-with-bluebird-promises
 
@@ -902,6 +916,10 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                 if (oauthAccessToken) {
                     options.headers['Authorization'] = "Bearer " + oauthAccessToken
                 }
+                if (apiKey) {
+                    options.headers['x-api-key'] = apiKey
+                }
+
                 return $http.get(url,options).then(
                     function(data) {
                         var bundle = data.data;     //the response is a bundle...
@@ -960,7 +978,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
 
                 var url = dataServer.url + "Patient/"+patientId + '/$everything';
 
-                this.getAllResourcesFollowingPaging(url).then(
+                this.getAllResourcesFollowingPaging(url,null,null,dataServer.apiKey).then(
                     function(arrayOfResource){
 
                         console.log(arrayOfResource)
@@ -1012,9 +1030,6 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
                         function getMedName(m) {
 
                             return ResourceUtilsSvc.getOneLineSummaryOfResource(m.resource);
-
-
-                           
 
                         }
                     },
@@ -1287,7 +1302,7 @@ angular.module("sampleApp").service('supportSvc', function($http,$q,appConfigSvc
         postBundle : function(bundle,referenceResources) {
             //sent the bundle to the server. If referenceResources is supplied, then add the resources to that list (with id)
             var deferred = $q.defer();
-            $http.post(appConfigSvc.getCurrentDataServerBase(),bundle).then(
+            $http.post(appConfigSvc.getCurrentDataServerBase(),bundle,serverInteractionSvc.getServerConfig()).then(
                 function(data) {
 
 

@@ -696,7 +696,16 @@ angular.module("sampleApp")
                 //create and draw the graph representation...
                 var graphData = resourceCreatorSvc.createGraphOfInstances($scope.allResourcesAsList);
                 var container = document.getElementById('mynetwork');
-                var network = new vis.Network(container, graphData, {});
+
+                //needed for large graphs
+                let options = {
+                    layout: {
+                        improvedLayout:false
+                    }
+                }
+
+                var network = new vis.Network(container, graphData, options);
+
                 $scope.graph['mynetwork'] = network;
                 network.on("click", function (obj) {
                    // console.log(obj)
@@ -2116,7 +2125,14 @@ angular.module("sampleApp")
          var graphData = resourceCreatorSvc.createGraphAroundSingleResourceInstance(resource,resourceReferences)
          var container = document.getElementById(containerId);
 
-         var network = new vis.Network(container, graphData, {});
+         //needed for large graphs
+         let options = {
+             layout: {
+                 improvedLayout:false
+             }
+         }
+
+         var network = new vis.Network(container, graphData, options);
          $scope.graph[containerId] = network;
 
          network.on("click", function (obj) {

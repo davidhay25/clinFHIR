@@ -81,9 +81,14 @@ angular.module("sampleApp").service('resourceCreatorSvc',
         findPatientsByName: function (name,oauthAccessToken) {
             var deferred = $q.defer();
 
-            var qry = appConfigSvc.getCurrentDataServer().url + "\Patient?name=" + name;
+            let currentServer = appConfigSvc.getCurrentDataServer()
 
-            supportSvc.getAllResourcesFollowingPaging(qry,null,oauthAccessToken).then(
+            var qry = currentServer.url + "\Patient?name=" + name;
+
+
+
+
+            supportSvc.getAllResourcesFollowingPaging(qry,null,oauthAccessToken,currentServer.apiKey).then(
                 function (data) {
                    // console.log(data)
                     deferred.resolve(data);
@@ -2999,46 +3004,33 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
             allResources.forEach(function (resource, inx) {
 
-                if (resource.id.indexOf('urn:')>-1) {
-                    objNodes[resource.id] = inx;
-                } else {
-                    objNodes[resource.resourceType + "/" + resource.id] = inx;
-                }
-
-
-                var node = {id: inx, label: that.createResourceLabel(resource), shape: 'box'};
-                node.resource = resource;
-                if (objColours[resource.resourceType]) {
-                    node.color = objColours[resource.resourceType];
-                }
-
-
-                let include = false
-                if (hashShowResourceTypes) {
-                    if (hashShowResourceTypes[resource.resourceType]) {
-                        include = true
+                //The IS implementation includes an OO without an Id
+                if (resource.id) {
+                    if (resource.id.indexOf('urn:') > -1) {
+                        objNodes[resource.id] = inx;
+                    } else {
+                        objNodes[resource.resourceType + "/" + resource.id] = inx;
                     }
-                } else {
-                    include = true;
-                }
 
+                    var node = {id: inx, label: that.createResourceLabel(resource), shape: 'box'};
+                    node.resource = resource;
+                    if (objColours[resource.resourceType]) {
+                        node.color = objColours[resource.resourceType];
+                    }
 
-/*
-                //don't include the patient - it completely skews the graph...
-                if (includePatient) {
-                    //arNodes.push(node)
-                    include = true
-                } else {
-                    if (resource.resourceType !== 'Patient') {
-                        //arNodes.push(node)
-                        include = true
+                    let include = false    //don't include the patient - it completely skews the graph...
+                    if (hashShowResourceTypes) {
+                        if (hashShowResourceTypes[resource.resourceType]) {
+                            include = true
+                        }
+                    } else {
+                        include = true;
+                    }
+
+                    if (include) {
+                        arNodes.push(node)
                     }
                 }
-*/
-                if (include) {
-                    arNodes.push(node)
-                }
-
 
             });
 
@@ -3048,26 +3040,26 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             var arEdges = [];
             allResources.forEach(function (resource, inx) {
                 var thisNodeId;
-
-                if (resource.id.indexOf('urn:')>-1) {
-                    thisNodeId = objNodes[resource.id];
-                } else {
-                    thisNodeId = objNodes[resource.resourceType + "/" + resource.id];
-                }
-
-                var resourceReferences = resourceSvc.getReference(resource);    //get the outward links for this resource
-                resourceReferences.outwardLinks.forEach(function (link) {
-                    var nodeId = objNodes[link.reference];
-
-
-                    //nodeId will only be set for resources in the 'allReference' object - ie ones we've loaded...
-                    if (nodeId == 0 || nodeId) {
-
-                        arEdges.push({from: thisNodeId, to: nodeId, arrows: {to: true}, label: link.key})
+                if (resource.id) {
+                    if (resource.id.indexOf('urn:') > -1) {
+                        thisNodeId = objNodes[resource.id];
+                    } else {
+                        thisNodeId = objNodes[resource.resourceType + "/" + resource.id];
                     }
 
-                })
+                    var resourceReferences = resourceSvc.getReference(resource);    //get the outward links for this resource
+                    resourceReferences.outwardLinks.forEach(function (link) {
+                        var nodeId = objNodes[link.reference];
 
+
+                        //nodeId will only be set for resources in the 'allReference' object - ie ones we've loaded...
+                        if (nodeId == 0 || nodeId) {
+
+                            arEdges.push({from: thisNodeId, to: nodeId, arrows: {to: true}, label: link.key})
+                        }
+
+                    })
+                }
             })
 
 
@@ -3618,8 +3610,15 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
         },
         loadVersions: function (resource) {
-            var url = appConfigSvc.getCurrentDataServer().url + resource.resourceType + "/" + resource.id + "/_history";
-            return $http.get(url);
+            let currentServer = appConfigSvc.getCurrentDataServer()
+            let config = {}
+            if (currentServer.apiKey) {
+                config.headers = {'x-api-key':currentServer.apiKey}
+            }
+            var url = currentServer.url + resource.resourceType + "/" + resource.id + "/_history";
+
+
+            return $http.get(url,config);
         },
 
         buildResourceTree: function (resource) {

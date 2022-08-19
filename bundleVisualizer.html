@@ -604,7 +604,7 @@
                                                         <div class="col-md-5 col-sm-5">
                                                             <button class="btn btn-link pull-right"
                                                                     ng-show="selectedFromSingleGraph"
-                                                                    ng-click="selectFromSingleGraph()">Select</button>
+                                                                    ng-click="selectFromSingleGraph()">Select {{selectedFromSingleGraph.resourceType}}</button>
                                                             <uib-tabset>
                                                                 <uib-tab heading="Json">
                                                                     <pre>{{selectedFromSingleGraph | json}}</pre>
@@ -615,11 +615,16 @@
 
                                                                 <uib-tab ng-show="selectedFromSingleGraph.resourceType == 'DiagnosticReport'" heading="DiagnosticReport">
                                                                     <br/>
-                                                                    <div class="banner">Observations linked to this DiagnosticReport</div>
+                                                                    <div class="banner">Observations referenced from this DiagnosticReport</div>
                                                                     <div ng-repeat="item in DR" ng-show="item.DR.id == selectedFromSingleGraph.id">
                                                                         <table class="table-bordered table">
                                                                             <tr ng-repeat = "obs in item.obs">
-                                                                                <td>{{obs.text.div | cleanTextDiv}}</td>
+                                                                                <td>
+                                                                                    <div class="clickable" ng-click="selectFromSingleGraph(obs)">
+                                                                                        {{obs.text.div | cleanTextDiv}}
+                                                                                    </div>
+
+                                                                                </td>
                                                                                 <td>
                                                                                     {{obs.valueCodeableConcept.text}} {{obs.valueString}}   {{obs.valueQuantity.value}}
                                                                                 </td>
@@ -637,6 +642,13 @@
 
                                                         </div>
                                                     </div>
+
+                                                </uib-tab>
+
+                                                <uib-tab ng-show="selectedBundleEntry.resource.resourceType == 'Binary'" heading="Binary Content">
+                                                    <br/>
+                                                    <pre>{{base64Decode(selectedBundleEntry.resource.data)}}</pre>
+
 
                                                 </uib-tab>
 

@@ -3111,6 +3111,7 @@ angular.module("sampleApp")
                             node.state.opened = data.node.state.opened;
                         }
                     });
+
                     $scope.$digest();
                 }).on('close_node.jstree',function(e,data){
 

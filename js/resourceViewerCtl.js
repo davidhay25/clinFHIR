@@ -3,7 +3,7 @@ angular.module("sampleApp")
     .controller('resourceViewerCtrl',
         function ($scope,supportSvc,appConfigSvc,resourceCreatorSvc,resourceSvc,$sce,sessionSvc,
                   $uibModal, $timeout,GetDataFromServer,modalService,ResourceUtilsSvc,builderSvc,$window,$http,$location,
-                  $firebaseObject,Utilities) {
+                  $firebaseObject,Utilities,serverInteractionSvc) {
 
 
 
@@ -1039,6 +1039,7 @@ angular.module("sampleApp")
                         console.log('fitting...')
                     },500            )
                 }
+
             };
 
             //when an individual resource has been selected... isVersion is true whendisplaying a version

@@ -14,7 +14,7 @@ angular.module("sampleApp").
             }
         }
     }).
-    service('SaveDataToServer', function($http,$q,appConfigSvc) {
+    service('SaveDataToServer', function($http,$q,appConfigSvc,serverInteractionSvc) {
     return {
         addOutputToTask : function(task,resource,type) {
             //save the resource, then make a reference to it from the task. Assume that the resource has an id...
@@ -82,17 +82,18 @@ angular.module("sampleApp").
             urlBase = urlBase || appConfigSvc.getCurrentConformanceServer().url;       //default to data server
             var deferred = $q.defer();
             var qry = urlBase + resource.resourceType;
-            var config = {};
+           /* var config = {};
             //if there's a user object with an 'authHeader' property, then add tha to the config... (added for IG & smile)
             if (user && user.authHeader) {
                 config.headers = {authorization:user.authHeader};
 
             }
+            */
             if (resource.id) {
                 //this is an update
                 qry += "/"+resource.id;
 
-                $http.put(qry, resource,config).then(
+                $http.put(qry, resource,serverInteractionSvc.getServerConfig()).then(
                     function(data) {
                         deferred.resolve(data);
                     },
@@ -103,7 +104,7 @@ angular.module("sampleApp").
             } else {
                 //this is new
                 //console.log(qry)
-                $http.post(qry, resource,config).then(
+                $http.post(qry, resource,serverInteractionSvc.getServerConfig()).then(
                     function(data) {
                         deferred.resolve(data);
                     },
@@ -119,7 +120,7 @@ angular.module("sampleApp").
             //update a conformance resource supplying the url and the resource...
             var deferred = $q.defer();
             var url = server.url + 'StructureDefinition/'+resource.id;
-            $http.put(url, resource).then(
+            $http.put(url, resource,serverInteractionSvc.getServerConfig()).then(
                 function(data) {
                     deferred.resolve(data);
                 },
@@ -134,7 +135,7 @@ angular.module("sampleApp").
             //update a resource supplying the url and the resource...
             var deferred = $q.defer();
             var url = server.url + 'StructureDefinition/'+resource.id;
-            $http.delete(url, resource).then(
+            $http.delete(url, resource,serverInteractionSvc.getServerConfig()).then(
                 function(data) {
                     deferred.resolve(data);
                 },
@@ -149,7 +150,7 @@ angular.module("sampleApp").
             var config = appConfigSvc.config();
             var qry = config.servers.terminology + "ValueSet/"+id;
             console.log(qry)
-            return $http.put(qry,valueSet);
+            return $http.put(qry,valueSet,serverInteractionSvc.getServerConfig());
 
 
         },
@@ -164,7 +165,7 @@ angular.module("sampleApp").
     }
 
 }).
-    service('GetDataFromServer', function($http,$q,appConfigSvc,Utilities,$localStorage,$timeout) {
+    service('GetDataFromServer', function($http,$q,appConfigSvc,Utilities,$localStorage,$timeout,serverInteractionSvc) {
     return {
         getListForPractitioner : function(practitioner,type) {
             var deferred = $q.defer();
@@ -174,7 +175,7 @@ angular.module("sampleApp").
                 "List?source:Practitioner="+ practitioner.id + "&code="  + type;
 
 console.log(url)
-            $http.get(url).then(
+            $http.get(url,serverInteractionSvc.getServerConfig()).then(
                 function(data) {
                     var list;
                     if (data.data && data.data.entry && data.data.entry.length > 0) {
@@ -199,7 +200,7 @@ console.log(url)
             //first, get all the tasks associated with this model
             var url = appConfigSvc.getCurrentDataServer().url + "Task?focus=StructureDefinition/"+model.id;
 
-            $http.get(url).then(
+            $http.get(url,serverInteractionSvc.getServerConfig()).then(
                 function(data){
                    // console.log(data.data);
 
@@ -295,7 +296,7 @@ console.log(url)
                         if (include) {
                             arQuery.push(
 
-                                $http.get(baseUrl+ ref).then(
+                                $http.get(baseUrl+ ref,serverInteractionSvc.getServerConfig()).then(
                                     function(data){
                                         arResources.push(data.data)
                                     },
@@ -431,7 +432,7 @@ console.log(url)
                         pract.id = 'clinFhir'+loginIdentifier;
                         pract.telecom = [{system:'email',value:user.email}];        //the email is the only property we can be sure of having
                         var createUrl = appConfigSvc.getCurrentDataServer().url + "Practitioner/"+pract.id;
-                        $http.put(createUrl,pract).then(
+                        $http.put(createUrl,pract,serverInteractionSvc.getServerConfig()).then(
                             function(){
                                 deferred.resolve(pract);
                             },
@@ -470,7 +471,7 @@ console.log(url)
         getVersionHistory : function(resource) {
             //retrieve the version history for a resource in the data server
             var qry = appConfigSvc.getCurrentDataServerBase() + resource.resourceType + "/"+resource.id + '/_history';
-            return $http.get(qry);
+            return $http.get(qry,serverInteractionSvc.getServerConfig());
 
 
         },
@@ -481,16 +482,27 @@ console.log(url)
             //find SD's that match a search query. used by selectProfile
             var config = appConfigSvc.config();
             var qry = config.servers.conformance + qry;
-            return $http.get(qry);
+            return $http.get(qry,serverInteractionSvc.getServerConfig());
         },
         getXmlResource : function (url) {
-            var config = appConfigSvc.config();
-            var qry = config.servers.data + url;
+            //var config = appConfigSvc.config();
+
+            let dataServer = appConfigSvc.getCurrentDataServer()
+            let qry = dataServer.url + url
+           // let config = {}
+          //  if (dataServer.apiKey) {
+            //    config.headers = {'x-api-key':dataServer.apiKey}
+         //   }
+
+
+            //var qry = config.servers.data + url;
+
             //console.log(qry)
-            return $http.get(qry);
+            return $http.get(qry,serverInteractionSvc.getServerConfig());
         },
         localServerQuery : function(url) {
-            return $http.get(url);
+
+            return $http.get(url,serverInteractionSvc.getServerConfig());
         },
         adHocFHIRQueryFollowingPaging : function(url,accessToken) {
             //used when a caller expects a bundle
@@ -524,7 +536,7 @@ console.log(url)
         adHocFHIRQuery : function(url) {
             //not all callers expect a bundle!!!
 
-            return $http.get(url);
+            return $http.get(url,serverInteractionSvc.getServerConfig());
 
 
         },
@@ -537,7 +549,7 @@ console.log(url)
             //var qry = appConfigSvc.getCurrentDataServerBase() + qry;
             var qry = config.servers.data + qry;
 
-            $http.get(qry).then(
+            $http.get(qry,serverInteractionSvc.getServerConfig()).then(
                 function(data){
                     deferred.resolve(data.data);
                 },function(err){
@@ -558,7 +570,7 @@ console.log(url)
             }
             config.log(qry,'rbServices:getExpandedValueSet')
 
-            $http.get(qry).then(
+            $http.get(qry,serverInteractionSvc.getServerConfig()).then(
                 function(data){
                     deferred.resolve(data.data);
                 },function(err){
@@ -585,7 +597,7 @@ console.log(url)
                 //the profile is in the browser cache...
                 deferred.resolve($localStorage.profileCacheUrl[url]);
             } else {
-                $http.get(url).then(
+                $http.get(url,serverInteractionSvc.getServerConfig()).then(
                     function(data) {
                         //the profile was located
                         var profile = data.data;    //a StructureDefinition, of course...
@@ -620,7 +632,7 @@ console.log(url)
 
             //config.log(qry,'findConformanceResourceByUri');
 
-            $http.get(qry).then(
+            $http.get(qry,serverInteractionSvc.getServerConfig()).then(
                 function(data){
                     var bundle = data.data;
                     if (bundle && bundle.entry && bundle.entry.length > 0) {
@@ -700,7 +712,7 @@ console.log(url)
             config.log(qry,'getFilteredValueSet');
 
             var deferred = $q.defer();
-            $http.get(qry)
+            $http.get(qry,serverInteractionSvc.getServerConfig())
                 .then(function(data) {
                     deferred.resolve(data.data);
                 },function(err) {
@@ -741,7 +753,7 @@ console.log(url)
 
             var deferred = $q.defer();
             var afterChange;
-            $http.get(url)
+            $http.get(url,serverInteractionSvc.getServerConfig())
                 .success(function(data) {
                     //that.registerAccess();      //register access AFTER reading history to lastAcess is accurate...
 
