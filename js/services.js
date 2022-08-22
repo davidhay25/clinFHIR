@@ -1,5 +1,5 @@
 angular.module("sampleApp").service('supportSvc', function(
-    $http,$q,appConfigSvc,GetDataFromServer,ResourceUtilsSvc ,Utilities,serverInteractionSvc) {
+    $http,$q,appConfigSvc,GetDataFromServer,ResourceUtilsSvc,Utilities,serverInteractionSvc) {
 
     //options for building the samples that will come from a UI
     var buildConfig = {};
@@ -97,15 +97,6 @@ angular.module("sampleApp").service('supportSvc', function(
 
     setUpReferenceResources(fhirVersion);
 
-    //return a config ojbect. needed for IS apikey
-    function getServerConfigDEP() {
-        let config = {}
-        let dataServer = appConfigSvc.getCurrentDataServer()
-        if (dataServer.apiKey) {
-            config.headers = {'x-api-key':dataServer.apiKey}
-        }
-        return config
-    }
 
     return {
         getResourceIdFromHeaders : getResourceIdFromHeaders,
@@ -277,124 +268,7 @@ angular.module("sampleApp").service('supportSvc', function(
             );      //don't care about the response
             return deferred.promise;
         },
-        createConditionsDEP : function (patientId,options) {
 
-            //create a set of encounters for the patient and add them to the referenceResources (just for this session)
-            var deferred = $q.defer();
-            var that = this;
-            options = options || {}
-            options.count = options.count || 5;     //number to reate
-            options.period = options.period || 30;  //what period of time the enounters should be over
-            var bundle = {resourceType: 'Bundle', type: 'transaction', entry: []};
-
-            var fhirVersion = appConfigSvc.getCurrentFhirVersion();
-            for (var i = 0; i < options.count; i++) {
-                var id = 't'+ new Date().getTime() + i;
-                var cond = {resourceType: 'Condition'};
-                cond.id = id;
-                if (fhirVersion == 2) {
-                    cond.patient = {reference:'Patient/'+patientId};
-                } else {
-                    cond.subject = {reference:'Patient/'+patientId};
-                }
-
-                cond.verificationStatus = this.getRandomEntryFromOptions('conditionVerificationStatus');
-                cond.code = this.getRandomEntryFromOptions('conditionCode');
-                var encounter = this.getRandomReferenceResource('Encounter');   //there may not be an encounter (if they aren't being created)
-                if (encounter) {
-                    cond.encounter = {reference: "Encounter/"+ encounter.id};
-                }
-                var practitioner = this.getRandomReferenceResource('Practitioner');     //there will always be a practitioner
-                cond.asserter = {reference: "Practitioner/"+ practitioner.id};
-
-                cond.text = {status:'generated',div:"<div  xmlns='http://www.w3.org/1999/xhtml'>"+cond.code.text+'</div>'};
-                bundle.entry.push({fullUrl:id,resource:cond,request: {method:'POST',url: 'Condition'}});
-            }
-
-            this.postBundle(bundle,referenceResources).then(
-                function(data){
-                    //now add the the referenceResources array in memory so that they can be used by other resources.
-                    data.data.entry.forEach(function(entry){
-
-                    });
-
-                    if (options.logFn) {
-                        options.logFn('Added ' + options.count + ' Conditions')
-                    }
-
-                    //now to see if a problem list shuld be created
-                    switch (buildConfig.createProblemList) {
-                        case 'yes' :
-                            that.buildProblemList(patientId).then(
-                                function(){
-                                    if (options.logFn) {
-                                        options.logFn('Added ProblemList')
-                                    }
-                                },
-                                function() {
-                                    if (options.logFn) {
-                                        options.logFn('Error creating ProblemList- not saved')
-                                    }
-                                }
-                            ).finally(function(){
-                                //don't need to do anything different based on the outcome of the operation
-
-                                deferred.resolve();
-                            });
-                            break;
-                        default :
-                            deferred.resolve();
-                            break;
-                    }
-
-
-                },
-                function(err) {
-                    deferred.reject("Error saving Conditions")
-                }
-            );
-            return deferred.promise;
-
-        },
-        buildProblemListDEP : function(id,empty) {
-            //make a problem list from the conditions
-            var deferred = $q.defer();
-            var today = moment().format();
-            var problemList = {resourceType : 'List',title:'Problem List', entry:[], date : today,
-                subject : {reference:'Patient/'+id},
-                status : 'current',
-                mode: 'snapshot',
-                code : {coding : [{code:'problems',system:'http://hl7.org/fhir/list-example-use-codes'}]}};
-
-
-            var encounter = this.getRandomReferenceResource('Encounter');   //there may not be an encounter (if they aren't being created)
-            if (encounter) {
-                problemList.encounter = {reference: "Encounter/"+ encounter.id};
-            }
-
-            //now add the conditions to the list
-            for (var i=0; i < buildConfig.problemListLength; i++) {
-                var condition = this.getRandomReferenceResource('Condition');
-                var entry = {date: today, item : {reference : 'Condition/'+condition.id}}
-                problemList.entry.push(entry);
-            }
-            
-            
-            // ... and save
-            var url = appConfigSvc.getCurrentDataServerBase()+ "List";
-            $http.post(url,problemList,serverInteractionSvc.getServerConfig()).then(
-                function (data) {
-                    deferred.resolve();
-                },
-                function(err){
-                    alert('Error saving problem list:\n'+angular.toJson(err))
-                    deferred.reject(err)
-                }
-            );
-
-            return deferred.promise;
-
-        },
         buildAllergiesList : function(patientId,options) {
 
             var deferred = $q.defer();
@@ -424,12 +298,10 @@ angular.module("sampleApp").service('supportSvc', function(
                         //each entry is a basic medication statement - needs to have the patient specific stuff added
                         allergy.patient = {reference:'Patient/'+patientId};
                         allergy.id = 'al'+inx;
-                        //allergy.reporter = {reference:'Patient/'+patientId};
+
 
                         var practitioner = that.getRandomReferenceResource('Practitioner');     //there will always be a practitioner
                         allergy.recorder = {reference: "Practitioner/"+ practitioner.id};
-
-
 
 
                         var entry = {date: today, item : {reference : 'AllergyIntolerance/'+allergy.id}}
@@ -489,6 +361,7 @@ angular.module("sampleApp").service('supportSvc', function(
             var listBundleEntry = {resource : conditionList,request:{method:'POST',url:'List/'}};
 
             bundle.entry.push(listBundleEntry);
+
             GetDataFromServer.localServerQuery(url).then(
                 function(data) {
                     var refList = data.data;
@@ -654,6 +527,7 @@ angular.module("sampleApp").service('supportSvc', function(
                 } else {
                     enc.diagnosis = []
                 }
+
                 //find a random number of Random Condition as the indication
 
                 var cnt = parseInt(5 * Math.random());
@@ -668,7 +542,6 @@ angular.module("sampleApp").service('supportSvc', function(
                             enc.diagnosis.push({condition: {reference:ref.response.location}});
                         }
                     }
-
                 }
 
                 //an empty array causes a parsing error on Grahames server...
@@ -680,16 +553,12 @@ angular.module("sampleApp").service('supportSvc', function(
                     delete enc.diagnosis;
                 }
 
-
                 //version difference...
                 if (fhirVersion == 2) {
                     enc.patient = {reference:'Patient/'+patientId};
                 } else {
                     enc.subject = {reference:'Patient/'+patientId};
                 }
-
-
-
 
                 enc.reason = [];
                 enc.reason.push(this.getRandomEntryFromOptions('encounterReason'));
@@ -896,12 +765,13 @@ angular.module("sampleApp").service('supportSvc', function(
             //http://stackoverflow.com/questions/28549164/how-can-i-do-pagination-with-bluebird-promises
 
             //add the count parameter
+            /* IS barfs at _count on $everything
             if (url.indexOf('?') > -1) {
                 url += "&_count=100"
             } else {
                 url += "?_count=100"
             }
-
+*/
             var deferred = $q.defer();
 
             limit = limit || 500;           //absolute max of 500
@@ -971,6 +841,8 @@ angular.module("sampleApp").service('supportSvc', function(
             //the currently selected data server object (not just the url)
             var dataServer = appConfigSvc.getCurrentDataServer();
             var resourceHash = {};      //this is used to avoid duplications that $everything can return...
+
+
 
             if (dataServer.everythingOperation || dataServer.everything) {
                 //The everything operation will return all patient related resources. not all servers recognize this, and

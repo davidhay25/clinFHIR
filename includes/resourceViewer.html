@@ -27,18 +27,11 @@
                     </a>
                 </div>
 
-                <!-- Show the vitals if there are any observations
-                <div class="list-group">
-                    <a ng-show="hasVitals" href="#" class="list-group-item" ng-click="getVitals()">Vitals</a>
-                </div>-->
+
             </div>
 
             <div class="col-md-10 col-sm-9">
-<!--
-                <div div ng-show="progressMessage" class="alert alert-info">
-                    {{progressMessage}}
-                </div>
--->
+
                 <div class="row">
                     <div class="col-md-4 col-sm-4">
 
@@ -607,89 +600,6 @@
                 </div>
 
 
-<!--
-                <uib-tabset ng-show="docAttachment">
-
-                    <uib-tab heading="Document tree">
-
-                        <div class="row">
-                            <div class="col-sm-6 col-md-6">
-                                <div id="docTreeView1"></div>
-                            </div>
-                            <div class="col-sm-6 col-md-6">
-
-                                <p ng-bind-html="docSectionText.div"></p>
-
-                                <pre ng-show="docSection">{{docSection | json}}</pre>
-
-
-
-                                <pre ng-show="docTreeResource">{{docTreeResource | json}}</pre>
-                            </div>
-                        </div>
-
-
-
-                        <em>Note that this view only includes the resources that are directly connected to the Composition.section.entry
-                            element, and to any List resources referenced by a section. To see the complete list, and all the references
-                            between resources (such as to the Patient) then use the Graph tab.</em>
-
-                    </uib-tab>
-
-
-                    <uib-tab heading="Document Graph" select="redrawChart()">
-                        <br/>
-                        <div class="row">
-
-                            <div class="col-md-7 col-sm-7">
-                                <div id="documentGraph"></div>
-                                <em>The Patient resource is not displayed</em>
-                            </div>
-                            <div class="col-md-5 col-sm-5">
-
-                                <pre>{{graphDocResource | json}}</pre>
-                            </div>
-                        </div>
-                    </uib-tab>
-
-
-
-                    <uib-tab heading="Document Text">
-                        <p ng-bind-html="docAttachment.html  "></p>
-                    </uib-tab>
-
-                    <uib-tab heading="Document Quality Report">
-                        <div>There are {{docQuality.cntNodes}} resources in this document.</div>
-                        <div>There are {{docQuality.cntEdges}} references between them.</div>
-
-                        <div ng-show="docQuality.orphans.length > 0">
-                            There are {{docQuality.orphans.length}} resources that have no reference to them:
-
-                            <table class="table table-bordered">
-                                <tr ng-repeat="orphan in docQuality.orphans">
-                                    <td>{{orphan.resourceType}}</td>
-                                    <td>{{orphan.id}}</td>
-                                    <td><p ng-bind-html="orphan.text.div"></p> </td>
-                                </tr>
-                            </table>
-                        </div>
-
-
-                    </uib-tab>
-
-                    <uib-tab heading="Bundle Json">
-                        <pre>{{docAttachment.bundle | json}}</pre>
-                    </uib-tab>
-
-
-                    <uib-tab heading="DocumentReference Json">
-                        <pre>{{documentReference | json}}</pre>
-                    </uib-tab>
-
-
-
-                </uib-tabset>
--->
 
             </div>
 

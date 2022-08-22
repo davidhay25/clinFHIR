@@ -11,44 +11,50 @@
                     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Ibuprofen causes urticaria</div>"
 
                 },
-                "clinicalStatus": "active",
-                "verificationStatus": "confirmed",
-                "type": "allergy",
-                "code": {
-                    "coding": [
-                        {
-                            "system": "http://snomed.info/sct",
-                            "code": "387207008",
-                            "display": "Ibuprofen"
-                        }
-                    ]
-                },
-                "patient": {
-                    "reference": "Patient/example1",
-                    "display": "Harry DAN"
-                },
-                "assertedDate": "2016-03-07",
-                "recorder": {
-                    "reference": "Practitioner/example0",
-                    "display": "Dr Helen Mayo"
-                },
-                "reaction": [
+                "clinicalStatus" : {"coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                    "code": "active"
+                  }
+                ]},
+                "verificationStatus": {
+                  "coding": [
                     {
-                        "manifestation": [
-                            {
-                                "coding": [
-                                    {
-                                        "system": "http://snomed.info/sct",
-                                        "code": "126485001",
-                                        "display": "Urticaria"
-                                    }
-                                ]
-                            }
-                        ]
+                      "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                      "code": "confirmed"
                     }
-                ]
-            },
-    {
+                  ]
+                },
+                      "type": "allergy",
+                      "code": {
+                          "coding": [
+                              {
+                                  "system": "http://snomed.info/sct",
+                                  "code": "387207008",
+                                  "display": "Ibuprofen"
+                              }
+                          ]
+                      },
+
+                      "recordedDate": "2016-03-07",
+
+                      "reaction": [
+                          {
+                              "manifestation": [
+                                  {
+                                      "coding": [
+                                          {
+                                              "system": "http://snomed.info/sct",
+                                              "code": "126485001",
+                                              "display": "Urticaria"
+                                          }
+                                      ]
+                                  }
+                              ]
+                          }
+                      ]
+                  },
+              {
                 "resourceType": "AllergyIntolerance",
                
                 "meta": {
@@ -59,8 +65,20 @@
                     "status": "generated",
                     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">eggs causes hives</div>"
                 },
-                "clinicalStatus": "active",
-                "verificationStatus": "unconfirmed",
+              "clinicalStatus" : {"coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                  "code": "active"
+                }
+              ]},
+              "verificationStatus": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                    "code": "confirmed"
+                  }
+                ]
+              },
                 "type": "allergy",
                 "category": [
                     "food"
@@ -74,17 +92,14 @@
                         }
                     ]
                 },
-                "patient": {
-                    "reference": "Patient/example2",
-                    "display": "Sally Grant"
-                },
+
                 "onsetAge": {
                     "value": 4,
                     "unit": "year",
                     "system": "http://unitsofmeasure.org",
                     "code": "a"
                 },
-                "assertedDate": "2018-03-07",
+                "recordedDate": "2018-03-07",
                 "reaction": [
                     {
                         "manifestation": [

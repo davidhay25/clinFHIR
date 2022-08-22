@@ -3083,20 +3083,27 @@ console.log(summary);
                         }
                         break;
                     case "AllergyIntolerance" :
+
+                        return getCCSummary(resource.code);
+                        /*
                         if (fhirVersion == 3) {
                             return getCCSummary(resource.code);
                          } else {
                             return getCCSummary(resource.substance);
                         }
-
+*/
                         break;
                     case "Practitioner" :
                         if (resource.name) {
+
+                            return getHumanNameSummary(resource.name[0]);
+                            /*
                             if (fhirVersion == 3) {
                                 return getHumanNameSummary(resource.name[0]);
                             } else {
                                 return getHumanNameSummary(resource.name);
                             }
+                            */
                         } else {
                             return 'Practitioner';
                         }

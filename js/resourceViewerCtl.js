@@ -3,57 +3,25 @@ angular.module("sampleApp")
     .controller('resourceViewerCtrl',
         function ($scope,supportSvc,appConfigSvc,resourceCreatorSvc,resourceSvc,$sce,sessionSvc,
                   $uibModal, $timeout,GetDataFromServer,modalService,ResourceUtilsSvc,builderSvc,$window,$http,$location,
-                  $firebaseObject,Utilities,serverInteractionSvc) {
+                  $firebaseObject,Utilities,createSampleBundleSvc, serverInteractionSvc) {
 
+
+/*
+            //testing sample creator
+            let patient = {resourceType:"Patient",name:[{text:"John Doe"}]}
+        createSampleBundleSvc.makeSampleBundle(patient).then(
+            function (data) {
+                console.log(JSON.stringify(data))
+            },function (err) {
+                console.log(err)
+            }
+        )
+
+*/
 
 
         //https://github.com/vasturiano/3d-force-graph
             //https://bl.ocks.org/vasturiano/02affe306ce445e423f992faeea13521
-/*
-            $scope.generate3dgraph = function() {
-                console.log($scope.graphData)
-                var Graph = ForceGraph3D()
-                (document.getElementById("3d-graph"));
-
-                var nodes = []// [{"id": "Myriel", "group": 1}, {"id": "Napoleon", "group": 2}]
-                var links = []//[{source: "Myriel", target: "Napoleon", value: 10}]
-
-                angular.forEach($scope.graphData.nodes._data,function(node){
-
-                    nodes.push({id:node.id,name:node.label})
-                });
-                nodes.push({id:'0',name:'Patient'})
-
-               // $scope.graphData.nodes._data['0'] = "Patient";
-                angular.forEach($scope.graphData.edges._data,function(edge){
-                    if ($scope.graphData.nodes._data[edge.to]){
-                        links.push({source:edge.from,target:edge.to})
-                    }
-
-                });
-
-                links[0].linkOpacity = 1;
-
-                Graph
-                    .cooldownTicks(300)
-                    .nodeLabel('name')
-                    .linkLabel('label')
-                    .nodeAutoColorBy('group')
-                    .forceEngine('ngraph')
-                    .linkOpacity(1)
-                    .nodeResolution(4)
-                    .backgroundColor('white')
-                    .nodeThreeObject(function(node){
-                        const sprite = new SpriteText(node.name);
-                        sprite.color = node.color;
-                        sprite.textHeight = 8;
-                        return sprite;
-                    })
-                    .graphData({nodes: nodes, links: links});
-
-            }
-
-*/
 
             $scope.outcome = {};
             $scope.graph = {};

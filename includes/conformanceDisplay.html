@@ -184,6 +184,20 @@
 
             </uib-tab>
 
+            <uib-tab heading="Search Include">
+                <br/>
+                <ul>
+                    <li ng-repeat = "inc in selectedType.searchInclude">{{inc}}</li>
+                </ul>
+            </uib-tab>
+
+            <uib-tab heading="Search RevInclude">
+                <br/>
+                <ul>
+                    <li ng-repeat = "rev in selectedType.searchRevInclude">{{rev}}</li>
+                </ul>
+            </uib-tab>
+
             <uib-tab heading="Operations">
                 <br />
                 <p>The type level operations supported by the server for this resource</p>

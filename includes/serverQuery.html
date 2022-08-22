@@ -6,6 +6,14 @@
         height: 550px;
         border: 1px solid lightgray;
     }
+
+    #singleResourceGraph {
+        width: 100%;
+        height: 550px;
+        border: 1px solid lightgray;
+    }
+
+
     .myScroll {
         height: 400px;
         overflow-y: scroll;
@@ -122,6 +130,44 @@
                                             <button  rows=4 class="btn btn-danger" ng-click="executeAdHoc(adHocQry)">Execute</button>
                                         </div>
                                     </div>
+
+                                </uib-tab>
+
+                                <uib-tab heading="Query history">
+
+
+
+                                    <h4>Previous Queries</h4>
+
+
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="paramListScroll">
+
+                                                <table class="table table-bordered table-condensed">
+                                                    <tr ng-repeat = "hx in queryHistory">
+                                                        <td>{{hx.query}}</td>
+                                                        <td>
+                                                            <div class="clickable"
+                                                                 ng-click="removeFromHistory($index)">Remove</div>
+
+                                                        </td>
+                                                        <td>
+                                                            <div class="clickable"
+                                                                 ng-click="executeFromHistory(hx)">Execute</div>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+
+
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+
+
 
                                 </uib-tab>
 
@@ -368,43 +414,7 @@
 
 
 
-                                <uib-tab heading="History">
 
-
-
-                                    <h4>Previous Queries</h4>
-
-
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <div class="paramListScroll">
-
-                                                    <table class="table table-bordered table-condensed">
-                                                        <tr ng-repeat = "hx in queryHistory">
-                                                            <td>{{hx.query}}</td>
-                                                            <td>
-                                                                <div class="clickable"
-                                                                     ng-click="removeFromHistory($index)">Remove</div>
-
-                                                            </td>
-                                                            <td>
-                                                                <div class="clickable"
-                                                                        ng-click="executeFromHistory(hx)">Execute</div>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-
-
-
-                                                </div>
-                                            </div>
-
-                                        </div>
-
-
-
-
-                                </uib-tab>
 
                                 <uib-tab ng-show = false heading="Compartment">
                                     <div ng-controller="compartmentCtrl">
@@ -497,7 +507,7 @@
                             </div>
 
                             <div class="row">
-                                <div class="col-md-4" ng-show="response.data.entry.length > 0">
+                                <div class="col-md-3" ng-show="response.data.entry.length > 0">
                                     <div class="rounded-box">
 
                                         <a ng-show="response.data.entry.length > 1"
@@ -516,8 +526,7 @@
                                         <br/>
                                         <uib-tab heading = "List">
                                             <div class="list-group"  style="height:600px; overflow-y: auto;">
-
-                                                <div ng-class="{'list-group-item':true,'list-group-item-info':result.selectedEntry.fullUrl == entry.fullUrl}"
+                                                <div ng-class="{'list-group-item':true,'list-group-item-info':selectedResource.id == entry.resource.id}"
                                                      ng-repeat="entry in response.data.entry">
                                                     <div ng-click="selectEntry(entry)"  style="cursor: pointer">
                                                         {{entry.resource.resourceType}}
@@ -528,7 +537,13 @@
                                         </uib-tab>
 
 
+
                                         <uib-tab heading = "Graph" ng-show="response.data.entry.length > 1" select="fitGraph()">
+
+                                            <div ng-show="tooLargeForGraph" class="alert alert-warning">
+                                                There are too many nodes (> 100) to draw a useful graph.
+                                            </div>
+
                                             <div id="bundleGraph"></div>
                                         </uib-tab>
 
@@ -542,7 +557,7 @@
                                     </uib-tabset>
                                 </div>
 
-                                <div class="col-md-8">
+                                <div class="col-md-9">
                                     <br/>
 
                                     <div class="alert alert-warning" ng-show="selectedResourceVersions && selectedResourceVersions.entry.length > 1">
@@ -572,9 +587,82 @@
                                             <pre>{{xmlResource}}</pre>
                                         </uib-tab>
 
+                                        <uib-tab heading="FSH">
+                                            <br/>
+                                            <pre>{{selectedFshFromSingleGraph}}</pre>
+                                        </uib-tab>
+
+
+
                                         <uib-tab heading="Tree">
                                             <br/>
                                             <div id="queryResourceTree"></div>
+
+                                        </uib-tab>
+
+                                        <uib-tab heading="Graph" select="fitSingleResourceGraph()">
+                                            <br/>
+
+
+
+                                            <div class="row">
+                                                <div class="col-md-8">
+
+                                                    <div ng-show="tooLargeForGraphSingle" class="alert alert-warning">
+                                                        There are too many nodes (> 100) to draw a useful graph.
+                                                    </div>
+
+                                                    <div>
+                                                        <div style="padding:8px" class="pull-right" ng-hide="tooLargeForGraphSingle" >
+                                                            <checkbox ng-change="showResource(selectedResource)"
+                                                                      ng-model="input.showHidePatient"></checkbox> Hide Patient
+                                                        </div>
+
+                                                    </div>
+                                                    <div id="singleResourceGraph"></div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <button class="btn btn-link"
+                                                            ng-show="input.selectedResourceFromSingleGraph"
+                                                            ng-click="showResource(input.selectedResourceFromSingleGraph)">Select this resource</button>
+                                                    <pre>{{input.selectedResourceFromSingleGraph | json}}</pre>
+                                                </div>
+                                            </div>
+
+
+                                        </uib-tab>
+
+
+                                        <uib-tab heading="Validate">
+                                            <br/>
+                                            <div class="pull-right">
+                                                <checkbox ng-model="input.useHapi"></checkbox> Use Hapi server
+
+                                                <button class="btn-link btn" ng-click = "validate(selectedResource)">Validate</button>
+
+                                            </div>
+
+                                            <div class="clearfix"/>
+                                            <hr/>
+
+                                            <div class="row" ng-show="validateResult">
+                                                <div class="col-md-6">
+                                                    <div class="myScroll">
+                                                        <pre>{{validateResult | json}}</pre>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <div class="myScroll">
+                                                        <pre>{{selectedResource | json}}</pre>
+                                                    </div>
+
+                                                </div>
+
+
+
+                                            </div>
+
 
                                         </uib-tab>
 

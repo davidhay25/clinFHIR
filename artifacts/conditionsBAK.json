@@ -2,10 +2,23 @@
   {
     "resourceType" : "Condition",
     "text": {"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>Asthma</div>"},
-    "clinicalStatus" : "active",
-    "verificationStatus" : "confirmed",
+    "clinicalStatus" : {"coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "active"
+      }
+    ]},
+    "verificationStatus": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+          "code": "confirmed"
+        }
+      ]
+    },
     "category" : {
       "coding" : [
+
         {"code": "14657009","system": "http://snomed.info/sct","display": "Diagnosis"}
       ],
       "text" : "Diagnosis"
@@ -32,8 +45,20 @@
   {
     "resourceType" : "Condition",
     "text": {"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>Diabetes</div>"},
-    "clinicalStatus" : "active",
-    "verificationStatus" : "confirmed",
+    "clinicalStatus" : {"coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "active"
+      }
+    ]},
+    "verificationStatus": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+          "code": "confirmed"
+        }
+      ]
+    },
     "category" : {
       "coding" : [
 
@@ -64,8 +89,20 @@
   {
     "resourceType" : "Condition",
     "text": {"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>Hypertension</div>"},
-    "clinicalStatus" : "active",
-    "verificationStatus" : "confirmed",
+    "clinicalStatus" : {"coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "active"
+      }
+    ]},
+    "verificationStatus": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+          "code": "confirmed"
+        }
+      ]
+    },
     "category" : {
       "coding" : [
 
@@ -96,8 +133,20 @@
   {
   "resourceType" : "Condition",
     "text": {"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>Depression</div>"},
-  "clinicalStatus" : "active",
-  "verificationStatus" : "confirmed",
+    "clinicalStatus" : {"coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "active"
+      }
+    ]},
+    "verificationStatus": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+          "code": "confirmed"
+        }
+      ]
+    },
   "category" : {
     "coding" : [
 
@@ -128,8 +177,20 @@
   {
     "resourceType" : "Condition",
     "text": {"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>Neuropathic pain</div>"},
-    "clinicalStatus" : "active",
-    "verificationStatus" : "confirmed",
+    "clinicalStatus" : {"coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "active"
+      }
+    ]},
+    "verificationStatus": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+          "code": "confirmed"
+        }
+      ]
+    },
     "category" : {
       "coding" : [
 
@@ -160,8 +221,20 @@
   {
     "resourceType" : "Condition",
     "text": {"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>Rheumatoid Arthritis</div>"},
-    "clinicalStatus" : "active",
-    "verificationStatus" : "confirmed",
+    "clinicalStatus" : {"coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "active"
+      }
+    ]},
+    "verificationStatus": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+          "code": "confirmed"
+        }
+      ]
+    },
     "category" : {
       "coding" : [
 
@@ -213,8 +286,20 @@
   {
     "resourceType" : "Condition",
     "text": {"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>Rheumatoid arthritis - left elbow</div>"},
-    "clinicalStatus" : "active",
-    "verificationStatus" : "confirmed",
+    "clinicalStatus" : {"coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "active"
+      }
+    ]},
+    "verificationStatus": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+          "code": "confirmed"
+        }
+      ]
+    },
     "category" : {
       "coding" : [
 
@@ -266,8 +351,20 @@
   {
     "resourceType" : "Condition",
     "text": {"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>GERD</div>"},
-    "clinicalStatus" : "active",
-    "verificationStatus" : "confirmed",
+    "clinicalStatus" : {"coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "active"
+      }
+    ]},
+    "verificationStatus": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+          "code": "confirmed"
+        }
+      ]
+    },
     "category" : {
       "coding" : [
 
@@ -298,8 +395,20 @@
   {
     "resourceType" : "Condition",
     "text": {"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>Hypercholesterolaemia</div>"},
-    "clinicalStatus" : "active",
-    "verificationStatus" : "confirmed",
+    "clinicalStatus" : {"coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "active"
+      }
+    ]},
+    "verificationStatus": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+          "code": "confirmed"
+        }
+      ]
+    },
     "category" : {
       "coding" : [
 
@@ -330,8 +439,20 @@
   {
     "resourceType" : "Condition",
     "text": {"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>Onychomycosis</div>"},
-    "clinicalStatus" : "active",
-    "verificationStatus" : "confirmed",
+    "clinicalStatus" : {"coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "active"
+      }
+    ]},
+    "verificationStatus": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+          "code": "confirmed"
+        }
+      ]
+    },
     "category" : {
       "coding" : [
 
@@ -362,8 +483,20 @@
   {
     "resourceType" : "Condition",
     "text": {"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>Angina</div>"},
-    "clinicalStatus" : "active",
-    "verificationStatus" : "confirmed",
+    "clinicalStatus" : {"coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "active"
+      }
+    ]},
+    "verificationStatus": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+          "code": "confirmed"
+        }
+      ]
+    },
     "category" : {
       "coding" : [
 

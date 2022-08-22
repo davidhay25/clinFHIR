@@ -1,7 +1,7 @@
 angular.module("sampleApp")
     .controller('findPatientCtrl',
             function($scope,ResourceUtilsSvc,resourceSvc,supportSvc,resourceCreatorSvc,
-                     $localStorage,appConfigSvc,GetDataFromServer,
+                     $localStorage,appConfigSvc,GetDataFromServer,createSampleBundleSvc, $http,serverInteractionSvc,
                      modalService){
 
                 $scope.input={mode:'find',gender:'male'};   //will be replaced by name randomizer
@@ -157,12 +157,97 @@ angular.module("sampleApp")
                 //add - and select - a new patient..
                 //note that Grahames server can't handle multiple concurrent requests - which is why theres
                 //a rather inelegant 'pyramid of doom' sync calls....
+                //not any more! Now we can just use a single transaction...
                 $scope.addNewPatient = function() {
                     $scope.showLog = true;
                     $scope.allowClose = false;
                     $scope.waiting = true;
-                    var nameText = $scope.input.fname + " " + $scope.input.lname;
+                    let nameText = $scope.input.fname + " " + $scope.input.lname;
                     addLog('Adding '+nameText);
+
+//-------
+                    //create the patient resource which will be added to the transaction
+                    let patient = {"resourceType": "Patient"};
+                    patient.name = [{use:'official',family:$scope.input.lname,given:[$scope.input.fname],text:nameText}];
+                    patient.gender = $scope.input.gender;
+                    patient.birthDate= moment($scope.input.dob).format('YYYY-MM-DD');
+                    if ($scope.input.identifier) {
+                        patient.identifier = [{system:appConfigSvc.config().standardSystem.identifierSystem,value:$scope.input.identifier}]
+                    }
+                    patient.text = {status:'generated',div:"<div xmlns='http://www.w3.org/1999/xhtml'>"+nameText+'</div>'};
+
+//-----------
+
+                    //let patient = {resourceType:"Patient",name:[{text:"John Doe"}]}
+                    //this is a new approach that uses a single bundle...
+                    createSampleBundleSvc.makeSampleBundle(patient).then(
+                        function (bundle) {
+                            //console.log(JSON.stringify(bundle))
+
+                            var url = appConfigSvc.getCurrentDataServerBase();
+                            //$scope.waiting = false;
+                            let config = serverInteractionSvc.getServerConfig()
+
+                            /* LEAVE - might be useful in debugging after changes - eg adding new resources
+                            //perform validation
+                            let validateUrl = appConfigSvc.getCurrentDataServerBase() + "Bundle/$validate"
+
+                            $http.post(validateUrl,bundle,config).then(
+                                function (data) {
+                                    $scope.validationResult = data.data
+                                },
+                                function(err){
+                                    $scope.validationResult = data.data
+
+                                })
+                            */
+
+                            /* this is the save,*/
+                            $http.post(url,bundle,config).then(
+                                function (data) {
+                                    //alert("Data saved")
+                                    $scope.saveMessage = "Data has been saved. Close the dialog to display"
+
+                                    //need to find the patient in the returned bundle so we can set the id
+                                    data.data.entry.forEach(function (entry) {
+                                        let loc = entry.response.location
+                                        if (loc.indexOf('Patient') > -1) {
+                                            //this is the created patient
+                                            let ar = loc.split('/')
+                                            let patientId = ar[ar.length -1]    //assume not _history
+                                            if (loc.indexOf('_history') > -1) {
+                                                //this is a versioned response (hapi
+                                                 patientId = ar[ar.length -3]   //hapi includes history
+                                            }
+
+                                            patient.id = patientId
+                                            $scope.currentPatient = patient;
+                                        }
+                                    })
+
+                                },
+                                function(err){
+                                    alert(angular.toJson(err))
+
+                                }
+                            ).finally(
+                                function(){
+                                    $scope.waiting = false
+                                    $scope.allowClose = true;
+                                }
+
+                            )
+
+
+
+
+                        },function (err) {
+                            console.log(err)
+                        }
+                    )
+
+
+                    return
 
                     supportSvc.createPatient($scope.input).then(
                         function(patient){
@@ -172,8 +257,55 @@ angular.module("sampleApp")
                             addLog('Added patient with the id : '+ patientId)
                             appConfigSvc.setCurrentPatient(patient);
 
+                            //let patient = {resourceType:"Patient",name:[{text:"John Doe"}]}
+                            //this is a new approach that uses a single bundle...
+                            createSampleBundleSvc.makeSampleBundle(patient).then(
+                                function (bundle) {
+                                    console.log(JSON.stringify(bundle))
 
-                            if ($scope.input.createSamples) {
+                                    var url = appConfigSvc.getCurrentDataServerBase();
+                                    $scope.waiting = false;
+                                    let config = serverInteractionSvc.getServerConfig()
+
+                                    //perform validation
+                                    let validateUrl = appConfigSvc.getCurrentDataServerBase() + "Bundle/$validate"
+
+                                    $http.post(validateUrl,bundle,config).then(
+                                        function (data) {
+                                           $scope.validationResult = data.data
+                                        },
+                                        function(err){
+                                            $scope.validationResult = data.data
+
+                                        })
+
+                                    /* TEMP - this is the save,*/
+                                    $http.post(url,bundle,config).then(
+                                        function (data) {
+                                            alert("Data saved")
+                                        },
+                                        function(err){
+                                            alert(angular.toJson(err))
+
+                                        }
+                                    ).finally(
+                                        function(){
+                                            $scope.waiting = false
+                                            $scope.allowClose = true;
+                                        }
+
+                                    )
+
+
+
+
+                                },function (err) {
+                                    console.log(err)
+                                }
+                            )
+
+
+                            if ( false && $scope.input.createSamples) {
                                 addLog('Checking that the required reference resources exist');
                                 supportSvc.checkReferenceResources().then (
                                     function() {
@@ -307,8 +439,8 @@ angular.module("sampleApp")
 
                             } else {
 
-                                $scope.waiting = false;
-                                $scope.allowClose = true;
+                              //  $scope.waiting = false;
+                              //  $scope.allowClose = true;
                             }
 
 

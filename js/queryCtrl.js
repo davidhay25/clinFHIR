@@ -134,9 +134,16 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
 
         $scope.selectedOpDefUrl = url;
         let qry = $scope.server.url + "OperationDefinition?url=" + url;
-        $http.get(qry).then(
+
+        let config = {}
+        if ($scope.server.apiKey) {
+            config.headers = config.headers || {}
+            config.headers['x-api-key'] = $scope.server.apiKey
+        }
+
+        $http.get(qry,config).then(
             function (data) {
-                if (data.data.entry.length >= 0) {
+                if (data.data.entry && data.data.entry.length >= 0) {
                     $scope.operationDefinition = data.data.entry[0].resource;
 
 
@@ -233,6 +240,8 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
     //------------- determine the server when launched-----------------------
     // the most recently selected server
     $scope.server = $localStorage.serverQueryServer || appConfigSvc.getCurrentDataServer();
+
+
 
     $scope.input.server = $scope.server;    //set the drop down
     $scope.input.serverType = "known"
@@ -403,8 +412,10 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
     let executeQuery = function(qry,type,executeFromHistory) {
        // $scope.buildQuery();        //always make sure the query is correct;
         delete $scope.response;
+        //delete $scope.sortedResponse;
         delete $scope.err;
         delete $scope.result.selectedEntry;
+        delete $scope.validateResult
 
         delete $scope.xmlResource;
         delete $scope.selectedResource;
@@ -416,6 +427,11 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
         if (accessToken) {
             config.headers.Authorization = "Bearer " + accessToken;
         }
+
+        if ($scope.server.apiKey) {
+            config.headers['x-api-key'] = $scope.server.apiKey
+        }
+
 
         $scope.query = qry;
         $scope.waiting = true;
@@ -502,9 +518,39 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
 
     };
 
+
+    $scope.validate = function (resource) {
+        delete $scope.validateResult
+        let config = {}, qry = {}
+        if ($scope.input.useHapi) {
+            qry = "http://hapi.fhir.org/baseR4/" + resource.resourceType + "/$validate"
+        } else {
+            if ($scope.server.apiKey) {
+                config.headers = config.headers || {}
+                config.headers['x-api-key'] = $scope.server.apiKey
+            }
+            qry = $scope.server.url + resource.resourceType + "/$validate"
+        }
+        /* tmp
+
+*/
+        //let qry = $scope.server.url + resource.resourceType + "/$validate"
+
+
+//console.log(qry)
+        $http.post(qry,resource,config).then(
+            function (data) {
+                $scope.validateResult = data.data
+            },function (err) {
+                $scope.validateResult = err.data
+            }
+        )
+
+    }
+
     //one of the versions of a resource with history is shown
     $scope.selectVersion = function(resource) {
-        showResource(resource)
+        $scope.showResource(resource)
     }
 
     //select an entry from the query result
@@ -514,12 +560,13 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
         delete $scope.xmlResource;
         delete $scope.selectedResource;
         delete $scope.selectedResourceVersions;
+        delete $scope.validateResult
 
         if (! entry) {
             return
         }
 
-        showResource(entry.resource);
+        $scope.showResource(entry.resource);
 
         //get the versions = todo - check if supported in CS
         let qryVersion = $scope.server.url + entry.resource.resourceType + "/" + entry.resource.id + "/_history"
@@ -527,6 +574,12 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
         if ($scope.input.accessToken) {
             config.headers = {Authorization:"Bearer " + $scope.input.accessToken}
         }
+
+        if ($scope.server.apiKey) {
+            config.headers = config.headers || {}
+            config.headers['x-api-key'] = $scope.server.apiKey
+        }
+
         $http.get(qryVersion,config).then(
             function (data) {
                 //only if tthere is more than one version
@@ -538,65 +591,33 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
                 console.log(err)
             }
         )
-/*
-        return
-
-        //$scope.result.selectedEntry = entry;
-        $scope.selectedResource = entry.resource;
-
-        var r = angular.copy(entry.resource);
-        var newResource =  angular.fromJson(angular.toJson(r));
-
-        var treeData = resourceCreatorSvc.buildResourceTree(newResource);
-
-        //retrieve the XML version - todo - utilize the lantana library/\...
-        let qry = $scope.server.url + r.resourceType + "/" + r.id + "?_format=xml&_pretty=true"
-      //  let config = {};
-        if ($scope.input.accessToken) {
-            config.headers = {Authorization:"Bearer " + $scope.input.accessToken}
-        }
-
-        $http.get(qry,config).then(
-            function (data) {
-                $scope.xmlResource = data.data;
-            },
-            function (err) {
-                $scope.xmlResource = "<error>Sorry, Unable to load Xml version</error>";
-            }
-        )
-
-        //get the versions = todo - check if supported in CS
-        let qryVersion = $scope.server.url + r.resourceType + "/" + r.id + "/_history"
-        $http.get(qryVersion,config).then(
-            function (data) {
-                //only if tthere is more than one version
-                if (data.data && data.data.entry &&  data.data.entry.length > 1) {
-                    $scope.selectedResourceVersions = data.data;
-                }
-            },
-            function (err) {
-               console.log(err)
-            }
-        )
-
-        //show the tree of this version
-        $('#queryResourceTree').jstree('destroy');
-        $('#queryResourceTree').jstree(
-            {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
-        )
-        */
 
     };
 
     //display the details of a single resource
-    showResource = function (resource) {
+    $scope.showResource = function (resource) {
+
+        if (! resource) {
+            return
+        }
+
         $scope.selectedResource = resource;
+
+        //Otherwise the json shown in the resource graph is the last one chosen - looks weird
+        $scope.input.selectedResourceFromSingleGraph = resource
 
         var r = angular.copy(resource);
         var newResource =  angular.fromJson(angular.toJson(r));
 
-        var treeData = resourceCreatorSvc.buildResourceTree(newResource);
+        //draw the graph
+        getGraphOneResource(r)
 
+        //get the fsh
+        getFSH(r)
+
+
+        //show the tree
+        var treeData = resourceCreatorSvc.buildResourceTree(newResource);
         //convert json to  XML on the server - utilizes the lantana library...
         let qry = "transformXML";
         $http.post(qry,resource).then(
@@ -615,6 +636,91 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
         )
     }
 
+
+    let getFSH = function(resource){
+        delete $scope.selectedFshFromSingleGraph
+        $http.post("./fsh/transformJsonToFsh",resource).then(
+            function(data) {
+                //console.log(data.data)
+                try {
+                    let response = data.data
+                    $scope.selectedFshFromSingleGraph = response.fsh.instances[resource.id]
+
+                    if (response.fsh.aliases) {
+                        $scope.selectedFshFromSingleGraph = response.fsh.aliases + "\n\n" +$scope.selectedFshFromSingleGraph
+                    }
+
+
+                } catch (ex) {
+                    $scope.selectedFshFromSingleGraph = "Unable to transform into FSH"
+                }
+
+            }, function(err) {
+                console.log("FSH Transform error")
+
+            }
+        )
+    }
+
+    //create the graph of a single resource with connections...
+    let getGraphOneResource = function(resource){
+        delete $scope.tooLargeForGraphSingle
+        if (! resource) {
+            return
+        }
+
+        console.log("Graphing " + resource.resourceType + "/" + resource.id)
+
+        let options = {bundle:$scope.response.data,hashErrors:{},serverRoot:$scope.server.url}
+        options.centralResourceId = $scope.server.url +  resource.resourceType + "/" + resource.id
+        options.showInRef = true
+        options.showOutRef = true
+        options.recursiveRef = true
+        options.hidePatient = $scope.input.showHidePatient;
+
+        let vo = v2ToFhirSvc.makeGraph(options);
+        //let vo = v2ToFhirSvc.makeGraph($scope.fhir,$scope.hashErrors,$scope.serverRoot,false,id)
+        //console.log(vo);
+
+        if (vo.nodes.length > 100) {
+            $scope.tooLargeForGraphSingle = true
+            return
+        }
+
+        let container = document.getElementById('singleResourceGraph');
+        let graphOptions = {
+            physics: {
+                enabled: true,
+                barnesHut: {
+                    gravitationalConstant: -10000,
+                }
+            }
+        };
+        $scope.singleResourceGraph = new vis.Network(container, vo.graphData, graphOptions);
+
+        $scope.singleResourceGraph.on("click", function (obj) {
+
+            delete $scope.input.selectedResourceFromSingleGraph
+            var nodeId = obj.nodes[0];  //get the first node
+            var node = vo.graphData.nodes.get(nodeId);
+            $scope.input.selectedResourceFromSingleGraph = node.resource;
+
+            $scope.$digest();
+        });
+
+
+    };
+
+    //fits the graph of a single resource
+    $scope.fitSingleResourceGraph = function(){
+        $timeout(function(){
+            if ($scope.singleResourceGraph) {
+                $scope.singleResourceGraph.fit();
+            }
+        },1000)
+    };
+
+    //fits the entire graph (if shown - must be < 100 nodes)
     $scope.fitGraph = function(){
         $timeout(function(){
             if ($scope.chart) {
@@ -624,18 +730,42 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
     };
 
     function drawGraph(options) {
+        delete $scope.tooLargeForGraph
+        let start = new Date()
         let vo = v2ToFhirSvc.makeGraph(options)
+
+        if (vo.nodes.length > 100) {
+            $scope.tooLargeForGraph = true
+            return
+        }
+
+        console.log("Time to make graph data ",moment().diff(start))
+        start = new Date()
 
         var container = document.getElementById('bundleGraph');
         var graphOptions = {
             physics: {
-                enabled: true,
+                enabled: true,  //big gratph take ages
                 barnesHut: {
                     gravitationalConstant: -10000,
+                },
+                stabilization : {
+                    iterations : 1000
                 }
+            },
+            layout: {
+                improvedLayout : false
             }
         };
+
+
+
         $scope.chart = new vis.Network(container, vo.graphData, graphOptions);
+
+        $scope.chart.on("stabilizationIterationsDone", function () {
+            console.log("Time to complete graph draw",moment().diff(start))
+        });
+
 
         $scope.chart.on("click", function (obj) {
 

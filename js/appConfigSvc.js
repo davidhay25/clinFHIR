@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2022-08-19';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2022-08-23a';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -136,31 +136,28 @@ angular.module("sampleApp")
         defaultConfig.terminologyServers.push({name:"Ontoserver",url:"https://ontoserver.csiro.au/stu3-latest/",version:3});
         defaultConfig.terminologyServers.push({name:"Ontoserver-PC",url:"https://primarycare.ontoserver.csiro.au/fhir/",version:3});
 
-        defaultConfig.allKnownServers.push({name:'InterSystems',version:4,
+        defaultConfig.allKnownServers.push({name:'InterSystems IRIS R4',version:4,
             url:"https://fhir.s37vcloskatg.static-test-account.isccloud.io/",
             apiKey:"sJdH2KXzI14lWunvyxTQhEDQLTf54z396LtIyVya",
             everythingOperation:true});
 
 
-        defaultConfig.allKnownServers.push({name:"Grahames STU2 server",url:"http://test.fhir.org/r2/",version:2,everythingOperation:true,isTerminology:true});
-        defaultConfig.allKnownServers.push({name:"Grahames STU3 server",url:"http://test.fhir.org/r3/",version:3,everythingOperation:true,isTerminology:true});
+        //defaultConfig.allKnownServers.push({name:"Grahames STU2 server",url:"http://test.fhir.org/r2/",version:2,everythingOperation:true,isTerminology:true});
+        //defaultConfig.allKnownServers.push({name:"Grahames STU3 server",url:"http://test.fhir.org/r3/",version:3,everythingOperation:true,isTerminology:true});
         defaultConfig.allKnownServers.push({name:"Grahames R4 server",url:"http://test.fhir.org/r4/",version:4,everythingOperation:true,isTerminology:true});
 
 
-        defaultConfig.allKnownServers.push({name:"Public HAPI STU2 server",url:"http://fhirtest.uhn.ca/baseDstu2/",version:2,everythingOperation:true});
-
-
-        defaultConfig.allKnownServers.push({name:"Public HAPI STU3 server",url:"http://fhirtest.uhn.ca/baseDstu3/",version:3,everythingOperation:true,isTerminology:true});
+        //defaultConfig.allKnownServers.push({name:"Public HAPI STU2 server",url:"http://fhirtest.uhn.ca/baseDstu2/",version:2,everythingOperation:true});
+        //defaultConfig.allKnownServers.push({name:"Public HAPI STU3 server",url:"http://fhirtest.uhn.ca/baseDstu3/",version:3,everythingOperation:true,isTerminology:true});
 
         defaultConfig.allKnownServers.push({name:"Public HAPI R4 server",url:"http://hapi.fhir.org/baseR4/",version:4,everythingOperation:true,isTerminology:true});
 
-        defaultConfig.allKnownServers.push({name:"Vonk STU3 server",url:"http://vonk.fire.ly/",version:3,everythingOperation:false});
+        //defaultConfig.allKnownServers.push({name:"Vonk STU3 server",url:"http://vonk.fire.ly/",version:3,everythingOperation:false});
         defaultConfig.allKnownServers.push({name:"Vonk R4 server",url:" https://vonk.fire.ly/R4/",version:4,everythingOperation:false});
-
-
-        defaultConfig.allKnownServers.push({name:"Telstra Health STU3 server",url:"http://sqlonfhir-stu3.azurewebsites.net/fhir/",version:3,everythingOperation:true});
+        //defaultConfig.allKnownServers.push({name:"Telstra Health STU3 server",url:"http://sqlonfhir-stu3.azurewebsites.net/fhir/",version:3,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"Telstra Health R4 server",url:"http://sqlonfhir-stu3.azurewebsites.net/fhir/",version:4,everythingOperation:true});
-/*
+
+        /*
         defaultConfig.allKnownServers.push({name:"Local HAPI STU2 server",url:"http://localhost:8079/baseDstu2/",version:2,everythingOperation:true});
         defaultConfig.allKnownServers.push({name:"Local HAPI STU3 server",url:"http://localhost:8080/baseDstu3/",version:3,everythingOperation:true,isTerminology:true});
         defaultConfig.allKnownServers.push({name:"HL7 New Zealand STU2 server",url:"http://fhir.hl7.org.nz/baseDstu2/",version:2});
@@ -169,28 +166,29 @@ angular.module("sampleApp")
      //   defaultConfig.allKnownServers.push({name:'fhir.org',version:3,url:"http://tx.fhir.org/r3/",isTerminology:true});
         //defaultConfig.allKnownServers.push({name:'Ontoserver STU3',version:3,url:"http://52.63.0.196:8080/fhir/",isTerminology:true});
        // defaultConfig.allKnownServers.push({name:'MiHIN STU2',version:2,url:"http://52.72.172.54:8080/fhir/baseDstu2/"});
-        defaultConfig.allKnownServers.push({name:'Simplifier R3',version:3,url:"https://stu3.simplifier.net/open/"});
-        defaultConfig.allKnownServers.push({name:'Aegis WildFHIR STU3',version:3,url:" http://wildfhir.aegis.net/fhir3-0-1/"});
+
+        //defaultConfig.allKnownServers.push({name:'Simplifier R3',version:3,url:"https://stu3.simplifier.net/open/"});
+        //defaultConfig.allKnownServers.push({name:'Aegis WildFHIR STU3',version:3,url:" http://wildfhir.aegis.net/fhir3-0-1/"});
 
 
         //defaultConfig.allKnownServers.push({name:'clinFHIR R2' ,version:2,url:"http://snapp.clinfhir.com:8080/baseDstu2/"});
-        defaultConfig.allKnownServers.push({name:'clinFHIR R3',version:3,everythingOperation:true,url:"http://snapp.clinfhir.com:8081/baseDstu3/"});
+        //defaultConfig.allKnownServers.push({name:'clinFHIR R3',version:3,everythingOperation:true,url:"http://snapp.clinfhir.com:8081/baseDstu3/"});
 
 
-        defaultConfig.allKnownServers.push({name:'GoFHIR',version:3,url:"https://syntheticmass.mitre.org/fhir/",everythingOperation:true});
+        //defaultConfig.allKnownServers.push({name:'GoFHIR',version:3,url:"https://syntheticmass.mitre.org/fhir/",everythingOperation:true});
 
-        defaultConfig.allKnownServers.push({name:'HSPC-14',version:3,url:"https://api3.hspconsortium.org/fhirconnect14/open/",everythingOperation:true});
+        //defaultConfig.allKnownServers.push({name:'HSPC-14',version:3,url:"https://api3.hspconsortium.org/fhirconnect14/open/",everythingOperation:true});
         //defaultConfig.allKnownServers.push({name:'HSPC Careplan',version:3,url:"https://api-stu3.hspconsortium.org/careplantest/open/",everythingOperation:true});
 
         defaultConfig.allKnownServers.push({name:'TermiNZ R4',version:4,url:"https://terminz.azurewebsites.net/fhir/"});
         //defaultConfig.allKnownServers.push({name:'Patients First R3',version:3,url:"http://its.patientsfirst.org.nz/RestService.svc/Terminz/"});
-        defaultConfig.allKnownServers.push({name:'HSPC Synthea',version:3,url:"https://api3.hspconsortium.org/HSPCplusSynthea/open/"});
+        //defaultConfig.allKnownServers.push({name:'HSPC Synthea',version:3,url:"https://api3.hspconsortium.org/HSPCplusSynthea/open/"});
 
        // defaultConfig.allKnownServers.push({name:'NHS-UK STU-2',version:2,url:"https://fhir.nhs.uk/"});
        // defaultConfig.allKnownServers.push({name:'HL7-UK STU-2',version:2,url:"https://fhir-test.hl7.org.uk/"});
 
-        defaultConfig.allKnownServers.push({name:'FHIR Registry',version:3,url:"https://registry-api.fhir.org/open/",everythingOperation:true});
-        defaultConfig.allKnownServers.push({name:"OntoserverR3 (terminology)",url:"https://ontoserver.csiro.au/stu3-latest/",version:3,everythingOperation:true,isTerminology:true});
+        //defaultConfig.allKnownServers.push({name:'FHIR Registry',version:3,url:"https://registry-api.fhir.org/open/",everythingOperation:true});
+        //defaultConfig.allKnownServers.push({name:"OntoserverR3 (terminology)",url:"https://ontoserver.csiro.au/stu3-latest/",version:3,everythingOperation:true,isTerminology:true});
         defaultConfig.allKnownServers.push({name:'OntoserverR4 (terminology)',version:4,url:"https://r4.ontoserver.csiro.au/fhir/",isTerminology:true});
 
         //defaultConfig.allKnownServers.push({name:'hofSmile',version:3,url:"https://hof.smilecdr.com:8000/",smart:true});
@@ -231,11 +229,10 @@ angular.module("sampleApp")
             setToDefault : function(){
 
                 this.setServerType('terminology',"https://r4.ontoserver.csiro.au/fhir/");
-                //this.setServerType('data',"http://hapi.fhir.org/baseR4/");
-                this.setServerType('data',"https://fhir.s37vcloskatg.static-test-account.isccloud.io/");
 
-
-
+                this.setServerType('data',"http://hapi.fhir.org/baseR4/");
+                //todo - once testing is complete...
+                //this.setServerType('data',"https://fhir.s37vcloskatg.static-test-account.isccloud.io/");
                 this.setServerType('conformance',"http://hapi.fhir.org/baseR4/");
 
 

@@ -535,7 +535,10 @@ angular.module("sampleApp")
                         let err = {ref:ref}
                         missingReferences[ref.targ].push(err)
 */
-                        console.log('>>>>>>> error Node Id '+ref.targ + ' is not present')
+                        try {
+                            console.log('>>>>>>> error Node Id '+ref.targ + ' is not present from ' + ref.src.resource.resourceType + " "+ ref.src.resource.id)
+                        } catch (ex) {}
+
                     }
                 });
 

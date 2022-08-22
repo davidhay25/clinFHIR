@@ -173,6 +173,15 @@
             </form>
 
 
+            <br/>
+            <div class="alert alert-success" ng-show="saveMessage">
+                {{saveMessage}}
+            </div>
+
+
+            <pre ng-show = "validationResult">{{validationResult | json}}</pre>
+
+
         </div>
 
         <div class="row" style="margin-top: 20px">
