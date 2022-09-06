@@ -330,8 +330,6 @@ angular.module("sampleApp")
                 return ref;
             }
 
-
-
         }
     })
     .filter('cleanTextDiv',function(){

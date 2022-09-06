@@ -3,9 +3,9 @@ angular.module("sampleApp")
     .controller('resourceViewerCtrl',
         function ($scope,supportSvc,appConfigSvc,resourceCreatorSvc,resourceSvc,$sce,sessionSvc,
                   $uibModal, $timeout,GetDataFromServer,modalService,ResourceUtilsSvc,builderSvc,$window,$http,$location,
-                  $firebaseObject,Utilities,createSampleBundleSvc, serverInteractionSvc) {
+                  $firebaseObject,Utilities,terminologySvc) {
 
-
+//,createSampleBundleSvc, serverInteractionSvc
 /*
             //testing sample creator
             let patient = {resourceType:"Patient",name:[{text:"John Doe"}]}
@@ -152,7 +152,7 @@ angular.module("sampleApp")
             //$scope.oauthAccessToken;    //if SMART, this will be the access token...
 
             //---------- SMART stuff ------ move to a common service eventually..
-            $scope.smartLogin = function() {
+            $scope.smartLoginDEP = function() {
                 $http.get('smartAuth/'+appConfigSvc.getCurrentDataServer().name).then(
                     function(data) {
                         $window.location.href = data.data.authUrl;
@@ -177,7 +177,7 @@ angular.module("sampleApp")
 
             //select graph options
 
-            $scope.selectScenario = function(){
+            $scope.selectScenarioDEP = function(){
                 let url = appConfigSvc.getCurrentDataServer().url + "DocumentReference?type=51899-3&_include=DocumentReference:subject";
 
                 //only get public scenarios
@@ -300,7 +300,7 @@ angular.module("sampleApp")
                 renderPatientDetails($scope.allResources,$scope.patientShown)
             };
 
-            $scope.showGQL = appConfigSvc.getCurrentDataServer().name == 'Grahames STU3 server';
+            $scope.showGQLDEP = appConfigSvc.getCurrentDataServer().name == 'Grahames STU3 server';
 
 
             $scope.displayServers = "<div>Data: " + appConfigSvc.getCurrentDataServer().name + "</div>"
@@ -315,7 +315,7 @@ angular.module("sampleApp")
 
 
             //when a document is selected in from the list of documents...
-            $scope.selectDocument = function(docRef) {
+            $scope.selectDocumentDEP = function(docRef) {
 
                 $scope.documentReference = docRef;
                 delete $scope.docAttachment;
@@ -459,7 +459,7 @@ angular.module("sampleApp")
 
             };
 
-            $scope.selectResourceInDocTree = function(resource) {
+            $scope.selectResourceInDocTreeDEP = function(resource) {
                 $scope.docTreeResource = resource;
             };
 
@@ -476,63 +476,8 @@ angular.module("sampleApp")
             };
 
 
-            //generate the document graph from the bundle
-            var generateDocGraphDEP = function(bundle) {
-
-                var allResources = [];
-
-                //assemble a list of all the resources in the bundle...
-                bundle.entry.forEach(function (entry) {
-                    var resource = entry.resource;
-                    //if the resource has no id, then set thu id to the full url (hopefully a urn) as that is what the references to it will use
-                    if (! resource.id) {
-                        resource.id = entry.fullUrl;
-                    }
-                    allResources.push(resource);
-
-                });
-
-                var graphData = resourceCreatorSvc.createGraphOfInstances(allResources);
-
-                $scope.docQuality = builderSvc.documentQualityReport(graphData.rawData.nodes,graphData.rawData.edges)
-
-                var container = document.getElementById('documentGraph');
-                $scope.docGraph = new vis.Network(container, graphData, {});
 
 
-                $scope.docGraph.on("click", function (obj) {
-                    var nodeId = obj.nodes[0];  //get the first node
-                    var selectedGraphNode = graphData.nodes.get(nodeId);
-
-                    console.log(selectedGraphNode)
-
-                    delete $scope.graphDocResource
-
-                    $scope.graphDocResource = selectedGraphNode.resource;
-
-                    $scope.$digest();
-                });
-
-
-
-            }
-
-
-            //assuming that this is a fhir document - generate the document views - html & tree
-            var getDocHtmlDEP = function(bundle) {
-
-                var comp = _.find(bundle.entry,function(o){
-                    return o.resource.resourceType=='Composition';
-                });
-
-                if (comp) {
-                    return(builderSvc.makeDocumentText(comp.resource,bundle))
-                }
-
-                //
-
-
-            };
 
             //==== for fhirpath ===
 
@@ -728,7 +673,8 @@ angular.module("sampleApp")
                             $scope.documentReferenceList = data.DocumentReference.entry;
                         }
 
-
+                        //$scope.terminologySummary = terminologySvc.makeTerminologySummary(data)
+                        $scope.lstCodedResources = terminologySvc.makeTerminologySummary(data)
 
 
                         //need to make sure the patient resource is in the allPatients object (set in renderPatientDetails)
