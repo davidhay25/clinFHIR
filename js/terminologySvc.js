@@ -7,15 +7,17 @@ angular.module("sampleApp").service('terminologySvc', function() {
             console.log(hash)
             let hashBySystem = {}           //hash of coded elements by system
             let lstCodedResources = []
+            let hashAllSystems = {}         //all systems from all resources
+
             Object.keys(hash).forEach(function (type) {
                 let ar = hash[type].entry
                 if (ar) {
                     ar.forEach(function (entry) {
                         let resource = entry.resource
 
-                        let arCodedElements = []
+                        let arCodedElements = []   //all the coded elements in this resource
 
-                        console.log(resource)
+                       // console.log(resource)
                         //look for coded elements off the root
                         Object.keys(resource).forEach(function (key) {
                             let element = resource[key]
@@ -28,6 +30,7 @@ angular.module("sampleApp").service('terminologySvc', function() {
                                             el.coding.forEach(function (concept) {
                                                 concept.path = key
                                                 arCodedElements.push(concept)
+                                                hashAllSystems[concept.system] = true
                                             })
                                         } else {
                                             //todo - look for child elements that may be coding..
@@ -39,6 +42,7 @@ angular.module("sampleApp").service('terminologySvc', function() {
                                         element.coding.forEach(function (concept) {
                                             concept.path = key
                                             arCodedElements.push(concept)
+                                            hashAllSystems[concept.system] = true
                                         })
 
                                     }
@@ -56,7 +60,11 @@ angular.module("sampleApp").service('terminologySvc', function() {
             })
 
             console.log(hashBySystem)
-            return lstCodedResources
+            let arAllSystems = ["All"]
+            Object.keys(hashAllSystems).forEach(function (key) {
+                arAllSystems.push(key)
+            })
+            return {codedResources:lstCodedResources,arAllSystems:arAllSystems}
             //return hashBySystem
 
 

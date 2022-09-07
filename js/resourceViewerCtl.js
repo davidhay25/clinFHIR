@@ -674,7 +674,9 @@ angular.module("sampleApp")
                         }
 
                         //$scope.terminologySummary = terminologySvc.makeTerminologySummary(data)
-                        $scope.lstCodedResources = terminologySvc.makeTerminologySummary(data)
+                        let vo = terminologySvc.makeTerminologySummary(data)
+                        $scope.lstCodedResources = vo.codedResources;
+                        $scope.input.arAllSystems = vo.arAllSystems       //all systems found
 
 
                         //need to make sure the patient resource is in the allPatients object (set in renderPatientDetails)

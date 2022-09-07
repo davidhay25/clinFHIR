@@ -12,13 +12,13 @@
     },
     "severity" : {
       "coding" : [
-        {"code": "6736007","system":"http://snomed.info/ct","display":"mild to moderate"}
+        {"code": "6736007","system":"http://snomed.info/sct","display":"mild to moderate"}
       ],
       "text" : "mild to moderate"
     },
     "code" : {
       "coding" : [
-        {"code": "195917001","system":"http://snomed.info/ct","display":"asthma"}
+        {"code": "195917001","system":"http://snomed.info/sct","display":"asthma"}
       ],
       "text" : "asthma"
     },
@@ -43,13 +43,13 @@
     },
     "severity" : {
       "coding" : [
-        {"code": "6736007","system":"http://snomed.info/ct","display":"moderate"}
+        {"code": "6736007","system":"http://snomed.info/sct","display":"moderate"}
       ],
       "text" : "moderate"
     },
     "code" : {
       "coding" : [
-        {"code": "73211009","system":"http://snomed.info/ct","display":"diabetes"}
+        {"code": "73211009","system":"http://snomed.info/sct","display":"diabetes"}
       ],
       "text" : "diabetes"
     },
@@ -75,13 +75,13 @@
     },
     "severity" : {
       "coding" : [
-        {"code": "255604002","system":"http://snomed.info/ct","display":"mild"}
+        {"code": "255604002","system":"http://snomed.info/sct","display":"mild"}
       ],
       "text" : "Mild"
     },
     "code" : {
       "coding" : [
-        {"code": "38341003","system":"http://snomed.info/ct","display":"hypertension"}
+        {"code": "38341003","system":"http://snomed.info/sct","display":"hypertension"}
       ],
       "text" : "hypertension"
     },
@@ -107,13 +107,13 @@
   },
   "severity" : {
     "coding" : [
-      {"code": "6736007","system":"http://snomed.info/ct","display":"moderate"}
+      {"code": "6736007","system":"http://snomed.info/sct","display":"moderate"}
     ],
     "text" : "Moderate"
   },
   "code" : {
     "coding" : [
-      {"code": "35489007","system":"http://snomed.info/ct","display":"depression"}
+      {"code": "35489007","system":"http://snomed.info/sct","display":"depression"}
     ],
     "text" : "depression"
   },
@@ -139,13 +139,13 @@
     },
     "severity" : {
       "coding" : [
-        {"code": "6736007","system":"http://snomed.info/ct","display":"moderate"}
+        {"code": "6736007","system":"http://snomed.info/sct","display":"moderate"}
       ],
       "text" : "moderate"
     },
     "code" : {
       "coding" : [
-        {"code": "247389009","system":"http://snomed.info/ct","display":"neuropathic pain"}
+        {"code": "247389009","system":"http://snomed.info/sct","display":"neuropathic pain"}
       ],
       "text" : "neuropathic pain"
     },
@@ -171,19 +171,19 @@
     },
     "severity" : {
       "coding" : [
-        {"code": "6736007","system":"http://snomed.info/ct","display":"moderate"}
+        {"code": "6736007","system":"http://snomed.info/sct","display":"moderate"}
       ],
       "text" : "Moderate"
     },
     "code" : {
       "coding" : [
-        {"code": "69896004","system":"http://snomed.info/ct","display":"rheumatoid arthritis"}
+        {"code": "69896004","system":"http://snomed.info/sct","display":"rheumatoid arthritis"}
       ],
       "text" : "rheumatoid arthritis - both hands"
     },
     "bodySite" : [{
       "coding" : [
-        {"code": "12861001","system":"http://snomed.info/ct","display":"both hands"}
+        {"code": "12861001","system":"http://snomed.info/sct","display":"both hands"}
       ],
       "text" : "both hands"
     }],
@@ -193,7 +193,7 @@
           "coding": [
             {
               "code": "57676002",
-              "system": "http://snomed.info/ct",
+              "system": "http://snomed.info/sct",
               "display": "Painful Joint"
             }
           ],
@@ -224,19 +224,19 @@
     },
     "severity" : {
       "coding" : [
-        {"code": "6736007","system":"http://snomed.info/ct","display":"mild to moderate"}
+        {"code": "6736007","system":"http://snomed.info/sct","display":"mild to moderate"}
       ],
       "text" : "Diagnosis"
     },
     "code" : {
       "coding" : [
-        {"code": "69896004","system":"http://snomed.info/ct","display":"rheumatoid arthritis"}
+        {"code": "69896004","system":"http://snomed.info/sct","display":"rheumatoid arthritis"}
       ],
       "text" : "rheumatoid arthritis - left elbow"
     },
     "Site" : [{
       "coding" : [
-        {"code": "1927002","system":"http://snomed.info/ct","display":"left elbow"}
+        {"code": "1927002","system":"http://snomed.info/sct","display":"left elbow"}
       ],
       "text" : "left elbow"
     }],
@@ -246,7 +246,7 @@
           "coding": [
             {
               "code": "57676002",
-              "system": "http://snomed.info/ct",
+              "system": "http://snomed.info/sct",
               "display": "Painful Joint"
             }
           ],
@@ -277,13 +277,13 @@
     },
     "severity" : {
       "coding" : [
-        {"code": "6736007","system":"http://snomed.info/ct","display":"moderate"}
+        {"code": "6736007","system":"http://snomed.info/sct","display":"moderate"}
       ],
       "text" : "Moderate"
     },
     "code" : {
       "coding" : [
-        {"code": "235595009","system":"http://snomed.info/ct","display":"GERD"}
+        {"code": "235595009","system":"http://snomed.info/sct","display":"GERD"}
       ],
       "text" : "GERD"
     },
@@ -309,13 +309,13 @@
     },
     "severity" : {
       "coding" : [
-        {"code": "6736007","system":"http://snomed.info/ct","display":"moderate"}
+        {"code": "6736007","system":"http://snomed.info/sct","display":"moderate"}
       ],
       "text" : "Moderate"
     },
     "code" : {
       "coding" : [
-        {"code": "13644009","system":"http://snomed.info/ct","display":"high cholesterol"}
+        {"code": "13644009","system":"http://snomed.info/sct","display":"high cholesterol"}
       ],
       "text" : "high cholesterol"
     },
@@ -341,13 +341,13 @@
     },
     "severity" : {
       "coding" : [
-        {"code": "24484000","system":"http://snomed.info/ct","display":"severe"}
+        {"code": "24484000","system":"http://snomed.info/sct","display":"severe"}
       ],
       "text" : "severe"
     },
     "code" : {
       "coding" : [
-        {"code": "414941998","system":"http://snomed.info/ct","display":"onychomycosis"}
+        {"code": "414941998","system":"http://snomed.info/sct","display":"onychomycosis"}
       ],
       "text" : "onychomycosis"
     },
@@ -373,13 +373,13 @@
     },
     "severity" : {
       "coding" : [
-        {"code": "6736007","system":"http://snomed.info/ct","display":"moderate"}
+        {"code": "6736007","system":"http://snomed.info/sct","display":"moderate"}
       ],
       "text" : "Moderate"
     },
     "code" : {
       "coding" : [
-        {"code": "194818000","system":"http://snomed.info/ct","display":"angina"}
+        {"code": "194818000","system":"http://snomed.info/sct","display":"angina"}
       ],
       "text" : "angina"
     },
@@ -395,7 +395,7 @@
           "coding": [
             {
               "code": "29857009",
-              "system": "http://snomed.info/ct",
+              "system": "http://snomed.info/sct",
               "display": "Chest Pain"
             }
           ],

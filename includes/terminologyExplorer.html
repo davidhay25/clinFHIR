@@ -9,15 +9,31 @@
     </style>
 
 
+    <div class="row">
+        <div class="col-md-2">
+            Select terminology to view
+        </div>
+        <div class="col-md-4">
+            <select class="form-control" ng-model="input.selectedSystem"
+                    ng-change = "selectSystem()"
+                    ng-options="system for system in input.arAllSystems"></select>
+        </div>
+    </div>
+
+    <hr/>
 
     <div class="row">
         <div class="col-md-2">
             <div class="banner">Resources</div>
+
+
             <div class="termScroll">
                 <div class="list-group">
                     <div ng-class="{clickable:true, 'list-group-item':true,listItemSelected:item == selectedItem}"
                          ng-repeat="item in lstCodedResources"
+                         ng-show = "canShowItem(item)"
                          ng-click = "selectItem(item)" >
+
                         <div ng-bind-html="item.resource.text.div"></div>
                         {{item.resource.resourceType}}
                     </div>
@@ -29,13 +45,14 @@
         <div class="col-md-4">
             <div class="banner">Json</div>
             <div class="termScroll">
-                <pre>{{selectedItem.resource | json}}</pre>
+                <pre ng-show="selectedItem.resource">{{selectedItem.resource | json}}</pre>
             </div>
         </div>
 
         <div class="col-md-4">
             <div class="banner">Coded elements</div>
-            <div ng-repeat="v in selectedItem.coded">
+            <div ng-repeat="v in selectedItem.coded"
+                ng-show = "canShowConcept(v)">
                 <div><strong>Path: {{v.path}}</strong></div>
                 <div style="padding-left: 12px">System: {{v.system}}</div>
                 <div style="padding-left: 12px">Code: {{v.code}}</div>
@@ -43,8 +60,11 @@
                 <br/>
             </div>
 
-        </div>
+            <div ng-show = "(selectedItem.resource) && input.selectedSystem && (input.selectedSystem !== 'All')">
+                <em>Only showing the coded elements from the terminology with the url {{input.selectedSystem}}</em>
+            </div>
 
+        </div>
     </div>
 
 
