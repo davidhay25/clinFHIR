@@ -25,13 +25,13 @@
     }],
     "severity" : {
       "coding" : [
-        {"code": "6736007","system":"http://snomed.info/ct","display":"mild to moderate"}
+        {"code": "6736007","system":"http://snomed.info/sct","display":"mild to moderate"}
       ],
       "text" : "mild to moderate"
     },
     "code" : {
       "coding" : [
-        {"code": "195917001","system":"http://snomed.info/ct","display":"asthma"}
+        {"code": "195917001","system":"http://snomed.info/sct","display":"asthma"}
       ],
       "text" : "asthma"
     },
@@ -68,13 +68,13 @@
     }],
     "severity" : {
       "coding" : [
-        {"code": "6736007","system":"http://snomed.info/ct","display":"moderate"}
+        {"code": "6736007","system":"http://snomed.info/sct","display":"moderate"}
       ],
       "text" : "moderate"
     },
     "code" : {
       "coding" : [
-        {"code": "73211009","system":"http://snomed.info/ct","display":"diabetes"}
+        {"code": "73211009","system":"http://snomed.info/sct","display":"diabetes"}
       ],
       "text" : "diabetes"
     },
@@ -112,13 +112,13 @@
     }],
     "severity" : {
       "coding" : [
-        {"code": "255604002","system":"http://snomed.info/ct","display":"mild"}
+        {"code": "255604002","system":"http://snomed.info/sct","display":"mild"}
       ],
       "text" : "Mild"
     },
     "code" : {
       "coding" : [
-        {"code": "38341003","system":"http://snomed.info/ct","display":"hypertension"}
+        {"code": "38341003","system":"http://snomed.info/sct","display":"hypertension"}
       ],
       "text" : "hypertension"
     },
@@ -156,13 +156,13 @@
   }],
   "severity" : {
     "coding" : [
-      {"code": "6736007","system":"http://snomed.info/ct","display":"moderate"}
+      {"code": "6736007","system":"http://snomed.info/sct","display":"moderate"}
     ],
     "text" : "Moderate"
   },
   "code" : {
     "coding" : [
-      {"code": "35489007","system":"http://snomed.info/ct","display":"depression"}
+      {"code": "35489007","system":"http://snomed.info/sct","display":"depression"}
     ],
     "text" : "depression"
   },
@@ -200,13 +200,13 @@
     }],
     "severity" : {
       "coding" : [
-        {"code": "6736007","system":"http://snomed.info/ct","display":"moderate"}
+        {"code": "6736007","system":"http://snomed.info/sct","display":"moderate"}
       ],
       "text" : "moderate"
     },
     "code" : {
       "coding" : [
-        {"code": "247389009","system":"http://snomed.info/ct","display":"neuropathic pain"}
+        {"code": "247389009","system":"http://snomed.info/sct","display":"neuropathic pain"}
       ],
       "text" : "neuropathic pain"
     },
@@ -244,19 +244,19 @@
     }],
     "severity" : {
       "coding" : [
-        {"code": "6736007","system":"http://snomed.info/ct","display":"moderate"}
+        {"code": "6736007","system":"http://snomed.info/sct","display":"moderate"}
       ],
       "text" : "Moderate"
     },
     "code" : {
       "coding" : [
-        {"code": "69896004","system":"http://snomed.info/ct","display":"rheumatoid arthritis"}
+        {"code": "69896004","system":"http://snomed.info/sct","display":"rheumatoid arthritis"}
       ],
       "text" : "rheumatoid arthritis - both hands"
     },
     "bodySite" : [{
       "coding" : [
-        {"code": "12861001","system":"http://snomed.info/ct","display":"both hands"}
+        {"code": "12861001","system":"http://snomed.info/sct","display":"both hands"}
       ],
       "text" : "both hands"
     }],
@@ -266,7 +266,7 @@
           "coding": [
             {
               "code": "57676002",
-              "system": "http://snomed.info/ct",
+              "system": "http://snomed.info/sct",
               "display": "Painful Joint"
             }
           ],
@@ -309,19 +309,19 @@
     }],
     "severity" : {
       "coding" : [
-        {"code": "6736007","system":"http://snomed.info/ct","display":"mild to moderate"}
+        {"code": "6736007","system":"http://snomed.info/sct","display":"mild to moderate"}
       ],
       "text" : "Diagnosis"
     },
     "code" : {
       "coding" : [
-        {"code": "69896004","system":"http://snomed.info/ct","display":"rheumatoid arthritis"}
+        {"code": "69896004","system":"http://snomed.info/sct","display":"rheumatoid arthritis"}
       ],
       "text" : "rheumatoid arthritis - left elbow"
     },
     "bodySite" : [{
       "coding" : [
-        {"code": "1927002","system":"http://snomed.info/ct","display":"left elbow"}
+        {"code": "1927002","system":"http://snomed.info/sct","display":"left elbow"}
       ],
       "text" : "left elbow"
     }],
@@ -331,7 +331,7 @@
           "coding": [
             {
               "code": "57676002",
-              "system": "http://snomed.info/ct",
+              "system": "http://snomed.info/sct",
               "display": "Painful Joint"
             }
           ],
@@ -374,13 +374,13 @@
     }],
     "severity" : {
       "coding" : [
-        {"code": "6736007","system":"http://snomed.info/ct","display":"moderate"}
+        {"code": "6736007","system":"http://snomed.info/sct","display":"moderate"}
       ],
       "text" : "Moderate"
     },
     "code" : {
       "coding" : [
-        {"code": "235595009","system":"http://snomed.info/ct","display":"GERD"}
+        {"code": "235595009","system":"http://snomed.info/sct","display":"GERD"}
       ],
       "text" : "GERD"
     },
@@ -418,13 +418,13 @@
     }],
     "severity" : {
       "coding" : [
-        {"code": "6736007","system":"http://snomed.info/ct","display":"moderate"}
+        {"code": "6736007","system":"http://snomed.info/sct","display":"moderate"}
       ],
       "text" : "Moderate"
     },
     "code" : {
       "coding" : [
-        {"code": "13644009","system":"http://snomed.info/ct","display":"high cholesterol"}
+        {"code": "13644009","system":"http://snomed.info/sct","display":"high cholesterol"}
       ],
       "text" : "high cholesterol"
     },
@@ -462,13 +462,13 @@
     }],
     "severity" : {
       "coding" : [
-        {"code": "24484000","system":"http://snomed.info/ct","display":"severe"}
+        {"code": "24484000","system":"http://snomed.info/sct","display":"severe"}
       ],
       "text" : "severe"
     },
     "code" : {
       "coding" : [
-        {"code": "414941998","system":"http://snomed.info/ct","display":"onychomycosis"}
+        {"code": "414941998","system":"http://snomed.info/sct","display":"onychomycosis"}
       ],
       "text" : "onychomycosis"
     },
@@ -506,13 +506,13 @@
     }],
     "severity" : {
       "coding" : [
-        {"code": "6736007","system":"http://snomed.info/ct","display":"moderate"}
+        {"code": "6736007","system":"http://snomed.info/sct","display":"moderate"}
       ],
       "text" : "Moderate"
     },
     "code" : {
       "coding" : [
-        {"code": "194818000","system":"http://snomed.info/ct","display":"angina"}
+        {"code": "194818000","system":"http://snomed.info/sct","display":"angina"}
       ],
       "text" : "angina"
     },
@@ -528,7 +528,7 @@
           "coding": [
             {
               "code": "29857009",
-              "system": "http://snomed.info/ct",
+              "system": "http://snomed.info/sct",
               "display": "Chest Pain"
             }
           ],
@@ -689,7 +689,7 @@
     "text" :{"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>salbutamol inhaler 2 puffs every 4 hours as required</div>"},
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "320176004","system":"http://snomed.info/ct","display":" salbutamol 100micrograms/inhaler "}
+        {"code": "320176004","system":"http://snomed.info/sct","display":" salbutamol 100micrograms/inhaler "}
       ],
       "text" : "salbutamol 100micrograms/inhaler"
     },
@@ -698,7 +698,7 @@
 
     "reasonCode" : [{
       "coding" : [
-        {"code":"195967001","system":"http://snomed.info/ct","display":"asthma (disorder)"}
+        {"code":"195967001","system":"http://snomed.info/sct","display":"asthma (disorder)"}
       ],
       "text" : "asthma"
     }],
@@ -717,7 +717,7 @@
           {
             "doseQuantity": {
               "value": 2,
-              "system": "http://snomed.info/ct",
+              "system": "http://snomed.info/sct",
               "unit": "puffs",
               "code": "415215001"
             }
@@ -737,7 +737,7 @@
           "coding": [
             {
               "code": "370167008",
-              "system": "http://snomed.info/ct",
+              "system": "http://snomed.info/sct",
               "display": "aspirin 81mg e/c tablet "
             }
           ],
@@ -756,7 +756,7 @@
       "coding" : [
         {
           "code":"49436004",
-          "system":"http://snomed.info/ct",
+          "system":"http://snomed.info/sct",
           "display":"atrial fibrillation (disorder)"}],
       "text" : "atrial fibrillation"
     }],
@@ -773,7 +773,7 @@
         "doseAndRate" : [
           {"doseQuantity": {
             "value" : 2,
-            "system" : "http://snomed.info/ct","unit":"tablet","code" : "428673006"
+            "system" : "http://snomed.info/sct","unit":"tablet","code" : "428673006"
           }}
         ]
 
@@ -785,7 +785,7 @@
     "text" :{"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>beclomethasone 2 puffs twice daily</div>"},
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "376733004","system":"http://snomed.info/ct","display":"beclomethasone dipropionate 40mcg aerosol"}
+        {"code": "376733004","system":"http://snomed.info/sct","display":"beclomethasone dipropionate 40mcg aerosol"}
       ],
       "text" : "beclomethasone dipropionate 40mcg aerosol"
     },
@@ -793,7 +793,7 @@
 
     "reasonCode" : [{
       "coding" : [
-        {"code":"195967001","system":"http://snomed.info/ct","display":"asthma (disorder)"}
+        {"code":"195967001","system":"http://snomed.info/sct","display":"asthma (disorder)"}
       ],
       "text" : "asthma"
     }],
@@ -811,7 +811,7 @@
         "doseAndRate" : [
           {"doseQuantity": {
             "value" : 2,
-            "system" : "http://snomed.info/ct","unit":"puffs","code" : "415215001"
+            "system" : "http://snomed.info/sct","unit":"puffs","code" : "415215001"
           }}
         ]
 
@@ -823,7 +823,7 @@
     "text" :{"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>carvedilol 25 mg twice daily</div>"},
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "318632005","system":"http://snomed.info/ct","display":"carvedilol 25 mg"}
+        {"code": "318632005","system":"http://snomed.info/sct","display":"carvedilol 25 mg"}
       ],
       "text" : "carvedilol 25 mg"
     },
@@ -831,7 +831,7 @@
 
     "reasonCode" : [{
       "coding" : [
-        {"code":"38341003","system":"http://snomed.info/ct","display":"hypertension (disorder)"}
+        {"code":"38341003","system":"http://snomed.info/sct","display":"hypertension (disorder)"}
       ],
       "text" : "hypertension"
     }],
@@ -848,7 +848,7 @@
         "doseAndRate" : [
           {"doseQuantity": {
             "value" : 1,
-            "system" : "http://snomed.info/ct","unit":"tablet","code" : "428673006"
+            "system" : "http://snomed.info/sct","unit":"tablet","code" : "428673006"
           }}
         ]
 
@@ -860,7 +860,7 @@
     "text" :{"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>chlortalidone 15 mg once daily</div>"},
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "376321007","system":"http://snomed.info/ct","display":"chlortalidone 15 mg"}
+        {"code": "376321007","system":"http://snomed.info/sct","display":"chlortalidone 15 mg"}
       ],
       "text" : "chlortalidone 15 mg"
     },
@@ -868,7 +868,7 @@
 
     "reasonCode" : [{
       "coding" : [
-        {"code":"38341003","system":"http://snomed.info/ct","display":"hypertension (disorder)"}
+        {"code":"38341003","system":"http://snomed.info/sct","display":"hypertension (disorder)"}
       ],
       "text" : "hypertension"
     }],
@@ -885,7 +885,7 @@
         "doseAndRate" : [
           {"doseQuantity": {
             "value" : 1,
-            "system" : "http://snomed.info/ct","unit":"tablet","code" : "428673006"
+            "system" : "http://snomed.info/sct","unit":"tablet","code" : "428673006"
           }}
         ]
 
@@ -897,7 +897,7 @@
     "text" :{"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>citalopram 20 mg once daily</div>"},
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "321987003","system":"http://snomed.info/ct","display":"citalopram 20 mg"}
+        {"code": "321987003","system":"http://snomed.info/sct","display":"citalopram 20 mg"}
       ],
       "text" : "citalopram 20 mg"
     },
@@ -905,7 +905,7 @@
 
     "reasonCode" : [{
       "coding" : [
-        {"code":"35489007","system":"http://snomed.info/ct","display":"depression (disorder)"}
+        {"code":"35489007","system":"http://snomed.info/sct","display":"depression (disorder)"}
       ],
       "text" : "depression"
     }],
@@ -922,7 +922,7 @@
         "doseAndRate" : [
           {"doseQuantity": {
             "value" : 1,
-            "system" : "http://snomed.info/ct","unit":"tablet","code" : "428673006"
+            "system" : "http://snomed.info/sct","unit":"tablet","code" : "428673006"
           }}
         ]
 
@@ -934,7 +934,7 @@
     "text" :{"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>gabapentin 600mg twice daily</div>"},
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "323021008","system":"http://snomed.info/ct","display":"gabapentin 600mg"}
+        {"code": "323021008","system":"http://snomed.info/sct","display":"gabapentin 600mg"}
       ],
       "text" : "gabapentin 600mg"
     },
@@ -942,7 +942,7 @@
 
     "reasonCode" : [{
       "coding" : [
-        {"code":"247398009","system":"http://snomed.info/ct","display":"neuropathic pain (disorder)"}
+        {"code":"247398009","system":"http://snomed.info/sct","display":"neuropathic pain (disorder)"}
       ],
       "text" : "neuropathic pain"
     }],
@@ -959,7 +959,7 @@
         "doseAndRate" : [
           {"doseQuantity": {
             "value" : 1,
-            "system" : "http://snomed.info/ct","unit":"tablet","code" : "428673006"
+            "system" : "http://snomed.info/sct","unit":"tablet","code" : "428673006"
           }}
         ]
 
@@ -971,7 +971,7 @@
     "text" :{"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>insulin glargine 100units/mL 28 units nocte</div>"},
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "400847007","system":"http://snomed.info/ct","display":"insulin glargine 100units/mL injection"}
+        {"code": "400847007","system":"http://snomed.info/sct","display":"insulin glargine 100units/mL injection"}
       ],
       "text" : "insulin glargine 100units/mL injection"
     },
@@ -979,7 +979,7 @@
 
     "reasonCode" : [{
       "coding" : [
-        {"code":"73211009","system":"http://snomed.info/ct","display":"diabetes (disorder)"}
+        {"code":"73211009","system":"http://snomed.info/sct","display":"diabetes (disorder)"}
       ],
       "text" : "diabetes"
     }],
@@ -997,7 +997,7 @@
         "doseAndRate" : [
           {"doseQuantity": {
             "value" : 28,
-            "system" : "http://snomed.info/ct","unit":"unit dose","code" : "408102007"
+            "system" : "http://snomed.info/sct","unit":"unit dose","code" : "408102007"
           }}
         ]
 
@@ -1009,7 +1009,7 @@
     "text" :{"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>losartan 100mg + hydrochlorothiazide 12.5mg once daily</div>"},
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "444639002","system":"http://snomed.info/ct","display":"losartan 100mg + hydrochlorothiazide 12.5mg"}
+        {"code": "444639002","system":"http://snomed.info/sct","display":"losartan 100mg + hydrochlorothiazide 12.5mg"}
       ],
       "text" :  "losartan 100mg + hydrochlorothiazide 12.5mg"
     },
@@ -1017,7 +1017,7 @@
 
     "reasonCode" : [{
       "coding" : [
-        {"code":"38341003","system":"http://snomed.info/ct","display":"hypertension (disorder)"}
+        {"code":"38341003","system":"http://snomed.info/sct","display":"hypertension (disorder)"}
       ],
       "text" : "hypertension"
     }],
@@ -1034,7 +1034,7 @@
         "doseAndRate" : [
           {"doseQuantity": {
             "value" : 1,
-            "system" : "http://snomed.info/ct","unit":"tablet","code" : "428673006"
+            "system" : "http://snomed.info/sct","unit":"tablet","code" : "428673006"
           }}
         ]
 
@@ -1046,7 +1046,7 @@
     "text" :{"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>metformin 1000mg twice daily</div>"},
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "411533003","system":"http://snomed.info/ct","display":"metformin 1000mg"}
+        {"code": "411533003","system":"http://snomed.info/sct","display":"metformin 1000mg"}
       ],
       "text" : "metformin 1000mg"
     },
@@ -1054,7 +1054,7 @@
 
     "reasonCode" : [{
       "coding" : [
-        {"code":"73211009","system":"http://snomed.info/ct","display":"diabetes (disorder)"}
+        {"code":"73211009","system":"http://snomed.info/sct","display":"diabetes (disorder)"}
       ],
       "text" : "diabetes"
     }],
@@ -1071,7 +1071,7 @@
         "doseAndRate" : [
           { "doseQuantity": {
             "value" : 1,
-            "system" : "http://snomed.info/ct","unit":"tablet","code" : "428673006"
+            "system" : "http://snomed.info/sct","unit":"tablet","code" : "428673006"
           }}
         ]
 
@@ -1083,7 +1083,7 @@
     "text" :{"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>naproxen 500mg twice daily</div>"},
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "329839005","system":"http://snomed.info/ct","display":"naproxen 500mg e/c tablet"}
+        {"code": "329839005","system":"http://snomed.info/sct","display":"naproxen 500mg e/c tablet"}
       ],
       "text" : "naproxen 500mg e/c tablet"
     },
@@ -1091,7 +1091,7 @@
 
     "reasonCode" : [{
       "coding" : [
-        {"code":"69896004","system":"http://snomed.info/ct","display":"rheumatoid arthritis (disorder)"}
+        {"code":"69896004","system":"http://snomed.info/sct","display":"rheumatoid arthritis (disorder)"}
       ],
       "text" : "rheumatoid arthritis"
     }],
@@ -1108,7 +1108,7 @@
         "doseAndRate" : [
           {"doseQuantity": {
             "value" : 1,
-            "system" : "http://snomed.info/ct","unit":"tablet","code" : "428673006"
+            "system" : "http://snomed.info/sct","unit":"tablet","code" : "428673006"
           }}
         ]
 
@@ -1120,7 +1120,7 @@
     "text" :{"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>omeprazole 40mg daily</div>"},
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "407848004","system":"http://snomed.info/ct","display":"omeprazole 40mg e/c tablet"}
+        {"code": "407848004","system":"http://snomed.info/sct","display":"omeprazole 40mg e/c tablet"}
       ],
       "text" : "omeprazole 40mg e/c tablet "
     },
@@ -1128,7 +1128,7 @@
 
     "reasonCode" : [{
       "coding" : [
-        {"code":"235595009","system":"http://snomed.info/ct","display":"GERD (disorder)"}
+        {"code":"235595009","system":"http://snomed.info/sct","display":"GERD (disorder)"}
       ],
       "text" : "Gastro Oesophageal reflux"
     }],
@@ -1145,7 +1145,7 @@
         "doseAndRate" : [
           { "doseQuantity": {
             "value" : 1,
-            "system" : "http://snomed.info/ct","unit":"tablet","code" : "428673006"
+            "system" : "http://snomed.info/sct","unit":"tablet","code" : "428673006"
           }}
         ]
 
@@ -1157,7 +1157,7 @@
     "text" :{"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>prednisone 20mg 2 tabs/day</div>"},
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "325456002","system":"http://snomed.info/ct","display":"prednisone 20mg"}
+        {"code": "325456002","system":"http://snomed.info/sct","display":"prednisone 20mg"}
       ],
       "text" : "prednisone 20mg"
     },
@@ -1165,7 +1165,7 @@
 
     "reasonCode" : [{
       "coding" : [
-        {"code":"195967001","system":"http://snomed.info/ct","display":"asthma (disorder)"}
+        {"code":"195967001","system":"http://snomed.info/sct","display":"asthma (disorder)"}
       ],
       "text" : "asthma"
     }],
@@ -1183,7 +1183,7 @@
         "doseAndRate" : [
           {  "doseQuantity": {
             "value" : 2,
-            "system" : "http://snomed.info/ct","unit":"tablet","code" : "428673006"
+            "system" : "http://snomed.info/sct","unit":"tablet","code" : "428673006"
           }}
         ]
 
@@ -1195,7 +1195,7 @@
     "text" :{"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>simvastatin 40mg once daily</div>"},
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "429374003","system":"http://snomed.info/ct","display":"simvastatin 40mg"}
+        {"code": "429374003","system":"http://snomed.info/sct","display":"simvastatin 40mg"}
       ],
       "text" : "simvastatin 40mg"
     },
@@ -1203,7 +1203,7 @@
 
     "reasonCode" : [{
       "coding" : [
-        {"code":"13644009","system":"http://snomed.info/ct","display":"high cholesterol"}
+        {"code":"13644009","system":"http://snomed.info/sct","display":"high cholesterol"}
       ],
       "text" : "high cholesterol"
     }],
@@ -1221,7 +1221,7 @@
         "doseAndRate" : [
           {"doseQuantity": {
             "value" : 1,
-            "system" : "http://snomed.info/ct","unit":"tablet","code" : "428673006"
+            "system" : "http://snomed.info/sct","unit":"tablet","code" : "428673006"
           }}
         ]
 
@@ -1233,7 +1233,7 @@
     "text" :{"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>terbinafine 250mg once daily</div>"},
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "324718007","system":"http://snomed.info/ct","display":"terbinafine 250mg"}
+        {"code": "324718007","system":"http://snomed.info/sct","display":"terbinafine 250mg"}
       ],
       "text" : "terbinafine 250mg"
     },
@@ -1241,7 +1241,7 @@
 
     "reasonCode" :[ {
       "coding" : [
-        {"code":"414941008","system":"http://snomed.info/ct","display":"onychomycosis"}
+        {"code":"414941008","system":"http://snomed.info/sct","display":"onychomycosis"}
       ],
       "text" : "onychomycosis"
     }],
@@ -1259,7 +1259,7 @@
         "doseAndRate" : [
           {"doseQuantity": {
             "value" : 1,
-            "system" : "http://snomed.info/ct","unit":"tablet","code" : "428673006"
+            "system" : "http://snomed.info/sct","unit":"tablet","code" : "428673006"
           }}
         ]
 
@@ -1271,7 +1271,7 @@
     "text" :{"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>zolpidem 5mg sublingual tablet, 1 nocte</div>"},
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "442160008","system":"http://snomed.info/ct","display":"zolpidem 5mg sublingual tablet"}
+        {"code": "442160008","system":"http://snomed.info/sct","display":"zolpidem 5mg sublingual tablet"}
       ],
       "text" : "zolpidem 5mg sublingual tablet"
     },
@@ -1279,7 +1279,7 @@
 
     "reasonCode" : [{
       "coding" : [
-        {"code":"193462001","system":"http://snomed.info/ct","display":"insomnia"}
+        {"code":"193462001","system":"http://snomed.info/sct","display":"insomnia"}
       ],
       "text" : "insomnia"
     }],
@@ -1297,7 +1297,7 @@
         "doseAndRate" : [
           { "doseQuantity": {
             "value" : 28,
-            "system" : "http://snomed.info/ct","unit":"unit dose","code" : "408102007"
+            "system" : "http://snomed.info/sct","unit":"unit dose","code" : "408102007"
           }}
         ]
 
@@ -1309,7 +1309,7 @@
     "text" :{"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>lisinopril 20mg mane</div>"},
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "318860005","system":"http://snomed.info/ct","display":"lisinopril 20mg"}
+        {"code": "318860005","system":"http://snomed.info/sct","display":"lisinopril 20mg"}
       ],
       "text" : "lisinopril 20mg"
     },
@@ -1317,7 +1317,7 @@
 
     "reasonCode" : [{
       "coding" : [
-        {"code":"38341003","system":"http://snomed.info/ct","display":"hypertension (disorder)"}
+        {"code":"38341003","system":"http://snomed.info/sct","display":"hypertension (disorder)"}
       ],
       "text" : "hypertension"
     }],
@@ -1334,7 +1334,7 @@
         "doseAndRate" : [
           { "doseQuantity": {
             "value" : 1,
-            "system" : "http://snomed.info/ct","unit":"tablet","code" : "428673006"
+            "system" : "http://snomed.info/sct","unit":"tablet","code" : "428673006"
           }}
         ]
 
@@ -1346,7 +1346,7 @@
     "text" :{"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>isosorbide mononitrate 20mg once daily</div>"},
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "319134001","system":"http://snomed.info/ct","display":"isosorbide mononitrate 20mg"}
+        {"code": "319134001","system":"http://snomed.info/sct","display":"isosorbide mononitrate 20mg"}
       ],
       "text" : "isosorbide mononitrate 20mg"
     },
@@ -1354,7 +1354,7 @@
 
     "reasonCode" : [{
       "coding" : [
-        {"code":"194828000","system":"http://snomed.info/ct","display":"angina"}
+        {"code":"194828000","system":"http://snomed.info/sct","display":"angina"}
       ],
       "text" : "hypertension"
     }],
@@ -1371,7 +1371,7 @@
         "doseAndRate" : [
           { "doseQuantity": {
             "value" : 1,
-            "system" : "http://snomed.info/ct","unit":"tablet","code" : "428673006"
+            "system" : "http://snomed.info/sct","unit":"tablet","code" : "428673006"
           }}
         ]
 
@@ -1383,14 +1383,14 @@
     "text" :{"status":"generated","div":"<div xmlns='http://www.w3.org/1999/xhtml'>buspirone 5mg TDS</div>"},
     "medicationCodeableConcept" : {
       "coding" : [
-        {"code": "321323009","system":"http://snomed.info/ct","display":"buspirone 5mg"}
+        {"code": "321323009","system":"http://snomed.info/sct","display":"buspirone 5mg"}
       ]
     },
     "status": "active",
 
     "reasonCode" : [{
       "coding" : [
-        {"code":"19748006","system":"http://snomed.info/ct","display":"anxiety disorder"}
+        {"code":"19748006","system":"http://snomed.info/sct","display":"anxiety disorder"}
       ],
       "text" : "anxiety disorder"
     }],
@@ -1408,7 +1408,7 @@
           {
             "doseQuantity": {
               "value" : 1,
-              "system" : "http://snomed.info/ct","unit":"tablet","code" : "428673006"
+              "system" : "http://snomed.info/sct","unit":"tablet","code" : "428673006"
             }
           }
         ]

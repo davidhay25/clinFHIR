@@ -136,7 +136,7 @@ angular.module("sampleApp")
         defaultConfig.terminologyServers.push({name:"Ontoserver",url:"https://ontoserver.csiro.au/stu3-latest/",version:3});
         defaultConfig.terminologyServers.push({name:"Ontoserver-PC",url:"https://primarycare.ontoserver.csiro.au/fhir/",version:3});
 
-        defaultConfig.allKnownServers.push({name:'InterSystems IRIS R4',version:4,
+        defaultConfig.allKnownServers.push({name:'InterSystems FHIR Server R4',version:4,
             url:"https://fhir.s37vcloskatg.static-test-account.isccloud.io/",
             apiKey:"sJdH2KXzI14lWunvyxTQhEDQLTf54z396LtIyVya",
             everythingOperation:true});
