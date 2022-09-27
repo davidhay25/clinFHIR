@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2022-09-09';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2022-09-28';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};
         defaultConfig.standardSystem = {};
@@ -206,6 +206,7 @@ angular.module("sampleApp")
 
         defaultConfig.allKnownServers.push({name:'HSPC-COF-R4',version:4,url:"https://api.logicahealth.org/CoFsandboxR4/open/",everythingOperation:true});
 
+        defaultConfig.allKnownServers.push({name:'SMART-healthIt',version:4,url:"https://r4.smarthealthit.org/",everythingOperation:true});
 
 
 
