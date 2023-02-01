@@ -1,0 +1,302 @@
+{
+  "1dUJRELiToxCevzCSLjxHChffQF9DDu24": {
+    "name": " brr-medication-definition-module.docx",
+    "type": "page",
+    "wg": " brr"
+  },
+  "1CI3iPNfNo4LMjIWHOKTbikzJres7mwNh": {
+    "name": " cds-clinicalreasoning-cds-on-fhir.docx",
+    "type": "page",
+    "wg": " cds"
+  },
+  "1xWcQNrjuCT57f0ykjaEMeTJ8eth6IhH9": {
+    "name": " cds-clinicalreasoning-evidence-and-statistics.docx",
+    "type": "page",
+    "wg": " cds"
+  },
+  "10MOI9RcgPLMttJsQIoptgEwOMsAx-CUC": {
+    "name": " cds-clinicalreasoning-knowledge-artifact-distribution.docx",
+    "type": "page",
+    "wg": " cds"
+  },
+  "1qMv29Nfdv4mKNaidQ0a3zOCgXgggOo7o": {
+    "name": " cds-clinicalreasoning-knowledge-artifact-representation.docx",
+    "type": "page",
+    "wg": " cds"
+  },
+  "1XsxAZdcJfqaowAaev_WBKpgJMr-seyst": {
+    "name": " cds-clinicalreasoning-module.docx",
+    "type": "page",
+    "wg": " cds"
+  },
+  "12dPwO1eZ-cR5psCyAcFFlwxB211YmuWu": {
+    "name": " cds-clinicalreasoning-topics-definitional-resources.docx",
+    "type": "page",
+    "wg": " cds"
+  },
+  "1YKDeIPUJ93bBJzSb5LM0RvRRxxdHk8Os": {
+    "name": " cds-clinicalreasoning-topics-supporting-documentation.docx",
+    "type": "page",
+    "wg": " cds"
+  },
+  "1gx5T0ELUmzM5aHVbGPdcdML3iX3cK9fV": {
+    "name": " cds-clinicalreasoning-topics-using-expressions.docx",
+    "type": "page",
+    "wg": " cds"
+  },
+  "1tkMljSZhwVXMExtnasVZ6bdAZrj75T91": {
+    "name": " cg-genomics.docx",
+    "type": "page",
+    "wg": " cg"
+  },
+  "15cQ7GJM_IK7ImCv-UMmwzVArLjI7J6Wv": {
+    "name": " cqi-clinicalreasoning-quality-reporting.docx",
+    "type": "page",
+    "wg": " cqi"
+  },
+  "1_PyDY604FGIn9Yh-RuXPTzGIhWgsFiLH": {
+    "name": " ehr-ehr-fm.docx",
+    "type": "page",
+    "wg": " ehr"
+  },
+  "1KwbcDvjItNfOs2z-e5GqzlgQCWp-COKc": {
+    "name": " fhir-async-bulk.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1zPDq72cAJDuqck2__u9fkqeOioEd63UG": {
+    "name": " fhir-async-bundle.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1UIrav-LB3v4kvd2ZGkCI355BVLzvB4h5": {
+    "name": " fhir-async.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "138r6XdHar2VBXIAziXOBYojHAdU95y6y": {
+    "name": " fhir-ballot-intro.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1ZB2FO7FgbuKJz450hQ2earawa0nBYQlD": {
+    "name": " fhir-best-practices.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1fQ3ySw_dOIQ2CCOPSEQ19fukYtRR25EY": {
+    "name": " fhir-change.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "10Ktvmx16O9b_r_BtevWqDAfaNMEF7QAI": {
+    "name": " fhir-comparison-cda.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1HP_7vXJLTV6dHoT3MU2RWJUxkhtBHIjP": {
+    "name": " fhir-comparison-other.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1QP04FTnBChoDb22p04NIfDX3a2s_daWC": {
+    "name": " fhir-comparison-v2.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "164IKZJLQgRnfnLmwuPq_qXtM03j8w-cp": {
+    "name": " fhir-comparison-v3.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1VvSTGaB57ruwDM73ac-_i-S6xW8AOAvq": {
+    "name": " fhir-comparison.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1F8xjTdPVaXCKrgNe7W10LRXEt-P2NQCG": {
+    "name": " fhir-conformance-module.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1mAtzLiM0abxxLj0UG-bT7U-iKpZjzplp": {
+    "name": " fhir-conformance-rules.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1bnf6gbAIiap030WB3QdHtqKZebl2QQOR": {
+    "name": " fhir-defining-extensions.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1UDUB0lFI0ZfBDDoGiu-8NabMkLtCyy99": {
+    "name": " fhir-diff.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1bW8XD8hQANK75edjPdDidZYTiZmeOpf2": {
+    "name": " fhir-documents.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1B0Jez3LRSE2pOZ5bE_jGpIX_ChO5mrDz": {
+    "name": " fhir-downloads.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1nK8GJrFZYqKwZ2wf9-XKTNKLS-Ktb0Bf": {
+    "name": " fhir-elementdefinition-definitions.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1x2vQkSkWuCTQlIC_17Oh-pv0Z5PRvi6Q": {
+    "name": "brr-administrableproductdefinition.xml",
+    "type": "resource",
+    "wg": "brr"
+  },
+  "1NuVXN98C8tqO01oFeT6PBYhdjLtRyQoD": {
+    "name": "brr-clinicalusedefinition.xml",
+    "type": "resource",
+    "wg": "brr"
+  },
+  "1ZdG5yvo-fKowVq8ejPpFkV8BmroeS1LH": {
+    "name": "brr-ingredient.xml",
+    "type": "resource",
+    "wg": "brr"
+  },
+  "1dLvemEtXb6cVDPtgndwTtOuvmdPvop_c": {
+    "name": "brr-manufactureditemdefinition.xml",
+    "type": "resource",
+    "wg": "brr"
+  },
+  "1wS4M-NLevqist6pnE4Ku8rMKKMknKFmD": {
+    "name": "brr-medicinalproductdefinition.xml",
+    "type": "resource",
+    "wg": "brr"
+  },
+  "15gkZVTgTvy2uH1m-v5opkW6-XJjQooPZ": {
+    "name": "brr-packagedproductdefinition.xml",
+    "type": "resource",
+    "wg": "brr"
+  },
+  "1yo3wK2MDP4Pu89STLGBzgaKsdeM-rwru": {
+    "name": "brr-regulatedauthorization.xml",
+    "type": "resource",
+    "wg": "brr"
+  },
+  "1cskUB4zd8sa_MHCWQFyL8IzWQ0KTS97Z": {
+    "name": "brr-researchstudy.xml",
+    "type": "resource",
+    "wg": "brr"
+  },
+  "1jzXrGjav-f2Zu86F94ub2ZreWqsBhKJj": {
+    "name": "brr-researchsubject.xml",
+    "type": "resource",
+    "wg": "brr"
+  },
+  "1nbjLQLnvoNrPXo93DG-5lNEekGH_Vkm6": {
+    "name": "brr-substance.xml",
+    "type": "resource",
+    "wg": "brr"
+  },
+  "1q2bb1tKqU7dleqvTxCdGS6CCgMuN1-KU": {
+    "name": "brr-substancedefinition.xml",
+    "type": "resource",
+    "wg": "brr"
+  },
+  "1VUgG2MIz28I7b27KYJ6FxJUMbDICO_0D": {
+    "name": "brr-substancenucleicacid.xml",
+    "type": "resource",
+    "wg": "brr"
+  },
+  "1SrpO0I2yGA-uZ9oFp9pbM5-DWo7m5s4C": {
+    "name": "brr-substancepolymer.xml",
+    "type": "resource",
+    "wg": "brr"
+  },
+  "1BJeeeubqIojBtkbeR9c8sUmax9Q2weP6": {
+    "name": "brr-substanceprotein.xml",
+    "type": "resource",
+    "wg": "brr"
+  },
+  "1OaKq9lI32BGmQXWLYpD2UTRkV2m6-uTF": {
+    "name": "brr-substancereferenceinformation.xml",
+    "type": "resource",
+    "wg": "brr"
+  },
+  "1I5DlSs4MELmItHUBkQnh6XMNkkJHiZlD": {
+    "name": "brr-substancesourcematerial.xml",
+    "type": "resource",
+    "wg": "brr"
+  },
+  "1UpgsfQg2yWYnKgzkwPu36Bzuhtzb-1EA": {
+    "name": "cbcc-consent.xml",
+    "type": "resource",
+    "wg": "cbcc"
+  },
+  "1gbxRG7Rd1mTucvNSaTUIBPtRZrOj8OX-": {
+    "name": "cds-RelatedArtifact.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1WdfSBkM9c73ge2wCbx9MYFRYxom4gZa6": {
+    "name": "cds-activitydefinition.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "10vyjPQE-kuxGj5iNcTtls67BXXAnwbAJ": {
+    "name": "cds-artifactassessment.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1Xp_nawqkJI33zCHWAVxcwW00ExN3JHu3": {
+    "name": "cds-citation.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1quh9bxhVJ0N87HjLwySFVqdIO1iZsHqj": {
+    "name": "cds-contactdetail.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1FqD6iAsC8hFh-hdOyQCbCxXomGV5b6DX": {
+    "name": "cds-contributor.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1ZTj1VMJMHNXYevYBMB29t0SssXePcup-": {
+    "name": "cds-datarequirement.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1f_BRkgQPX7OxDZvAiN8vkGm3w2LPZ3j4": {
+    "name": "cds-detectedissue.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1SldOGX9thQ5vt3nc2V-IcmARTqvQsk_6": {
+    "name": "cds-eventdefinition.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1YZAf4tKRusoN9HZX1f4sqa66JS1t3ThK": {
+    "name": "cds-evidence.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1sL6eFfe8rOQKKSCt36v1i-0o86VwCIwV": {
+    "name": "cds-evidencereport.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1Af9jR2bItVPszQ-pVAF-jiTfIg8mq3Hv": {
+    "name": "cds-evidencevariable.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1zwKN6tRQThwczmWhQ_c7P7Zky9TAoB0I": {
+    "name": "cds-guidanceresponse.xml",
+    "type": "resource",
+    "wg": "cds"
+  }
+}

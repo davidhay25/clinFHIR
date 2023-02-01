@@ -19,6 +19,8 @@ var smartModule = require("./serverModuleSMART.js")
 const proxyModule = require("./serverModuleProxy.js")
 
 const fshModule = require("./serverModuleFSH.js")
+const qaModule = require("./serverModuleQA.js")
+qaModule.setup(app)
 
 let registryModule = require('./serverModuleRegistry.js');
 registryModule.setup(app)
