@@ -20,7 +20,7 @@
     <script src="js/libs/ngStorage.min.js"></script>
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngStorage']).config(function($locationProvider) {
+        angular.module("sampleApp",['ui.bootstrap','ngStorage','ui.checkbox']).config(function($locationProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)  -- ,'ngStorage'
             $locationProvider.html5Mode(true);
@@ -29,12 +29,15 @@
         angular.module("sampleApp").constant("moment", moment);
 
     </script>
-
+    <script src="js/libs/angular-bootstrap-checkbox.js"></script>
     <script src="js/libs/angular-sanitize.js"></script>
 
     <script src="js/r5qaCtrl.js"></script>
 
 
+    <style>
+        .fmm5 {background-color: lightcoral}
+    </style>
 
         <title>QA for Release 5</title>
 
@@ -88,26 +91,43 @@
 
     <div class="row">
         <div class="col-md-2">
+
+            <div><checkbox ng-change = "setVisibility()" ng-model="input.fmm5only"></checkbox> Only show FMM 5 resources</div>
+            <div><checkbox ng-change = "setVisibility()" ng-model="input.unclaimedonly"></checkbox> Only show unclaimed pages</div>
+
+            <br/>
             <select class="form-control" ng-model="input.wg"
                     ng-options="key for (key,value) in hashByWG"
                     ng-change="selectWg(input.wg)">
-
+                <option value=''>- Please select WorkGroup -</option>
             </select>
         </div>
         <div class="col-md-4">
 
             <input class="form-control" placeholder="Enter your name here" type="text" ng-model="input.userName" ng-blur="setUserName(userName)"/>
-
+            <div ng-hide="input.userName"><em>Enter your name to be able to claim a page</em></div>
         </div>
-        <div class="col-md-4">
-            <div ng-hide="input.userName">Enter your name to be able to claim this page</div>
-            {{selectedId}}
+
+
+        <div class="col-md-2">
+            {{selectedPage.display}}
+
         </div>
 
         <div class="col-md-2">
-            <button ng-show="input.userName && selectedPage"
+            <div ng-show = "selectedPage && selectedPage.type == 'resource'">
+                <div ng-class="{fmm5:selectedPage.fmm == 5}">FMM level: {{selectedPage.fmm}}</div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-2">
+            <button ng-show="input.userName && selectedPage && ! selectedPage.claimedby"
                     ng-click="claimPage()"
                     class="btn btn-primary pull-right">Claim this page</button>
+
+            <button class="btn btn-info pull-right" ng-show="selectedPage.claimedby">Page has been claimed</button>
         </div>
 
     </div>
@@ -117,14 +137,14 @@
 
             <h4>Resources</h4>
             <ul class="list-unstyled">
-                <li ng-repeat="(k,v) in selectedHashWg.resources">
-                    <div class="clickable" ng-click="selectPage(v.id)"> {{v.name}}</div>
+                <li ng-repeat="(k,v) in selectedHashWg.resources track by $index">
+                    <div class="clickable" ng-hide="v.hide" ng-click="selectPage(v.id)"> {{v.display}}</div>
                 </li>
             </ul>
             <h4>Other pages</h4>
             <ul class="list-unstyled">
-                <li ng-repeat="(k,v) in selectedHashWg.pages">
-                <div class="clickable" ng-click="selectPage(v.id)"> {{v.name}}</div>
+                <li ng-repeat="(k,v) in selectedHashWg.pages track by $index">
+                <div class="clickable" ng-hide="v.hide" ng-click="selectPage(v.id)"> {{v.display}}</div>
             </li>
             </ul>
 
