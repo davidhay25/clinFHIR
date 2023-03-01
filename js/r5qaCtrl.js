@@ -14,14 +14,15 @@ angular.module("sampleApp")
 
                         item.hide = false
 
+                        if ($scope.input.fmm5only && (item.fmm != 5 )) {
+                            item.hide = true
+                        }
 
                         if ($scope.input.unclaimedonly && item.claimedby ) {
                             item.hide = true
                         }
 
-                        if ($scope.input.fmm5only && item.fmm !== 5 ) {
-                            item.hide = true
-                        }
+
                     })
                 })
 
@@ -80,6 +81,34 @@ angular.module("sampleApp")
 
                 })
 
+                //sort the resources by name
+                Object.keys($scope.hashByWG).forEach(function (key) {
+                    $scope.hashByWG[key].resources.sort(function(a,b) {
+                        if (getName(a.name,2) > getName(b.name,2)) {
+                            return 1
+                        } else {
+                            return -1
+                        }
+                    })
+                    $scope.hashByWG[key].pages.sort(function(a,b) {
+                        if (a.name > b.name) {
+                            return 1
+                        } else {
+                            return -1
+                        }
+                    })
+
+
+                })
+
+                function getName(n,pos) {
+                    let ar = n.split('-')
+                    if (ar.length > pos) {
+                        return ar[pos]
+                    } else {
+                        return n
+                    }
+                }
                 console.log($scope.hashByWG)
 
 

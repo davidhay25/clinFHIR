@@ -402,7 +402,8 @@ angular.module("sampleApp")
                     } else {
                         //check if the full url is actually a guid. If it is, then set the url to {type}/{id} as the guid is ignored
                         if (url.indexOf("urn:uuid:") > -1) {
-                            url = resource.resourceType + "/" + resource.id
+                            //2020-10-25 - this doesn't seem right...
+                            //url = resource.resourceType + "/" + resource.id
 
                         } else {
                             //not a urn
