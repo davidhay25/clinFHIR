@@ -1,105 +1,2017 @@
 {
-  "14y0iAAu7GSEJHd11EKzrn7tG8ZVuaiEh": {
+  "1sqjL8dgB0TDehh2w354RpJKt_EZUqKMd": {
     "name": " brr-medication-definition-module.docx",
     "type": "page",
-    "wg": " brr",
-    "claimedby": "smith"
+    "wg": " brr"
   },
-  "1NVNyCgyrPsm5fHyZs9tXfa-hiz9Ioxps": {
+  "1vgzOxXLvr_YnHF0SvnLw-Irrh2mwNEsk": {
     "name": " cds-clinicalreasoning-cds-on-fhir.docx",
     "type": "page",
     "wg": " cds"
   },
-  "1v94kY-dR7RfbATYTbrIMck2sc_BcFNgi": {
+  "1ZESIhG27emNpkuGuE3Fxtt8FrKdVLZgA": {
     "name": " cds-clinicalreasoning-evidence-and-statistics.docx",
     "type": "page",
     "wg": " cds"
   },
-  "1n-sm2PlNCNDwKmc7DRety3TK4DdVDqm1": {
+  "1zJo4SBDyKONWHwAkX6_6MgJxy_5K3WTg": {
     "name": " cds-clinicalreasoning-knowledge-artifact-distribution.docx",
     "type": "page",
     "wg": " cds"
   },
-  "1oMjcWu8MhAsDhPXodG9EWZcGlysQnDz1": {
+  "14exDjLW4hrTpCpkZfof6uGtBWBV-1sTV": {
     "name": " cds-clinicalreasoning-knowledge-artifact-representation.docx",
     "type": "page",
     "wg": " cds"
   },
-  "1YAX-bqHWK_AJeC7UwiIhEJ5El7K1gNFX": {
+  "18zFf7RzBB75vZtSEmTLr4ZmrzQXodIcU": {
     "name": " cds-clinicalreasoning-module.docx",
     "type": "page",
     "wg": " cds"
   },
-  "1W5l0MQBlefFWUhcDTapfZX0Md8qnPghs": {
+  "18uQ8PwFSZU5d_hTw6CgFvkY25wm65MDj": {
     "name": " cds-clinicalreasoning-topics-definitional-resources.docx",
     "type": "page",
     "wg": " cds"
   },
-  "1VQEPfsjSuqvyjmBWyvQ7V76wsxCxakFT": {
+  "1G1QGGcQGbwTfsNQnA6JPeE9Ibe1X88hm": {
     "name": " cds-clinicalreasoning-topics-supporting-documentation.docx",
     "type": "page",
     "wg": " cds"
   },
-  "1nHanp_Rq2tRRDFB7CX5k37IAIHSUFC3g": {
+  "1oVEGyPA8lc28pPCjG3D7pbxZ5FHlx_PH": {
     "name": " cds-clinicalreasoning-topics-using-expressions.docx",
     "type": "page",
     "wg": " cds"
   },
-  "1ZEVcNK9wBhT9BpMgbBFU4Im_4dZ9bQHp": {
+  "1TxrQ6kxnLdzZ8iPSGxhCG7MdX8cjpJmW": {
     "name": " cg-genomics.docx",
     "type": "page",
-    "wg": " cg",
-    "claimedby": "davud"
+    "wg": " cg"
   },
-  "1Q1r0IFmiCyAoABpxCL3wBJ9xTAtFse8S": {
+  "1mSkY97t5PyB6qMs5dN579OrWhIr1G_oD": {
+    "name": " cqi-clinicalreasoning-quality-reporting.docx",
+    "type": "page",
+    "wg": " cqi"
+  },
+  "1A0xZkCk6k_z-gsH48OWRK8RzTAUOQNGD": {
+    "name": " ehr-ehr-fm.docx",
+    "type": "page",
+    "wg": " ehr"
+  },
+  "1h043f-KZF23KM-XvTiR1Y1zendjtpNok": {
+    "name": " fhir-async-bulk.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1K3K-fPF3kNqlXujD2PzIbLFqny6jjr87": {
+    "name": " fhir-async-bundle.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1p5p0dONFLHJ4U20UxceTkyXcO20sFUME": {
+    "name": " fhir-async.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1Gw-JBG8KA2FaqSY5r15hcRjw8iV_5KXn": {
+    "name": " fhir-ballot-intro.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1O8dI005Lkf9ycwPYlMutTCJ70N-uS6U-": {
+    "name": " fhir-best-practices.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1VHT0YCulOdcxnCHNAxtH2jBT4LBBGl_s": {
+    "name": " fhir-change.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1f4RjFJ14a1EWjQOVjRiK0cwCNBK8F3u1": {
+    "name": " fhir-comparison-cda.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "14_TkC2LwicOgw_f1usYVEwOBs1IgxLwn": {
+    "name": " fhir-comparison-other.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1Bxn95GvwHMlVx6Zl1z29Qnk5e38pngBt": {
+    "name": " fhir-comparison-v2.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1XdRhSo0xiFgdAwEe4GofCMSHgvwSojPW": {
+    "name": " fhir-comparison-v3.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "13ixBSju0fD78rZyPDN3OWM_JyLOkPnKv": {
+    "name": " fhir-comparison.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1GE0ZPrGjtdO_CU2qWD6jL0YeEHt_0tTK": {
+    "name": " fhir-conformance-module.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1pU2FWqwDlYq16tjhwWxzWQacLcqTZSMA": {
+    "name": " fhir-conformance-rules.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1cU7lIZKiI3sj8mWkyOZ7Mzw6yO3fZ_cF": {
+    "name": " fhir-defining-extensions.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1vCuv6nxuGXApjuypzArCaI13AcNSrGDl": {
+    "name": " fhir-diff.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1SJO5anQ4VuUHkebG4s_5CBp9RUe_Egq-": {
+    "name": " fhir-documents.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1sYVZccf_W4MR8c2cOkN9z_BeLqUwkO77": {
+    "name": " fhir-downloads.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1PzEqv2WOG-HI7bt60gDr02UNpX1igNhE": {
+    "name": " fhir-elementdefinition-definitions.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1HKhJJhqdz39DsqhPEOFZ_efrlHKAFTfs": {
+    "name": " fhir-elementdefinition-examples.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1KQL4CEbZm2XeqGZXmriExr37jCR43pVI": {
+    "name": " fhir-elementdefinition-extras.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1nLlh0WpUU5XyUYuoxR_ewDI3FHZRR08s": {
+    "name": " fhir-elementdefinition-mappings.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1iDxT0mCGHJ7swOablxHtpRDHbVzP_6pv": {
+    "name": " fhir-elementdefinition.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1hWu783_iAjx-N6slFeYkaSaR5IO4-6SS": {
+    "name": " fhir-exchange-module.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1pGn8NFEgjqcVLqxQkhkwlDMs8DVytaS_": {
+    "name": " fhir-exchanging-messaging.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1gwvt4QYMMlV4u1VpR-Of2DiuN0ER1eHD": {
+    "name": " fhir-exchanging-operation.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "112deVTEfQC3yUXg5pM0TEzfHbvSURCFE": {
+    "name": " fhir-exchanging-polling.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1M5a5VqLEJ0wOz6AuZbdjxbTWFPM94qWC": {
+    "name": " fhir-exchanging-request.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1kanid0jyrgsdAnQqsy6AapVJWwgzWR3J": {
+    "name": " fhir-exchanging-rest.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1MeMGZUYMoFYgsy5VO4DFDAVS9CGt0F-e": {
+    "name": " fhir-exchanging-search.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1IjXP-dRIkwWnZn8vrqFzpv0pxQkaSmLk": {
+    "name": " fhir-exchanging-subscription.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "11sOik41Tl0ksRvtmSupWrk0sTDfMac_8": {
+    "name": " fhir-exchanging.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1s1-7vmm6Ozx6xZNSthLMFvdqr7u8ccnM": {
+    "name": " fhir-extensibility-definitions.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "12WElvtTpXjWpC62SIOKveJp-Wo8jIubP": {
+    "name": " fhir-extensibility-examples.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1eNiby_LmvT2MKEubIUpkhm59JE1yMkll": {
+    "name": " fhir-extensibility-registry.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "15lcuhAaZWOgkzCCvJJc_VZHIwi8WnpTZ": {
+    "name": " fhir-extensibility.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1xkx8Xv_SwHfWrNUhpbEjw4IfQ-W9W3FX": {
+    "name": " fhir-fhir-xquery.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1FL9pVlMSzVGGBUfQ5DhYSPMWILXk2ak2": {
+    "name": " fhir-fhirpatch.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1RzdeTYbtXNCNY9fbh9_WytPYCtZ71Ih9": {
+    "name": " fhir-fhirpath.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1IjcH-iH9WuINYgptgL2MCT_pOowQM3AM": {
+    "name": " fhir-fmg.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1B8XSVtaaLwI32cBcR1Ga6DneCV6utIHK": {
+    "name": " fhir-formats.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1-OC9xlpa5_gCXOIvImmF8CI4vcAUW30x": {
+    "name": " fhir-foundation-module.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1Yf_gRhOJ5eVfr4GYaSWHiTmua39izq6s": {
+    "name": " fhir-glossary.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1_TGnCu5EaYhZLcoPiKEXetwZ6HyVd6fG": {
+    "name": " fhir-graphql.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1ABBi0JdakH0boQ1VRkCX7Jh6BK5dGjrM": {
+    "name": " fhir-http.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1iQyOgbh7uzSaotfkUvxCX_FuaYJ_61W7": {
+    "name": " fhir-identifier-registry.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1D277hlOu3G2_zNeLVS65rX7viw8JIJmd": {
+    "name": " fhir-implsupport-module.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "14rQcOGwbnAG8703fhlHPkDuQhhLliE2c": {
+    "name": " fhir-integrated-examples.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1Wd7k6VVxHLHMG6K0UYLD1PP1RwhozRT1": {
+    "name": " fhir-languages.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1s0TrPIOl9mvQKKdP0RlTHBfYhc8X_YCt": {
+    "name": " fhir-license.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "14x4Gp8CNmtzdw1FoC_Bj2AVancYLZtoh": {
+    "name": " fhir-lifecycle.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1qQLX6cGoB9t9_PTA2DhsoQMxlmiIypWZ": {
+    "name": " fhir-logical.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1DxoWaFN4Qkyexv8MT2Hu4c-th-Z-oBsO": {
+    "name": " fhir-managing.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1HmrP1-T7d1Gpgmvw5CUa1W0zzlv40oLi": {
+    "name": " fhir-mapping-language.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1lIo9S2l3qDA_7-EjXjiJvwJqWTYg5q_P": {
+    "name": " fhir-mapping-tutorial.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1FgnkzS8puVR5FC8rqtfKT0niBpjcAHc3": {
+    "name": " fhir-mappings.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1Vppf4LP0tpeFpWbCn_PLCnD_XB9wzKZI": {
+    "name": " fhir-messaging.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1itHzfeLq-a51sY6j_U8PQDehPTNFhLHl": {
+    "name": " fhir-modules.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1Fi-P0Q61naezjXyhb-JfH3uqGvkItcq1": {
+    "name": " fhir-narrative-definitions.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1fX5RxaDqmPxjPUUMG2umnGichQT98Xif": {
+    "name": " fhir-narrative-example.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1TAa3pmPLofPp4CI-Q6gOJvC4UnoKYvHH": {
+    "name": " fhir-narrative.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1zurtjMnlqsNScB1IBkzacPekkkaDWsYL": {
+    "name": " fhir-ns.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1LARM2foXaROaj6tvZkxU0q7C2_91A39B": {
+    "name": " fhir-obligations.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1tv_MBf92YVPPAL5hi0nf45r-BE-Xzlwy": {
+    "name": " fhir-op-example-request.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1yx5yd-BZ8c9yUTdpaCfe904XjPZ71p8l": {
+    "name": " fhir-operations-for-large-resources.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1bvmRIMSEGNiRFNf_9efY4pMSsGPhGQJe": {
+    "name": " fhir-operations.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1iYCGXoWCd72vr-7sntfaIwwmz1759hMy": {
+    "name": " fhir-overview-arch.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1qpAX5qkwhl87MHP_gufgVANsraKJDQxP": {
+    "name": " fhir-overview-clinical.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1GIi3HV4bMPZ95vXrBNmAchs9SDsG6FVJ": {
+    "name": " fhir-overview-dev.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1A59TSmw09g0i4igqliZHc2UOIzUW9lQ_": {
+    "name": " fhir-overview-patient.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1OherkPfr3yTjku4KsAHLDtc7HiY3tqtw": {
+    "name": " fhir-overview.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1DQ9ZYA8uY3rE5-Isu_pEOHsTzcr3561U": {
+    "name": " fhir-packages.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1eyg33sRabv9FjcQkwJ7jGga8F0fM8Jd5": {
+    "name": " fhir-profiling-examples.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1tUjjaDbvPquwiR0m3i5Du112eRDg_V83": {
+    "name": " fhir-profiling.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1CdhkvzLA0ct4Ihhyt1_ajOuoC2EZe1r1": {
+    "name": " fhir-pushpull.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1qgQZRGfG6Khq2eL0wch4f4CEZujgZ3o5": {
+    "name": " fhir-r2maps.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "15VziaPJESUOFFtC_U3jmi0EAd6Ff-ueo": {
+    "name": " fhir-r3maps.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "18D7XArO3jZQGudnlRQHGmAYlAhqERzTb": {
+    "name": " fhir-r4maps.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1G35eLkDhNQprm9yVSkXoSHzeKU62g4cV": {
+    "name": " fhir-references-definitions.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1RfNRHQSH1DawEhAPSzpQAQc3sH_gt7XO": {
+    "name": " fhir-references-extras.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1KDKFTLrfkylFDdSsEffCusUCbLrPGByM": {
+    "name": " fhir-references.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1w8333v4kvfKFRu3I5zTRxYc-Wz5N2eRo": {
+    "name": " fhir-resource-formats.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1gbAbb_Pa4v6Gd8mGmq3NYeC8qp7okV1f": {
+    "name": " fhir-resourceguide.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1fSSv-1ieMw2_HU59JRXab4ID045jK2S1": {
+    "name": " fhir-resourcelist-examples.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "14xH0tEjXqeuTMF_FDijeFK_QKWKh2NEm": {
+    "name": " fhir-resourcelist.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1hE9oyyY5s-OiiJvj1N-nEUYIAxr3RyEY": {
+    "name": " fhir-resources-definitions.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1ef22P1x-oFeGrH7BmcIgwP5Znxax936q": {
+    "name": " fhir-resources-examples.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1RXM4eZ3_jyMMp6Sg5Lmftil2byS-snkt": {
+    "name": " fhir-safety.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1jopM9FtK0SEROaVgTqc9Y1icgE_c0iJ1": {
+    "name": " fhir-search.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1XoX69wPa1xfxEyOvukNTkyMCeu-t9vIO": {
+    "name": " fhir-search_filter.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1QInW6Di305G5JpsDTMk2jB4-GkYgWP8N": {
+    "name": " fhir-searchparameter-registry.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1UPjtxwn_8TaRL96yfRHpxt-ZN4S4bPvw": {
+    "name": " fhir-services.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1lQwXhpjOGq_qJSurPheY9Z3QN-ekBKVT": {
+    "name": " fhir-sid-icd-10.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1ROfujV7oNCqBW25r_AF5T2Y2ks6Ai_cz": {
+    "name": " fhir-sid-icd-9.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1jDoTMX8vJkFtDMMdNQyuO7X3yxfRacy6": {
+    "name": " fhir-sid-us-ssn.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1k56kJLWaac1XmWnCBujLFjZlxGNPf3vC": {
+    "name": " fhir-storage.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1kb13E7ta3t1nNOUVF2UXCDAWgzTeaJHu": {
+    "name": " fhir-subscriptions.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1w1ujiUiFFAzgnmP81f9CRHnfrwoIkJFn": {
+    "name": " fhir-summary.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1p_zsN9SzXaDBgqs2ZLYa7Yr3JmkR0sea": {
+    "name": " fhir-testing.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1yuaOiCp8LciLJrrxgYFJjMGZi-vittix": {
+    "name": " fhir-types-definitions.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1blC-Hh3kkSdtMaIuR2vjjdo_bbi6sUeI": {
+    "name": " fhir-types-extras.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1mnlPWuBXrySeY1pvnfxBY8YH6k4F48vZ": {
+    "name": " fhir-types-mappings.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1QRDZ3mdxB19GHrVTVxJFHXEdTpkYtssZ": {
+    "name": " fhir-types-version-maps.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1F3Ztm2-SqPl625DAgeRutOBv1qUh8viI": {
+    "name": " fhir-types.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1OJ3MkoMFMQXQS72sCD0l7RKRWmh13thx": {
+    "name": " fhir-uml.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1lt8VAPmfH01Laj6mEr0bUN6_dN7VC8ry": {
+    "name": " fhir-updates.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1PkYb5bWQR1qc9lk_x1tCbzyrewebhTZA": {
+    "name": " fhir-usecases.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1j-ccVRdSs2isq6TBudVeAiHf7g-rAlI0": {
+    "name": " fhir-validation.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1DMezkEaODZxy9MG48S0Nyjvb1tQsBH0a": {
+    "name": " fhir-versioning.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1wdulsadkuFwbVxMNIjNpD1NlPe1rLa83": {
+    "name": " fhir-versions.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1e3zkwVKR4UDkn19v6p0BfLsBFsHhCj3a": {
+    "name": " fhir-wglist.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1mjKQRYKRfb8FaSJkpbl7GOvQ26v2hJR2": {
+    "name": " fhir-workflow-ad-hoc.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1a19Rxe-FNK8_i0IrYRjL0H4kiPojEwwa": {
+    "name": " fhir-workflow-communications.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "15XjwzxWobvIcJEzmqpHBjl41Y1E-_VpG": {
+    "name": " fhir-workflow-examples.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1xW8VyTJ4XQ0LCzNWp7StzA5RZWC-Esp9": {
+    "name": " fhir-workflow-management.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1ccPefm5xZ-agXFCOgFnuIPegqssKCKto": {
+    "name": " fhir-workflow-module.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1ZvyxHVCJIzYRPFn3HXVhkRnvxiixracw": {
+    "name": " fhir-workflow.docx",
+    "type": "page",
+    "wg": " fhir"
+  },
+  "1Dlrd7H0Yzt0DzmqFwG-0JbsSEACChG_l": {
+    "name": " fm-financial-module.docx",
+    "type": "page",
+    "wg": " fm"
+  },
+  "1TFaT8E7xVpMw4rDc3k5x9J37hEqK7J7g": {
+    "name": " its-json.docx",
+    "type": "page",
+    "wg": " its"
+  },
+  "1cmGAQ1AO5mWywvHku0ipkhUxvZRkJEhQ": {
+    "name": " its-nd-json.docx",
+    "type": "page",
+    "wg": " its"
+  },
+  "1wViidKrwtC_PWZccOJTd8Hx08Oxy2uvC": {
+    "name": " its-oids.docx",
+    "type": "page",
+    "wg": " its"
+  },
+  "1-E6PvE7pZSgPXt6wf2tQ2o2BtZXiQUJ1": {
+    "name": " its-rdf.docx",
+    "type": "page",
+    "wg": " its"
+  },
+  "1oRAJQYBjzBlSQhcKk2f4YNV7YfMPs3YF": {
+    "name": " its-xml.docx",
+    "type": "page",
+    "wg": " its"
+  },
+  "1uy2Fwd91XPJ9o46sCfBtByzIXXVJzJtP": {
+    "name": " mnm-datatypes-definitions.docx",
+    "type": "page",
+    "wg": " mnm"
+  },
+  "19NuiibqFaT2A8tR3QVP_PGspJ21owwti": {
+    "name": " mnm-datatypes-examples.docx",
+    "type": "page",
+    "wg": " mnm"
+  },
+  "1O1yF-KZuUu0byRwy5U0MihS29UkxJUPQ": {
+    "name": " mnm-datatypes-extras.docx",
+    "type": "page",
+    "wg": " mnm"
+  },
+  "1CnUYj9ZRNx7N7iNU9Pw5dxy90QMMwwgv": {
+    "name": " mnm-datatypes-mappings.docx",
+    "type": "page",
+    "wg": " mnm"
+  },
+  "1eKM72RjiSX2gy6fL87B10vKM-jl9cruZ": {
+    "name": " mnm-datatypes-version-maps.docx",
+    "type": "page",
+    "wg": " mnm"
+  },
+  "1f9AEKll8bQuMVpcTF_GrGpquHzOV0P2x": {
+    "name": " mnm-datatypes.docx",
+    "type": "page",
+    "wg": " mnm"
+  },
+  "1jY0HDeQT7zZ1iegLm90sLMKhlptan-X9": {
+    "name": " mnm-metadatatypes-definitions.docx",
+    "type": "page",
+    "wg": " mnm"
+  },
+  "1tIln4W1rCdYtz9HCvXRBuFuFmkp09cH9": {
+    "name": " mnm-metadatatypes-examples.docx",
+    "type": "page",
+    "wg": " mnm"
+  },
+  "14ErDg2SaoRzNrqQVIpaiIFpv4rbV3byk": {
+    "name": " mnm-metadatatypes-mappings.docx",
+    "type": "page",
+    "wg": " mnm"
+  },
+  "1buKw0T_0zgI-LYajS0LnKh83zaTnDT1e": {
+    "name": " mnm-metadatatypes.docx",
+    "type": "page",
+    "wg": " mnm"
+  },
+  "1N-7uaBcgAjQMQewYamMS17-tJ_utvEwd": {
+    "name": " oo-diagnostics-module.docx",
+    "type": "page",
+    "wg": " oo"
+  },
+  "1x2-ahxGpcgLjokgqquWnyhRQZD3vK7Sl": {
+    "name": " pa-administration-module.docx",
+    "type": "page",
+    "wg": " pa"
+  },
+  "1jZRHHr9PLOvLpc4bqBcJyQPSU5Y00RRd": {
+    "name": " pc-clinicalsummary-module.docx",
+    "type": "page",
+    "wg": " pc"
+  },
+  "1hMosDoLf5PZPxkRC05M_fbxsMUPYlISU": {
+    "name": " phx-dosage-definitions.docx",
+    "type": "page",
+    "wg": " phx"
+  },
+  "1HjxxVnB4zS93YJjXW5J1JCqJc9kA6I3p": {
+    "name": " phx-dosage-examples.docx",
+    "type": "page",
+    "wg": " phx"
+  },
+  "1KxIcNi7YfztLN-R-KNAcD9dS-uhpcEOD": {
+    "name": " phx-dosage-extras.docx",
+    "type": "page",
+    "wg": " phx"
+  },
+  "19qMFtU7O_WfZyhgStw0chY2kkiBb3IXO": {
+    "name": " phx-dosage-mappings.docx",
+    "type": "page",
+    "wg": " phx"
+  },
+  "1k6-sPqPHOt0jux1PRd5Deljs6L6gHmyo": {
+    "name": " phx-dosage.docx",
+    "type": "page",
+    "wg": " phx"
+  },
+  "1xrT4Zuu9iao_LNcQA7ygn0O2OUrVOvX2": {
+    "name": " phx-marketingstatus-definitions.docx",
+    "type": "page",
+    "wg": " phx"
+  },
+  "1-38tG6rSCA6ttG1-_cp4n-38n8a48FcX": {
+    "name": " phx-marketingstatus-examples.docx",
+    "type": "page",
+    "wg": " phx"
+  },
+  "1WCF-YXxvExx9WtAqlZskpMBJq0qRPnbx": {
+    "name": " phx-marketingstatus-extras.docx",
+    "type": "page",
+    "wg": " phx"
+  },
+  "1IZoZNoB46yLVnWiXEuMU7NElRzn5cgny": {
+    "name": " phx-marketingstatus-mappings.docx",
+    "type": "page",
+    "wg": " phx"
+  },
+  "1RxA5JAQOf82oIZsviuX8kqS0jO8-V7Jl": {
+    "name": " phx-marketingstatus.docx",
+    "type": "page",
+    "wg": " phx"
+  },
+  "1kmquT5uk-_3kIgGbfxD3pqbYLvjUN2lL": {
+    "name": " phx-medications-module.docx",
+    "type": "page",
+    "wg": " phx"
+  },
+  "1OnCcOQa27S6bl_oqqBmupqxX9ieeLb58": {
+    "name": " phx-population-definitions.docx",
+    "type": "page",
+    "wg": " phx"
+  },
+  "1UP39gAscT682uBwmTdD6KDzjNT1os-yg": {
+    "name": " phx-population-examples.docx",
+    "type": "page",
+    "wg": " phx"
+  },
+  "1uUH4Twz_vgD8waIuOUa-eKzfjJdkMT9I": {
+    "name": " phx-population-extras.docx",
+    "type": "page",
+    "wg": " phx"
+  },
+  "1hHQpyGJfOl40b9rSPvMjl9yjAVDHHsUJ": {
+    "name": " phx-population-mappings.docx",
+    "type": "page",
+    "wg": " phx"
+  },
+  "1Nq0037N4pNZ9tWrxF3jiTNIc8K1cKLdQ": {
+    "name": " phx-population.docx",
+    "type": "page",
+    "wg": " phx"
+  },
+  "1wrrrZl9UXgOF_Ri9HNg_TyfFDUv8RT08": {
+    "name": " phx-productshelflife-definitions.docx",
+    "type": "page",
+    "wg": " phx"
+  },
+  "1XWe8Fa0p10zCNCSLNuBDm7CTRbLE22ZA": {
+    "name": " phx-productshelflife-examples.docx",
+    "type": "page",
+    "wg": " phx"
+  },
+  "1Mu20h9lIsamKUtalXolpKCNkOgDv7-c6": {
+    "name": " phx-productshelflife-extras.docx",
+    "type": "page",
+    "wg": " phx"
+  },
+  "1ZNedbNbCiobJ0iPcbeb6voQGCRcIrSoi": {
+    "name": " phx-productshelflife-mappings.docx",
+    "type": "page",
+    "wg": " phx"
+  },
+  "1fTyi3LiCncsygUbXAIneJYZZLGy9ZZG-": {
+    "name": " phx-productshelflife.docx",
+    "type": "page",
+    "wg": " phx"
+  },
+  "1rrO93IP3RO2ejTz9rYWfOKDDi5qHFRSO": {
+    "name": " sd-cda-intro.docx",
+    "type": "page",
+    "wg": " sd"
+  },
+  "1n9PonYgXw71uYSHW5ocfIHfnue27Xz5v": {
+    "name": " sec-secpriv-module.docx",
+    "type": "page",
+    "wg": " sec"
+  },
+  "1oQJm7WswxqLKpg3sHZTL0N2SyFbfrzq0": {
+    "name": " sec-security-labels.docx",
+    "type": "page",
+    "wg": " sec"
+  },
+  "1SiXfxzulXqfqHsDxTO7mq5_R0NVt77fZ": {
+    "name": " sec-security.docx",
+    "type": "page",
+    "wg": " sec"
+  },
+  "1AwiProKYfi8J0BSH4oPIe_HBaPG1Tz8M": {
+    "name": " sec-signatures.docx",
+    "type": "page",
+    "wg": " sec"
+  },
+  "1xU1wjDjRHc2yYVTfpFYVfjr3Ilqt3UOa": {
+    "name": " vocab-terminologies-binding-examples.docx",
+    "type": "page",
+    "wg": " vocab"
+  },
+  "1X5TSULlpQV8PI6kzIoPrTgBKJkZzdTlL": {
+    "name": " vocab-terminologies-conceptmaps.docx",
+    "type": "page",
+    "wg": " vocab"
+  },
+  "1cGKNqUkywKIlk8PEn_ojQ6FLmGmmuuEY": {
+    "name": " vocab-terminologies-systems.docx",
+    "type": "page",
+    "wg": " vocab"
+  },
+  "1wvi7zAx-WPFPl5vFN2iC5uPOvLSdbz0y": {
+    "name": " vocab-terminologies-valuesets.docx",
+    "type": "page",
+    "wg": " vocab"
+  },
+  "1B_SRToT9tw8Lv6bqrrfXLZsDSKjWmhHI": {
+    "name": " vocab-terminologies.docx",
+    "type": "page",
+    "wg": " vocab"
+  },
+  "1CnDAvn_EcjF0Oc1mwiuz6knCgcS5ep1W": {
+    "name": " vocab-terminology-module.docx",
+    "type": "page",
+    "wg": " vocab"
+  },
+  "1fllu0BI-xjQO7FyQYXmJ4FtX-QcKRZWk": {
+    "name": " vocab-terminology-service.docx",
+    "type": "page",
+    "wg": " vocab"
+  },
+  "1wlE_1gCC2bZfOvGzvZI2NRTVPg7mfSV3": {
+    "name": "none-ansi-conformance.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1mCXbUADUDAJC8ib9km66zvmV6myBkPxB": {
+    "name": "none-ansi-infrastructure.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "14OcFvDCMKX0BoLduH7UKfhPyyrzpZ7mr": {
+    "name": "none-ansi-observation.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1O6-J5zXrFy08xWEncSBq1w_7l0GJqN3V": {
+    "name": "none-ansi-patient.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1E7Mu2Su_8WxuR5rJ2Gt37aZN1tWXlvbR": {
+    "name": "none-ansi.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1hWQy2JTp1l806eUqaIpRxeIiR4w329cw": {
+    "name": "none-broken-link.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1yt3WcMxk9zCFQ2kITi7lI4tgv3rrsQQr": {
+    "name": "none-clinicalreasoning-topics-template.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1JRqD2vBWaTmwAfrm3JpnaHN0mTz256GY": {
+    "name": "none-communicationrequest-post.svg.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1gpc1Tp9bNiSU33SLumvbUfUAUJROqtmd": {
+    "name": "none-communicationrequest-task.svg.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1MSCraJo2pj-YgrLRzjQ3ECqefAtpLUzk": {
+    "name": "none-credits.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1LRd3H1QqF8cJK9uL5_-PWHlDhQeKCgJU": {
+    "name": "none-directory.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1DT-7TwRT20jOXYidj58J4D6-JfS2QnUK": {
+    "name": "none-documentation.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1muC13LsA-Kb7CgBCoSgfMsQ1K9MTx49S": {
+    "name": "none-fhir-exchanges.svg.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1HePaUOUrbBHwGjT28wqPnKeKFmyx3FjV": {
+    "name": "none-help.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1_geclzO5N7jtOy_EQccm5dm2uQfHqTnN": {
+    "name": "none-history.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1QlqZND8gNAC4X_oXxJ0icOtoQwxWzi2l": {
+    "name": "none-index.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "14d_HTfjk9Fubxddj6sZDyUoMK9HSDTMT": {
+    "name": "none-message-async.svg.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1Hot0OYW2uWzCsefjVE2TEbOmd8USLzvB": {
+    "name": "none-message-sync.svg.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1wF8YTAy00FN59UQBNx6-55S5_o_sURIn": {
+    "name": "none-modules-fragment.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1P03m2BXNkJmRXunxW_kDzsdYfviFBMod": {
+    "name": "none-modules-list.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1es1oAnuSYCFizn7XtP7nIhQCKkHyUIyZ": {
+    "name": "none-operationslist.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "12Dme5qHXVPJyoS3crcSF9YNy0IxEzEb-": {
+    "name": "none-page.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1eN3qe4aOOiB3aUiyfDksXGx0XBHH5TO4": {
+    "name": "none-patterns.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1Uo06aTUtM8IQ0A9p7_Vp9rVzv4Kurx_S": {
+    "name": "none-polling-query.svg.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1fyFhFu7fS1RBxJrx-d4iTvGDSg0acEoK": {
+    "name": "none-polling-read.svg.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1KvKYv8MFlDTAhkXsM_yzN-x3wP0XkF-p": {
+    "name": "none-profilelist.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1IhGQA5Fe1-CVLQ3jUGHD7eutHXEcVor9": {
+    "name": "none-qa.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1lNBu9eTh4tM5DxrafjWRIkP7HT-P0cz-": {
+    "name": "none-redirect.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1GJSiyA7-y-Ixq7Hnu1Kdo1JD34VuAuia": {
+    "name": "none-rest-async.svg.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "14uRtnl3vyaqVvn_RiKkRS5rTQekXMYSR": {
+    "name": "none-rest-read.svg.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1GPvk1LijR9CHLRcSFwDZhn1B2ZZywbnD": {
+    "name": "none-rest-sync.svg.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1KU_KR7dCULgMpN9jiLa_xLFi8QdzU8bl": {
+    "name": "none-rest.svg.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1f99az5aTfE4cPe82DivjIiS7B7K165o2": {
+    "name": "none-sc.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1zli2N4bln3S6zb-pS2Rjjcq-nu5RSVK_": {
+    "name": "none-search-build.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1abHYfJbum7xvFugrbG_k1v6Sue4gMI3y": {
+    "name": "none-search-sync.svg.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1onxnEVsWmV8kz-vSufvsjoErzGqRPMc3": {
+    "name": "none-snomedct-usage.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1FUb8gdvF8Qx8q_FBpPsukLJulyzBWPcE": {
+    "name": "none-subscription-pull.svg.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "17uVHggaDaso8VDzkMpxQy0bBaCuEYCNp": {
+    "name": "none-subscription-push.svg.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1QRzwA3DC7QT2VyhjxV_JIlST8pFkIl5i": {
+    "name": "none-task.svg.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1mdjkVQ77iZHH4yYQrdhGesUZi2vY_5ca": {
+    "name": "none-toc.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1c4zFnZ2bUJjxBGuaOdv-EZ4H_-OwqVxe": {
+    "name": "none-todo.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1moI2nG93Ds6bIR3w3P1N5-Je8jCeofy5": {
+    "name": "none-w5.docx",
+    "type": "page",
+    "wg": "none"
+  },
+  "1n6AR-p5h1BGwF9FqSCxcvCtAS8r6uFKr": {
     "name": "brr-0-researchstudy.xml",
     "type": "resource",
-    "wg": "brr",
-    "claimedby": "Da"
+    "wg": "brr"
   },
-  "1N6dlqhJJsB7cGHIe4oOswJEAyyPNN3fn": {
+  "1k0RLfeJ9BwwvDsROWQ7TUatg6Nk10VxI": {
     "name": "brr-0-researchsubject.xml",
     "type": "resource",
     "wg": "brr"
   },
-  "1FJui_1top5a-9RfdaEZwUjxvsPGImhSD": {
+  "1iFDFw73GW8yDePvyDbs0L9gnFyVonozA": {
     "name": "brr-0-substancenucleicacid.xml",
     "type": "resource",
     "wg": "brr"
   },
-  "1_tF7w7IGxtMuQQARSJ2TeTd6ZhK-VaH_": {
+  "15LHxKEttrPthOW_Dix8jeqLeMNOI22Av": {
     "name": "brr-0-substancepolymer.xml",
     "type": "resource",
     "wg": "brr"
   },
-  "1FCBAdDYvXXEi1C25tfzR_FT-JYJzPDwX": {
+  "1npop2cHFp1rGJFPP219JUGTdvZ5EBL2U": {
     "name": "brr-0-substanceprotein.xml",
     "type": "resource",
     "wg": "brr"
   },
-  "1C0zx_jHLiOwRAPbrsHXaBgvXvYD0viQY": {
+  "1Ko0De2ZqqqAroc92-aMvHcI1Q4KgoCuB": {
     "name": "brr-0-substancereferenceinformation.xml",
     "type": "resource",
     "wg": "brr"
   },
-  "1bV_Z7Bk2gEnOY2DjYN770F-xw0GGvh2_": {
+  "1au9er07qXPAiehzedd3O3-y9XJBeHDfi": {
     "name": "brr-0-substancesourcematerial.xml",
     "type": "resource",
     "wg": "brr"
   },
-  "1Q53QkGWr6rUeO5HA95i_-wUeNaRyfGk_": {
+  "1dsSOJNbiEhr-W_BoUzLhZ1p2UxyCLNG3": {
     "name": "brr-1-substancedefinition.xml",
     "type": "resource",
     "wg": "brr"
   },
-  "1QqMu3jlYo9ruxRoVK7W0plTxhzVr5sw8": {
+  "1HdWcxXCQJN5_1Fwi2t5DcvKQRxLec8HC": {
     "name": "brr-2-administrableproductdefinition.xml",
     "type": "resource",
     "wg": "brr"
   },
-  "1pIQPbGVAiCuXux3summe5-cCcElGCc1p": {
+  "1vv7W8QS4K9V5ZVitSgZKybIJcF5hgRD4": {
     "name": "brr-2-clinicalusedefinition.xml",
     "type": "resource",
     "wg": "brr"
+  },
+  "10hKizmPSmNq1RQ4nvewsEXygE-9PqtuR": {
+    "name": "brr-2-ingredient.xml",
+    "type": "resource",
+    "wg": "brr"
+  },
+  "1Yr1AJWlB94-07whvgdgbgyr-rQAknd8H": {
+    "name": "brr-2-manufactureditemdefinition.xml",
+    "type": "resource",
+    "wg": "brr"
+  },
+  "1DtngH6BVLUT-nA_X2d8qeVaUXMAomycc": {
+    "name": "brr-2-packagedproductdefinition.xml",
+    "type": "resource",
+    "wg": "brr"
+  },
+  "1LZuE3Q7Z_ui01xc7RX51EUtHnJburfO7": {
+    "name": "brr-2-regulatedauthorization.xml",
+    "type": "resource",
+    "wg": "brr"
+  },
+  "1ULb6gMO_ZF1wXC54RE3lPDoaQmFd80Qu": {
+    "name": "brr-2-substance.xml",
+    "type": "resource",
+    "wg": "brr"
+  },
+  "1dr5oeQa0vFFPmKdGEk5v9X1cSGzzeZPT": {
+    "name": "brr-3-medicinalproductdefinition.xml",
+    "type": "resource",
+    "wg": "brr"
+  },
+  "1GkaKzCxflAHGKI5pl8OX_DmT6gNb13_Y": {
+    "name": "cbcc-2-consent.xml",
+    "type": "resource",
+    "wg": "cbcc"
+  },
+  "1p-GcPPVBOSDlf5c2eMv8DbnnTbpmIbjB": {
+    "name": "cds-0-artifactassessment.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1EJMg_jNaimlcaNC7pgMolLWLcNBTLm2W": {
+    "name": "cds-0-citation.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1q0DcT0Bdii0StSFIesvEwInfeGssIq1k": {
+    "name": "cds-0-eventdefinition.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1OcURbKFBL6WIxaHJbzxij6gBN7UBqysU": {
+    "name": "cds-0-evidencereport.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1lRKuSiwVHRTvbOBLVVkPOPry7SL2pmKg": {
+    "name": "cds-1-evidence.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1Ke7QKOoso6XZELZbVUuDs6Di-KL-Cd8z": {
+    "name": "cds-1-evidencevariable.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1HZiZEDEbOnAraigph2x6U58YCzBilJuD": {
+    "name": "cds-1-riskassessment.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "19cs20ni5qxfMB60xmDbuh8hIouZeHZI6": {
+    "name": "cds-2-detectedissue.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1rcVh0kWukmJ7czw5COtK9NiXN1-ZExdP": {
+    "name": "cds-2-guidanceresponse.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1ns1iU708lRlgA3D1SasxuoDw6LZTMqKD": {
+    "name": "cds-2-requestorchestration.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1Vq5Da3NgD8ag6e5e_aZIezYC0cbg2cGw": {
+    "name": "cds-3-activitydefinition.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1PV6ZhzhcbO3XI713NmtWrJVmzFK2SJE8": {
+    "name": "cds-3-library.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1b9YG6j6rNakWH0vVPRtxf0p_c3Ylkgig": {
+    "name": "cds-3-plandefinition.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1k9Noyri1e0b0ns9KJqL_oz-dzZhPnNAQ": {
+    "name": "cds-RelatedArtifact.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1O7IOmA7lSX6Kmtfwr2Gvr6shlA6lTi_4": {
+    "name": "cds-contactdetail.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1Rz7sWGu8TedzrstmclbsqmZIGYHX223S": {
+    "name": "cds-contributor.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "13-XfTV4gpro6LuXoBl7N5V8m8oLgt8Ll": {
+    "name": "cds-datarequirement.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1_a4oFJ2doJqf5Ck5wfmAXdB8uPRjrk14": {
+    "name": "cds-parameterdefinition.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1sO5g0RncdjjMS6cPdbjSxq8qAsbBdMmV": {
+    "name": "cds-triggerdefinition.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1ekId94qXMyvLl2ypI-tJZS-9_iz25FNx": {
+    "name": "cds-usagecontext.xml",
+    "type": "resource",
+    "wg": "cds"
+  },
+  "1izH1UvWzE9WNIW2ZnBPEFasVDUBdkFir": {
+    "name": "cg-0-genomicstudy.xml",
+    "type": "resource",
+    "wg": "cg"
+  },
+  "1VRkjOaPC3lfDRrw5xGmF48r8TjId3kb8": {
+    "name": "cg-1-molecularsequence.xml",
+    "type": "resource",
+    "wg": "cg"
+  },
+  "1WJUVLRUhuuafKUZiUfonhAdxbhpy_BDC": {
+    "name": "cqi-3-measure.xml",
+    "type": "resource",
+    "wg": "cqi"
+  },
+  "13eVd2ec1m8mLkcAcdyCEYAsdhcUVrlOo": {
+    "name": "cqi-3-measurereport.xml",
+    "type": "resource",
+    "wg": "cqi"
+  },
+  "1ZdKFkXW4XokSELqCpWjv6cbBLpml8xoO": {
+    "name": "dev-1-devicemetric.xml",
+    "type": "resource",
+    "wg": "dev"
+  },
+  "1C3CfmziVv14BbzHg9R2tKO_-xYIO4Luq": {
+    "name": "fhir-0-group.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "10mfr0-URcBPZy9a4Dinnn9L_gJIc87tG": {
+    "name": "fhir-0-subscriptionstatus.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1AMHrIpCHma9bcDiQM_V0qIz8xf-8osbk": {
+    "name": "fhir-0-subscriptiontopic.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1jLhhXmVryHckSBlwHt7MLGpCq0aqVNpl": {
+    "name": "fhir-0-testplan.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1rjsjHGIRBO0OXSt46itfndx2RMEtD_pt": {
+    "name": "fhir-0-testreport.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1jrW_Bjh4c8QRDMoI50Ktl_UdbG6Mg6vf": {
+    "name": "fhir-1-actordefinition.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1V91nJdpb3IWXaPEvtJ0XfqlpKWqrmEWW": {
+    "name": "fhir-1-basic.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1_ELRbzGreDwXy-yu5DrrrPwJuS51wA_u": {
+    "name": "fhir-1-compartmentdefinition.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1e04C8pB96Rp9sCF_-Kewrd_CidH4-KIB": {
+    "name": "fhir-1-examplescenario.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1Latz5Avz4onW92sqlx7OaKypgDK6abg0": {
+    "name": "fhir-1-graphdefinition.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1Nhw9sQGwsrrxHulcToaVvzx3H4qvS2Dy": {
+    "name": "fhir-1-implementationguide.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1JeXaxBpz1XvmygdR4R5WJtnK9npuOvqq": {
+    "name": "fhir-1-list.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1AqPhTvx2fQ2Y7HZiusQ-Ei1VfNW3uEft": {
+    "name": "fhir-1-requirements.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1n3761cEFGxBKjiu512brF8L9MDODfaN1": {
+    "name": "fhir-1-testreport.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1N2aI80L76B4zrOyr8W3f8bSDGt8K4vsd": {
+    "name": "fhir-2-structuremap.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1SzbUFw3NwEbc-CTIvi5SCH6EdFr5HSTx": {
+    "name": "fhir-2-subscription.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1d8C9QmxQJV-l3D5LsS81mpNdHHVq7MAq": {
+    "name": "fhir-2-testscript.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1o4VizUu472oBXq7l_UVvGghmfaawHLFq": {
+    "name": "fhir-3-questionnaire.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1cDEbTpwdQHUJk_uHzIhZeJG3bvUBqybO": {
+    "name": "fhir-3-questionnaireresponse.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1aDFD5xp_YmQ0HhroZCkc4hiZxLPK7_rv": {
+    "name": "fhir-3-searchparameter.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1PixRjx-aCf_lrkqOB2QIEezK5gilvrE2": {
+    "name": "fhir-4-testscript.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1guTv4NHnnkVfMRr23AEj07NW2HanCD2g": {
+    "name": "fhir-5-binary.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "15ahIOtBzoTSH8Dg6d9xS9WyHcRN1Q0SN": {
+    "name": "fhir-5-bundle.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1gJRp5rLb-wdp-k92xduvuE-4E6oIpk0m": {
+    "name": "fhir-5-canonicalresource.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1n92OVjA8QnfTgYqCDt2lE5_-ost2u2dm": {
+    "name": "fhir-5-capabilitystatement.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1jaeJ_Z2ZGd4Yiq6LPEMx3yxlyMwHssEQ": {
+    "name": "fhir-5-domainresource.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "16hizjThG6K9ACDBFcZwHWG3Qqzm07xW8": {
+    "name": "fhir-5-metadataresource.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1gxbUf5PtAHMq4T-bu_BLXF5jhMOu9qoX": {
+    "name": "fhir-5-operationdefinition.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1TqCPOXI2eC_3UuQuqX-kZXnvOl2Cbgzc": {
+    "name": "fhir-5-operationoutcome.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1IRINRDBxT50at7hR63YBn50kFTsfHM1M": {
+    "name": "fhir-5-parameters.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1Rxj1jgcodPqBRnV51K4db14eqO_13JpO": {
+    "name": "fhir-5-resource.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1F-iYO1t2qCCa1yh6r28mlTxkeGk48Pdm": {
+    "name": "fhir-5-structuredefinition.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1x5XmMx9OgQYTwCk3aeHd8qSnrnMRXm54": {
+    "name": "fhir-expression.xml",
+    "type": "resource",
+    "wg": "fhir"
+  },
+  "1AN062ex-n-rLmzxd4yk9OXtoUaKdCmg7": {
+    "name": "fm-0-enrollmentrequest.xml",
+    "type": "resource",
+    "wg": "fm"
+  },
+  "1VvjUFmInp-1TcxzQNR_d-IuIMo3fo2S1": {
+    "name": "fm-0-enrollmentresponse.xml",
+    "type": "resource",
+    "wg": "fm"
+  },
+  "1F8m_J-qkmP-38DzJrhsDF1HTwTCDX_bR": {
+    "name": "fm-0-invoice.xml",
+    "type": "resource",
+    "wg": "fm"
+  },
+  "1iG953ON9hssngR67DGD-g_LwPyx3xn6B": {
+    "name": "fm-1-contract.xml",
+    "type": "resource",
+    "wg": "fm"
+  },
+  "1tdpcCCxcBnw4hLmVvtUhxUnwEUB7qr-f": {
+    "name": "fm-2-claim.xml",
+    "type": "resource",
+    "wg": "fm"
+  },
+  "1o95KFTKK5BONujPaJuu-OEjEphVAFkR4": {
+    "name": "fm-2-claimresponse.xml",
+    "type": "resource",
+    "wg": "fm"
+  },
+  "131GahlKeTCJc60o--uA2hsIVuvC8n54E": {
+    "name": "fm-2-coverage.xml",
+    "type": "resource",
+    "wg": "fm"
+  },
+  "1vid_U3xRjCXLwnPtRFil02zv4RP-eaJM": {
+    "name": "fm-2-coverageeligibilityrequest.xml",
+    "type": "resource",
+    "wg": "fm"
+  },
+  "1JXyhduY_deBL-Lq8OUqdRoemVseHhnpH": {
+    "name": "fm-2-coverageeligibilityresponse.xml",
+    "type": "resource",
+    "wg": "fm"
+  },
+  "1H2eURUJQz_DcBbfv_gBc8DPOkFarIe9c": {
+    "name": "fm-2-explanationofbenefit.xml",
+    "type": "resource",
+    "wg": "fm"
+  },
+  "16TTRMDFm-ur-nOW9f3QY0hSwGMROuPTY": {
+    "name": "fm-2-paymentnotice.xml",
+    "type": "resource",
+    "wg": "fm"
+  },
+  "11XIuldWrdejnijxSMh0qhVvhAHss0C6U": {
+    "name": "fm-2-paymentreconciliation.xml",
+    "type": "resource",
+    "wg": "fm"
+  },
+  "1bJejE0ZXcmMtDJlcnf3MtPcLDHSaql5u": {
+    "name": "fm-2-visionprescription.xml",
+    "type": "resource",
+    "wg": "fm"
+  },
+  "1DNGF9EGkiw4AdsjjPhquoLbRtSPb1JOW": {
+    "name": "ii-1-imagingselection.xml",
+    "type": "resource",
+    "wg": "ii"
+  },
+  "1riTa4tOFVROZ-_Hj60awprxIa23PwlTZ": {
+    "name": "ii-4-imagingstudy.xml",
+    "type": "resource",
+    "wg": "ii"
+  },
+  "19VO0GuQ19xcdRf9gzZIH8fNFTU8nicwy": {
+    "name": "ii-unknown-imagingmanifest.xml",
+    "type": "resource",
+    "wg": "ii"
+  },
+  "1hmorPQHFrWmFAY3Gp1RDDtavt9LR6y7H": {
+    "name": "inm-1-messagedefinition.xml",
+    "type": "resource",
+    "wg": "inm"
+  },
+  "15R4KrLNWi3dOfBXcIVPKkeQvnLJhvxkC": {
+    "name": "inm-4-messageheader.xml",
+    "type": "resource",
+    "wg": "inm"
+  },
+  "18LZrlTzoWC_Fmq3WoJfb3BNpJwslKhoj": {
+    "name": "oo-0-biologicallyderivedproductdispense.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "1C52may_3_vYjKgn-cmkzIGwwtwzKMzzG": {
+    "name": "oo-0-deviceassociation.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "1otSq68Ie0JejdFp-a7REriyv44leVV0O": {
+    "name": "oo-0-devicedispense.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "1drJ-y46cirS_jM3Hk6kYw2uALlMF05tM": {
+    "name": "oo-0-inventoryitem.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "1jY5JewQGV6oo1TvoXRY3vgl6NRTotz8q": {
+    "name": "oo-0-inventoryreport.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "1ZRCH60Dwx4OXEOnYfWml6kIPUL5m8PnM": {
+    "name": "oo-0-iteminstance.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "10Keha2y1FZR1iWVnDPZMtcFeiq6WTAbq": {
+    "name": "oo-1-bodystructure.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "1OZ1Ng4talg48oZem5tCHFoiEJZnROZo0": {
+    "name": "oo-1-devicedefinition.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "1eJUE4NuhIUPH-a11skWwIiy5zEBqQolL": {
+    "name": "oo-1-devicerequest.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "1zJ6TU0YMoKkdCLsjJJ2cbYvgEDzSGlmz": {
+    "name": "oo-1-deviceusage.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "1CNG_gTGxftbVH2QGV5AvSp6EcrW7Jzey": {
+    "name": "oo-1-media.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "1leFfCLo15P5LzixP78x4A4q-DkAPqLbn": {
+    "name": "oo-1-nutritionintake.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "1yhyp105126FRREKAu4y-mrCGx1xVbzxC": {
+    "name": "oo-1-nutritionproduct.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "16YBN9L-T4WdCckg7ocalWGt5WuuWqwv5": {
+    "name": "oo-1-observationdefinition.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "1-P0ELe3SkLQLkjJ7h9D_ptzMZRVQ5RWA": {
+    "name": "oo-1-specimendefinition.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "18IkGVVeRRfhO5YGChi2KxZVm4JxJyTaK": {
+    "name": "oo-1-supplydelivery.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "1IhFovuHNDZ4Q3T6vVVOHdy2Vchy7df_8": {
+    "name": "oo-1-supplyrequest.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "1zS8OP23fZ-7MAVL2tptfRvtrln4ukMyD": {
+    "name": "oo-1-transport.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "1Dz4lcTTYmPvP0Dr4eDhc_FM2zeu3qYjX": {
+    "name": "oo-2-biologicallyderivedproduct.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "1M8CPi-BampbMGEaD1A0wRyKVXdFIPWjs": {
+    "name": "oo-2-device.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "1QQkNs2fLhYvEgepPJmpV9_3rnidA9Fwo": {
+    "name": "oo-2-nutritionorder.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "1GEZb2lMvHTkSONg7HYIqeyrvnx70AE-P": {
+    "name": "oo-2-servicerequest.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "1oKJYJmOjsjG7wxADwBoD-xL0aqRMZHtr": {
+    "name": "oo-2-specimen.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "1QXACrj1m5w4x55T8ufKWo3DKpew6SGoy": {
+    "name": "oo-2-task.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "1h3LVzd-QapV4YfFF4pjq68KhPApAJdJg": {
+    "name": "oo-3-diagnosticreport.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "1uyfw-kWJSKikWu5KkCNK5XEvw7s4qoDU": {
+    "name": "oo-4-documentreference.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "16tUVdCa3p86JlcPYnQbNSGm-IAm-q71O": {
+    "name": "oo-5-observation.xml",
+    "type": "resource",
+    "wg": "oo"
+  },
+  "1kWr7pMFN84GPc5hc-kKI3AYLZWgd7Hk6": {
+    "name": "pa-0-chargeitem.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1rLJpph1BfCcIs3MTEoU7iK2eSCQnHgjY": {
+    "name": "pa-0-chargeitemdefinition.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1xUGDMeK4gu7p7wMAzewhhf84KccPigyy": {
+    "name": "pa-0-encounterhistory.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1AZIkSfSdsU0Zl4u81AcnJ3mPUW5RHV0j": {
+    "name": "pa-0-insuranceplan.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1jxJ_eKfoVq6TGm6vY--K0xFzwook7NtI": {
+    "name": "pa-0-organizationaffiliation.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1qiIVbbb7FWJavQFZG8UAeJw2ZZrZWVNu": {
+    "name": "pa-0-verificationresult.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1VIiI5MZu73YA0mzFLlUDqANA__PDBAm7": {
+    "name": "pa-2-account.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1DKdtWtUNHKx2Ys1pkY6HhMJef0SahG7v": {
+    "name": "pa-2-encounter.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1itl5YcPdO1Gv-SvzydGMVS3kk5k8ZRfE": {
+    "name": "pa-2-endpoint.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1CX7t3IPOq1imfCErt_R0oz19eqlL_GDN": {
+    "name": "pa-2-episodeofcare.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1XbdTs4-PMZYWbYBmwFdBMd3YR3gj1HYi": {
+    "name": "pa-2-healthcareservice.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1NLtV2Nbs15UZHuVOScp5gf3TEDQ5XB6w": {
+    "name": "pa-2-person.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1RrZyyFWHay07ho_ohuDwayq2wxiMDtHI": {
+    "name": "pa-2-practitionerrole.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1xPLJ6AHsRSLGo96vkqS_cKSBtQSLm1Hs": {
+    "name": "pa-2-relatedperson.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1KadPqE-1mztANjFKXNPxmU4VyVcgH3r4": {
+    "name": "pa-3-appointment.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1HCsXQIU6iLUBngLLhU2Ao-6gDfHn-z-S": {
+    "name": "pa-3-appointmentresponse.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1iIQbfeRs6p3o_5fU7IJBki1JD4rP97Y-": {
+    "name": "pa-3-location.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "12WxrpKmadQru7WLVs13kDzBDlTFzbmOK": {
+    "name": "pa-3-organization.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1XKRcxnv5o8xVNJhzIAKITN5SxQC8Ej9j": {
+    "name": "pa-3-practitioner.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1Fw6WanSXDU_rUEGfwOZaBsEP170wU5XF": {
+    "name": "pa-3-schedule.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1FGwvfHfYcYk2yE8UstlvzWy8Bx2UxZSc": {
+    "name": "pa-3-slot.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1y4EgSWeZFQ_PX0GAeJSFXnMp5dUaK_B9": {
+    "name": "pa-5-patient.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1irWOSSDGEf1dPj-HhUW4BiC3u95J0X_Y": {
+    "name": "pa-availability.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1NQn2pYhArrYSQGcCufmXWDIsScdDJJPQ": {
+    "name": "pa-extendedcontactdetail.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1g3PEqob3dbN9KORbiUI1LBLMGWPpvguM": {
+    "name": "pa-monetarycomponent.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1x8NJbaz3LOpG9rkDdzi6TUTi3iLRuElq": {
+    "name": "pa-virtualservicedetail.xml",
+    "type": "resource",
+    "wg": "pa"
+  },
+  "1KY72E-iHX_SwkC4D4F2ncUikWxOvOHeJ": {
+    "name": "pc-0-adverseevent.xml",
+    "type": "resource",
+    "wg": "pc"
+  },
+  "1uZvoW6KExc-LJkAt63AgxUIMOol53wZd": {
+    "name": "pc-0-clinicalimpression.xml",
+    "type": "resource",
+    "wg": "pc"
+  },
+  "1BXV9MmDtLm1D-1TPEf6Jakxu9-fJn4wJ": {
+    "name": "pc-0-conditiondefinition.xml",
+    "type": "resource",
+    "wg": "pc"
+  },
+  "14Ap3YtAbCNVL0tUy_9QGwSfHzXIn2oVw": {
+    "name": "pc-0-linkage.xml",
+    "type": "resource",
+    "wg": "pc"
+  },
+  "1ogBGlCN5ipDbnaiDquZNVG25MHDWQVqr": {
+    "name": "pc-1-flag.xml",
+    "type": "resource",
+    "wg": "pc"
+  },
+  "1Y77Ry8BX1cQjHpQnBjgeOBWO9Yab7TLf": {
+    "name": "pc-2-careplan.xml",
+    "type": "resource",
+    "wg": "pc"
+  },
+  "1_z2MgkOWxsS7RhcKbBAAGwZR-wsEVZfu": {
+    "name": "pc-2-careteam.xml",
+    "type": "resource",
+    "wg": "pc"
+  },
+  "1FqPmwESCFR1RkAPjnAwdF8rJvm8JvkaA": {
+    "name": "pc-2-communication.xml",
+    "type": "resource",
+    "wg": "pc"
+  },
+  "1lWSkSVrvELaFWp-OmHXdLq5Jj9AuR9YN": {
+    "name": "pc-2-communicationrequest.xml",
+    "type": "resource",
+    "wg": "pc"
+  },
+  "1P44NfuF1ryigasiRkoJniV14pxufYxQH": {
+    "name": "pc-2-familymemberhistory.xml",
+    "type": "resource",
+    "wg": "pc"
+  },
+  "1wNAym7cHs56vRLzdRc6PiIiwETHqZwaB": {
+    "name": "pc-2-goal.xml",
+    "type": "resource",
+    "wg": "pc"
+  },
+  "1eyXZEc7sXqYDaGB7Mi4mjIUKbKGeKZv1": {
+    "name": "pc-3-allergyintolerance.xml",
+    "type": "resource",
+    "wg": "pc"
+  },
+  "1f1UbwGYqFWwuHuJ5tfzyZpMbdnf4pbir": {
+    "name": "pc-3-condition.xml",
+    "type": "resource",
+    "wg": "pc"
+  },
+  "1HUsNI4OE3LWztnLFSEd-3blaZfdUfe2-": {
+    "name": "pc-3-procedure.xml",
+    "type": "resource",
+    "wg": "pc"
+  },
+  "1VTsP_gZHtR9Rl5fwTbIROm1qyT7q1_Bu": {
+    "name": "pher-1-immunizationevaluation.xml",
+    "type": "resource",
+    "wg": "pher"
+  },
+  "1-Nov1mCSEzIcdBBiiqbh3fQszOJK8lKj": {
+    "name": "pher-1-immunizationrecommendation.xml",
+    "type": "resource",
+    "wg": "pher"
+  },
+  "1ifkDOT__4B6XnaPmPkrB4REfCAn4D5Np": {
+    "name": "pher-5-immunization.xml",
+    "type": "resource",
+    "wg": "pher"
+  },
+  "1f65rJS6QbMICMZf9Av1Pkm_5rXbJdgU6": {
+    "name": "phx-0-formularyitem.xml",
+    "type": "resource",
+    "wg": "phx"
+  },
+  "1Br2RjLRliRSlqUHmr3ESEIKymGhQWMOR": {
+    "name": "phx-1-medicationknowledge.xml",
+    "type": "resource",
+    "wg": "phx"
+  },
+  "11rJrTORQS6xBZbFc2jo-SaRxrAwjNH9X": {
+    "name": "phx-2-medicationadministration.xml",
+    "type": "resource",
+    "wg": "phx"
+  },
+  "1mJRHOAIifNj7sJMoB7JN_pobj1jVljQt": {
+    "name": "phx-2-medicationdispense.xml",
+    "type": "resource",
+    "wg": "phx"
+  },
+  "14sUoEYjoxynvx9O-eJRMHcSCTr01tO9W": {
+    "name": "phx-3-medication.xml",
+    "type": "resource",
+    "wg": "phx"
+  },
+  "1JjzIzTFLghv3NeM1V64CAsqKIc6HKE_0": {
+    "name": "phx-3-medicationrequest.xml",
+    "type": "resource",
+    "wg": "phx"
+  },
+  "1C1fpmuDGnIZD_sMC3_p8RfA9EHl2Az_8": {
+    "name": "phx-3-medicationstatement.xml",
+    "type": "resource",
+    "wg": "phx"
+  },
+  "1F6KRryCaJwyMSpnZGN1Sgw82GGRLPN0w": {
+    "name": "phx-3-medicationusage.xml",
+    "type": "resource",
+    "wg": "phx"
+  },
+  "1L6IaPpBcWvZKDaPOJlc0dKzE-ZaFB3Xq": {
+    "name": "phx-dosage.xml",
+    "type": "resource",
+    "wg": "phx"
+  },
+  "1DIdOlXt_THoRz_pbXKO2wm4ATI9FlOh7": {
+    "name": "sd-2-composition.xml",
+    "type": "resource",
+    "wg": "sd"
+  },
+  "15B3u68y4FFGhqQxms-a9uVnVknCq4NL1": {
+    "name": "sec-0-permission.xml",
+    "type": "resource",
+    "wg": "sec"
+  },
+  "17WJp4cREDx-bqG79TT9xELjpFbfOi8PK": {
+    "name": "sec-3-auditevent.xml",
+    "type": "resource",
+    "wg": "sec"
+  },
+  "1NZkyZF2FGd9pBSWHUqa7-EkV4Sc-Ntf0": {
+    "name": "sec-3-provenance.xml",
+    "type": "resource",
+    "wg": "sec"
+  },
+  "1_EovqG7BXcckr46nMv8BhVcXKudKCmdA": {
+    "name": "vocab-1-conceptmap.xml",
+    "type": "resource",
+    "wg": "vocab"
+  },
+  "1QtKSf2FqZPIBKNmh2wr-7X00k8tQBGtX": {
+    "name": "vocab-1-terminologycapabilities.xml",
+    "type": "resource",
+    "wg": "vocab"
+  },
+  "1GQnsdVHxYebFhb7_CbtHrGEJWeM-hFzJ": {
+    "name": "vocab-2-namingsystem.xml",
+    "type": "resource",
+    "wg": "vocab"
+  },
+  "1X0lLKSSr7oV7sFSxzxAo9RdKN4PSC4JO": {
+    "name": "vocab-5-codesystem.xml",
+    "type": "resource",
+    "wg": "vocab"
+  },
+  "1KE4xo4-J_K0_7gCUApeftFB1WLzejdoR": {
+    "name": "vocab-5-valueset.xml",
+    "type": "resource",
+    "wg": "vocab"
   }
 }
