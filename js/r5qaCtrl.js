@@ -14,6 +14,9 @@ angular.module("sampleApp")
 
                         item.hide = false
 
+                        if ($scope.input.claimedonly && ! item.claimedby ) {
+                            item.hide = true
+                        }
 
                         if ($scope.input.unclaimedonly && item.claimedby ) {
                             item.hide = true
@@ -29,6 +32,10 @@ angular.module("sampleApp")
                     $scope.hashByWG[key].pages.forEach(function (item) {
 
                         item.hide = false
+
+                        if ($scope.input.claimedonly && ! item.claimedby ) {
+                            item.hide = true
+                        }
 
                         if ($scope.input.unclaimedonly && item.claimedby ) {
                             item.hide = true

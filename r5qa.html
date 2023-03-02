@@ -74,6 +74,7 @@
 
             <div class="col-md-1 col-sm-1">
                 <form class="navbar-form navbar-left">
+                    <a href="https://docs.google.com/document/d/1IwxMHBO5_Gi0Nl3qM8NMUhpbJ_xmkM57iXwcK7KhmNM/edit" target="_blank">Help</a>
                     <img ng-show="waiting" src="css/ajax_loader_blue_32.gif"/>
                 </form>
             </div>
@@ -94,6 +95,7 @@
 
             <div><checkbox ng-change = "setVisibility()" ng-model="input.fmm5only"></checkbox> Only show FMM 5 resources</div>
             <div><checkbox ng-change = "setVisibility()" ng-model="input.unclaimedonly"></checkbox> Only show unclaimed pages</div>
+            <div><checkbox ng-change = "setVisibility()" ng-model="input.claimedonly"></checkbox> Only show claimed pages</div>
 
             <br/>
             <select class="form-control" ng-model="input.wg"
