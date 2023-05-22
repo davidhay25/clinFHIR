@@ -212,24 +212,23 @@
         <nav ng-hide="startupParams.hideNav" class="navbar navbar-default navbar-fixed-top" role="navigation">
 
             <div class="container-fluid">
-                <div class="col-md-3 col-sm-3">
+                <div class="col-md-2 col-sm-2">
                     <span>
                         <a class="navbar-brand" href="#" ng-click="showVersion()">
-                            Logical Modeller: {{currentType.url | getLogicalID}}
+                            Logical Modeller: <div>{{currentType.url | getLogicalID}}</div>
 
                         </a>
                     </span>
 
 
                 </div>
-                <div class="col-md-3 col-sm-3">
+                <div class="col-md-2 col-sm-2">
 
                     <span class ="navbar-text ">
-                        <i class="glyphicon glyphicon-edit clickable" ng-click="selectServer()"></i>
+                        Conf: <i class="glyphicon glyphicon-edit clickable" ng-click="selectServer()"></i>
                             {{appConfigSvc.getCurrentConformanceServer().url}}
 
                     </span>
-
 
                 </div>
 
@@ -246,7 +245,7 @@
 
                 </div>
 
-                <div class="col-md-2 col-sm-2">
+                <div class="col-md-4 col-sm-4">
                     <div ng-hide = "loadedFromBookmark">
                         <div class="navbar-text clickable" ng-show="LMSelectorVisible" ng-click="hideLMSelector()">Hide Selector</div>
                         <div class="navbar-text clickable" ng-hide="LMSelectorVisible" ng-click="showLMSelector()">Show Selector</div>
@@ -255,14 +254,19 @@
                     <div class="navbar-text clickable" ng-show="LMDetailVisible" ng-click="hideDetailSelector()">Hide Detail</div>
                     <div class="navbar-text clickable" ng-hide="LMDetailVisible" ng-click="showDetailSelector()">Show Detail</div>
 
-                    <form ng-show="isDirty" class="navbar-form">
+                    <form class="navbar-form">
                         <button ng-show="isDirty && currentUserIsEditor"
-                                class="btn btn-success pull-right" ng-click="saveModel()">Save model</button>
-                    </form>
+                                class="btn btn-success" style="padding-right: 8px" ng-click="saveModel()">Save model</button>
 
+                        <button ng-show="SD && !loadedFromBookmark && !treeData.shortCut.shortCut"
+                                class="btn btn-warning iconSpacing" ng-click="generateShortCut()">Share</button>
+
+                    </form>
+<!--
                     <form ng-show="SD && !loadedFromBookmark && !treeData.shortCut.shortCut" class="navbar-form">
                         <button class="btn btn-success pull-right iconSpacing" ng-click="generateShortCut()">Share</button>
                     </form>
+                    -->
                 </div>
 
                 <div class="col-md-1 col-sm-1">
@@ -1044,7 +1048,13 @@
                                     </td>
                                 </tr>
 
+                                <tr ng-show="selectedNode.data.code">
+                                    <td width="20%">Code</td>
+                                    <td>{{selectedNode.data.code[0].code}}  <span class="pull-right">{{selectedNode.data.code[0].system}}</span>
 
+
+                                    </td>
+                                </tr>
 
 
                                 <tr ng-show = "selectedNode.data.edStatus && (selectedNode.data.edStatus !== 'included')" class="required">
@@ -1055,6 +1065,7 @@
 
                                 </td>
                                 </tr>
+
                                 <tr ng-show="selectedNode.data.lmReviewReason">
                                     <td>Reason for review</td>
                                     <td>

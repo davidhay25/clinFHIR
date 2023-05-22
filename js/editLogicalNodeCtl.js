@@ -238,10 +238,17 @@ angular.module("sampleApp")
                     return;
                 }
 
-
-                    //editing an existing node
-                $scope.pathDescription = 'Path'
                 var data = node.data;
+                    //editing an existing node
+
+                if (data.code && data.code.length > 0) {
+                    $scope.input.code = {}
+                    $scope.input.code.code = data.code[0].code
+                    $scope.input.code.system = data.code[0].system || ""
+                }
+
+                $scope.pathDescription = 'Path'
+
                 $scope.input.name = data.name;
                 $scope.input.pathSegment = data.pathSegment;
                 $scope.input.short= data.short;
@@ -828,6 +835,17 @@ angular.module("sampleApp")
                        // vo.idFromSD =
                    // }
 
+
+                    //add the code - may 2013
+                    if ($scope.input.code.code) {
+                        let code = {code:$scope.input.code.code}
+                        if ($scope.input.code.system) {
+                            code.system = $scope.input.code.system
+                        } else {
+                            code.system = "http://snomed.info/sct"
+                        }
+                        vo.code = [code]
+                    }
 
                     vo.name = $scope.input.name;
                     vo.short = $scope.input.short;

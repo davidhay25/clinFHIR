@@ -2870,6 +2870,7 @@ angular.module("sampleApp")
 
                         }
 
+                        item.data.code = ed.code     //array - 2013
 
                         //show if an element is multiple...
                         if (ed.max == '*') {
@@ -3324,6 +3325,8 @@ angular.module("sampleApp")
                         ed.label = item.text;
                         ed.comment = data.comments;
                     }
+
+                    ed.code = data.code         //an array 2013
 
                     ed.id = data.idFromSD || data.path;  //gets assigned to the original path when the element is created
                     ed.path = data.path;
