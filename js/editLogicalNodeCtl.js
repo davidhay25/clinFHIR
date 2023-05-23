@@ -837,7 +837,7 @@ angular.module("sampleApp")
 
 
                     //add the code - may 2013
-                    if ($scope.input.code.code) {
+                    if ($scope.input.code && $scope.input.code.code) {
                         let code = {code:$scope.input.code.code}
                         if ($scope.input.code.system) {
                             code.system = $scope.input.code.system
