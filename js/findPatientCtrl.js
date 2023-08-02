@@ -203,7 +203,7 @@ angular.module("sampleApp")
                             */
 
                             /* this is the save,*/
-                            console.log(bundle)
+                            //console.log(bundle)
                             $http.post(url,bundle,config).then(
                                 function (data) {
                                     //alert("Data saved")

@@ -489,16 +489,12 @@ console.log(url)
 
             let dataServer = appConfigSvc.getCurrentDataServer()
             let qry = dataServer.url + url
-           // let config = {}
-          //  if (dataServer.apiKey) {
-            //    config.headers = {'x-api-key':dataServer.apiKey}
-         //   }
 
+            let tmp = serverInteractionSvc.getServerConfig()
+            //tmp.headers = tmp.headers || {}
+           // tmp.headers.accept = "application/fhir+xml"
 
-            //var qry = config.servers.data + url;
-
-            //console.log(qry)
-            return $http.get(qry,serverInteractionSvc.getServerConfig());
+            return $http.get(qry,tmp);
         },
         localServerQuery : function(url) {
 
@@ -1767,15 +1763,7 @@ console.log(summary);
 
             var returnBundle = {resourceType:'Bundle',total:0,type:'searchset',link:[],entry:[]};
             returnBundle.link.push({relation:'self',url:url})
-/* - not really adding value...
-            //add the count parameter
-            if (url.indexOf('?') > -1) {
-                url += "&_count=100"
-            } else {
-                url += "?_count=100"
-            }
 
-*/
             var deferred = $q.defer();
 
             limit = limit || 100;

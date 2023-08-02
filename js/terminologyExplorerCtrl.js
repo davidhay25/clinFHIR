@@ -27,7 +27,7 @@ angular.module("sampleApp")
             }
 
             $scope.canShowItem = function(item) {
-                console.log(item)
+                //console.log(item)
                 if (! $scope.input.selectedSystem || $scope.input.selectedSystem == 'All') {return true}
 
                 let canShow = false
