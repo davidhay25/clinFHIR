@@ -121,9 +121,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Coverage"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Coverage"]
         }
       ],
       "short": "The party(s), such as insurances, that may contribute to the payment of this account",
@@ -237,9 +235,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Account"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Account"]
         }
       ],
       "short": "Reference to a parent Account",
@@ -374,9 +370,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Group"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Group"]
         }
       ],
       "short": "Type of individual the activity definition is intended for",
@@ -650,9 +644,7 @@
       "types": [
         {
           "code": "canonical",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Library"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Library"]
         }
       ],
       "short": "Logic used by the activity definition",
@@ -798,9 +790,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Where it should happen",
@@ -889,9 +879,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "How much is administered/consumed/supplied",
@@ -1135,9 +1123,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Encounter created as part of",
@@ -1192,9 +1178,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Condition"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
         }
       ],
       "short": "Effect on the subject due to this event",
@@ -1208,9 +1192,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Location where adverse event occurred",
@@ -1614,9 +1596,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Patient"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
         }
       ],
       "short": "Who the sensitivity is for",
@@ -1630,9 +1610,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Encounter when the allergy or intolerance was asserted",
@@ -2065,9 +2043,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Additional information to support the appointment",
@@ -2120,9 +2096,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Slot"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Slot"]
         }
       ],
       "short": "The slots that this appointment is filling",
@@ -2690,9 +2664,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Where",
@@ -2882,9 +2854,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Specific instance of resource",
@@ -3091,9 +3061,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Identifies the focus of this resource",
@@ -3161,9 +3129,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Identifies another resource to use as proxy when enforcing access control",
@@ -3413,9 +3379,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Substance"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Substance"]
         }
       ],
       "short": "Substance added during processing",
@@ -3668,9 +3632,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Patient"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
         }
       ],
       "short": "Who this is about",
@@ -5337,9 +5299,7 @@
             }
           ],
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/CarePlan"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/CarePlan"]
         }
       ],
       "short": "Fulfills CarePlan",
@@ -5359,9 +5319,7 @@
             }
           ],
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/CarePlan"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/CarePlan"]
         }
       ],
       "short": "CarePlan replaced by this CarePlan",
@@ -5382,9 +5340,7 @@
             }
           ],
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/CarePlan"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/CarePlan"]
         }
       ],
       "short": "Part of referenced CarePlan",
@@ -5499,9 +5455,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Encounter created as part of",
@@ -5589,9 +5543,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/CareTeam"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/CareTeam"]
         }
       ],
       "short": "Who's involved in plan?",
@@ -5605,9 +5557,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Condition"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
         }
       ],
       "short": "Health issues this plan addresses",
@@ -5622,9 +5572,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Information considered as part of plan",
@@ -5639,9 +5587,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Goal"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Goal"]
         }
       ],
       "short": "Desired outcome of plan",
@@ -5688,9 +5634,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Appointment, Encounter, Procedure, etc.",
@@ -5867,9 +5811,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Goal"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Goal"]
         }
       ],
       "short": "Goals this activity relates to",
@@ -5949,9 +5891,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Where it should happen",
@@ -6015,9 +5955,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "How to consume/day?",
@@ -6031,9 +5969,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "How much to administer/supply/consume",
@@ -6158,9 +6094,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Encounter created as part of",
@@ -6289,9 +6223,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Condition"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
         }
       ],
       "short": "Why the care team exists",
@@ -7006,9 +6938,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Account"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Account"]
         }
       ],
       "short": "Account to place this charge",
@@ -7036,9 +6966,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Further information supporting this charge",
@@ -7596,9 +7524,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Patient"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
         }
       ],
       "short": "The recipient of the products and services",
@@ -7744,9 +7670,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Claim"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Claim"]
         }
       ],
       "short": "Reference to the related claim",
@@ -7900,9 +7824,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Servicing facility",
@@ -8103,9 +8025,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Data to be provided",
@@ -8169,9 +8089,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Condition"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
         }
       ],
       "short": "Nature of illness or problem",
@@ -8307,9 +8225,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Procedure"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Procedure"]
         }
       ],
       "short": "Specific clinical procedure",
@@ -8328,9 +8244,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Device"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Device"]
         }
       ],
       "short": "Unique device identifier",
@@ -8399,9 +8313,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Coverage"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Coverage"]
         }
       ],
       "short": "Insurance information",
@@ -8507,9 +8419,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Where the event occurred",
@@ -8717,9 +8627,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Place of service or where product was supplied",
@@ -8738,9 +8646,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Count of products or services",
@@ -8795,9 +8701,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Device"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Device"]
         }
       ],
       "short": "Unique device identifier",
@@ -8848,9 +8752,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Encounters related to this billed item",
@@ -8985,9 +8887,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Count of products or services",
@@ -9042,9 +8942,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Device"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Device"]
         }
       ],
       "short": "Unique device identifier",
@@ -9178,9 +9076,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Count of products or services",
@@ -9235,9 +9131,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Device"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Device"]
         }
       ],
       "short": "Unique device identifier",
@@ -9354,9 +9248,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Patient"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
         }
       ],
       "short": "The recipient of the products and services",
@@ -9418,9 +9310,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Claim"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Claim"]
         }
       ],
       "short": "Id of resource triggering adjudication",
@@ -9856,9 +9746,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Place of service or where product was supplied",
@@ -9877,9 +9765,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Count of products or services",
@@ -10035,9 +9921,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Count of products or services",
@@ -10156,9 +10040,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Count of products or services",
@@ -10561,9 +10443,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Coverage"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Coverage"]
         }
       ],
       "short": "Insurance information",
@@ -10779,9 +10659,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Encounter created as part of",
@@ -11054,9 +10932,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Information supporting the clinical impression",
@@ -11320,9 +11196,7 @@
       "types": [
         {
           "code": "canonical",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/ValueSet"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/ValueSet"]
         }
       ],
       "short": "Canonical reference to the value set with entire code system",
@@ -11799,9 +11673,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Request fulfilled by this communication",
@@ -11816,9 +11688,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Part of this action",
@@ -11978,9 +11848,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Resources that pertain to this communication",
@@ -11995,9 +11863,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Encounter created as part of",
@@ -12141,9 +12007,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Message part content",
@@ -12186,9 +12050,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Fulfills plan or proposal",
@@ -12355,9 +12217,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Resources that pertain to this communication request",
@@ -12372,9 +12232,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Encounter created as part of",
@@ -12408,9 +12266,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Message part content",
@@ -12896,9 +12752,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Who and/or what the composition is about",
@@ -12913,9 +12767,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Context of the Composition",
@@ -13177,9 +13029,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "The event(s) being documented",
@@ -13260,9 +13110,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Who/what the section is about, when it is not about the subject of composition",
@@ -13329,9 +13177,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "A reference to data that supports this section",
@@ -13590,9 +13436,7 @@
         },
         {
           "code": "canonical",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/ValueSet"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/ValueSet"]
         }
       ],
       "short": "The source value set that contains the concepts that are being mapped",
@@ -13610,9 +13454,7 @@
         },
         {
           "code": "canonical",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/ValueSet"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/ValueSet"]
         }
       ],
       "short": "The target value set which provides context for the mappings",
@@ -14100,9 +13942,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Encounter created as part of",
@@ -14319,9 +14159,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Supporting information found elsewhere",
@@ -14419,9 +14257,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Patient"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
         }
       ],
       "short": "Who the consent applies to",
@@ -14863,9 +14699,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "The actual data reference",
@@ -14959,9 +14793,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Contract"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Contract"]
         }
       ],
       "short": "Source Contract Definition",
@@ -15050,9 +14882,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Contract Target Entity",
@@ -15083,9 +14913,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "A sphere of control governed by an authoritative jurisdiction, organization, or person",
@@ -15099,9 +14927,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Specific Location",
@@ -15208,9 +15034,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Focus of contract interest",
@@ -15426,9 +15250,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Term Concern",
@@ -15650,9 +15472,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Negotiable offer asset",
@@ -15767,9 +15587,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "The actual answer response",
@@ -15871,9 +15689,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Associated entities",
@@ -15936,9 +15752,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Creator,custodian or owner",
@@ -16095,9 +15909,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Contract Valued Item Type",
@@ -16137,9 +15949,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Count of Contract Valued Items",
@@ -16692,9 +16502,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Extra Information",
@@ -17014,9 +16822,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Patient"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
         }
       ],
       "short": "Plan beneficiary",
@@ -17213,9 +17019,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         },
         {
           "code": "Money"
@@ -17291,9 +17095,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Contract"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Contract"]
         }
       ],
       "short": "Contract details",
@@ -17377,9 +17179,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Patient"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
         }
       ],
       "short": "Intended recipient of products and services",
@@ -17475,9 +17275,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Servicing facility",
@@ -17518,9 +17316,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Data to be provided",
@@ -17576,9 +17372,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Coverage"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Coverage"]
         }
       ],
       "short": "Insurance information",
@@ -17705,9 +17499,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Count of products or services",
@@ -17767,9 +17559,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Condition"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
         }
       ],
       "short": "Nature of illness or problem",
@@ -17788,9 +17578,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Product or service details",
@@ -17856,9 +17644,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Patient"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
         }
       ],
       "short": "Intended recipient of products and services",
@@ -17998,9 +17784,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Coverage"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Coverage"]
         }
       ],
       "short": "Insurance information",
@@ -18469,9 +18253,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Patient"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
         }
       ],
       "short": "Associated patient",
@@ -18519,9 +18301,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Problem resource",
@@ -18567,9 +18347,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Supporting information",
@@ -19153,9 +18931,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Patient"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
         }
       ],
       "short": "Patient to whom Device is affixed",
@@ -19199,9 +18975,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Where the device is found",
@@ -19255,9 +19029,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Device"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Device"]
         }
       ],
       "short": "The parent device",
@@ -19836,9 +19608,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Device"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Device"]
         }
       ],
       "short": "Describes the link to the source Device",
@@ -19852,9 +19622,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Device"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Device"]
         }
       ],
       "short": "Describes the link to the parent Device",
@@ -20044,9 +19812,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "What request fulfills",
@@ -20060,9 +19826,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "What request replaces",
@@ -20144,9 +19908,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Device"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Device"]
         },
         {
           "code": "CodeableConcept"
@@ -20240,9 +20002,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Encounter motivating request",
@@ -20402,9 +20162,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Additional clinical information",
@@ -20588,9 +20346,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Device"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Device"]
         }
       ],
       "short": "Reference to device used",
@@ -20779,9 +20535,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Health care event when test ordered",
@@ -20867,9 +20621,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Specimen"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Specimen"]
         }
       ],
       "short": "Specimens this report is based on",
@@ -20945,9 +20697,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Media"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Media"]
         }
       ],
       "short": "Reference to the image source",
@@ -21175,9 +20925,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Items in manifest",
@@ -21220,9 +20968,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Related Resource",
@@ -21660,9 +21406,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Patient"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
         }
       ],
       "short": "Patient demographics from source",
@@ -21676,9 +21420,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Related identifiers or resources",
@@ -22978,9 +22720,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Account"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Account"]
         }
       ],
       "short": "The set of accounts that may be used for billing for this Encounter",
@@ -23179,9 +22919,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Location the encounter takes place",
@@ -23268,9 +23006,7 @@
             }
           ],
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Another Encounter this encounter is part of",
@@ -23539,9 +23275,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Patient"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
         }
       ],
       "short": "The subject to be enrolled",
@@ -23555,9 +23289,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Coverage"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Coverage"]
         }
       ],
       "short": "Insurance information",
@@ -23809,9 +23541,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Condition"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
         }
       ],
       "short": "Conditions/problems/diagnoses this episode of care is for",
@@ -23856,9 +23586,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Patient"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
         }
       ],
       "short": "The patient who is the focus of this episode of care",
@@ -23934,9 +23662,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/CareTeam"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/CareTeam"]
         }
       ],
       "short": "Other practitioners facilitating this episode of care",
@@ -23950,9 +23676,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Account"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Account"]
         }
       ],
       "short": "The set of accounts that may be used for billing for this EpisodeOfCare",
@@ -24088,9 +23812,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Group"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Group"]
         }
       ],
       "short": "Type of individual the event definition is focused on",
@@ -25106,9 +24828,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Patient"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
         }
       ],
       "short": "The recipient of the products and services",
@@ -25273,9 +24993,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Claim"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Claim"]
         }
       ],
       "short": "Reference to the related claim",
@@ -25426,9 +25144,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Servicing Facility",
@@ -25442,9 +25158,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Claim"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Claim"]
         }
       ],
       "short": "Claim reference",
@@ -25722,9 +25436,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Data to be provided",
@@ -25788,9 +25500,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Condition"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
         }
       ],
       "short": "Nature of illness or problem",
@@ -25925,9 +25635,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Procedure"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Procedure"]
         }
       ],
       "short": "Specific clinical procedure",
@@ -25946,9 +25654,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Device"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Device"]
         }
       ],
       "short": "Unique device identifier",
@@ -26003,9 +25709,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Coverage"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Coverage"]
         }
       ],
       "short": "Insurance information",
@@ -26081,9 +25785,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Where the event occurred",
@@ -26291,9 +25993,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Place of service or where product was supplied",
@@ -26312,9 +26012,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Count of products or services",
@@ -26369,9 +26067,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Device"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Device"]
         }
       ],
       "short": "Unique device identifier",
@@ -26422,9 +26118,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Encounters related to this billed item",
@@ -26650,9 +26344,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Count of products or services",
@@ -26707,9 +26399,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Device"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Device"]
         }
       ],
       "short": "Unique device identifier",
@@ -26856,9 +26546,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Count of products or services",
@@ -26913,9 +26601,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Device"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Device"]
         }
       ],
       "short": "Unique device identifier",
@@ -27091,9 +26777,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Place of service or where product was supplied",
@@ -27112,9 +26796,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Count of products or services",
@@ -27270,9 +26952,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Count of products or services",
@@ -27391,9 +27071,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Count of products or services",
@@ -27942,9 +27620,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Patient"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
         }
       ],
       "short": "The patient this person is related to",
@@ -28067,9 +27743,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Alert relevant during encounter",
@@ -29261,9 +28935,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Encounter during which the response was returned",
@@ -29291,9 +28963,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Device"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Device"]
         }
       ],
       "short": "Device returning the guidance",
@@ -29515,9 +29185,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Location(s) where service may be provided",
@@ -29598,9 +29266,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Location(s) service is intended for/available to",
@@ -29890,9 +29556,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Endpoint"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Endpoint"]
         }
       ],
       "short": "Technical endpoints providing access to electronic services operated for the healthcare service",
@@ -29977,9 +29641,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Patient"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
         }
       ],
       "short": "Who was immunized",
@@ -29993,9 +29655,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Encounter immunization was part of",
@@ -30072,9 +29732,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Where immunization occurred",
@@ -30166,9 +29824,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Amount of vaccine administered",
@@ -30597,9 +30253,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Patient"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
         }
       ],
       "short": "Who this evaluation is for",
@@ -30787,9 +30441,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Patient"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
         }
       ],
       "short": "Who this profile is for",
@@ -31056,9 +30708,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Patient observations supporting recommendation",
@@ -31489,9 +31139,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Location of the resource",
@@ -31603,9 +31251,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Binary"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Binary"]
         }
       ],
       "short": "Where to find that page",
@@ -31786,9 +31432,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Location of the resource",
@@ -32041,9 +31685,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Where product applies",
@@ -32128,9 +31770,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Endpoint"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Endpoint"]
         }
       ],
       "short": "Technical endpoint",
@@ -32323,9 +31963,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Where product applies",
@@ -32716,9 +32354,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Account"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Account"]
         }
       ],
       "short": "Account that is being balanced",
@@ -33044,9 +32680,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Group"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Group"]
         }
       ],
       "short": "Type of individual the library content is focused on",
@@ -33424,9 +33058,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Resource being linked",
@@ -33545,9 +33177,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Context in which list created",
@@ -33687,9 +33317,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Actual entry",
@@ -33971,9 +33599,7 @@
             }
           ],
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Another Location this one is physically a part of",
@@ -34071,9 +33697,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Endpoint"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Endpoint"]
         }
       ],
       "short": "Technical endpoints providing access to services operated for the location",
@@ -34208,9 +33832,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Group"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Group"]
         }
       ],
       "short": "E.g. Patient, Practitioner, RelatedPerson, Organization, Location, Device",
@@ -34485,9 +34107,7 @@
       "types": [
         {
           "code": "canonical",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Library"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Library"]
         }
       ],
       "short": "Logic used by the measure",
@@ -34993,9 +34613,7 @@
       "types": [
         {
           "code": "canonical",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Measure"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Measure"]
         }
       ],
       "short": "What measure was calculated",
@@ -35165,9 +34783,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/List"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/List"]
         }
       ],
       "short": "For subject-list reports, the subject results in this population",
@@ -35329,9 +34945,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/List"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/List"]
         }
       ],
       "short": "For subject-list reports, the subject results in this population",
@@ -35358,9 +34972,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "What data was used to calculate the measure score",
@@ -35407,9 +35019,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Part of referenced event",
@@ -35519,9 +35129,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Encounter associated with media",
@@ -36101,9 +35709,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Additional information to support administration",
@@ -36238,9 +35844,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Device"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Device"]
         }
       ],
       "short": "Device used to administer",
@@ -36349,9 +35953,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Amount of medication per dose",
@@ -36369,9 +35971,7 @@
         },
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Dose quantity per unit of time",
@@ -36419,9 +36019,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Procedure"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Procedure"]
         }
       ],
       "short": "Event that dispense is part of",
@@ -36557,9 +36155,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Information that supports the dispensing of the medication",
@@ -36625,9 +36221,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Where the dispense occurred",
@@ -36676,9 +36270,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Amount dispensed",
@@ -36692,9 +36284,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Amount of medication expressed as a timing amount",
@@ -36734,9 +36324,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Where the medication was sent",
@@ -36982,9 +36570,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Amount of drug in package",
@@ -37142,9 +36728,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Substance"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Substance"]
         }
       ],
       "short": "Medication(s) or substance(s) contained in the medication",
@@ -37393,9 +36977,7 @@
         },
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Specific characteristic that is relevant to the administration guideline",
@@ -37492,9 +37074,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "The number of product units the package would contain if fully loaded",
@@ -37545,9 +37125,7 @@
         },
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         },
         {
           "code": "base64Binary"
@@ -37688,9 +37266,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "The maximum number of units of the medication that can be dispensed",
@@ -37730,9 +37306,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "The drug concentration measured at certain discrete points in time",
@@ -37746,9 +37320,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "The median lethal dose of a drug",
@@ -37965,9 +37537,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Encounter created as part of encounter/admission/stay",
@@ -37982,9 +37552,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Information to support ordering of the medication",
@@ -38275,9 +37843,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "First fill quantity",
@@ -38345,9 +37911,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Amount of medication to supply per dispense",
@@ -38713,9 +38277,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Additional supporting information",
@@ -41679,9 +41241,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Device"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Device"]
         }
       ],
       "short": "Particular delivery destination within the destination",
@@ -41960,9 +41520,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "The actual content of the message",
@@ -42368,9 +41926,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Patient"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
         }
       ],
       "short": "The person who requires the diet, formula or nutritional supplement",
@@ -42384,9 +41940,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "The encounter associated with this nutrition order",
@@ -42560,9 +42114,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Quantity of the specified nutrient",
@@ -42716,9 +42268,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Amount of the nutritional supplement",
@@ -42821,9 +42371,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Amount of energy per specified volume that is required",
@@ -42882,9 +42430,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "The volume of formula to provide",
@@ -42898,9 +42444,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         },
         {
           "code": "Ratio"
@@ -42918,9 +42462,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Upper limit on formula volume per unit of time",
@@ -43097,9 +42639,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "What the observation is about, when it is not about the subject of record",
@@ -43114,9 +42654,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Healthcare event during which this observation is made",
@@ -43323,9 +42861,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Specimen"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Specimen"]
         }
       ],
       "short": "Specimen used for this observation",
@@ -43372,9 +42908,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Low Range, if relevant",
@@ -43388,9 +42922,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "High Range, if relevant",
@@ -43954,9 +43486,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/ValueSet"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/ValueSet"]
         }
       ],
       "short": "Value set of valid coded values for the observations conforming to this ObservationDefinition",
@@ -43970,9 +43500,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/ValueSet"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/ValueSet"]
         }
       ],
       "short": "Value set of normal coded values for the observations conforming to this ObservationDefinition",
@@ -43986,9 +43514,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/ValueSet"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/ValueSet"]
         }
       ],
       "short": "Value set of abnormal coded values for the observations conforming to this ObservationDefinition",
@@ -44002,9 +43528,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/ValueSet"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/ValueSet"]
         }
       ],
       "short": "Value set of critical coded values for the observations conforming to this ObservationDefinition",
@@ -44552,9 +44076,7 @@
       "types": [
         {
           "code": "canonical",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/ValueSet"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/ValueSet"]
         }
       ],
       "short": "Source of value set",
@@ -44959,9 +44481,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Endpoint"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Endpoint"]
         }
       ],
       "short": "Technical endpoints providing access to services operated for the organization",
@@ -45101,9 +44621,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "The location(s) at which the role occurs",
@@ -45146,9 +44664,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Endpoint"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Endpoint"]
         }
       ],
       "short": "Technical endpoints providing access to services operated for this role",
@@ -45823,9 +45339,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Request reference",
@@ -45839,9 +45353,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Response reference",
@@ -46058,9 +45570,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Task"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Task"]
         }
       ],
       "short": "Reference to requesting resource",
@@ -46222,9 +45732,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Request giving rise to the payment",
@@ -46256,9 +45764,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Response committing to a payment",
@@ -46716,9 +46222,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Group"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Group"]
         }
       ],
       "short": "Type of individual the plan definition is focused on",
@@ -46992,9 +46496,7 @@
       "types": [
         {
           "code": "canonical",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Library"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Library"]
         }
       ],
       "short": "Logic used by the plan definition",
@@ -47328,9 +46830,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Group"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Group"]
         }
       ],
       "short": "Type of individual the action is focused on",
@@ -48081,9 +47581,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "The location(s) at which this practitioner provides care",
@@ -48251,9 +47749,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Endpoint"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Endpoint"]
         }
       ],
       "short": "Technical endpoints providing access to services operated for the practitioner with this role",
@@ -48444,9 +47940,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Encounter created as part of",
@@ -48593,9 +48087,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Where the procedure happened",
@@ -48725,9 +48217,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Condition"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
         }
       ],
       "short": "A condition that is a result of the procedure",
@@ -48803,9 +48293,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Device"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Device"]
         }
       ],
       "short": "Device that was changed",
@@ -48859,9 +48347,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Target Reference(s) (usually version specific)",
@@ -48921,9 +48407,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Where the activity occurred, if relevant",
@@ -49100,9 +48584,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Identity of entity",
@@ -49627,9 +49109,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Value for question comparison based on operator",
@@ -49723,9 +49203,7 @@
       "types": [
         {
           "code": "canonical",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/ValueSet"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/ValueSet"]
         }
       ],
       "short": "Valueset containing permitted answers",
@@ -49769,9 +49247,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Answer value",
@@ -49852,9 +49328,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Actual value for initializing the question",
@@ -49960,9 +49434,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "The subject of the questions",
@@ -49977,9 +49449,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Encounter created as part of",
@@ -50151,9 +49621,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Single-valued answer to the question",
@@ -50202,9 +49670,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Patient"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
         }
       ],
       "short": "The patient this person is related to",
@@ -50421,9 +49887,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Fulfills plan, proposal, or order",
@@ -50437,9 +49901,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Request(s) replaced by this request",
@@ -50553,9 +50015,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Created as part of",
@@ -51017,9 +50477,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "The target of the action",
@@ -51274,9 +50732,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Group"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Group"]
         }
       ],
       "short": "Inclusion & exclusion criteria",
@@ -51337,9 +50793,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Facility where study activities are conducted",
@@ -51542,9 +50996,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Patient"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
         }
       ],
       "short": "Who is part of study",
@@ -51584,9 +51036,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Consent"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Consent"]
         }
       ],
       "short": "Agreement to participate in study",
@@ -51615,9 +51065,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Request fulfilled by this assessment",
@@ -51631,9 +51079,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Part of this occurrence",
@@ -51712,9 +51158,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Where was assessment performed?",
@@ -51744,9 +51188,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Condition"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Condition"]
         }
       ],
       "short": "Condition assessed",
@@ -51810,9 +51252,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Information used in assessment",
@@ -52784,9 +52224,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Encounter in which the request was created",
@@ -52936,9 +52374,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Requested location",
@@ -53008,9 +52444,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Additional clinical information",
@@ -53025,9 +52459,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Specimen"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Specimen"]
         }
       ],
       "short": "Procedure Samples",
@@ -53188,9 +52620,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Schedule"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Schedule"]
         }
       ],
       "short": "The schedule resource that this slot defines an interval of status information",
@@ -53373,9 +52803,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Specimen"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Specimen"]
         }
       ],
       "short": "Specimen from which this specimen originated",
@@ -53466,9 +52894,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "The quantity of specimen collected",
@@ -53585,9 +53011,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Substance"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Substance"]
         }
       ],
       "short": "Material used in the processing step",
@@ -53674,9 +53098,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Container volume or size",
@@ -53690,9 +53112,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Quantity of specimen within container",
@@ -53709,9 +53129,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Substance"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Substance"]
         }
       ],
       "short": "Additive associated with container",
@@ -53986,9 +53404,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Container capacity",
@@ -54002,9 +53418,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         },
         {
           "code": "string"
@@ -54037,9 +53451,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Substance"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Substance"]
         }
       ],
       "short": "Additive associated with container",
@@ -55999,9 +55411,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Amount of substance in the package",
@@ -56044,9 +55454,7 @@
         },
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Substance"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Substance"]
         }
       ],
       "short": "A component of the substance",
@@ -57789,9 +57197,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Patient"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
         }
       ],
       "short": "Patient for whom the item is supplied",
@@ -57836,9 +57242,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Amount dispensed",
@@ -57916,9 +57320,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Where the Supply was sent",
@@ -58298,9 +57700,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Request fulfilled by this task",
@@ -58327,9 +57727,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Task"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Task"]
         }
       ],
       "short": "Composite task",
@@ -58466,9 +57864,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "What task is acting on",
@@ -58483,9 +57879,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Beneficiary of the Task",
@@ -58499,9 +57893,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Healthcare event during which this task originated",
@@ -58617,9 +58009,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Location"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Location"]
         }
       ],
       "short": "Where task occurs",
@@ -58651,9 +58041,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Why task is needed",
@@ -60748,9 +60136,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Reference of the resource",
@@ -60765,9 +60151,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "Reference of the validation profile",
@@ -62152,9 +61536,7 @@
       "types": [
         {
           "code": "canonical",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/ValueSet"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/ValueSet"]
         }
       ],
       "short": "Select the contents included in this value set",
@@ -62394,9 +61776,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Resource"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Resource"]
         }
       ],
       "short": "A resource that was validated",
@@ -62933,9 +62313,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Patient"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Patient"]
         }
       ],
       "short": "Who prescription is for",
@@ -62949,9 +62327,7 @@
       "types": [
         {
           "code": "Reference",
-          "targetProfile": [
-            "http://hl7.org/fhir/StructureDefinition/Encounter"
-          ]
+          "targetProfile": ["http://hl7.org/fhir/StructureDefinition/Encounter"]
         }
       ],
       "short": "Created during encounter / admission / stay",
@@ -63183,9 +62559,7 @@
       "types": [
         {
           "code": "Quantity",
-          "profile": [
-            "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
-          ]
+          "profile": ["http://hl7.org/fhir/StructureDefinition/SimpleQuantity"]
         }
       ],
       "short": "Lens wear duration",

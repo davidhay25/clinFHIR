@@ -20,8 +20,6 @@
   vertical-align: top;
 }
 
-
-
 .jstree-anchor:focus {
   outline: 0;
 }
@@ -303,7 +301,10 @@
 }
 .jstree-proton .jstree-anchor,
 .jstree-proton .jstree-wholerow {
-  transition: background-color 0.15s, box-shadow 0.15s, color 0.15s;
+  transition:
+    background-color 0.15s,
+    box-shadow 0.15s,
+    color 0.15s;
 }
 .jstree-proton .jstree-hovered {
   background: #76b6ec;
@@ -333,7 +334,7 @@
 }
 .jstree-proton .jstree-disabled > .jstree-icon {
   opacity: 0.8;
-  filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'jstree-grayscale\'><feColorMatrix type=\'matrix\' values=\'0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0\'/></filter></svg>#jstree-grayscale");
+  filter: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='jstree-grayscale'><feColorMatrix type='matrix' values='0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0'/></filter></svg>#jstree-grayscale");
   /* Firefox 10+ *
 filter: gray;
 /* IE6-9 */
@@ -357,16 +358,21 @@ filter: gray;
   background: #76b6ec;
   color: #ffffff;
 }
-.jstree-proton.jstree-checkbox-no-clicked > .jstree-wholerow-ul .jstree-wholerow-clicked {
+.jstree-proton.jstree-checkbox-no-clicked
+  > .jstree-wholerow-ul
+  .jstree-wholerow-clicked {
   background: transparent;
   color: inherit;
 }
-.jstree-proton.jstree-checkbox-no-clicked > .jstree-wholerow-ul .jstree-wholerow-clicked.jstree-wholerow-hovered {
+.jstree-proton.jstree-checkbox-no-clicked
+  > .jstree-wholerow-ul
+  .jstree-wholerow-clicked.jstree-wholerow-hovered {
   background: #76b6ec;
   color: #ffffff;
 }
 .jstree-proton > .jstree-striped {
-  background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAkCAMAAAB/qqA+AAAABlBMVEUAAAAAAAClZ7nPAAAAAnRSTlMNAMM9s3UAAAAXSURBVHjajcEBAQAAAIKg/H/aCQZ70AUBjAATb6YPDgAAAABJRU5ErkJggg==") left top repeat;
+  background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAkCAMAAAB/qqA+AAAABlBMVEUAAAAAAAClZ7nPAAAAAnRSTlMNAMM9s3UAAAAXSURBVHjajcEBAQAAAIKg/H/aCQZ70AUBjAATb6YPDgAAAABJRU5ErkJggg==")
+    left top repeat;
 }
 .jstree-proton > .jstree-wholerow-ul .jstree-hovered,
 .jstree-proton > .jstree-wholerow-ul .jstree-clicked {
@@ -385,7 +391,13 @@ filter: gray;
 .jstree-proton .jstree-wholerow-clicked {
   background: #3392e3;
   background: -moz-linear-gradient(top, #3392e3 0%, #3392e3 100%);
-  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #3392e3), color-stop(100%, #3392e3));
+  background: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    color-stop(0%, #3392e3),
+    color-stop(100%, #3392e3)
+  );
   background: -webkit-linear-gradient(top, #3392e3 0%, #3392e3 100%);
   background: -o-linear-gradient(top, #3392e3 0%, #3392e3 100%);
   background: -ms-linear-gradient(top, #3392e3 0%, #3392e3 100%);
@@ -472,7 +484,9 @@ filter: gray;
 .jstree-proton .jstree-checked > .jstree-checkbox {
   background-position: -229px -5px;
 }
-.jstree-proton.jstree-checkbox-selection .jstree-clicked > .jstree-checkbox:hover,
+.jstree-proton.jstree-checkbox-selection
+  .jstree-clicked
+  > .jstree-checkbox:hover,
 .jstree-proton .jstree-checked > .jstree-checkbox:hover {
   background-position: -229px -37px;
 }
@@ -637,11 +651,15 @@ filter: gray;
 .jstree-proton-small .jstree-checkbox:hover {
   background-position: -167px -39px;
 }
-.jstree-proton-small.jstree-checkbox-selection .jstree-clicked > .jstree-checkbox,
+.jstree-proton-small.jstree-checkbox-selection
+  .jstree-clicked
+  > .jstree-checkbox,
 .jstree-proton-small .jstree-checked > .jstree-checkbox {
   background-position: -231px -7px;
 }
-.jstree-proton-small.jstree-checkbox-selection .jstree-clicked > .jstree-checkbox:hover,
+.jstree-proton-small.jstree-checkbox-selection
+  .jstree-clicked
+  > .jstree-checkbox:hover,
 .jstree-proton-small .jstree-checked > .jstree-checkbox:hover {
   background-position: -231px -39px;
 }
@@ -806,11 +824,15 @@ filter: gray;
 .jstree-proton-large .jstree-checkbox:hover {
   background-position: -160px -32px;
 }
-.jstree-proton-large.jstree-checkbox-selection .jstree-clicked > .jstree-checkbox,
+.jstree-proton-large.jstree-checkbox-selection
+  .jstree-clicked
+  > .jstree-checkbox,
 .jstree-proton-large .jstree-checked > .jstree-checkbox {
   background-position: -224px 0px;
 }
-.jstree-proton-large.jstree-checkbox-selection .jstree-clicked > .jstree-checkbox:hover,
+.jstree-proton-large.jstree-checkbox-selection
+  .jstree-clicked
+  > .jstree-checkbox:hover,
 .jstree-proton-large .jstree-checked > .jstree-checkbox:hover {
   background-position: -224px -32px;
 }
@@ -1002,8 +1024,12 @@ filter: gray;
   .jstree-proton-responsive .jstree-checkbox:hover {
     background-position: -30px -60px;
   }
-  .jstree-proton-responsive.jstree-checkbox-selection .jstree-clicked > .jstree-checkbox,
-  .jstree-proton-responsive.jstree-checkbox-selection .jstree-clicked > .jstree-checkbox:hover,
+  .jstree-proton-responsive.jstree-checkbox-selection
+    .jstree-clicked
+    > .jstree-checkbox,
+  .jstree-proton-responsive.jstree-checkbox-selection
+    .jstree-clicked
+    > .jstree-checkbox:hover,
   .jstree-proton-responsive .jstree-checked > .jstree-checkbox,
   .jstree-proton-responsive .jstree-checked > .jstree-checkbox:hover {
     background-position: 0 -60px;
@@ -1080,48 +1106,69 @@ filter: gray;
   }
 }
 @font-face {
-  font-family: 'Titillium Web';
-  src: url('fonts/titillium/titilliumweb-extralight-webfont.eot');
-  src: url('fonts/titillium/titilliumweb-extralight-webfont.eot?#iefix') format('embedded-opentype'), url('fonts/titillium/titilliumweb-extralight-webfont.woff') format('woff'), url('fonts/titillium/titilliumweb-extralight-webfont.ttf') format('truetype'), url('fonts/titillium/titilliumweb-extralight-webfont.svg#titillium_webthin') format('svg');
+  font-family: "Titillium Web";
+  src: url("fonts/titillium/titilliumweb-extralight-webfont.eot");
+  src:
+    url("fonts/titillium/titilliumweb-extralight-webfont.eot?#iefix")
+      format("embedded-opentype"),
+    url("fonts/titillium/titilliumweb-extralight-webfont.woff") format("woff"),
+    url("fonts/titillium/titilliumweb-extralight-webfont.ttf")
+      format("truetype"),
+    url("fonts/titillium/titilliumweb-extralight-webfont.svg#titillium_webthin")
+      format("svg");
   font-weight: 300;
   font-style: normal;
 }
 @font-face {
-  font-family: 'Titillium Web';
-  src: url('fonts/titillium/titilliumweb-regular-webfont.eot');
-  src: url('fonts/titillium/titilliumweb-regular-webfont.eot?#iefix') format('embedded-opentype'), url('fonts/titillium/titilliumweb-regular-webfont.woff') format('woff'), url('fonts/titillium/titilliumweb-regular-webfont.ttf') format('truetype'), url('fonts/titillium/titilliumweb-regular-webfont.svg#titillium_webregular') format('svg');
+  font-family: "Titillium Web";
+  src: url("fonts/titillium/titilliumweb-regular-webfont.eot");
+  src:
+    url("fonts/titillium/titilliumweb-regular-webfont.eot?#iefix")
+      format("embedded-opentype"),
+    url("fonts/titillium/titilliumweb-regular-webfont.woff") format("woff"),
+    url("fonts/titillium/titilliumweb-regular-webfont.ttf") format("truetype"),
+    url("fonts/titillium/titilliumweb-regular-webfont.svg#titillium_webregular")
+      format("svg");
   font-weight: 400;
   font-style: normal;
 }
 @font-face {
-  font-family: 'Titillium Web';
-  src: url('fonts/titillium/titilliumweb-bold-webfont.eot');
-  src: url('fonts/titillium/titilliumweb-bold-webfont.eot?#iefix') format('embedded-opentype'), url('fonts/titillium/titilliumweb-bold-webfont.woff') format('woff'), url('fonts/titillium/titilliumweb-bold-webfont.ttf') format('truetype'), url('fonts/titillium/titilliumweb-bold-webfont.svg#titillium_webbold') format('svg');
+  font-family: "Titillium Web";
+  src: url("fonts/titillium/titilliumweb-bold-webfont.eot");
+  src:
+    url("fonts/titillium/titilliumweb-bold-webfont.eot?#iefix")
+      format("embedded-opentype"),
+    url("fonts/titillium/titilliumweb-bold-webfont.woff") format("woff"),
+    url("fonts/titillium/titilliumweb-bold-webfont.ttf") format("truetype"),
+    url("fonts/titillium/titilliumweb-bold-webfont.svg#titillium_webbold")
+      format("svg");
   font-weight: 700;
   font-style: normal;
 }
 @media screen and (-webkit-min-device-pixel-ratio: 0) {
   @font-face {
-    font-family: 'Titillium Web';
-    src: url('fonts/titillium/titilliumweb-extralight-webfont.svg#titillium_webthin') format('svg');
+    font-family: "Titillium Web";
+    src: url("fonts/titillium/titilliumweb-extralight-webfont.svg#titillium_webthin")
+      format("svg");
     font-weight: 300;
     font-style: normal;
   }
   @font-face {
-    font-family: 'Titillium Web';
-    src: url('fonts/titillium/titilliumweb-regular-webfont.svg#titillium_webregular') format('svg');
+    font-family: "Titillium Web";
+    src: url("fonts/titillium/titilliumweb-regular-webfont.svg#titillium_webregular")
+      format("svg");
     font-weight: 400;
     font-style: normal;
   }
   @font-face {
-    font-family: 'Titillium Web';
-    src: url('fonts/titillium/titilliumweb-bold-webfont.svg#titillium_webbold') format('svg');
+    font-family: "Titillium Web";
+    src: url("fonts/titillium/titilliumweb-bold-webfont.svg#titillium_webbold")
+      format("svg");
     font-weight: 700;
     font-style: normal;
   }
 }
 .jstree-proton {
-  font-familyX: 'Titillium Web', sans-serif, Arial, sans-serif;
-  font-family: 'Helvetica Neue','Arial', sans-serif, Arial, sans-serif;
+  font-familyx: "Titillium Web", sans-serif, Arial, sans-serif;
+  font-family: "Helvetica Neue", "Arial", sans-serif, Arial, sans-serif;
 }
-

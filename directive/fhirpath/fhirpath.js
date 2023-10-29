@@ -1,40 +1,39 @@
-angular.module('sampleApp')
-    .directive('fhirpath', function () {
-        return {
-            restrict: 'EA', //E = element, A = attribute, C = class, M = comment
-            scope: {
-                //@ reads the attribute value, = provides two-way binding, & works with functions
-                resource: '=',
-                selectItem : '&',
-                showEDE : '&',
-                selectExtensionFromProfileE : '&',
-                showValueSetE : '&'
-            },
+angular.module("sampleApp").directive("fhirpath", function () {
+  return {
+    restrict: "EA", //E = element, A = attribute, C = class, M = comment
+    scope: {
+      //@ reads the attribute value, = provides two-way binding, & works with functions
+      resource: "=",
+      selectItem: "&",
+      showEDE: "&",
+      selectExtensionFromProfileE: "&",
+      showValueSetE: "&",
+    },
 
-            templateUrl: 'directive/fhirpath/fhirpath.html',
-            controller: function($scope,$http){
+    templateUrl: "directive/fhirpath/fhirpath.html",
+    controller: function ($scope, $http) {
+      $scope.input = {};
 
-                $scope.input = {};
+      $scope.$watch(
+        function () {
+          return $scope.resource;
+        },
+        function () {
+          delete $scope.FHIRPathResult;
+          delete $scope.input.JSONPath;
+        },
+      );
 
-                $scope.$watch(
-                    function() {return $scope.resource},
-                    function() {
+      $scope.executeJSONPath = function (path) {
+        delete $scope.FHIRPathResult;
+        delete $scope.FHIRPathError;
+        try {
+          $scope.FHIRPathResult = fhirpath.evaluate($scope.resource, path);
+        } catch (ex) {
+          $scope.FHIRPathError = ex.message;
+        }
 
-                        delete $scope.FHIRPathResult;
-                        delete $scope.input.JSONPath;
-                    }
-                );
-
-                $scope.executeJSONPath = function(path) {
-                    delete $scope.FHIRPathResult;
-                    delete $scope.FHIRPathError;
-                    try {
-                        $scope.FHIRPathResult = fhirpath.evaluate($scope.resource, path);
-                    } catch (ex) {
-                        $scope.FHIRPathError = ex.message;
-                    }
-
-/*
+        /*
  var url = "clinFHIR/executeFP";
                     var data = {path:path,resource:$scope.resource}
 
@@ -49,7 +48,7 @@ angular.module('sampleApp')
                     );
 
 */
-                }
-            }
-        }
-    });
+      };
+    },
+  };
+});

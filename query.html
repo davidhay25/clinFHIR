@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head lang="en">
+  <head lang="en">
     <base href="/" />
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
 
     <script src="js/libs/jquery-1.9.0.min.js"></script>
     <script src="js/libs/angular.min1-5.js"></script>
@@ -12,12 +12,16 @@
 
     <script src="js/libs/moment.min.js"></script>
 
-    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
-    <link rel="stylesheet" type="text/css" href="css/main.css"/>
-    <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
-    <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="css/main.css" />
+    <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="css/jsTreeThemes/proton/style.css"
+    />
 
-    <link rel="stylesheet" type="text/css" href="css/vis.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/vis.min.css" />
 
     <script src="js/libs/angular-sanitize.js"></script>
 
@@ -25,21 +29,21 @@
     <script src="js/libs/angular-bootstrap-checkbox.js"></script>
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngStorage','ui.checkbox']).config(function($locationProvider) {
-
-            // enable html5Mode for pushstate ('#'-less URLs)
-            $locationProvider.html5Mode(true);
-            $locationProvider.hashPrefix('!');
+      angular
+        .module("sampleApp", ["ui.bootstrap", "ngStorage", "ui.checkbox"])
+        .config(function ($locationProvider) {
+          // enable html5Mode for pushstate ('#'-less URLs)
+          $locationProvider.html5Mode(true);
+          $locationProvider.hashPrefix("!");
         });
-        angular.module("sampleApp").constant("moment", moment);
-/*
+      angular.module("sampleApp").constant("moment", moment);
+      /*
         angular.module("sampleApp").config(['$compileProvider', function ($compileProvider) {
 
             $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|blob):/);
 
         }]);
         */
-
     </script>
 
     <script src="js/libs/ngStorage.min.js"></script>
@@ -74,49 +78,42 @@
     <title>Server Query</title>
 
     <style>
-        .required {
-            color: red;
-        }
-        .notrequired {
-            color: black;
-        }
-        .paramListScroll {
-            height: 500px;
-            overflow-y: scroll;
-        }
-
+      .required {
+        color: red;
+      }
+      .notrequired {
+        color: black;
+      }
+      .paramListScroll {
+        height: 500px;
+        overflow-y: scroll;
+      }
     </style>
+  </head>
 
-</head>
-
-<body style="padding: 8px; padding-top: 80px">
-
-<div ng-app="sampleApp" ng-controller="queryCtrl" class="container-fluid">
-
-    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+  <body style="padding: 8px; padding-top: 80px">
+    <div ng-app="sampleApp" ng-controller="queryCtrl" class="container-fluid">
+      <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
         <div class="col-md-4 col-sm-4">
-            <a class="navbar-brand" href="#">
-                clinFHIR Server Query
-            </a>
+          <a class="navbar-brand" href="#"> clinFHIR Server Query </a>
         </div>
-        <div class="col-md-5 col-sm-5">
-        </div>
+        <div class="col-md-5 col-sm-5"></div>
         <div class="col-md-3">
-            <div class="pull-right">
-                <a href="https://www.intersystems.com/" target="_blank">
-                    <img style="padding-top: 8px" src="/icons/sb-intersystems.png"/>
-                </a>
-
-            </div>
-
+          <div class="pull-right">
+            <a href="https://www.intersystems.com/" target="_blank">
+              <img style="padding-top: 8px" src="/icons/sb-intersystems.png" />
+            </a>
+          </div>
         </div>
-    </nav>
+      </nav>
 
-    <ng-include src="'/includes/serverQuery.html'"></ng-include>
+      <ng-include src="'/includes/serverQuery.html'"></ng-include>
 
-    <vs-browser trigger="showVSBrowserDialog" hidesearch="true"
-                vs-selected="vsSelected"></vs-browser>
-
-</div>
-</body>
+      <vs-browser
+        trigger="showVSBrowserDialog"
+        hidesearch="true"
+        vs-selected="vsSelected"
+      ></vs-browser>
+    </div>
+  </body>
 </html>

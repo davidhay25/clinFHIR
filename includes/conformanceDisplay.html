@@ -1,237 +1,222 @@
-
 <style>
+  .myScroll {
+    height: 600px;
+    overflow-y: scroll;
+  }
 
-    .myScroll {
-
-        height: 600px;
-        overflow-y: scroll;
-    }
-
-    .myActive {
-        background-color: lightgrey;
-    }
-
-
+  .myActive {
+    background-color: lightgrey;
+  }
 </style>
 
-<br/>
+<br />
 <div class="row">
-    <div class="col-md-3 col-sm-3">
+  <div class="col-md-3 col-sm-3">
+    <h5>Resource Types</h5>
+    <div class="list-group myScroll">
+      <div
+        href="#"
+        ng-class="{'list-group-item':true,myActive:selectedType.type == res.type}"
+        style="cursor: pointer"
+        ng-click="showType(res)"
+        ng-show="res.interaction.length > 0"
+        ng-repeat="res in conformance.rest[0].resource"
+      >
+        <div>
+          {{res.type}}
 
-        <h5>Resource Types</h5>
-        <div class="list-group myScroll" >
-
-            <div href="#" ng-class="{'list-group-item':true,myActive:selectedType.type == res.type}"
-                 style="cursor: pointer"
-               ng-click="showType(res)"
-                 ng-show="res.interaction.length > 0"
-               ng-repeat="res in conformance.rest[0].resource">
-
-                <div>
-                    {{res.type}}
-
-                    <span class="pull-right">
-
-                    <a title="Load spec page in new tab" target = "_blank" ng-href="{{makeUrl(res.type)}}">
-                        <i class="glyphicon glyphicon-globe"></i></a>
-                </span>
-                </div>
-
-
-
-            </div>
-
-
+          <span class="pull-right">
+            <a
+              title="Load spec page in new tab"
+              target="_blank"
+              ng-href="{{makeUrl(res.type)}}"
+            >
+              <i class="glyphicon glyphicon-globe"></i
+            ></a>
+          </span>
         </div>
+      </div>
+    </div>
+  </div>
 
+  <div ng-show="selectedType" class="col-md-9 col-sm-9">
+    <div class="row" ng-show="selectedType.documentation">
+      <div class="col-md-12">
+        {{selectedType.documentation}}
+        <hr />
+      </div>
     </div>
 
+    <uib-tabset class="myScroll">
+      <uib-tab heading="Resource structure">
+        <!--ng-show="selectedType.profile"-->
 
-
-
-    <div ng-show="selectedType" class="col-md-9 col-sm-9">
-
-        <div class="row" ng-show="selectedType.documentation">
-            <div class="col-md-12">
-                {{selectedType.documentation}}
-                <hr />
-            </div>
-        </div>
-
-
-
-        <uib-tabset class="myScroll" >
-            <uib-tab heading="Resource structure" >  <!--ng-show="selectedType.profile"-->
-
-
-
-                <div class="row">
-                    <div class="col-md-6 col-sm-6">
-
-
-                        <!-- a component (1.5) todisplay a profile-->
-                        <!--
+        <div class="row">
+          <div class="col-md-6 col-sm-6">
+            <!-- a component (1.5) todisplay a profile-->
+            <!--
                         <show-profile profile="selectedProfile" treedivid="'pfTreeViewConf'"
                                       ontreenodeselected="treeNodeSelected(item)"></show-profile>
 
                         -->
-                        <!-- Where the tree will be rendered-->
-                        <div id="pfTreeViewConf"></div>
+            <!-- Where the tree will be rendered-->
+            <div id="pfTreeViewConf"></div>
 
-                        <div>
-                            <em>The structure for this resource type defined in the spec</em>
-                        </div>
+            <div>
+              <em>The structure for this resource type defined in the spec</em>
+            </div>
+          </div>
+          <div class="col-md-6 col-sm-6">
+            <br />
 
+            <uib-tabset ng-show="edFromTreeNode">
+              <uib-tab heading="Details">
+                <br />
+                <div class="row">
+                  <div class="col-md-3 col-sm-3">Path</div>
+                  <div class="col-md-9 col-sm-9">{{edFromTreeNode.path}}</div>
+                </div>
+                <div class="row">
+                  <div class="col-md-3 col-sm-3">DataType/s</div>
+                  <div class="col-md-9 col-sm-9">
+                    <div ng-repeat="typ in edFromTreeNode.types">
+                      {{typ.code}}
                     </div>
-                    <div class="col-md-6 col-sm-6">
-
-                        <br/>
-
-                        <uib-tabset ng-show="edFromTreeNode">
-                            <uib-tab heading="Details">
-                                <br/>
-                                <div class="row">
-                                    <div class="col-md-3 col-sm-3">Path</div>
-                                    <div class="col-md-9 col-sm-9">
-                                        {{edFromTreeNode.path}}
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-3 col-sm-3">DataType/s</div>
-                                    <div class="col-md-9 col-sm-9">
-                                        <div ng-repeat="typ in edFromTreeNode.types">{{typ.code}}</div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-3 col-sm-3">Definition</div>
-                                    <div class="col-md-9 col-sm-9">{{edFromTreeNode.definition}}</div>
-                                </div>
-                                <div class="row" ng-show="edFromTreeNode.comment">
-                                    <div class="col-md-3 col-sm-3">Comment</div>
-                                    <div class="col-md-9 col-sm-9">{{edFromTreeNode.comment}}</div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-3 col-sm-3">
-                                        Multiplicity
-                                    </div>
-                                    <div class="col-md-9 col-sm-9">
-                                        {{edFromTreeNode.min}}..{{edFromTreeNode.max}}
-                                    </div>
-                                </div>
-
-                                <div class="row" ng-show="edFromTreeNode.binding">
-                                    <div class="col-md-3 col-sm-3">
-                                        Binding
-                                    </div>
-                                    <div class="col-md-9 col-sm-9">
-
-                                        <div>ValueSet:
-                                            <span  class="clickable" ng-click="showValueSetForProfile(edFromTreeNode.binding.valueSet)">
-                                                {{edFromTreeNode.binding.valueSet}}
-                                            </span>
-
-                                        </div>
-                                        <div>Strength: {{edFromTreeNode.binding.strength}}</div>
-
-                                    </div>
-                                </div>
-                            </uib-tab>
-                            <uib-tab heading="Json">
-                                <pre>{{edFromTreeNode | json}}</pre>
-                            </uib-tab>
-                        </uib-tabset>
-
-
-
-
-
-                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-3 col-sm-3">Definition</div>
+                  <div class="col-md-9 col-sm-9">
+                    {{edFromTreeNode.definition}}
+                  </div>
+                </div>
+                <div class="row" ng-show="edFromTreeNode.comment">
+                  <div class="col-md-3 col-sm-3">Comment</div>
+                  <div class="col-md-9 col-sm-9">
+                    {{edFromTreeNode.comment}}
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-3 col-sm-3">Multiplicity</div>
+                  <div class="col-md-9 col-sm-9">
+                    {{edFromTreeNode.min}}..{{edFromTreeNode.max}}
+                  </div>
                 </div>
 
+                <div class="row" ng-show="edFromTreeNode.binding">
+                  <div class="col-md-3 col-sm-3">Binding</div>
+                  <div class="col-md-9 col-sm-9">
+                    <div>
+                      ValueSet:
+                      <span
+                        class="clickable"
+                        ng-click="showValueSetForProfile(edFromTreeNode.binding.valueSet)"
+                      >
+                        {{edFromTreeNode.binding.valueSet}}
+                      </span>
+                    </div>
+                    <div>Strength: {{edFromTreeNode.binding.strength}}</div>
+                  </div>
+                </div>
+              </uib-tab>
+              <uib-tab heading="Json">
+                <pre>{{edFromTreeNode | json}}</pre>
+              </uib-tab>
+            </uib-tabset>
+          </div>
+        </div>
+      </uib-tab>
 
+      <uib-tab heading="Interactions">
+        <br />
 
-            </uib-tab>
+        <!--<p>Describes the interactions supported by the server </p>-->
+        <table class="table table-bordered">
+          <tr>
+            <th>Code</th>
+            <th>Documentation</th>
+          </tr>
+          <tr ng-repeat="int in selectedType.interaction">
+            <td>{{int.code}}</td>
+            <td>{{int.documentation}}</td>
+          </tr>
+        </table>
+      </uib-tab>
+      <uib-tab heading="Search Parameters">
+        <!---->
+        <br />
+        <p>The Search parameters supported by the server for this resource</p>
+        <table class="table table-bordered">
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Definition</th>
+            <th>Documentation</th>
+          </tr>
+          <tr ng-repeat="param in selectedType.searchParam">
+            <td>{{param.name}}</td>
+            <td>{{param.type}}</td>
+            <td>{{param.definition}}</td>
+            <td>{{param.documentation}}</td>
+          </tr>
+        </table>
+      </uib-tab>
 
-            <uib-tab heading="Interactions" >
-                <br/>
+      <uib-tab heading="Search Include">
+        <br />
+        <ul>
+          <li ng-repeat="inc in selectedType.searchInclude">{{inc}}</li>
+        </ul>
+      </uib-tab>
 
+      <uib-tab heading="Search RevInclude">
+        <br />
+        <ul>
+          <li ng-repeat="rev in selectedType.searchRevInclude">{{rev}}</li>
+        </ul>
+      </uib-tab>
 
+      <uib-tab heading="Operations">
+        <br />
+        <p>
+          The type level operations supported by the server for this resource
+        </p>
+        <table class="table table-bordered">
+          <tr>
+            <th>Name</th>
+            <th>Definition</th>
+            <th>Documentation</th>
+          </tr>
+          <tr ng-repeat="op in selectedType.operation">
+            <td>{{op.name}}</td>
+            <td>{{op.definition}}</td>
 
+            <td>{{op.documentation}}</td>
+          </tr>
+        </table>
+      </uib-tab>
 
-
-                <!--<p>Describes the interactions supported by the server </p>-->
-                <table class="table table-bordered">
-                    <tr><th>Code</th><th>Documentation</th></tr>
-                    <tr ng-repeat="int in selectedType.interaction">
-                        <td>{{int.code}}</td>
-                        <td>{{int.documentation}}</td>
-                    </tr>
-                </table>
-            </uib-tab>
-            <uib-tab heading="Search Parameters">
-<!---->
-                <br />
-                <p>The Search parameters supported by the server for this resource</p>
-                <table class="table table-bordered">
-                    <tr><th>Name</th><th>Type</th><th>Definition</th><th>Documentation</th></tr>
-                    <tr ng-repeat="param in selectedType.searchParam">
-                        <td>{{param.name}}</td>
-                        <td>{{param.type}}</td>
-                        <td>{{param.definition}}</td>
-                        <td>{{param.documentation}}</td>
-                    </tr>
-                </table>
-
-            </uib-tab>
-
-            <uib-tab heading="Search Include">
-                <br/>
-                <ul>
-                    <li ng-repeat = "inc in selectedType.searchInclude">{{inc}}</li>
-                </ul>
-            </uib-tab>
-
-            <uib-tab heading="Search RevInclude">
-                <br/>
-                <ul>
-                    <li ng-repeat = "rev in selectedType.searchRevInclude">{{rev}}</li>
-                </ul>
-            </uib-tab>
-
-            <uib-tab heading="Operations">
-                <br />
-                <p>The type level operations supported by the server for this resource</p>
-                <table class="table table-bordered">
-                    <tr><th>Name</th><th>Definition</th><th>Documentation</th></tr>
-                    <tr ng-repeat="op in selectedType.operation">
-                        <td>{{op.name}}</td>
-                        <td>{{op.definition}}</td>
-
-
-                        <td>{{op.documentation}}</td>
-                    </tr>
-                </table>
-            </uib-tab>
-
-            <uib-tab heading="Conditionals">
-                <br/>
-                <table width="50%">
-                    <tr><td><strong>Conditional Create </strong></td><td>{{selectedType.conditionalCreate}}</td></tr>
-                    <tr><td><strong>Conditional Update </strong></td><td>{{selectedType.conditionalUpdate}}</td></tr>
-                    <tr><td><strong>Conditional Delete </strong></td><td>{{selectedType.conditionalDelete}}</td></tr>
-                </table>
-
-            </uib-tab>
-            <uib-tab heading="Json">
-                <br />
-                <pre>{{selectedType | json}}</pre>
-            </uib-tab>
-
-        </uib-tabset>
-
-
-
-    </div>
-
-
+      <uib-tab heading="Conditionals">
+        <br />
+        <table width="50%">
+          <tr>
+            <td><strong>Conditional Create </strong></td>
+            <td>{{selectedType.conditionalCreate}}</td>
+          </tr>
+          <tr>
+            <td><strong>Conditional Update </strong></td>
+            <td>{{selectedType.conditionalUpdate}}</td>
+          </tr>
+          <tr>
+            <td><strong>Conditional Delete </strong></td>
+            <td>{{selectedType.conditionalDelete}}</td>
+          </tr>
+        </table>
+      </uib-tab>
+      <uib-tab heading="Json">
+        <br />
+        <pre>{{selectedType | json}}</pre>
+      </uib-tab>
+    </uib-tabset>
+  </div>
 </div>
