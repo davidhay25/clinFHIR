@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <base href="/" />
+    <meta charset="UTF-8">
+
+    <script src="js/libs/angular.min1-5.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+
+    <script src="js/libs/moment.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/vis.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <!--
+
+    nzigs has someple code
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+
+    <script src="js/libs/angular-sanitize.js"></script>
+    <script src="js/libs/firebase.js"></script>
+    <script src="js/libs/angularfire.min.js"></script>
+
+-->
+    <script>
+        angular.module("sampleApp",['ui.bootstrap','ngStorage']).config(function($locationProvider) {
+
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+        });
+
+    </script>
+
+
+    <style>
+        #storyChart {
+            width: 100%;
+            height: 550px;
+            border: 1px solid lightgray;
+        }
+
+    </style>
+    <script src="js/enculturedCtl.js"></script>
+    <script src="js/enculturedSvc.js"></script>
+    <script src="js/libs/ngStorage.min.js"></script>
+    <script src="js/libs/vis.min.js"></script>
+    <title>Encultured</title>
+
+</head>
+
+
+<body style="padding: 8px;padding-top: 80px" >
+
+<div ng-app="sampleApp" ng-controller="enculturedCtrl" class="container-fluid">
+
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+
+        <div class="container-fluid">
+            <div class="col-md-7 col-sm-7">
+                <span>
+                    <a class="navbar-brand" href="#" ng-click="showVersion()">
+                        Encultured
+                    </a>
+                </span>
+
+            </div>
+
+
+
+
+
+            <div class="col-md-2 col-sm-2">
+
+            </div>
+
+
+
+            <div class="col-md-3 col-sm-3">
+
+            </div>
+
+        </div>
+    </nav>
+
+
+<div class="row">
+
+    <div class="col-md-2">
+        <select class="form-control" ng-model="input.environment"
+                ng-options = "e for e in environments">
+
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <select class="form-control" ng-model="input.genre"
+                ng-options = "g for g in genres">
+
+        </select>
+    </div>
+
+
+
+    <div class="col-md-7">
+        <input type="text" class="form-control" placeholder="Enter start text"
+               ng-model="input.seedText"/>
+    </div>
+
+    <div class="col-md-1">
+        <button class="btn-link btn" ng-click="startStory(input.seedText)">Start</button>
+    </div>
+
+</div>
+    <br/>
+
+    <div class="row">
+        <div class="col-md-4">
+
+                <div class="list-group">
+
+                    <!-- This is the historical stuff-->
+                    <!--
+                    <div ng-show="nodes.length > 1" class="list-group-item" ng-repeat="node in nodes">
+                        <div ng-hide="$index == nodes.length-1">
+                            <p>{{node.aiText}}</p>
+                            <span ng-repeat="choice in node.aiChoices">
+                            {{choice}}
+                        </span>
+                        </div>
+
+                    </div>
+                    -->
+
+                    <div ng-show = "currentNode">
+                        <div class="list-group-item">
+                            <p>{{currentNode.aiText}}</p>
+                            <div ng-repeat="choice in currentNode.aiChoices"
+                                 class="clickable" ng-click="selectChoice(currentNode,$index)">
+                                {{choice}}
+                            </div>
+                        </div>
+                    </div>
+
+                                 <!-- This is the current one-->
+                    <div ng-show = "false &&nodes.length">
+                        <!--
+                        <strong>Step: {{nodes.length}}</strong>
+                        -->
+                        <div class="list-group-item">
+                            <p>{{nodes[nodes.length-1].aiText}}</p>
+                            <div ng-repeat="choice in currentNode.aiChoices"
+                                  class="clickable" ng-click="selectChoice(currentNode,$index)">
+                                {{choice}}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+        </div>
+        <div class="col-md-8">
+            <uib-tabset ng-show="nodes.length">
+
+                <uib-tab heading="Current story">
+                    <table class="table table-bordered">
+                        <tr><th>AI Text</th><th>Id</th><th>Choice</th><th></th></tr>
+                        <tr ng-repeat="node in story">
+                            <td>{{node.aiText}}</td>
+                            <td>{{node.id}}</td>
+                            <td>{{node.aiChoices[node.userChoiceIndex]}}</td>
+                            <td><div class="clickable" ng-click="newStory(node)">New story</div> </td>
+                        </tr>
+                    </table>
+                </uib-tab>
+
+                <uib-tab heading="Graph" select="fitGraph()">
+                    <div class="row">
+                        <div class="col-md-7">
+                            <div id="storyChart"></div>
+                        </div>
+                        <div class="col-md-5">
+                            <uib-tabset>
+                                <uib-tab heading="Selected node">
+                                    <pre>{{selectedNodeFromChart.aiNode | json}}</pre>
+                                    <br/>
+
+                                </uib-tab>
+                                <uib-tab heading="Story from this node">
+                                    <table class="table table-bordered">
+                                        <tr><th>AI Text</th><th>Id</th><th>Choice</th></tr>
+                                        <tr ng-repeat="node in storyFromThisNode">
+                                            <td>{{node.aiText}}</td>
+                                            <td>{{node.id}}</td>
+                                            <td>{{node.aiChoices[node.userChoiceIndex]}}</td>
+
+
+                                        </tr>
+                                    </table>
+                                </uib-tab>
+
+                            </uib-tabset>
+
+                            <div ng-show="selectedNodeFromChart"
+                                 class="clickable"
+                                 ng-click="newStory(selectedNodeFromChart.aiNode)">New story starting at this node</div>
+
+
+                        </div>
+                    </div>
+
+
+                </uib-tab>
+
+                <uib-tab heading="All stories">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="list-group">
+                                <div class="list-group-item"
+                                     ng-click="showStory(storyNode)"
+                                     ng-repeat="storyNode in allStories">
+                                    {{storyNode.id}}
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-md-9">
+                            <table class="table table-bordered">
+                                <tr><th>AI Text</th><th>Id</th><th>Choice</th><th></th></tr>
+                                <tr ng-repeat="node in oneStory">
+                                    <td>{{node.aiText}}</td>
+                                    <td>{{node.id}}</td>
+                                    <td>{{node.aiChoices[node.userChoiceIndex]}}</td>
+                                    <td><div class="clickable" ng-click="newStory(node)">New story</div> </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </uib-tab>
+
+                <uib-tab heading="Table of all nodes">
+                    <table class="table table-bordered">
+                        <tr><th>AI Text</th><th>Id</th><th>Parent</th><th>Choice</th></tr>
+                        <tr ng-repeat="node in nodes">
+                            <td>{{node.aiText}}</td>
+                            <td>{{node.id}}</td>
+                            <td>{{node.parentId}}</td>
+                            <td>{{node.aiChoices[node.userChoiceIndex]}}</td>
+                        </tr>
+                    </table>
+                </uib-tab>
+
+
+
+                <uib-tab heading="Json">
+                    <pre>{{nodes | json}}</pre>
+                </uib-tab>
+            </uib-tabset>
+
+        </div>
+    </div>
+
+
+</div>
+</body>
+</html>

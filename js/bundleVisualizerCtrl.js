@@ -46,9 +46,40 @@ angular.module("sampleApp")
 
             $scope.localStorage = $localStorage     //so can easily update
 
-            console.log($scope.savedQueries)
+            //default to no validation
+            if (! $localStorage.bvConfig) {
+                $localStorage.bvConfig = {noValidate : true}
+            }
 
+            //turn off autovalidation - todo - remove all references when loading...
+            $localStorage.bvConfig = {noValidate : true}
 
+            //console.log($scope.savedQueries)
+
+            //---     load the index of samples
+            $http.get("samples/index.json").then(
+                function (data) {
+                    $scope.exampleIndex = data.data
+                }
+            )
+            $scope.selectExample = function(example) {
+                $http.get(`samples/${example.name}`).then(
+                    function (data) {
+                        $scope.exampleBundle = data.data
+                    }
+                )
+
+            }
+
+            $scope.loadExample = function (json) {
+                processBundle(json)
+            }
+
+            $scope.performValidation = function(){
+                validate($scope.fhir,$scope.validationServer.url,function(hashErrors){
+                    $scope.hashErrors = hashErrors;
+                })
+            }
 
             let search = $window.location.search;
 
@@ -589,7 +620,7 @@ angular.module("sampleApp")
                     }
                 } else {
                     //if there is a full url, then strip of any guid marker
-                    url = url.replace("urn:uuid:","")
+                    //  2022-10-25 - why do this? url = url.replace("urn:uuid:","")
                 }
 
                 let options = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:$scope.serverRoot,centralResourceId:url}
@@ -912,40 +943,15 @@ angular.module("sampleApp")
                // let options = {bundle:$scope.fhir,hashErrors:{},serverRoot:serverRoot}
                // drawGraph(options)
 
+                //validation is now a deliberate process...
+                if (false) {
+                    validate(oBundle, validationServer,function(hashErrors){
+                        //returns a hash by position in bundle with errors...
+                        $scope.hashErrors = hashErrors;
+                    });
+
+                }
                 //note that this function is defined on the root...
-                validate(oBundle, validationServer,function(hashErrors){
-                    //returns a hash by position in bundle with errors...
-
-                    $scope.hashErrors = hashErrors;
-                    //$scope.validationResult = hashErrors
-/*
-                    //the serverRoot is needed to figure out the references when the reference is relative
-                    //we assume that all the resources are from the same server, so figure out the server root
-                    //by looking at the first fullUrl (remove the /{type}/{id} at the end of the url
-
-                    let serverRoot = "";
-                    if ($scope.fhir && $scope.fhir.entry) {
-                        //work out the server root from the first entry
-                        let first = $scope.fhir.entry[0]
-                        if (first && first.fullUrl) {
-                            console.log(first.fullUrl)
-                            let ar = first.fullUrl.split('/')
-                            ar.pop();
-                            ar.pop();
-                            serverRoot = ar.join('/') + "/"
-                            console.log(serverRoot)
-                            $scope.serverRoot = serverRoot;
-
-                        } else {
-                            //todo - do we really need the fullUrl
-                           // alert('All entries need the fullUrl for the graph generation to work properly. The graph may be incomplete..')
-                        }
-                    }
-
-                    let options = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:serverRoot}
-                    drawGraph(options)
-*/
-                });
 
                 let bundle=angular.copy(oBundle)
 
@@ -1041,6 +1047,7 @@ angular.module("sampleApp")
             function drawGraph(options) {
                 let vo = v2ToFhirSvc.makeGraph(options)
 
+                $scope.showGraphWarning = true
                 var container = document.getElementById('resourceGraph');
                 var graphOptions = {
                     physics: {
@@ -1050,7 +1057,6 @@ angular.module("sampleApp")
                         }
                     }
                 };
-
 
 
                 $scope.chart = new vis.Network(container, vo.graphData, graphOptions);
@@ -1069,6 +1075,7 @@ angular.module("sampleApp")
 
                 //https://stackoverflow.com/questions/32403578/stop-vis-js-physics-after-nodes-load-but-allow-drag-able-nodes
                 $scope.chart.on("stabilizationIterationsDone", function () {
+                    delete $scope.showGraphWarning
                     $scope.chart.setOptions( { physics: false } );
                 });
 
@@ -1087,9 +1094,12 @@ angular.module("sampleApp")
                 let validationServer = inValidationServer || $scope.validationServer.url
 
 
-                if ($localStorage.bvConfig && $localStorage.bvConfig.noValidate) {
-                    return
-                }
+                //defauk to no validate
+
+
+            //    if ($localStorage.bvConfig && $localStorage.bvConfig.noValidate) {
+             //       return
+            //    }
 
 
                 $scope.waiting = true;

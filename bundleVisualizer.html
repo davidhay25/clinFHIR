@@ -247,12 +247,13 @@
                             processed and displayed, unless disabled using the otion below. </p>
                         <br/>
 
-
+<!--
                         <div>
                             <checkbox ng-model="localStorage.bvConfig.noValidate"></checkbox>
                             Don't validate.
                         </div>
 
+                        -->
 <!--
                         <div>
                             <checkbox ng-model="localStorage.bvConfig.setValidate"></checkbox>
@@ -380,6 +381,31 @@
                 </div>
             </uib-tab>
 
+            <uib-tab heading = "Examples">
+                <br/>
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-bordered">
+                            <tr ng-repeat="example in exampleIndex.contents">
+                                <td><div class="clickable" ng-click="selectExample(example)">{{example.name}}</div></td>
+                                <td>{{example.display}}</td>
+
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="clickable" ng-click="loadExample(exampleBundle)">Load</div>
+                            </div>
+                        </div>
+                        <pre>{{exampleBundle | json}}</pre>
+
+                    </div>
+                </div>
+
+            </uib-tab>
+
         </uib-tabset>
 
     </div>
@@ -418,6 +444,10 @@
 
 
                     <div>
+
+                        <button class="btn btn-link pull-right" ng-show="fhir"
+                                ng-click="performValidation()">Validate</button>
+
 
                         <button class="btn btn-link pull-right" ng-show="fhir"
                                 ng-click="copyToClipboard()">Copy bundle to Clipboard</button>
@@ -462,8 +492,6 @@
                                                 </uib-tab>
 
 
-
-
                                                 <uib-tab heading="Type, Id">
                                                     <div class="entryListScroll">
                                                         <div ng-repeat="es in sortedEntries">
@@ -482,26 +510,6 @@
 
                                                     </div>
                                                 </uib-tab>
-<!--
-                                                <uib-tab heading="TDEPype, Id">
-                                                    <div class="entryListScroll">
-                                                        <div class="list-group">
-                                                            <div ng-repeat="(k,v) in hashEntries">
-                                                                <div><strong>{{k}}</strong></div>
-                                                                <div ng-repeat = "entry in v"
-                                                                     ng-class="{'list-group-item':true,'listItemSelected':selectedBundleEntry == entry}">
-                                                                    <div style="padding-left: 10px; cursor: pointer"
-                                                                         ng-click="selectBundleEntry(entry,hashErrors[$index])">
-                                                                        <div> {{entry.resource.text.div | cleanTextDiv | limitTo:50}}</div>
-                                                                        <div style="padding-left: 10px"><em>Id: {{entry.resource.id}}</em></div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                    </div>
-                                                </uib-tab>
-                                                -->
 
                                                 <uib-tab heading="Type, Name">
                                                     <div class="entryListScroll">
@@ -519,6 +527,16 @@
 
                                                         </div>
                                                     </div>
+                                                </uib-tab>
+
+                                                <uib-tab heading="Type">
+
+                                                    <div class="list-group">
+                                                        <div class="list-group-item" ng-repeat = "es in sortedEntries">
+                                                            {{es.type}}
+                                                        </div>
+                                                    </div>
+
                                                 </uib-tab>
 
                                             </uib-tabset>
@@ -792,6 +810,11 @@
 
 
                         <uib-tab heading = "References Graph" select="fitGraph()">
+
+                            <div class="alert alert-warning" ng-show="showGraphWarning">
+                                Large graphs can take a while to render in the graph. Be patient!
+                            </div>
+
                             <div class="row">
                                 <div class="col-md-8">
 
@@ -845,10 +868,18 @@
                                             <div ng-repeat="item in DR" ng-show="item.DR.id == selectedNode.entry.resource.id">
                                                 <table class="table-bordered table">
                                                     <tr ng-repeat = "obs in item.obs">
-                                                        <td>{{obs.text.div | cleanTextDiv}}</td>
                                                         <td>
-                                                            {{obs.valueCodeableConcept.text}} {{obs.valueString}}   {{obs.valueQuantity.value}}
+                                                            {{obs.text.div | cleanTextDiv}}
+                                                            <div ng-repeat="coding in obs.code.coding">
+                                                                {{coding.display}}
+                                                            </div>
                                                         </td>
+                                                        <td>
+                                                            {{obs.valueCodeableConcept.text}} {{obs.valueString}} {{obs.valueQuantity.value}}
+                                                            {{obs.valueQuantity.unit}}
+
+                                                        </td>
+
                                                     </tr>
                                                 </table>
 
