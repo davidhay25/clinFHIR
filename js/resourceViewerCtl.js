@@ -654,6 +654,7 @@ angular.module("sampleApp")
                         if (resource) {
                             loadPatientById(resource);
 
+
                         }
                     }
                 )
@@ -747,6 +748,11 @@ angular.module("sampleApp")
                                 $scope.singleBundle.entry.push(entry) ;
                             })
                         }
+
+                        //Aug 2023
+                        $scope.downloadBundleJsonContent = window.URL.createObjectURL(new Blob([angular.toJson($scope.singleBundle, true)], {type: "text/text"}));
+                        $scope.downloadBundleJsonName = "PatientBundle";
+
                     }
                 });
 /*
@@ -991,6 +997,9 @@ angular.module("sampleApp")
                     $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(resource, true)], {type: "text/text"}));
                     $scope.downloadLinkJsonName = resource.resourceType + "-" + resource.id;
 
+
+
+                    //GetDataFromServer.getXmlResource(resource.resourceType + "/" + resource.id).then(
                     GetDataFromServer.getXmlResource(resource.resourceType + "/" + resource.id + "?_format=xml&_pretty=true").then(
                         function (data) {
                             $scope.xmlResource = data.data;

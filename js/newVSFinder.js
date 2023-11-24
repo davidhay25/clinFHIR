@@ -62,6 +62,7 @@ angular.module("sampleApp").controller('vsFinderCtrl',
             
             var url = $scope.termServer+"ValueSet?name:contains="+filter;
             $scope.showWaiting = true;
+
             GetDataFromServer.adHocFHIRQueryFollowingPaging(url).then(
             //GetDataFromServer.adHocFHIRQuery(url).then(
                 function(data){

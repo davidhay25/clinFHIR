@@ -28,6 +28,12 @@
                 </div>
 
 
+                <a ng-show="downloadBundleJsonName" class="pull-right" download="{{downloadBundleJsonName}}.json"
+                   href="{{downloadBundleJsonContent}}">Download Bundle</a>
+
+                <!--  <a class="pull-right" download="{{downloadLinkJsonName}}.json"
+                                                       href="{{downloadLinkJsonContent}}">Download</a>-->
+
             </div>
 
             <div class="col-md-10 col-sm-9">
@@ -496,6 +502,9 @@
                     <uib-tab heading="Bundle">
                         <br/>
                         <div class="row">
+
+
+
                             <div class="col-sm-12 col-md-12">
                                 <span class="clickable pull-right" ng-click="selectSingleBundle(singleBundle)">Show Bundle</span>
                             </div>

@@ -11,9 +11,6 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
     $scope.fhirBasePath="http://hl7.org/fhir/";
 
 
-
-
-
     $scope.bvUrl = $location.protocol() + "://" + $location.host() + ":" + $location.port() +  "/bundleVisualizer.html"
     console.log($scope.bvUrl)
     //anonQuery
