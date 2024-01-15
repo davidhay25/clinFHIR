@@ -61,6 +61,10 @@
     overflow-y: scroll;
 }
 
+.myScroll1 {
+    height: 800px;
+    overflow-y: scroll;
+}
 
 .scoreResult {
     border : 1px solid #eeeeee;

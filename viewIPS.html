@@ -31,10 +31,21 @@
     <script src="js/viewIPSCtrl.js"></script>
     <script src="js/libs/ngStorage.min.js"></script>
     <script src="js/libs/jstree.min.js"></script>
-
+    <script src="js/filters.js"></script>
     <title>View IPS</title>
 
     <style>
+
+        patientBanner {
+            border: 1px solid #b8b9b5;
+            -webkit-border-radius: 3px;
+            -moz-border-radius: 3px;
+            border-radius: 3px;
+            padding: 2px;
+            margin-bottom: 5px;
+            background-color: #F6F6F6;
+
+        }
 
         table {
             border-collapse: collapse;
@@ -68,7 +79,7 @@
             <div class="col-md-4">
                 <span>
                     <a class="navbar-brand" href="#">
-                        View IPS
+                        View IPS Document
                     </a>
                 </span>
 
@@ -87,7 +98,7 @@
 
             <div class="col-md-1">
                 <div class="navbar-text">
-
+                </div>
 
             </div>
 
@@ -99,23 +110,76 @@
             </div>
 
         </div>
-        </div>
+
     </nav>
 
-    <div class="row">
+    <!--
+        <div class="row">
         <div class="col-md-1">NHI</div>
         <div class="col-md-2"><input type="text" class="form-control" ng-model="input.nhi"/> </div>
         <div class="col-md-1"><button class="btn btn-primary" ng-click="load(input.nhi)">Load</button></div>
         <div class="col-md-8">{{qry}}</div>
     </div>
+    -->
+    <div class="row">
+        <div class="col-md-2">
+            <select ng-model="input.endpoint" class= "form-control"
+                    ng-change="selectEP(input.endpoint)"
+                    ng-options = "ep.name for ep in endPoints"></select>
+        </div>
+        <div class="col-md-1"><button class="btn btn-primary" ng-click="load(input.endpoint)">Load</button></div>
+        <div class="col-md-9">{{qry}}</div>
+    </div>
 
-    <uib-tabset>
+    <uib-tabset ng-show="composition">
         <uib-tab heading="Display">
+            <br/>
+            <div class="banner">
+                {{patient.name[0].family}} <span ng-repeat="f in patient.name[0].given">, {{f}}</span>
+                {{patient.gender}} {{patient.birthDate}} ({{patient.birthDate | getAge}})
+            </div>
+
             <div ng-repeat="section in composition.section">
                 <div><h4>{{section.title}}</h4></div>
 
                 <p ng-bind-html="to_trusted(section.text.div)"></p>
 
+            </div>
+        </uib-tab>
+
+        <uib-tab heading="Resources">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="myScroll1">
+                        <div ng-repeat="section in composition.section">
+                            <div><h4>{{section.title}}</h4></div>
+                            <div class="list-group">
+                                <div class="list-group-item"
+                                     style="cursor: pointer"
+                                     ng-click="selectResource(ref)"
+                                     ng-repeat="ref in section.entry">
+                                    {{ref.reference}}
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-md-8">
+                    <uib-tabset>
+                        <uib-tab heading="Json">
+                            <pre>{{selectedResource | json}}</pre>
+                        </uib-tab>
+                        <uib-tab heading="Validate">
+                            <div class="btn btn-primary" ng-click="validate(selectedResource)">Validate</div>
+
+                            <pre>{{OO | json}}</pre>
+
+                        </uib-tab>
+                    </uib-tabset>
+
+                </div>
             </div>
         </uib-tab>
 
