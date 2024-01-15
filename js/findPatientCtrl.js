@@ -188,6 +188,9 @@ angular.module("sampleApp")
                             //$scope.waiting = false;
                             let config = serverInteractionSvc.getServerConfig()
 
+                            //as IS server isists on the correct mime type
+                            config.headers = {'content-type':'application/fhir+json'}
+
                             /* LEAVE - might be useful in debugging after changes - eg adding new resources
                             //perform validation
                             let validateUrl = appConfigSvc.getCurrentDataServerBase() + "Bundle/$validate"

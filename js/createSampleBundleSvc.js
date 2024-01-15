@@ -94,7 +94,7 @@ angular.module("sampleApp").service('createSampleBundleSvc', function(
             enc.subject = {reference:"urn:uuid:" + patient.id}
 
             //find a random number of Random Condition as the indication
-            var cnt = parseInt(5 * Math.random());      //random number between 0 & 4
+            var cnt = parseInt(4 * Math.random()) + 1;      //random number between 1 & 4
             for (var j=0; j < cnt; j++) {
                 var condition = arConditions[parseInt(arConditions.length * Math.random())];    //a randdom condition
                 enc.diagnosis.push({condition: {reference:"urn:uuid:" + condition.id}});
