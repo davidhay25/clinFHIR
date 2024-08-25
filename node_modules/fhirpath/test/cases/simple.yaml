@@ -2,7 +2,7 @@ tests:
   - expression:
       - Patient.name.family
       - name.family
-      - name."family"
+      - name.`family`
     result:
       - Chalmers
       - Windsor
@@ -89,11 +89,35 @@ tests:
   - expression: Patient.name.select(given | family)
     result: ["Peter", "James", "Chalmers", "Jim", "Peter", "James", "Windsor"]
 
+  - expression: Patient.name.select(given.union(family))
+    result: ["Peter", "James", "Chalmers", "Jim", "Peter", "James", "Windsor"]
+
+  - expression: Patient.name.select(given.combine(family))
+    result: ["Peter", "James", "Chalmers", "Jim", "Peter", "James", "Windsor"]
+
+  - expression: Patient.name.select(('James').subsetOf(given))
+    result: [true, false, true]
+
+  - expression: Patient.name.select(('Peter' | 'James').supersetOf(given))
+    result: [true, false, true]
+
+  - expression: Patient.name.select(('Peter' | 'James' | 'something').intersect(given | family))
+    result: ["Peter", "James", "Peter", "James"]
+
   - expression: Patient.name.trace('tracing').given[0]
     result: ["Peter"]
     disableConsoleLog: true
 
    # $this
+  - expression: Patient.name.given.select($this.single())
+    result: ["Peter", "James", "Jim", "Peter", "James"]
+
+  - expression: Patient.name.given.select($this.contains('Ja'))
+    result: [false, true, false, false, true]
+
+  - expression: Patient.name.given.select($this.length) = Patient.name.given.select(length)
+    result: [true]
+
   - expression:  Patient.telecom.where($this.use = 'work')
     result: [{"use": "work", "rank": 1, "value": "(03) 5555 6473", "system": "phone"}]
 
@@ -103,11 +127,56 @@ tests:
   - expression:  identifier.where($this.type.coding.code = 'Z').value
     result: []
 
+  - desc: trace(name) doesn't affect the context of the following subexpressions
+    inputfile: patient-example.json
+    expression: name.given.combine(name.family) = name.trace('n').given.combine(name.family)
+    result:
+      - true
+
+  - desc: trace(name, projection) doesn't affect the context of the following subexpressions
+    inputfile: patient-example.json
+    expression: name.given.combine(name.family) = name.trace('m', family).given.combine(name.family)
+    result:
+      - true
+
   - expression:  (2).combine(3)
     desc: 'Parenthesized expression'
     result: [2,3]
 
+  - desc: Evaluating expression for a part of a resource
+    inputfile: questionnaire-part-example.json
+    model: 'r4'
+    expression: {base: 'QuestionnaireResponse.item', expression: 'answer.value = 2 year'}
+    result:
+      - true
 
+  - desc: 'type() function for the null element of a collection'
+    inputfile: patient-example-2.json
+    model: r4
+    expression: Patient.name.given.type()
+    result:
+      - name: string
+        namespace: FHIR
+      - name: string
+        namespace: FHIR
+      - name: string
+        namespace: FHIR
+      - name: string
+        namespace: FHIR
+
+  - desc: 'ofType() function for the null element of a collection (1)'
+    inputfile: patient-example-2.json
+    model: r4
+    expression: Patient.name.given.ofType(string)[0]
+    result: []
+
+  - desc: 'ofType() function for the null element of a collection (2)'
+    inputfile: patient-example-2.json
+    model: r4
+    expression: Patient.name.given.ofType(string)
+    result:
+      - Peter
+      - James
 
 subject:
   resourceType: Patient

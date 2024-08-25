@@ -29,7 +29,11 @@ angular.module('sampleApp')
                     delete $scope.FHIRPathResult;
                     delete $scope.FHIRPathError;
                     try {
-                        $scope.FHIRPathResult = fhirpath.evaluate($scope.resource, path);
+
+
+
+                        $scope.FHIRPathResult = fhirpath.evaluate($scope.resource, path,null,fhirpath_r4_model);
+                       // $scope.FHIRPathResult = fhirpath.evaluate($scope.resource, path);
                     } catch (ex) {
                         $scope.FHIRPathError = ex.message;
                     }
