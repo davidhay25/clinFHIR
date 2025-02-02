@@ -130,7 +130,7 @@ angular.module("sampleApp")
         defaultConfig.terminologyServers.push({name:'Public HAPI STU3 server',version:3,url:"http://fhirtest.uhn.ca/baseDstu3/"});
 
        // defaultConfig.terminologyServers.push({name:'Ontoserver',version:3,url:"http://52.63.0.196:8080/fhir/"});
-        defaultConfig.terminologyServers.push({name:"Local HAPI STU3",url:"http://localhost:8080/baseDstu3/",version:3});
+       // defaultConfig.terminologyServers.push({name:"Local HAPI STU3",url:"http://localhost:8080/baseDstu3/",version:3});
         defaultConfig.terminologyServers.push({name:"fhir.org",url:"http://tx.fhir.org/r3/",version:3});
 
         defaultConfig.terminologyServers.push({name:"Ontoserver",url:"https://ontoserver.csiro.au/stu3-latest/",version:3});
@@ -233,10 +233,10 @@ angular.module("sampleApp")
 
                 this.setServerType('terminology',"https://r4.ontoserver.csiro.au/fhir/");
 
-                this.setServerType('data',"http://hapi.fhir.org/baseR4/");
+                this.setServerType('data',"https://hapi.fhir.org/baseR4/");
                 //todo - once testing is complete...
                 //this.setServerType('data',"https://fhir.s37vcloskatg.static-test-account.isccloud.io/");
-                this.setServerType('conformance',"http://hapi.fhir.org/baseR4/");
+                this.setServerType('conformance',"https://hapi.fhir.org/baseR4/");
 
 
             },
