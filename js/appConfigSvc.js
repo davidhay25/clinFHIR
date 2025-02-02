@@ -110,7 +110,7 @@ angular.module("sampleApp")
         //these are the default servers....
         defaultConfig.servers.terminology = "https://r4.ontoserver.csiro.au/fhir/";//
         defaultConfig.servers.data = "https://fhir.s37vcloskatg.static-test-account.isccloud.io/";
-        defaultConfig.servers.conformance = "http://hapi.fhir.org/baseR4/";
+        defaultConfig.servers.conformance = "https://hapi.fhir.org/baseR4/";
 
         //defaultConfig.servers.terminology = "https://ontoserver.csiro.au/stu3-latest/";//
         //defaultConfig.servers.data = "http://fhirtest.uhn.ca/baseDstu3/";
@@ -150,12 +150,12 @@ angular.module("sampleApp")
         //defaultConfig.allKnownServers.push({name:"Public HAPI STU2 server",url:"http://fhirtest.uhn.ca/baseDstu2/",version:2,everythingOperation:true});
         //defaultConfig.allKnownServers.push({name:"Public HAPI STU3 server",url:"http://fhirtest.uhn.ca/baseDstu3/",version:3,everythingOperation:true,isTerminology:true});
 
-        defaultConfig.allKnownServers.push({name:"Public HAPI R4 server",url:"http://hapi.fhir.org/baseR4/",version:4,everythingOperation:true,isTerminology:true});
+        defaultConfig.allKnownServers.push({name:"Public HAPI R4 server",url:"https://hapi.fhir.org/baseR4/",version:4,everythingOperation:true,isTerminology:true});
 
         //defaultConfig.allKnownServers.push({name:"Vonk STU3 server",url:"http://vonk.fire.ly/",version:3,everythingOperation:false});
         defaultConfig.allKnownServers.push({name:"Vonk R4 server",url:" https://vonk.fire.ly/R4/",version:4,everythingOperation:false});
         //defaultConfig.allKnownServers.push({name:"Telstra Health STU3 server",url:"http://sqlonfhir-stu3.azurewebsites.net/fhir/",version:3,everythingOperation:true});
-        defaultConfig.allKnownServers.push({name:"Telstra Health R4 server",url:"http://sqlonfhir-stu3.azurewebsites.net/fhir/",version:4,everythingOperation:true});
+       //defaultConfig.allKnownServers.push({name:"Telstra Health R4 server",url:"http://sqlonfhir-stu3.azurewebsites.net/fhir/",version:4,everythingOperation:true});
 
         /*
         defaultConfig.allKnownServers.push({name:"Local HAPI STU2 server",url:"http://localhost:8079/baseDstu2/",version:2,everythingOperation:true});
@@ -198,9 +198,11 @@ angular.module("sampleApp")
 
 
 
-        defaultConfig.allKnownServers.push({name:'csiroProject',version:3,url:"http://home.clinfhir.com:8030/baseDstu3/",everythingOperation:true});
-        defaultConfig.allKnownServers.push({name:'nzProject',version:3,url:"http://home.clinfhir.com:8040/baseDstu3/",everythingOperation:true});
-        defaultConfig.allKnownServers.push({name:'nzProjectR4',version:4,url:"http://home.clinfhir.com:8054/baseR4/",everythingOperation:true});
+        //defaultConfig.allKnownServers.push({name:'csiroProject',version:3,url:"http://home.clinfhir.com:8030/baseDstu3/",everythingOperation:true});
+       // defaultConfig.allKnownServers.push({name:'nzProject',version:3,url:"http://home.clinfhir.com:8040/baseDstu3/",everythingOperation:true});
+        //defaultConfig.allKnownServers.push({name:'nzProjectR4',version:4,url:"http://home.clinfhir.com:8054/baseR4/",everythingOperation:true});
+
+
 
         defaultConfig.allKnownServers.push({name:'HSPC Tutorial',version:3,url:"https://api-v8-stu3.hspconsortium.org/ClinFHIRTutorial/open/",everythingOperation:false});
 
