@@ -38,7 +38,7 @@ process.on('uncaughtException', function(err) {
 var db;
 var port = process.env.port;
 if (! port) {
-    port=80;
+    port=8080;
 }
 
 let server = http.createServer(app).listen(port);
