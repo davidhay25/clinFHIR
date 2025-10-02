@@ -9,8 +9,17 @@ angular.module("sampleApp")
                 return $sce.trustAsHtml(html_code);
             }
 
-            //$scope.btoa = btoa
+            $scope.input = {};
 
+            $scope.selectors = []
+            $scope.selectors.push({display:"Paste bundle",code:'paste'})
+            $scope.selectors.push({display:"Query",code:'query'})
+            $scope.selectors.push({display:"Saved queries",code:'saved'})
+            $scope.selectors.push({display:"Library",code:'library'})
+            $scope.input.selectedSelector = $scope.selectors[0]
+
+
+            //used for binary display
             $scope.base64Decode = function (b64) {
                 if (b64) {
                     return atob(b64)
@@ -42,19 +51,11 @@ angular.module("sampleApp")
 
             //queries now stored in local browser cache
             $scope.savedQueries = $localStorage.bvQueries || []
-            //$scope.bvConfig = $localStorage.bvConfig || {}
+
 
             $scope.localStorage = $localStorage     //so can easily update
 
-            //default to no validation
-            if (! $localStorage.bvConfig) {
-                $localStorage.bvConfig = {noValidate : true}
-            }
 
-            //turn off autovalidation - todo - remove all references when loading...
-            $localStorage.bvConfig = {noValidate : true}
-
-            //console.log($scope.savedQueries)
 
             //---     load the index of samples
             $http.get("samples/index.json").then(
@@ -68,7 +69,6 @@ angular.module("sampleApp")
                         $scope.exampleBundle = data.data
                     }
                 )
-
             }
 
             $scope.loadExample = function (json) {
@@ -81,17 +81,17 @@ angular.module("sampleApp")
                 })
             }
 
+
+            //has a query been passed in. Not sure if this is still being used - or needed
             let search = $window.location.search;
 
             if (search) {
                 search = decodeURIComponent(search)
                 let bundleId;
-                console.log(search)
 
                 let qry = search.substr(1); //remove the leading '?'
-                let proxiedQuery = "/proxyfhir/" + qry
+                let proxiedQuery = "proxyfhir/" + qry
 
-                console.log(proxiedQuery)
 
                 $http.get(proxiedQuery).then(
                     function (data) {
@@ -141,11 +141,11 @@ angular.module("sampleApp")
                 $scope.waiting = true
                 bundleVisualizerSvc.deepValidation($scope.fhir,$scope.validationServer.url).then(
                     function(data) {
-                        console.log(data)
+                      //  console.log(data)
                         $scope.deepValidationResult = data
                     }, function(err) {
                         $scope.deepValidationResult = err
-                        console.log(err)
+                     //   console.log(err)
                     }
                 ).then(function (){
                     $scope.waiting = false
@@ -154,7 +154,7 @@ angular.module("sampleApp")
 
             $scope.validateWithInferno = function(){
                 //curl 'https://inferno-dev.healthit.gov/validatorapi/validate?profile=http://hl7.org/fhir/uv/ips/StructureDefinition/Composition-uv-ips' -X POST -H 'Content-Type: application/fhir+json' --data-raw $'{\n  "resourceType" : "Composition"\n}'
-                let url = "/proxyfhir/https://inferno-dev.healthit.gov/validatorapi/validate?profile=http://hl7.org/fhir/uv/ips/StructureDefinition/Composition-uv-ips"
+                let url = "proxyfhir/https://inferno-dev.healthit.gov/validatorapi/validate?profile=http://hl7.org/fhir/uv/ips/StructureDefinition/Composition-uv-ips"
 
                 $scope.validatingWithInferno = true;
                 delete $scope.infernoError
@@ -163,7 +163,7 @@ angular.module("sampleApp")
                 $http.post(url,$scope.fhir).then(
                     function (data){
                         $scope.infernoValidationResult = data.data
-                        console.log(data.data)
+                       // console.log(data.data)
                     }, function(err) {
                         $scope.infernoError = err.data
                         console.log(err.data)
@@ -177,31 +177,19 @@ angular.module("sampleApp")
             }
 
             $scope.selectFromInfernoValidate = function (iss) {
-                console.log(iss)
+             //   console.log(iss)
                 if (iss.expression) {
                     //get the index of the enry in the bundle
 
                     $scope.selectedInfernoValidationEntry = fhirpath.evaluate($scope.fhir, iss.expression[0])
-/*
-                    console.log(fhirpath.evaluate($scope.fhir, iss.expression[0]));
 
-
-                    let ar = iss.expression[0].split('.')     //entry[n]
-                    if (ar.length > 1) {
-                        let t = ar[1]
-                        let g = t.indexOf('[')
-                        let inx = t.substr(g+1,t.length -g -2)
-                        console.log(inx)
-                        $scope.selectedInfernoValidationEntry = $scope.fhir.entry[inx]
-                    }
-            */
 
                 }
             }
 
 
             $scope.selectFromDeepValidate = function (iss) {
-                console.log(iss)
+               // console.log(iss)
                 if (iss.location) {
                     //get the index of the enry in the bundle
                     let ar = iss.location[0].split('.')     //entry[n]
@@ -209,7 +197,7 @@ angular.module("sampleApp")
                         let t = ar[1]
                         let g = t.indexOf('[')
                         let inx = t.substr(g+1,t.length -g -2)
-                        console.log(inx)
+                      //  console.log(inx)
                         $scope.selectedDeepValidationEntry = $scope.fhir.entry[inx]
                     }
 
@@ -236,13 +224,38 @@ angular.module("sampleApp")
 
                 delete $scope.executedQueryBundle
 
+
+
+                let newQry = `proxyRequest?qry=${encodeURIComponent(qry)}`
+                $http.get(newQry).then(
+                    function (data) {
+                        let bundle = data.data
+                        if (bundle.resourceType !== 'Bundle' || ! bundle.entry || bundle.entry.length < 1 ) {
+                            alert("Must return a Bundle with at least one entry")
+                        } else {
+                            $scope.executedQueryBundle = data.data;
+                        }
+
+                    }, function (err) {
+                        alert("Unable to get any response from that Query. Is it a complete query - including the 'http' ?")
+                        //alert(angular.toJson(err))
+
+                    }
+                )
+
+
+                return
+
+
                 if (qry.substr(0,4) !== 'http') {
                     qry = $scope.dataServer.url + qry
                 }
                 $scope.executedQuery = qry
 
 
-                let proxiedQuery = "/proxyfhir/" + qry
+
+
+                let proxiedQuery = "proxyfhir/" + qry
                 //$http.get(qry).then(
                 $http.get(proxiedQuery).then(
                     function (data) {
@@ -267,15 +280,17 @@ angular.module("sampleApp")
             $scope.clearQuery = function() {
                 delete $scope.input.newQuery
                 delete $scope.executedQuery
+                delete $scope.executedQueryBundle
             }
 
-            $scope.addNewQuery = function(qry,name) {
+            $scope.addNewQuery = function(qry,name,description) {
+                /*
                 if (qry.substr(0,4) !== 'http') {
                     qry = $scope.dataServer.url + qry
                 }
-
+*/
                 $localStorage.bvQueries = $localStorage.bvQueries || []
-                let newQuery = {name: name,qry: qry }
+                let newQuery = {name: name,qry: qry ,description:description}
 
                 $localStorage.bvQueries.push(newQuery)
 
@@ -306,8 +321,6 @@ angular.module("sampleApp")
 
                 $http.get(item.qry).then(
                     function (data) {
-                        console.log(data)
-                        //todo - same logic as when query supplied - might be to a FHIR server or not
 
                         //if 'set validation server' is true, then supply the validation server in the call
                         validationServer = null
@@ -341,7 +354,7 @@ angular.module("sampleApp")
                     $http.post('/transformJson',bundle).then(
                         function(data) {
                             json = data.data
-                            console.log(json)
+
                             process(json,name)
                         },
                         function(err) {
@@ -360,6 +373,8 @@ angular.module("sampleApp")
                         alert("Must be a valid Json bundle")
                         return;
                     }
+
+
                     try {
                         process(json,name)
                     } catch (ex) {
@@ -384,7 +399,7 @@ angular.module("sampleApp")
 
             //show or hide the patient in the main graph
             $scope.showHidePatient = function(toggle) {
-                console.log(toggle)
+
                 let options = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:$scope.serverRoot}
                 options.hidePatient = toggle;
                 drawGraph(options)
@@ -396,21 +411,14 @@ angular.module("sampleApp")
                 alert('The config was updated. You can continue.')
             }
 
-            $http.post('/stats/login',{module:'bundleVisualizer'}).then(
-                function(data){
 
-                },
-                function(err){
-                    console.log('error accessing clinfhir to register access',err)
-                }
-            );
 
             //pre-defined queries
             $scope.queries = [];
 
 
             //inward and outwards references in graph
-            $scope.input = {};
+
             $scope.input.showInRef = true;
             $scope.input.showOutRef = true;
 
@@ -475,7 +483,7 @@ angular.module("sampleApp")
                         $scope.allServers = allServers;
 
                         $scope.setServer = function(svr) {
-                            console.log(svr)
+
                             $scope.input.url = svr.url
                             $scope.input.name = svr.name
                             $scope.canSave = true
@@ -519,37 +527,48 @@ angular.module("sampleApp")
 
 
 
-            $scope.selectIssueDEP = function(issue){
-
-                console.log(issue)
-                //find the actual entry - a bit of a hack tttt
-                if (issue.location) {
-                    let g1 = issue.location[0].indexOf('[')
-                    let g2 = issue.location[0].indexOf(']')
-                    if (g1 && g2) {
-                        let inx = issue.location[0].substr(g1+1,g2-g1-1)
-                        console.log(inx -1)
-                        $scope.selectedIssueEntry = $scope.fhir.entry[inx-1]
-                    }
-                }
-
-            };
 
 
             $scope.selectBundleEntry = function(entry,entryErrors) {
                 delete $scope.selectedFromSingleGraph;  //does this need to be done?
+
+                let resourceId = entry.resource.id
+
+                $scope.selectedBundleEntryErrors = []     //an array of errors for this entry
+                //only if the bundle has been validated
+                if ($scope.validationResult) {
+                    for (const iss of $scope.validationResult.issue) {
+                        let loc = iss.location[0]
+                        const match = loc.match(/\[(\d+)\]/);
+                        const firstIndex = match ? parseInt(match[1], 10) : null;
+                        if (firstIndex !== null) {
+
+                            const resource = $scope.fhir.entry[firstIndex].resource
+                            if (resource.id == resourceId) {
+                                $scope.selectedBundleEntryErrors.push(iss)
+                            }
+                        }
+
+
+
+
+                    }
+
+                }
+
+
                 $scope.selectedFromSingleGraph = entry.resource
                 delete $scope.fshText
                 delete $scope.xmlText
                 $scope.selectedBundleEntry = entry
-                $scope.selectedBundleEntryErrors = entryErrors;
+                //$scope.selectedBundleEntryErrors = entryErrors;
 
                 $scope.createGraphOneEntry();
 
                 //get the FSH of the resource
                 $http.post("./fsh/transformJsonToFsh",entry.resource).then(
                     function(data) {
-                        console.log(data.data)
+                        //console.log(data.data)
                         try {
                             let response = data.data
                             $scope.fshText = response.fsh.instances[entry.resource.id]
@@ -630,11 +649,10 @@ angular.module("sampleApp")
                 options.hidePatient = $scope.input.showHidePatient;
 
                 let vo = v2ToFhirSvc.makeGraph(options);
-                //let vo = v2ToFhirSvc.makeGraph($scope.fhir,$scope.hashErrors,$scope.serverRoot,false,id)
-                //console.log(vo);
+
 
                 let container = document.getElementById('singleResourceGraph');
-                let graphOptions = {
+                let graphOptionsDEP = {
                     physics: {
                         enabled: true,
                         barnesHut: {
@@ -642,7 +660,31 @@ angular.module("sampleApp")
                         }
                     }
                 };
+
+                let graphOptions = {
+                    physics: {
+                        enabled: true,
+                        barnesHut: {
+                            gravitationalConstant: -10000,
+                            centralGravity: 0.3,
+                            springLength: 120,
+                            springConstant: 0.04,
+                            damping: 0.09,
+                            avoidOverlap: 0.2
+                        },
+                        stabilization: {
+                            iterations: 200,   // try lowering from default (1000)
+                            updateInterval: 25
+                        }
+                    }
+                }
+
                 $scope.singleResourceChart = new vis.Network(container, vo.graphData, graphOptions);
+
+                // 🚀 Turn off physics after initial layout
+                $scope.singleResourceChart.once('stabilizationIterationsDone', function () {
+                    $scope.singleResourceChart.setOptions({ physics: false });
+                });
 
                 $scope.singleResourceChart.on("click", function (obj) {
                     delete $scope.selectedFshFromSingleGraph
@@ -778,7 +820,9 @@ angular.module("sampleApp")
 
                 delete $scope.hashErrors
                // $scope.CarePlans = []       //a list of all Careplans in the bundle (
+
                 $scope.DR = []          //list of DiagnosticReports
+                $scope.encounters = []
                 delete $scope.selectedDeepValidationEntry
                 delete $scope.deepValidationResult
 
@@ -786,6 +830,10 @@ angular.module("sampleApp")
 
                 delete $scope.serverRoot;
                 $scope.fhir = oBundle;
+
+                //now that we have a local hapi server this is much faster
+                $scope.performValidation()
+
 
                 //create a hash for bundle by name
                 $scope.hashByName = {}
@@ -797,6 +845,15 @@ angular.module("sampleApp")
                         if (resource.resourceType == "CarePlan") {
                            // $scope.CarePlans.push(entry)
                         }
+
+                        if (resource.resourceType == "Encounter") {
+                            // $scope.CarePlans.push(entry)
+
+                            $scope.encounters.push(entry)
+                        }
+
+
+
 
                         if (resource.resourceType == "DiagnosticReport") {
                            // let vo = bundleVisualizerSvc.makeDRSummary()
@@ -816,9 +873,6 @@ angular.module("sampleApp")
                         $scope.DR.forEach(function (item) {
                             let vo = bundleVisualizerSvc.makeDRSummary(item.DR,$scope.hashByRef)
                             item.obs = vo.obs
-
-                            console.log(item)
-
                         })
                     }
 
@@ -1044,12 +1098,32 @@ angular.module("sampleApp")
             };
 
 
-            function drawGraph(options) {
+            function drawGraph(options) {console.log("Building graph")
+
                 let vo = v2ToFhirSvc.makeGraph(options)
 
                 $scope.showGraphWarning = true
                 var container = document.getElementById('resourceGraph');
-                var graphOptions = {
+
+                let graphOptions = {
+                    physics: {
+                        enabled: true,
+                        barnesHut: {
+                            gravitationalConstant: -10000,
+                            centralGravity: 0.3,
+                            springLength: 120,
+                            springConstant: 0.04,
+                            damping: 0.09,
+                            avoidOverlap: 0.2
+                        },
+                        stabilization: {
+                            iterations: 200,   // try lowering from default (1000)
+                            updateInterval: 25
+                        }
+                    }
+                };
+
+                var graphOptionsDEP = {
                     physics: {
                         enabled: true,
                         barnesHut: {
@@ -1060,6 +1134,8 @@ angular.module("sampleApp")
 
 
                 $scope.chart = new vis.Network(container, vo.graphData, graphOptions);
+
+
 
                 $scope.chart.on("click", function (obj) {
 
@@ -1087,28 +1163,88 @@ angular.module("sampleApp")
 
             //validate each entry
 
-            let validate = function(bundle,inValidationServer,cb) {
+
+            $scope.getResourceFromIssue = function (iss) {
+                $scope.selectedIssue = iss
+
+                // "Bundle.entry[0].resource.section[5].text.div",
+                let loc = iss.location[0]
+
+                const match = loc.match(/\[(\d+)\]/);
+                const firstIndex = match ? parseInt(match[1], 10) : null;
+
+                if (firstIndex !== null) {
+                    $scope.issueResource = $scope.fhir.entry[firstIndex].resource
+                }
+
+
+
+
+            }
+
+            let validate = function(resource,inValidationServer,cb) {
+                let hashErrors = {};    //related to position in bundle...
+                $http.post("validate",resource).then(
+                    function (data) {
+                        console.log(data)
+
+                        //this is an OO
+
+                        $scope.validationResult = data.data
+                        let issues = data.data.issue
+                        $scope.validationResult.issue = []
+
+                        //remove all the 'should have text element' errors
+                        const exclude = "dom-6:"
+                        issues = issues.filter(item => !item.diagnostics.includes(exclude));
+                        //$scope.validationResult.issue =
+                         //   $scope.validationResult.issue.filter(item => !item.diagnostics.includes(exclude));
+
+                        //create a hash by resource id
+                        $scope.errorsByResource = {}
+
+                        for (const iss of issues) {
+                            let loc = iss.location[0]
+
+                            const match = loc.match(/\[(\d+)\]/);
+                            const firstIndex = match ? parseInt(match[1], 10) : null;
+
+                            if (firstIndex !== null) {
+                                if (firstIndex > $scope.fhir.entry.length) {
+                                    console.error(`Theres an issue with a location of ${loc} but there are only ${$scope.fhir.entry.length} entries  in the bundle`)
+                                } else {
+                                    const resource = $scope.fhir.entry[firstIndex].resource
+                                    $scope.validationResult.issue.push(iss)
+
+                                    $scope.errorsByResource[resource.id] = $scope.errorsByResource[resource.id] || {resource:resource,issues:[]}
+                                    $scope.errorsByResource[resource.id].issues.push(iss)
+                                }
+
+                            }
+
+
+                        }
+
+
+
+                    }, function (err) {
+                        console.log(err)
+                    }
+                )
+
+
+                return
+
                 $scope.valErrors = 0
                 $scope.valWarnings=0;
 
                 let validationServer = inValidationServer || $scope.validationServer.url
 
-
-                //defauk to no validate
-
-
-            //    if ($localStorage.bvConfig && $localStorage.bvConfig.noValidate) {
-             //       return
-            //    }
-
-
                 $scope.waiting = true;
-
-
 
                 //this is the 'per entry' validation
                 let arQuery = []
-                let hashErrors = {};    //related to position in bundle...
+               // let hashErrors = {};    //related to position in bundle...
                 bundle.entry.forEach(function (entry,inx) {
                     let resource = entry.resource
                     let url =  validationServer+resource.resourceType +"/$validate";  // "/proxyfhir/" +

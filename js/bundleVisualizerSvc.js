@@ -5,8 +5,6 @@ angular.module("sampleApp")
     //also holds the current patient and all their resources...
     //note that the current profile is maintained by resourceCreatorSvc
 
-
-
     .service('bundleVisualizerSvc', function($http,$q) {
 
         let deepValidateMax = 30    //maximum number of resources allowed in deep validation
@@ -15,13 +13,16 @@ angular.module("sampleApp")
             makeDRSummary : function(DR,hashResourcesByRef) {
                 //create an object to make it easy to list DiagnosticReports
                 let vo = {DR:DR,obs:[]}
-                DR.result.forEach(function (ref) {
-                    let obs = hashResourcesByRef[ref.reference]
-                    if (obs) {
-                        vo.obs.push(obs)
-                    }
+                if (DR.result) {
+                    DR.result.forEach(function (ref) {
+                        let obs = hashResourcesByRef[ref.reference]
+                        if (obs) {
+                            vo.obs.push(obs)
+                        }
 
-                })
+                    })
+                }
+
                 return vo
             },
             makeCarePlanSummaryDEP : function(arCarePlans,hashResources) {

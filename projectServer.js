@@ -98,7 +98,7 @@ app.get('/init',function(req,res){
 
 //========= proxy endpoints - goes to the SMART server.
 
-app.get('/proxyfhir/*',function(req,res) {
+app.get('proxyfhir/*',function(req,res) {
     var config = req.session['config'];
     var fhirQuery = config.baseUrl + req.originalUrl.substr(11); //strip off proxyfhir/
     var options = {

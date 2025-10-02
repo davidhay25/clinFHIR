@@ -58,7 +58,7 @@ angular.module("sampleApp")
                 }
 
                 if ($scope.input.useProxy) {
-                    qry = "/proxyfhir/" + qry;
+                    qry = "proxyfhir/" + qry;
                 }
 
 

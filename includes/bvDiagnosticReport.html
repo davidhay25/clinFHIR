@@ -1,34 +1,34 @@
 <div>
 
-
-   <div ng-repeat="item in DR">
-
-       <div >{{item.DR.resourceType}}</div>
-
        <br/>
+
         <div class="row">
             <div class="col-md-8">
-                <table class="table table-condensed table-bordered">
-                    <tr ng-repeat="obs in item.obs">
-                        <td>
-                            <div class="clickable" ng-click="selectDRObs(obs)">{{obs.text.div | cleanTextDiv}}</div>
-                        </td>
-                        <td>{{obs.valueCodeableConcept}} {{obs.valueString}}   {{obs.valueQuantity}} </td>
-                    </tr>
-                </table>
+                <div class="myScroll1">
+                <div ng-repeat="item in DR">
+
+                    <div >{{item.DR.effectiveDateTime | date}}</div>
+
+                    <table class="table table-condensed table-bordered">
+                        <tr ng-repeat="obs in item.obs">
+                            <td style="width: 50%">
+                                <div class="clickable" ng-click="selectDRObs(obs)">
+                                    {{obs.code.coding[0].display}}
+                                </div>
+                            </td>
+                            <td>{{obs.valueCodeableConcept.value}} {{obs.valueCodeableConcept.unit}}
+                                {{obs.valueQuantity.value}} {{obs.valueQuantity.unit}}
+                                {{obs.valueString}}
+                                </td>
+                        </tr>
+                    </table>
+                </div>
+                </div>
             </div>
+
             <div class="col-md-4">
                 <pre>{{selectedDRObservation | json}}</pre>
-                <!--
-                <uib-tabset>
-                    <uib-tab heading="Observation">
-                        <pre>{{selectedDRObservation | json}}</pre>
-                    </uib-tab>
-                    <uib-tab heading="DiagnosticReport">
-                        <pre>{{selectedDR | json}}</pre>
-                    </uib-tab>
-                </uib-tabset>
-                -->
+
 
             </div>
         </div>

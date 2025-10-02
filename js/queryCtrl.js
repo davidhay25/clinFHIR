@@ -435,7 +435,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
 
         //if using the CF proxy
         if ($scope.input.useProxy) {
-            qry = "/proxyfhir/" + qry;
+            qry = "proxyfhir/" + qry;
         }
 
 

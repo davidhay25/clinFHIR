@@ -57,7 +57,7 @@ angular.module("sampleApp")
 
             function getModels() {
 
-                var url = "/proxyfhir/StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
+                var url = "proxyfhir/StructureDefinition?kind=logical&identifier=http://clinfhir.com|author";
                 $http.get(url).then(
                     function (data) {
                         console.log(data.data)

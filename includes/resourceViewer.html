@@ -47,7 +47,7 @@
                                ng-class="{'list-group-item':true,'active':entry.resource.id == outcome.selectedResource.id}"
                                ng-repeat="entry in outcome.allResourcesOfOneType.entry">
                                 <div style="cursor: pointer" ng-click="resourceSelected(entry)">
-                                    <ng-include src="'./includes/resourceDisplayTemplates.html'"></ng-include>
+                                    <ng-include src="'includes/resourceDisplayTemplates.html'"></ng-include>
                                 </div>
                             </a>
                         </div>
@@ -150,7 +150,7 @@
                                         <uib-tab heading="Task " ng-show="outcome.selectedResource.resourceType=='Task'">
                                             <br/>
                                             <div ng-controller="pvTaskCtrl">
-                                                <ng-include src="'./includes/pvTask.html'"></ng-include>
+                                                <ng-include src="'includes/pvTask.html'"></ng-include>
                                             </div>
 
                                         </uib-tab>
@@ -259,7 +259,7 @@
 
 
         <div ng-controller="terminologyExplorerCtrl">
-            <ng-include src="'./includes/terminologyExplorer.html'"></ng-include>
+            <ng-include src="'includes/terminologyExplorer.html'"></ng-include>
         </div>
 
 
@@ -490,7 +490,7 @@
                                     <li ng-class="{'list-group-item':1==1,'list-group-item-info':entry.resource.id == outcome.selectedResource.id}"
                                         style = "cursor: pointer"
                                         ng-repeat = "entry in value.entry" ng-click="selectFPResource(entry)">
-                                        <ng-include src="'./includes/resourceDisplayTemplates.html'"></ng-include>
+                                        <ng-include src="'includes/resourceDisplayTemplates.html'"></ng-include>
 
                                     </li>
                                 </ul>
@@ -518,7 +518,7 @@
                                 <li ng-class="{'list-group-item':1==1,'list-group-item-info':entry.resource.id == outcome.selectedResource.id}"
                                     style = "cursor: pointer"
                                     ng-repeat = "entry in singleBundle.entry" ng-click="selectFPResource(entry)">
-                                    <ng-include src="'./includes/resourceDisplayTemplates.html'"></ng-include>
+                                    <ng-include src="'includes/resourceDisplayTemplates.html'"></ng-include>
 
                                 </li>
                             </ul>

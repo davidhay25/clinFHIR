@@ -9,6 +9,8 @@ function setup(app,indb) {
 
     db = indb;
 
+    console.log('Setting up stats')
+
 //when a user navigates to cf
 
     app.post('/stats/login',function(req,res){
@@ -174,7 +176,7 @@ function setup(app,indb) {
 
 
 
-
+/*
     app.post('/errorReport',function(req,res){
         if(! db) {
             //check that the mongo server is running...
@@ -259,7 +261,7 @@ function setup(app,indb) {
 
     });
 
-
+*/
     var updateLocation = function(doc,ip) {
         //doc.ip="198.102.235.144"
         var url = "http://freegeoip.net/json/"+doc.ip;
@@ -322,13 +324,13 @@ function recordAccess(req,data) {
         audit.data = data;
 
 
-        db.collection("accessAudit").insert(audit, function (err, result) {
+        db.collection("accessAudit").insertOne(audit, function (err, result) {
             if (err) {
                 console.log('Error logging access ',audit)
             } else {
 
                 if (result && result.length) {
-                    updateLocation(result[0],clientIp);
+                 //   updateLocation(result[0],clientIp);
 
                 }
             }
