@@ -28,6 +28,22 @@
 
 
         <uib-tabset>
+
+
+            <uib-tab heading="Predefined">
+                <!-- <pre>{{allServers | json}}</pre>-->
+                <table class="table">
+                    <tr ng-repeat="row in allServers">
+                        <td>{{row.name}}</td>
+                        <td>{{row.url}}</td>
+                        <td>
+                            <div class="clickable" ng-click="selectServer(row)">Select</div>
+                        </td>
+                    </tr>
+                </table>
+
+            </uib-tab>
+
             <uib-tab heading="Ad hoc server">
                 <br/>
                 <div class="row" style="margin-bottom: 8px">
@@ -100,20 +116,6 @@
                         </div>
                     </div>
                 </div>
-
-            </uib-tab>
-
-            <uib-tab heading="Predefined">
-                <!-- <pre>{{allServers | json}}</pre>-->
-                <table class="table">
-                    <tr ng-repeat="row in allServers">
-                        <td>{{row.name}}</td>
-                        <td>{{row.url}}</td>
-                        <td>
-                            <div class="clickable" ng-click="selectServer(row)">Select</div>
-                        </td>
-                    </tr>
-                </table>
 
             </uib-tab>
 

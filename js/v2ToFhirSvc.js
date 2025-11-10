@@ -356,6 +356,7 @@ angular.module("sampleApp")
                 //makeGraph: function (bundle,hashErrors,serverRoot,hidePatient,centralResourceId) {
 
                 let bundle = options.bundle;
+                let lstErrors = []
 
                 if (!bundle || ! bundle.entry) {
                     return {graphData : {}, allReferences:[], nodes: {}, visNodes:{},visEdges:{}};
@@ -455,12 +456,7 @@ angular.module("sampleApp")
                     }
 
                     arNodes.push(node);
-/*
-                    if (centralResourceId && url == centralResourceId) {
-                        //this is the central id
-                        centralResourceNodeId = arNodes.length;
-                    }
-*/
+
                     if (centralResourceId && url == centralResourceId) {
                         //this is the central id
                         centralResourceNodeId = arNodes.length;
@@ -468,17 +464,17 @@ angular.module("sampleApp")
 
                     if (hidePatient) {
 
-                       // if (node.title == 'Patient') {
+
                         if (node.resource &&  node.resource.resourceType == 'Patient') {
-                            //objNodes[inx] = node;
+
                         } else {
                             objNodes[node.url] = node;
-                           // arNodes.push(node);
+
                         }
 
                     } else {
                         objNodes[node.url] = node;
-                       // arNodes.push(node);
+
                     }
 
 
@@ -486,40 +482,35 @@ angular.module("sampleApp")
                     var refs = [];
                     findReferences(refs,resource,resource.resourceType);
 
-                    //console.log(refs);
+
                     let cRefs = []
-                    //findCanonicalReferences(cRefs,resource,resource.resourceType);
-                    //console.log(cRefs)
+
 
 
                     refs.forEach(function(ref){
                         allReferences.push({src:node,path:ref.path,targ:ref.reference,index:ref.index})
-                        //gAllReferences.push({src:url,path:ref.path,targ:ref.reference,index:ref.index});    //all relationsin the collection
-                    })
+                        })
 
                 });
-               // console.log(objNodes)
+
 
                 //so now we have the references, build the graph model...
                 let hash = {};      //this will be a hash of nodes that have a reference to centralResourceId (if specified)
 
 
-                //console.log(allReferences)
+
 
                 allReferences.forEach(function(ref){
-
 
                     let targetNode = objNodes[ref.targ];
 
                     if (centralResourceId) {
 
-
-                        //if (ref.src.resource.id == centralResourceId) {
                         if (ref.src.normalizedId == centralResourceId && options.showOutRef) {
                             //this is from the central resource to the given central resource
                             hash[ref.targ] = true;      //this is the url property of the node
                         }
-                        //if (targetNode && targetNode.resource.id == centralResourceId) {
+
                         if (targetNode && targetNode.normalizedId == centralResourceId  && options.showInRef) {
                             //this is a resource eferencing the central node
                             hash[ref.src.url] = true;
@@ -537,8 +528,33 @@ angular.module("sampleApp")
                         missingReferences[ref.targ].push(err)
 */
                         try {
-                            console.log('>>>>>>> error Node Id '+ref.targ + ' is not present from ' + ref.src.resource.resourceType + " "+ ref.src.resource.id)
-                        } catch (ex) {}
+
+                            //only populate when a single resource is being graphed...
+                            if (centralResourceId) {
+                                let includeMsg = true
+                                if (hidePatient) {
+                                    //if the patient is being hidden, and the target is patient then this is not an error
+                                    if (ref.targ.indexOf('/Patient/') > -1) {
+                                        includeMsg = false
+                                    }
+                                }
+
+
+
+                                if (includeMsg) {
+                                    let msg = `Node Id ${ref.targ} is not present from ${ ref?.src?.resource?.resourceType} ${ref?.src?.resource?.id}`
+                                    lstErrors.push({msg:msg})
+                                }
+
+
+
+                            }
+
+                            //console.log('>>>>>>> error Node Id '+ref.targ + ' is not present from ' + ref.src.resource.resourceType + " "+ ref.src.resource.id)
+
+                        } catch (ex) {
+                            console.error(ex)
+                        }
 
                     }
                 });
@@ -561,7 +577,6 @@ angular.module("sampleApp")
 
                     nodes = makeNodeDataSet(nodesToInclude,hidePatient)
 
-                    //nodes = new vis.DataSet(nodesToInclude);
 
                     //if not recursive, remove edges where there isn't a direct reference to or from the centrlal resource id.
                     if (! options.recursiveRef) {
@@ -592,7 +607,13 @@ angular.module("sampleApp")
 
 
                 console.log(missingReferences)
-                return {graphData : data, allReferences:allReferences, nodes: arNodes, visNodes:nodes,visEdges:edges, missingReferences:missingReferences};
+                return {graphData : data,
+                    allReferences:allReferences,
+                    nodes: arNodes,
+                    visNodes:nodes,
+                    visEdges:edges,
+                    lstErrors : lstErrors,
+                    missingReferences:missingReferences};
 
 
                 function makeNodeDataSet(arNodes,hidePatient) {

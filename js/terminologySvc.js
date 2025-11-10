@@ -28,9 +28,10 @@ angular.module("sampleApp").service('terminologySvc', function() {
                                     element.forEach(function (el) {
                                         if (el.coding) {
                                             el.coding.forEach(function (concept) {
-                                                concept.path = key
-                                                arCodedElements.push(concept)
-                                                hashAllSystems[concept.system] = true
+                                                let clone = angular.copy(concept)
+                                                clone.path = key
+                                                arCodedElements.push(clone)
+                                                hashAllSystems[clone.system] = true
                                             })
                                         } else {
                                             //todo - look for child elements that may be coding..
@@ -40,9 +41,11 @@ angular.module("sampleApp").service('terminologySvc', function() {
                                 } else {
                                     if (element.coding) {
                                         element.coding.forEach(function (concept) {
-                                            concept.path = key
-                                            arCodedElements.push(concept)
-                                            hashAllSystems[concept.system] = true
+                                            let clone = angular.copy(concept)
+                                            clone.path = key
+                                           // concept.path = key
+                                            arCodedElements.push(clone)
+                                            hashAllSystems[clone.system] = true
                                         })
 
                                     }

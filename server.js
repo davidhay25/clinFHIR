@@ -21,6 +21,7 @@ let lantanaModule = require("./serverModuleLantana")
 //var smartModule = require("./serverModuleSMART.js")
 //let testingModule = require("./serverModuleTesting.js")
 const proxyModule = require("./serverModuleProxy.js")
+const bvModule = require("./serverModuleBV.js")
 
 const fshModule = require("./serverModuleFSH.js")
 const qaModule = require("./serverModuleQA.js")
@@ -37,9 +38,7 @@ process.on('uncaughtException', function(err) {
     console.log('>>>>>>>>>>>>>>> Caught exception: ' + err);
 });
 
-
-
-var db;
+//var db;
 var port = process.env.port;
 if (! port) {
     port=8080;
@@ -48,6 +47,54 @@ if (! port) {
 let server = http.createServer(app).listen(port);
 
 console.log(`listening on port ${port}`);
+
+
+const { connect } = require("./serverModuleDb");
+
+(async () => {
+    const client = await connect();
+
+    bvModule.setup(app,client)
+    console.log('connected to mongoDb')
+})();
+
+
+
+/*
+//set up the mongo connection
+const mongoUrl = process.env.MONGO_URL || "mongodb://localhost:27017/clinfhir"
+
+console.log(mongoUrl)
+
+const { MongoClient } = require("mongodb");
+const client = new MongoClient(mongoUrl, {
+    connectTimeoutMS: 5000,
+    socketTimeoutMS: 5000
+});
+
+// Wrap connect() in a timeout
+function connectWithTimeout(client, timeoutMs) {
+    return Promise.race([
+        client.connect(), // attempt to connect
+        new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("MongoDB connection timed out")), timeoutMs)
+        )
+    ]);
+}
+
+// Usage
+connectWithTimeout(client, 7000) // overall timeout of 7 seconds
+    .then(() => {
+        console.log("✅ Connected to MongoDB");
+        const db = client.db("mydatabase");
+        // do something with db
+    })
+    .catch(err => {
+        console.error("❌ Connection failed:", err);
+    });
+
+*/
+
 
 //not using WS now - was for logical modeller
 /*
@@ -79,7 +126,10 @@ lantanaModule.setup(app)
 proxyModule.setup(app);
 
 
-const { MongoClient } = require('mongodb');
+
+
+//const { MongoClient } = require('mongodb');
+
 
 /*
 MongoClient.connect('mongodb://127.0.0.1:27017', { })

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>clinFHIR</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f0f4f8;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      justify-content: center; /* center container */
+      height: 100vh;
+      box-sizing: border-box;
+    }
+
+    /* Container with small side spacing */
+    .container {
+      display: flex;
+      width: 95%;         /* container fills most of screen */
+      max-width: 1400px;  /* cap for very wide screens */
+      gap: 20px;
+      height: 100%;
+    }
+
+    /* Left pane ~40% */
+    .info-pane {
+      flex: 2;
+      min-width: 350px;
+      background: #f5f5f5;
+      padding: 20px;
+      box-sizing: border-box;
+      border-right: 1px solid #ccc;
+      overflow-y: auto;
+
+    }
+
+    .myScroll {
+        height: 600px;
+        overflow-y: scroll;
+    } 
+
+    /* Right pane ~60% */
+    .commands-pane {
+      flex: 3;
+      padding: 20px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      overflow-y: auto;
+    }
+
+    /* Header with PNG */
+    .commands-header {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .commands-header img {
+      height: 60px;
+      width: auto;
+    }
+
+    /* Card grid */
+    .command-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 15px;
+    }
+
+    /* Cards */
+    .card {
+      border-radius: 14px;
+      padding: 25px 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .icon {
+      font-size: 2.2rem;
+      margin-bottom: 12px;
+    }
+
+    .card h2 {
+      font-size: 1.2rem;
+      margin: 0 0 8px;
+      color: #1a202c;
+    }
+
+    .card p {
+      font-size: 0.95rem;
+      color: #555;
+      margin: 0 0 8px 0;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      border-radius: 8px;
+      background: #ff6b6b;
+      color: white;
+    }
+
+    /* Scrollbars */
+    .info-pane::-webkit-scrollbar,
+    .commands-pane::-webkit-scrollbar {
+      width: 8px;
+    }
+    .info-pane::-webkit-scrollbar-thumb,
+    .commands-pane::-webkit-scrollbar-thumb {
+      background-color: rgba(0,0,0,0.2);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Left pane -->
+    <div class="info-pane">
+      <h2>clinFHIR</h2>
+      <p>This dashboard provides quick access to various clinFHIR modules. Click on any card to open the corresponding module in a new tab.</p>
+      <p>Modules include tools for visualizing patient data, managing FHIR bundles, resource clinical graphs, querying FHIR servers, designing forms, and viewing Questionnaires / QuestionnaireResponses.</p>
+
+
+      <div class="myScroll">
+
+      <h3>Patient Viewer</h3>
+      <p>Select a server and a patient on that server to view their resources in a number of displays.
+        You can also add a new patient with a 'pre-defined' set of resources.
+      </p>
+
+
+      <h3>Bundle Visualizer</h3>
+      <p>Display the contents of FHIR Bundles. There are a number of visualization options 
+        available to help you understand the structure and contents of the bundle.</p>
+        <p>Bundles can be pasted in directly, pulled from a remote server or accessed from the library.</p>
+
+
+      <h3>Graph Builder</h3>
+      <p>Create and visualize resource graphs. This tool allows you to build complex queries
+         and see the relationships between different FHIR resources.</p>
+
+      <h3>Server Query</h3>
+      <p>Query a FHIR server using a simple interface. You can search for resources
+         based on various criteria and view the results in a structured format.</p> 
+
+      <h3>Form Designer</h3>
+      <p>Design and manage forms for data collection. This tool provides a user-friendly interface
+         for creating forms that can be used in clinical settings.</p>  
+
+      <h3>Questionnaire Viewer</h3>
+      <p>View questionnaires in a structured format. This tool allows you to easily navigate
+         and understand the contents of FHIR Questionnaires.</p>  
+<!--
+      <h3>Questionnaire Response Viewer</h3>
+      <p>View questionnaire responses in a table. The Questionnaire it was built from must be available.</p>
+      -->
+    </div>
+          </div>
+
+
+
+    <!-- Right pane -->
+    <div class="commands-pane">
+      <div class="commands-header">
+        <img src="sb-intersystems.png" alt="Header" />
+      </div>
+      <div class="command-grid">
+        <!-- Cards inserted by JS -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const colors = [
+      "#D0E8F2", "#A7D8F5", "#A8E6CF", "#DFF7DF",
+      "#E6F8D8", "#FFF3BF", "#FFE5D9", "#FFCCC9",
+      "#FFD9E1", "#E3DFFF", "#D4C4F7", "#B8E0F4"
+    ];
+
+    //https://getemoji.com/#smileys
+
+    const commands = [
+      { title: "Patient Viewer", description: "Visualize patient data from a server.", 
+        icon: "👳‍♀️", url: "/clinfhir/patientViewer.html", color: "#e0f7fa", badge: "View only" },
+
+      { title: "Bundle Visualizer", description: "Display the contents of FHIR Bundles.", 
+        icon: "📦", url: "/clinfhir/bundleVisualizer.html", color: "#f3e5f5", badge: "View only" },
+
+      { title: "Graph Builder", description: "Create and visualize resource graphs.",
+        icon: "📝", url: "/gb2/", color: "#fffde7", badge: "New", badge: "Edit" },
+
+      { title: "Server Query", description: "Query a FHIR server",
+        icon: "🗄️", url: "/clinfhir/query.html", color: "#f1f8e9" , badge: "View only"},
+
+      { title: "Form Designer", description: "Design and manage forms.",
+        icon: "🧹", url: "/forms/models.html", color: "#fff3e0", badge: "Edit" },
+
+      { title: "Questionnaire Viewer", description: "View questionnaires.",
+        icon: "🔁", url: "/forms/modelReview.html", color: "#fce4ec", badge: "View only" }
+
+     
+    ];
+
+    // { title: "QuestionnaireResponse Viewer", description: "View questionnaire responses.",
+    //    icon: "🔁", url: "/forms/qrVisualizerAdHoc.html", color: "#fce4ec", badge: "View only" }
+
+    const grid = document.querySelector('.command-grid');
+
+    commands.forEach((cmd, i) => {
+      const card = document.createElement('a');
+      card.href = cmd.url;
+      card.target = "_blank";
+      card.className = 'card';
+      card.style.background = colors[i % colors.length];
+      card.innerHTML = `
+        <div class="icon">${cmd.icon}</div>
+        <h2>${cmd.title}</h2>
+        <p>${cmd.description}</p>
+
+
+        ${cmd.badgeX ? `<span class="badge">${cmd.badge}</span>` : ''}`; 
+
+
+      grid.appendChild(card);
+    });
+  </script>
+
+</body>
+</html>

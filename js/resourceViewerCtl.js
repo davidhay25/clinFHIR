@@ -5,19 +5,7 @@ angular.module("sampleApp")
                   $uibModal, $timeout,GetDataFromServer,modalService,ResourceUtilsSvc,builderSvc,$window,$http,$location,
                   $firebaseObject,Utilities,terminologySvc) {
 
-//,createSampleBundleSvc, serverInteractionSvc
-/*
-            //testing sample creator
-            let patient = {resourceType:"Patient",name:[{text:"John Doe"}]}
-        createSampleBundleSvc.makeSampleBundle(patient).then(
-            function (data) {
-                console.log(JSON.stringify(data))
-            },function (err) {
-                console.log(err)
-            }
-        )
 
-*/
 
 
         //https://github.com/vasturiano/3d-force-graph
@@ -750,22 +738,28 @@ angular.module("sampleApp")
                         }
 
                         //Aug 2023
-                        $scope.downloadBundleJsonContent = window.URL.createObjectURL(new Blob([angular.toJson($scope.singleBundle, true)], {type: "text/text"}));
-                        $scope.downloadBundleJsonName = "PatientBundle";
+                       // $scope.downloadBundleJsonContent = window.URL.createObjectURL(new Blob([angular.toJson($scope.singleBundle, true)], {type: "text/text"}));
+                       // $scope.downloadBundleJsonName = "PatientBundle";
 
                     }
                 });
-/*
-                //sort the list of types
-                let ar = []
-                angular.forEach(hashShowType,function (k,v) {
-                    ar.push(v)
-                })
-                ar.sort();
-                ar.forEach(function(k){
-                    $scope.input.showType[k] = true;
-                })
-*/
+
+                $scope.downloadBundleJsonContent = window.URL.createObjectURL(new Blob([angular.toJson($scope.singleBundle, true)], {type: "text/text"}));
+                $scope.downloadBundleJsonName = "PatientBundle";
+                $scope.downloadBundleText = angular.toJson($scope.singleBundle)
+
+                /*
+
+                                //sort the list of types
+                                let ar = []
+                                angular.forEach(hashShowType,function (k,v) {
+                                    ar.push(v)
+                                })
+                                ar.sort();
+                                ar.forEach(function(k){
+                                    $scope.input.showType[k] = true;
+                                })
+                */
 
 
 
@@ -1121,5 +1115,53 @@ angular.module("sampleApp")
                     }
                 )
             };
+
+            $scope.copyToClipboard = function(text) {
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text).then(function() {
+                        alert('Copied to clipboard.');
+                    }, function(err) {
+                        alert.error('Failed to copy: ', angular.toJson(err));
+                    });
+                } else {
+                    fallbackCopyTextToClipboard(text);
+                }
+            }
+            function fallbackCopyTextToClipboard(text) {
+                var textarea = document.createElement("textarea");
+                textarea.value = text;
+
+                // Avoid scrolling to bottom
+                textarea.style.position = "fixed";
+                textarea.style.top = "0";
+                textarea.style.left = "0";
+                textarea.style.width = "1px";
+                textarea.style.height = "1px";
+                textarea.style.padding = "0";
+                textarea.style.border = "none";
+                textarea.style.outline = "none";
+                textarea.style.boxShadow = "none";
+                textarea.style.background = "transparent";
+
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+
+                try {
+                    var successful = document.execCommand('copy');
+                    if (successful) {
+                        alert('Copied to clipboard.');
+                    } else {
+                        alert('Error copying to clipboard.')
+                    }
+
+                } catch (err) {
+                    alert('Error copying to clipboard.')
+                }
+
+                document.body.removeChild(textarea);
+            }
+
+
 
         });

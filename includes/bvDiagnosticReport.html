@@ -27,6 +27,14 @@
             </div>
 
             <div class="col-md-4">
+                <div class="pull-right">
+                    <button class="btn btn-link"
+                            ng-click="selectFromMainGraph(selectedDRObservation)">Details</button>
+                </div>
+                <div class="clearfix"></div>
+
+                <div class="myScroll1">
+
                 <pre>{{selectedDRObservation | json}}</pre>
 
 

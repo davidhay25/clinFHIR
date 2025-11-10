@@ -5,6 +5,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
 //profileCreatorSvc  RenderProfileSvc  SaveDataToServer  $rootScope
 
     $scope.config = $localStorage.config;
+
     $scope.input = {serverType:'known'};  //serverType allows select from known servers or enter ad-hoc
     $scope.result = {selectedEntry:{}}
     $scope.ResourceUtilsSvc = ResourceUtilsSvc;
@@ -20,6 +21,10 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
 
     //note that functions to check the $location # for a server & setuo initial one are below $scope.selectServer & $scope.buildQuery
 
+    //sets the current set of default servers.
+    if (appConfigSvc.checkConfigVersion()) {
+        alert('The config was updated. You can continue.')
+    }
 
     //select a server. If 'server' is populated then we've selected a known server. If url is populated then an ad-hoc url has been entered
     //has to be at the top as called at startup
@@ -235,15 +240,16 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
     };
 
     //------------- determine the server when launched-----------------------
-    // the most recently selected server
-    $scope.server = $localStorage.serverQueryServer || appConfigSvc.getCurrentDataServer();
+    // the most recently selected server - nov 2025 - changed to default to local hapi
 
 
+   // $scope.server = $localStorage.serverQueryServer || appConfigSvc.getCurrentDataServer();
+    $scope.server = appConfigSvc.getCurrentDataServer() //returns the local hapi server
 
     $scope.input.server = $scope.server;    //set the drop down
     $scope.input.serverType = "known"
 
-
+    //todo - still support this?
     var hash = $location.hash();
     if (hash) {
         console.log("server passed in: " + hash)
@@ -257,11 +263,10 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
         $scope.server = {name:'Ad Hoc server',url:hash}
     }
 
+    //Nov 2025 - don't try to remember server. Just have the drop down of known servers from appConfigSvc
     $scope.selectServer($scope.server);     //either one passed in, or the previous one...
 
-    $scope.makeUrlDEP = function(type) {
-        return  $scope.config.baseSpecUrl + type;
-    }
+
 
     function clear() {
         delete $scope.operationDefinition
@@ -289,7 +294,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
 
 
     //register that app started...
-    $http.post('/stats/login',{module:"query",servers: {}})
+    //$http.post('/stats/login',{module:"query",servers: {}})
 
 
     $scope.treeNodeSelectedDEP = function(item) {
@@ -528,13 +533,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
             }
             qry = $scope.server.url + resource.resourceType + "/$validate"
         }
-        /* tmp
 
-*/
-        //let qry = $scope.server.url + resource.resourceType + "/$validate"
-
-
-//console.log(qry)
         $http.post(qry,resource,config).then(
             function (data) {
                 $scope.validateResult = data.data
@@ -636,7 +635,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
 
     let getFSH = function(resource){
         delete $scope.selectedFshFromSingleGraph
-        $http.post("./fsh/transformJsonToFsh",resource).then(
+        $http.post("fsh/transformJsonToFsh",resource).then(
             function(data) {
                 //console.log(data.data)
                 try {
@@ -676,8 +675,7 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
         options.hidePatient = $scope.input.showHidePatient;
 
         let vo = v2ToFhirSvc.makeGraph(options);
-        //let vo = v2ToFhirSvc.makeGraph($scope.fhir,$scope.hashErrors,$scope.serverRoot,false,id)
-        //console.log(vo);
+
 
         if (vo.nodes.length > 100) {
             $scope.tooLargeForGraphSingle = true

@@ -17,6 +17,8 @@
     <script src="js/libs/angular.min1-5.js"></script>
     <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
 
+
+
     <script src="js/libs/moment.min.js"></script>
 
     <script src="https://cdn.counter.dev/script.js" data-id="62b27fdf-0033-481b-8b59-680638d9162c" data-utcoffset="12"></script>
@@ -37,10 +39,6 @@
 
     <script src="js/libs/fhirpath.min.js"></script>
 
-<!--
-<script src="js/libs/angular-sanitize.js"></script>
-    <script src="js/libs/handlebars-v4.1.2.js"></script>
-    -->
 
 
 
@@ -74,6 +72,7 @@
 
     <script src="js/bundleVisualizerSvc.js"></script>
     <script src="js/serverInteractionSvc.js"></script>
+    <script src="js/apiService.js"></script>
 
     <style>
         .myForm {
@@ -137,10 +136,6 @@
     <script src="js/bundleVisualizerCtrl.js"></script>
 
 
-    <!--
-
-    -->
-
     <title>Bundle Visualizer</title>
 
 </head>
@@ -159,6 +154,7 @@
                         Bundle Visualizer
                     </a>
                 </span>
+
 
             </div>
             <div class="col-md-2">
@@ -207,7 +203,241 @@
 
     <div ng-show = "showSelector">
 
-        <uib-tabset>
+        <div>
+
+            <div class="row">
+                <div class="col-md-2">
+                    <h4>Bundle selection</h4>
+                    <div class="list-group">
+                        <div ng-class="{'list-group-item':true,listItemSelected:sel==input.selectedSelector}"
+                             style="cursor: pointer"
+                             ng-click="input.selectedSelector = sel"
+                             ng-repeat = "sel in selectors">
+                            {{sel.display}}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-10">
+
+                    <!-- Paste a bundle directly into the app-->
+                    <div ng-show="input.selectedSelector.code == 'paste'">
+                        <div class="alert alert-info">
+                            Paste the Bundle into the text box. A 'view Bundle' button will appear that will display the Bundle contents.
+                            <strong>Don't use this with real Patient data! It's for testing and learning only.</strong>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-8">
+                                <textarea class="form-control" rows = '20' ng-model="input.newBundle"></textarea>
+                            </div>
+                            <div class="col-md-4">
+                                <button ng-show = "input.newBundle" class="btn btn-success"
+                                        ng-click="viewNewBundle(input.newBundle)">View bundle</button>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add a url-->
+                    <div ng-show="input.selectedSelector.code == 'query'">
+                        <div class="alert alert-info">
+                            Enter a query to retrieve a Bundle from an external source. This can be a FHIR query or
+                            the location of a saved Bundle. The full URL (including http: & server) must be entered.
+                            If you enter a name then you will have the option to save this query in the local browser store for later re-use.
+
+                            <strong>Don't use this to query for real Patient data! It's for testing and learning only.</strong>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+
+                                <label>Query to execute</label>
+                                <textarea class="form-control" ng-model="input.newQuery" placeholder="The query."></textarea>
+                                <span class="help-block pull-right">To use the clinFhir FHIR server just use the query = eg 'Patient?name=hay'.
+                                    To use any other server, use the full query (incl. http) eg http://myserver/Patient?name=hay
+                                </span>
+
+
+
+                                <br/><br/><br/>
+                                <label>Query name</label>
+                                <div>
+                                    <input class="form-control" ng-model="input.newQueryName"
+                                           placeholder="A name for the query (required if query is to be saved"/>
+                                </div>
+                                <span class="help-block pull-right">Required if the query is to be saved</span>
+                                <br/><br/>
+                                <label>Query description</label>
+                                <textarea class="form-control" ng-model="input.newQueryDescription"
+                                          placeholder="A description of the query."></textarea>
+                                <span class="help-block pull-right">If the query is saved, this is a description of what it contains</span>
+                            </div>
+                            <div class="col-md-6">
+                                <div>
+                                    <button ng-show = "input.newQuery && ! testQueryBundle" class="btn btn-primary"
+                                            ng-click="testNewQuery(input.newQuery)">Run query</button>
+
+                                    <button ng-show = "executedQueryBundle" class="btn btn-warning"
+                                            ng-click="clearQuery()">Clear</button>
+
+                                    <button ng-show = "executedQueryBundle && input.newQueryName" class="btn btn-danger"
+                                            ng-click="addNewQuery(input.newQuery,input.newQueryName,input.newQueryDescription)">
+                                        Add query to list and view</button>
+
+                                    <button ng-show = "executedQueryBundle" class="btn btn-success"
+                                            ng-click="viewNewQueryBundle(executedQueryBundle)">View bundle</button>
+
+                                    <div ng-show="executedQueryBundle" class="myScroll1">
+                                        <pre>{{executedQueryBundle | json}}</pre>
+                                    </div>
+
+
+                                    <div ng-show = "input.newQuery && ! testQueryBundle">
+                                        <br/> <br/>
+                                        <em>If a query response is paged, all pages will be retrieved.</em></div>
+                                </div>
+
+                                <br/>
+                                <strong ng-show="executedQuery">Executed query</strong>
+                                <div>{{executedQuery}}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Saved links-->
+                    <div ng-show="input.selectedSelector.code == 'saved'">
+                        <div class="alert alert-info">
+                            These are queries previously saved in the browser cache that you can re-execute. You are also able to add them to the
+                            Library <strong>which means that anyone else can access this query.</strong>. Select the query
+                            you wish to execute and details plus the 'Run query' button will appear to the right.
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <table class="table table-bordered">
+                                    <tr><th>Name</th><th>Query</th><th>In library</th><th></th></tr>
+                                    <tr ng-click="input.savedQuery=item"
+                                        style="cursor: pointer"
+                                        ng-class="{listItemSelected:input.savedQuery == item}"
+                                        ng-repeat = "item in savedQueries">
+                                        <td>
+                                            {{item.name}}
+                                        </td>
+                                        <td>{{item.qry}}</td>
+                                        <td>{{item.inLibrary}}</td>
+                                        <td><i class="glyphicon glyphicon-remove-sign clickable"
+                                               ng-click="deleteQuery($index)"></i>
+                                        </td>
+
+                                        <!--
+                                        <td width="80"><button class="btn btn-link" ng-click="executeSavedQuery(item)">Load</button> </td>
+                                        -->
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-4">
+                                {{input.savedQuery.name}}
+                                <br/><br/>
+                                {{input.savedQuery.description}}
+                                <br/> <br/>
+
+                                <button ng-show = "input.savedQuery" class="btn btn-primary"
+                                        ng-click="executeSavedQuery(input.savedQuery)">Run query</button>
+
+                                <button ng-show = "input.savedQuery && ! input.savedQuery.inLibrary" class="btn btn-danger"
+                                        ng-click="addLinkToLibrary(input.savedQuery)">Save to Library</button>
+
+
+                            <div ng-show="input.savedQuery">
+                                <br/> <br/>
+                                <em>If a query response is paged, all pages will be retrieved.</em></div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Library-->
+                    <div ng-show="input.selectedSelector.code == 'library'">
+                        <div class="alert alert-info">
+                            These are queries that others have saved to the Library so that they are available to anyone.
+                            Select the query
+                            you wish to execute and details plus the 'Run query' button will appear to the right.
+                        </div>
+
+
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <table class="table table-bordered">
+                                            <tr><th>Name</th><th>Query</th></tr>
+                                            <tr ng-click="input.libraryQuery=item"
+                                                style="cursor: pointer"
+                                                ng-class="{listItemSelected:input.libraryQuery == item}"
+                                                ng-repeat = "item in library">
+                                                <td>
+                                                    {{item.name}}
+                                                </td>
+                                                <td>{{item.qry}}</td>
+
+                                            </tr>
+                                        </table>
+                                    </div>
+
+                                    <div class="col-md-1">
+                                    </div>
+                                    <div class="col-md-3">
+                                        {{input.libraryQuery.name}}
+                                        <br/><br/>
+                                        {{input.libraryQuery.description}}
+                                        <br/> <br/>
+
+                                        <button ng-show = "input.libraryQuery" class="btn btn-primary"
+                                                ng-click="executeLibraryQuery(input.libraryQuery)">Run query</button>
+
+
+                                    </div>
+                                </div>
+
+
+                    </div>
+
+
+                    <!-- Stored bundles-->
+                    <div ng-show="input.selectedSelector.code == 'stored'">
+                        <div class="alert alert-info">
+                            These are Bundles that others have saved to the Library so that they are available to anyone.
+                            Select the Bundle to view.
+                        </div>
+
+
+                            <div class="row">
+                                    <div class="col-md-8">
+                                        <table class="table table-bordered">
+                                            <tr><th>Name</th><th>Description</th><th>Author</th><th>Date</th></tr>
+                                            <tr ng-click="input.libraryQuery=item"
+                                                ng-repeat="bundle in libraryAllBundles"
+                                                style="cursor: pointer">
+                                                <td>{{bundle.name}}</td>
+                                                <td>{{bundle.description}}</td>
+                                                <td>{{bundle.author}}</td>
+                                                <td>{{bundle.date | date}}</td>
+
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+
+                    </div>
+
+
+
+                </div>
+            </div>
+
+
+        </div>
+
+
+<!--
+
+        <uib-tabset ng-show="false">
             <uib-tab heading="Select Bundle">
                 <br/>
                 <div class="row">
@@ -223,7 +453,7 @@
                     </div>
                     <div class="col-md-10">
 
-                        <!-- Paste a bundle directly into the app-->
+
                         <div ng-show="input.selectedSelector.code == 'paste'">
                             <div class="row">
                                 <div class="col-md-8">
@@ -237,14 +467,17 @@
                             </div>
                         </div>
 
-                        <!-- Add a url-->
+
                         <div ng-show="input.selectedSelector.code == 'query'">
                             <div class="row">
                                 <div class="col-md-6">
 
+
+
                                     <label>Query to execute</label>
                                     <textarea class="form-control" ng-model="input.newQuery" placeholder="The query."></textarea>
-                                    <span class="help-block pull-right">Use full query (incl. http)</span>
+                                    <span class="help-block pull-right">To use the local Hapi server just use the query = eg 'Patient?name=hay'</span>
+                                    <div> <span class="help-block pull-right">To use any other server, use the full query (incl. http)</span></div>
 
                                     <br/><br/>
                                     <label>Query name</label>
@@ -288,11 +521,12 @@
                             </div>
                         </div>
 
-                        <!-- Saved links-->
+
                         <div ng-show="input.selectedSelector.code == 'saved'">
                             <div class="row">
                                 <div class="col-md-8">
                                     <table class="table table-bordered">
+                                        <tr><th>Name</th><th>Query</th><th>In library</th><th></th></tr>
                                         <tr ng-click="input.savedQuery=item"
                                             style="cursor: pointer"
                                             ng-class="{listItemSelected:input.savedQuery == item}"
@@ -301,12 +535,12 @@
                                                 {{item.name}}
                                             </td>
                                             <td>{{item.qry}}</td>
+                                            <td>{{item.inLibrary}}</td>
                                             <td><i class="glyphicon glyphicon-remove-sign clickable"
                                                    ng-click="deleteQuery($index)"></i>
                                             </td>
-                                            <!--
-                                            <td width="80"><button class="btn btn-link" ng-click="executeSavedQuery(item)">Load</button> </td>
-                                            -->
+
+
                                         </tr>
                                     </table>
                                 </div>
@@ -319,17 +553,44 @@
                                     <button ng-show = "input.savedQuery" class="btn btn-primary"
                                             ng-click="executeSavedQuery(input.savedQuery)">Run query</button>
 
-                                    <button ng-show = "input.savedQuery" class="btn btn-danger"
-                                            ng-click="saveToLibrary(input.savedQuery)">Save to Library</button>
+                                    <button ng-show = "input.savedQuery && ! input.savedQuery.inLibrary" class="btn btn-danger"
+                                            ng-click="addLinkToLibrary(input.savedQuery)">Save to Library</button>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Library-->
+
                         <div ng-show="input.selectedSelector.code == 'library'">
                             <div class="row">
                                 <div class="col-md-8">
-                                    TBD
+
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <table class="table table-bordered">
+                                                <tr ng-click="input.libraryQuery=item"
+                                                    style="cursor: pointer"
+                                                    ng-class="{listItemSelected:input.libraryQuery == item}"
+                                                    ng-repeat = "item in library">
+                                                    <td>
+                                                        {{item.name}}
+                                                    </td>
+                                                    <td>{{item.qry}}</td>
+
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <div class="col-md-4">
+                                            {{input.libraryQuery.name}}
+                                            <br/><br/>
+                                            {{input.libraryQuery.description}}
+                                            <br/> <br/>
+
+                                            <button ng-show = "input.libraryQuery" class="btn btn-primary"
+                                                    ng-click="executeLibraryQuery(input.libraryQuery)">Run query</button>
+
+
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="col-md-4">
                                 </div>
@@ -391,19 +652,8 @@
                             processed and displayed, unless disabled using the otion below. </p>
                         <br/>
 
-<!--
-                        <div>
-                            <checkbox ng-model="localStorage.bvConfig.noValidate"></checkbox>
-                            Don't validate.
-                        </div>
 
-                        -->
-<!--
-                        <div>
-                            <checkbox ng-model="localStorage.bvConfig.setValidate"></checkbox>
-                            Set validation server to the same server as the url.
-                        </div>
--->
+
 
 
 
@@ -422,9 +672,7 @@
                                 <td>{{item.qry}}</td>
                                 <td><i class="glyphicon glyphicon-remove-sign clickable" ng-click="deleteQuery($index)"></i>
                                 </td>
-                                <!--
-                                <td width="80"><button class="btn btn-link" ng-click="executeSavedQuery(item)">Load</button> </td>
-                                -->
+
                             </tr>
                         </table>
 
@@ -481,14 +729,12 @@
                             a name in the box below and click the 'Add query to list' button that appears after testing
                             the query.</p>
 
-                        <!--
-                        <label>Data server url</label>
-                        <div>{{dataServer.url}}</div>
-                        -->
+
                         <br/><br/>
                         <label>Query to execute</label>
                         <textarea class="form-control" ng-model="input.newQuery" placeholder="The query."></textarea>
-                        <span class="help-block pull-right">Use full query (incl. http) if to a different server</span>
+                        <span class="help-block pull-right">To use the local Hapi server just use the query = eg 'Patient?name=hay'</span>
+                        <div> <span class="help-block pull-right">To use any other server, use the full query (incl. http)</span></div>
 
                         <br/><br/>
                         <label>Query name</label>
@@ -551,6 +797,8 @@
 
         </uib-tabset>
 
+        -->
+
     </div>
 
     <div ng-hide = "showSelector" class="row">
@@ -586,366 +834,250 @@
             </div>
 
 
-                    <div>
+            <div>
+
+
+                <button class="btn btn-link pull-right" ng-show="fhir"
+                        ng-click="addBundleToLibrary()">Save bundle in Library</button>
+
+                <button class="btn btn-link pull-right" ng-show="fhir"
+                        ng-click="copyToClipboard()">Copy bundle to Clipboard</button>
+
+            </div>
+
+            <uib-tabset active="setTab.mainTabActive" ng-show="fhir" >
+
+                <uib-tab>
+                    <br/>
+                    <uib-tab-heading>
+                        Bundle entries <span class="badge">{{fhir.entry.length}}</span>
+                    </uib-tab-heading>
+
+                    <div class="row">
+                        <div class="col-md-3">
+
+                            <uib-tabset>
+                                <uib-tab heading="Bundle Order">
+
+                                    <div class="entryListScroll">
+
+
+                                        <div class="list-group">
+                                            <div ng-class="{'list-group-item':true,'listItemSelected':selectedBundleEntry == entry}"
+                                                 style="cursor: pointer"
+                                                 ng-repeat="entry in fhir.entry"
+                                                 ng-click="selectBundleEntry(entry,hashErrors[$index])">
+
+                                                <strong>{{entry.resource.resourceType}}</strong>
+
+                                                <span class="pull-right badge">{{hashErrors[$index].length}}</span>
+                                                <div>{{entry.resource.text.div | cleanTextDiv | limitTo:50}}</div>
 <!--
-                        <button class="btn btn-link pull-right" ng-show="fhir"
-                                ng-click="performValidation()">Validate</button>
--->
-
-                        <button class="btn btn-link pull-right" ng-show="fhir"
-                                ng-click="copyToClipboard()">Copy bundle to Clipboard</button>
-
-                    </div>
-
-                    <uib-tabset active="setTab.mainTabActive" ng-show="fhir" >
-
-                        <uib-tab>
-                            <br/>
-                            <uib-tab-heading>
-                                Bundle entries <span class="badge">{{fhir.entry.length}}</span>
-                            </uib-tab-heading>
-
-
-
-                            <div class="row">
-                                        <div class="col-md-3">
-
-                                            <uib-tabset>
-                                                <uib-tab heading="Bundle Order">
-
-                                                    <div class="entryListScroll">
-
-
-                                                        <div class="list-group">
-                                                            <div ng-class="{'list-group-item':true,'listItemSelected':selectedBundleEntry == entry}"
-                                                                 style="cursor: pointer"
-                                                                 ng-repeat="entry in fhir.entry"
-                                                                 ng-click="selectBundleEntry(entry,hashErrors[$index])">
-
-                                                                <strong>{{entry.resource.resourceType}}</strong>
-
-                                                                <span class="pull-right badge">{{hashErrors[$index].length}}</span>
-                                                                <div>{{entry.resource.text.div | cleanTextDiv | limitTo:50}}</div>
-<!--
-                                                                <div><em>{{entry.fullUrl}}</em></div>
-                                                                -->
-                                                                <div style="padding-left: 10px"><em>Id: {{entry.resource.id}}</em></div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                </uib-tab>
-
-
-                                                <uib-tab heading="Type, Id">
-                                                    <div class="entryListScroll">
-                                                        <div ng-repeat="es in sortedEntries">
-                                                            <strong>{{es.type}}</strong>
-                                                            <div class="list-group">
-                                                                <div ng-repeat = "entry in es.entries"
-                                                                     ng-class="{'list-group-item':true,'listItemSelected':selectedBundleEntry == entry}">
-                                                                    <div style="padding-left: 10px; cursor: pointer"
-                                                                         ng-click="selectBundleEntry(entry,[])">
-                                                                        <div> {{entry.resource.text.div | cleanTextDiv | limitTo:50}}</div>
-                                                                        <div style="padding-left: 10px"><em>Id: {{entry.resource.id}}</em></div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                    </div>
-                                                </uib-tab>
-<!--
-                                                <uib-tab heading="Type, Name">
-                                                    <div class="entryListScroll">
-                                                        <div ng-repeat="(k,v) in hashByName">
-                                                            <div><strong>{{k}}</strong></div>
-                                                            <div class="list-group">
-                                                                <div class="list-group-item" ng-repeat="item in v"
-                                                                     ng-click="selectBundleEntry(item.entry,hashErrors[$index])">
-                                                                    {{item.display || 'None'}}
-                                                                </div>
-                                                            </div>
-
-
-                                                        </div>
-                                                    </div>
-                                                </uib-tab>
-
-                                                <uib-tab heading="Type">
-
-                                                    <div class="list-group">
-                                                        <div class="list-group-item" ng-repeat = "es in sortedEntries">
-                                                            {{es.type}}
-                                                        </div>
-                                                    </div>
-
-                                                </uib-tab>
-
+                                                <div><em>{{entry.fullUrl}}</em></div>
                                                 -->
+                                                <div style="padding-left: 10px"><em>Id: {{entry.resource.id}}</em></div>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                                            </uib-tabset>
+                                </uib-tab>
 
+
+                                <uib-tab heading="Type, Id">
+                                    <div class="entryListScroll">
+                                        <div ng-repeat="es in sortedEntries">
+                                            <strong>{{es.type}}</strong>
+                                            <div class="list-group">
+                                                <div ng-repeat = "entry in es.entries"
+                                                     ng-class="{'list-group-item':true,'listItemSelected':selectedBundleEntry == entry}">
+                                                    <div style="padding-left: 10px; cursor: pointer"
+                                                         ng-click="selectBundleEntry(entry,[])">
+                                                        <div> {{entry.resource.text.div | cleanTextDiv | limitTo:50}}</div>
+                                                        <div style="padding-left: 10px"><em>Id: {{entry.resource.id}}</em></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </uib-tab>
+<!--
+                                <uib-tab heading="Type, Name">
+                                    <div class="entryListScroll">
+                                        <div ng-repeat="(k,v) in hashByName">
+                                            <div><strong>{{k}}</strong></div>
+                                            <div class="list-group">
+                                                <div class="list-group-item" ng-repeat="item in v"
+                                                     ng-click="selectBundleEntry(item.entry,hashErrors[$index])">
+                                                    {{item.display || 'None'}}
+                                                </div>
+                                            </div>
 
 
                                         </div>
+                                    </div>
+                                </uib-tab>
 
-                                        <div class="col-md-9">
+                                <uib-tab heading="Type">
 
-                                            <div class="pull-right">
-                                                <a target="_blank"
-                                                   ng-show="selectedBundleEntry"
-                                                   ng-href="http://hl7.org/fhir/{{selectedBundleEntry.resource.resourceType}}.html#resource">{{selectedBundleEntry.resource.resourceType}} in the Spec</a>
+                                    <div class="list-group">
+                                        <div class="list-group-item" ng-repeat = "es in sortedEntries">
+                                            {{es.type}}
+                                        </div>
+                                    </div>
+
+                                </uib-tab>
+
+                                -->
+
+                            </uib-tabset>
+
+                        </div>
+
+                        <div class="col-md-9">
+
+                            <div class="pull-right">
+                                <a target="_blank"
+                                   ng-show="selectedBundleEntry"
+                                   ng-href="http://hl7.org/fhir/{{selectedBundleEntry.resource.resourceType}}.html#resource">{{selectedBundleEntry.resource.resourceType}} in the Spec</a>
+                            </div>
+
+                            <uib-tabset>
+                                <uib-tab heading="Json">
+                                    <div class="myScroll1">
+                                        <pre>{{selectedBundleEntry.resource | json}}</pre>
+                                    </div>
+
+                                </uib-tab>
+                                <uib-tab heading="Entry">
+                                    <div class="myScroll1">
+                                    <pre>{{selectedBundleEntry | json}}</pre>
+                                    </div>
+                                </uib-tab>
+
+                                <uib-tab heading="Text">
+
+                                    <div ng-hide="selectedBundleEntry.resource.text.div">
+                                        <div class="alert-info alert">
+                                            This resource has no .text element.
+                                        </div>
+                                    </div>
+
+                                    <p ng-bind-html="selectedBundleEntry.resource.text.div"></p>
+
+
+                                </uib-tab>
+
+
+
+                                <uib-tab heading="Tree">
+                                    <br/>
+
+                                    <div id="builderResourceTree"></div>
+
+                                </uib-tab>
+
+                                <uib-tab heading="References"  select="fitSingleGraph()">
+                                    <br/>
+                                    <div class="row">
+
+                                        <div class="col-md-3">
+                                            <div  uib-popover="If checked will hide the Patient resource."
+                                                  popover-placement="top"
+                                                  popover-trigger="'mouseenter'">
+                                                Hide Patient <checkbox ng-model="input.showHidePatient" ng-change="createGraphOneEntry()"></checkbox>
+
                                             </div>
+                                        </div>
 
+                                    </div>
+                                    <br/>
+
+                                    <div class="row">
+                                        <div class="col-md-7 col-sm-7">
+                                            <div id="singleResourceGraph"></div>
+                                            <em>Double click to select a resource and make it the focus</em>
+                                        </div>
+                                        <div class="col-md-5 col-sm-5">
+                                            <!--
+                                            <button class="btn btn-link pull-right"
+                                                    ng-show="selectedFromSingleGraph"
+                                                    ng-click="selectFromSingleGraph()">Select {{selectedFromSingleGraph.resourceType}}</button>
+                                            -->
                                             <uib-tabset>
                                                 <uib-tab heading="Json">
                                                     <div class="myScroll1">
-                                                        <pre>{{selectedBundleEntry.resource | json}}</pre>
-                                                    </div>
-
-                                                </uib-tab>
-                                                <uib-tab heading="Entry">
-                                                    <div class="myScroll1">
-                                                    <pre>{{selectedBundleEntry | json}}</pre>
-                                                    </div>
-                                                </uib-tab>
-
-                                                <uib-tab heading="Text">
-                                                    <p ng-bind-html="selectedBundleEntry.resource.text.div"></p>
-
-
-                                                </uib-tab>
-
-
-                                                <uib-tab heading="Tree">
-                                                    <br/>
-
-                                                    <div id="builderResourceTree"></div>
-
-                                                </uib-tab>
-
-                                                <uib-tab heading="References"  select="fitSingleGraph()">
-                                                    <br/>
-                                                    <div class="row">
-
-                                                        <div class="col-md-3">
-                                                            <div  uib-popover="If checked will hide the Patient resource."
-                                                                  popover-placement="top"
-                                                                  popover-trigger="'mouseenter'">
-                                                                Hide Patient <checkbox ng-model="input.showHidePatient" ng-change="createGraphOneEntry()"></checkbox>
-
-                                                            </div>
-                                                        </div>
-
-                                                    </div>
-                                                    <br/>
-
-                                                    <div class="row">
-                                                        <div class="col-md-7 col-sm-7">
-                                                            <div id="singleResourceGraph"></div>
-                                                        </div>
-                                                        <div class="col-md-5 col-sm-5">
-                                                            <button class="btn btn-link pull-right"
-                                                                    ng-show="selectedFromSingleGraph"
-                                                                    ng-click="selectFromSingleGraph()">Select {{selectedFromSingleGraph.resourceType}}</button>
-                                                            <uib-tabset>
-                                                                <uib-tab heading="Json">
-                                                                    <pre>{{selectedFromSingleGraph | json}}</pre>
-                                                                </uib-tab>
-                                                                <uib-tab ng-show="selectedFshFromSingleGraph" heading="Fsh">
-                                                                    <pre>{{selectedFshFromSingleGraph}}</pre>
-                                                                </uib-tab>
-
-                                                                <uib-tab ng-show="selectedFromSingleGraph.resourceType == 'DiagnosticReport'" heading="DiagnosticReport">
-                                                                    <br/>
-                                                                    <div class="banner">Observations referenced from this DiagnosticReport</div>
-                                                                    <div ng-repeat="item in DR" ng-show="item.DR.id == selectedFromSingleGraph.id">
-                                                                        <table class="table-bordered table">
-                                                                            <tr ng-repeat = "obs in item.obs">
-                                                                                <td>
-                                                                                    <div class="clickable" ng-click="selectFromSingleGraph(obs)">
-                                                                                        {{obs.text.div | cleanTextDiv}}
-                                                                                    </div>
-
-                                                                                </td>
-                                                                                <td>
-                                                                                    {{obs.valueCodeableConcept.text}} {{obs.valueString}}   {{obs.valueQuantity.value}}
-                                                                                </td>
-                                                                            </tr>
-                                                                        </table>
-
-
-
-                                                                    </div>
-                                                                </uib-tab>
-
-                                                            </uib-tabset>
-
-
-
-                                                        </div>
+                                                        <pre>{{selectedFromSingleGraph | json}}</pre>
                                                     </div>
 
                                                 </uib-tab>
 
-                                                <uib-tab ng-show="selectedBundleEntry.resource.resourceType == 'Binary'" heading="Binary Content">
-                                                    <br/>
-                                                    <pre>{{base64Decode(selectedBundleEntry.resource.data)}}</pre>
-
-
+                                                <uib-tab ng-show="selectedFshFromSingleGraph" heading="Fsh">
+                                                    <pre>{{selectedFshFromSingleGraph}}</pre>
                                                 </uib-tab>
 
-                                                <uib-tab ng-show="selectedBundleEntryErrors.length > 0">
-                                                    <uib-tab-heading>
-                                                        Errors <span class="badge">{{selectedBundleEntryErrors.length}}</span>
-                                                    </uib-tab-heading>
+                                                <uib-tab ng-show="selectedFromSingleGraph.resourceType == 'DiagnosticReport'" heading="DiagnosticReport">
                                                     <br/>
-
-
-                                                    <div uib-alert class="alert-warning">
-                                                        <table class="table">
-                                                            <tr ng-repeat="err in selectedBundleEntryErrors">
-                                                                <td>{{err.severity}}</td>
+                                                    <div class="banner">Observations referenced from this DiagnosticReport</div>
+                                                    <div ng-repeat="item in DR" ng-show="item.DR.id == selectedFromSingleGraph.id">
+                                                        <table class="table-bordered table">
+                                                            <tr ng-repeat = "obs in item.obs">
                                                                 <td>
-                                                                    {{err.diagnostics}}
-                                                                    {{err.details.text}}
-                                                                    <div ng-repeat = "ex in err.expression">
-                                                                        {{ex}}
+                                                                    <div class="clickable" ng-click="selectFromSingleGraph(obs)">
+                                                                        {{obs.text.div | cleanTextDiv}}
                                                                     </div>
+
                                                                 </td>
                                                                 <td>
-                                                                    <div ng-repeat="location in err.location">
-                                                                        {{location}}
-                                                                    </div>
+                                                                    {{obs.valueCodeableConcept.text}} {{obs.valueString}}   {{obs.valueQuantity.value}}
                                                                 </td>
                                                             </tr>
                                                         </table>
-                                                    </div>
-
-                                                    <br/>
-                                                    <div><strong>Notes</strong></div>
-                                                    <ul>
-
-                                                        <li>
-                                                            "Resource should have narrative..." means you're missing the .text element
-                                                        </li>
-
-                                                        <li>"Unable to resolve resource..." errors simply mean that the referenced
-                                                        resource was not found on the Validation server. These can generally be ignored.</li>
-                                                    </ul>
-                                                </uib-tab>
-
-                                                <uib-tab ng-show="fshText" heading="FSH (transformed)">
-                                                    <pre>{{fshText}}</pre>
-                                                </uib-tab>
-
-                                                <uib-tab ng-show="xmlText"  heading="XML (transformed)">
-                                                    <pre>{{xmlText}}</pre>
-                                                </uib-tab>
-
-                                                <uib-tab ng-show="selectedBundleEntry.resource.resourceType == 'Composition'"
-                                                         heading="Sections">
 
 
-                                                    <div class="col-md-6 col-sm-6">
-
-                                                        <div class="myScroll1">
-
-
-                                                        <div ng-repeat="section in selectedBundleEntry.resource.section">
-                                                            <strong>{{section.title}}</strong>
-
-
-                                                            <div class="list-group">
-
-
-
-                                                                <div ng-class="{'list-group-item':true,'listItemSelected':entry.reference == selectedRef}"
-                                                                     ng-repeat="entry in section.entry">
-                                                                    <div class="clickable" ng-click="selectResourceFromSection(entry.reference)">
-                                                                        {{entry.reference}}</div>
-
-
-                                                                </div>
-                                                            </div>
-
-
-                                                        </div>
-                                                        </div>
 
                                                     </div>
-                                                    <div class="col-md-6 col-sm-6">
-                                                        <pre>{{resourceFromSection | json}}</pre>
-                                                    </div>
-
-                                                </uib-tab>
-
-                                                <uib-tab ng-show="selectedBundleEntry.resource.resourceType == 'ValueSet' && selectedBundleEntry.resource.expansion">
-
-                                                    <uib-tab-heading>
-                                                        Expansion <span class="badge">{{selectedBundleEntry.resource.expansion.contains.length}}</span>
-                                                    </uib-tab-heading>
-
-                                                    <table class="table table-condensed">
-                                                        <tr ng-repeat = "concept in selectedBundleEntry.resource.expansion.contains">
-                                                            <td>
-                                                                {{concept.code}}
-                                                                <div>{{concept.system}}</div>
-                                                                <div>{{concept.version}}</div>
-                                                            </td>
-                                                            <td>{{concept.display}}</td>
-                                                        </tr>
-                                                    </table>
-                                                </uib-tab>
-
-                                                <uib-tab ng-show="hashRefsByResource[selectedBundleEntry.resource.id].length > 0">
-                                                    <uib-tab-heading>
-                                                        Canonicals <span class="badge">{{hashRefsByResource[selectedBundleEntry.resource.id].length}}</span>
-
-                                                    </uib-tab-heading>
-
-                                                    <pre>{{hashRefsByResource[selectedBundleEntry.resource.id] | json}}</pre>
-
                                                 </uib-tab>
 
                                             </uib-tabset>
-                                        </div>
-
-                                    </div>
 
 
-                        </uib-tab>
 
-
-                        <uib-tab heading = "References Graph" select="fitGraph()">
-
-                            <div class="alert alert-warning" ng-show="showGraphWarning">
-                                Large graphs can take a while to render in the graph. Be patient!
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-8">
-
-                                    <div>
-                                        <div class="pull-right">
-                                            <input ng-model="input.showHidePatient" type="checkbox"
-                                                   ng-click="showHidePatient(input.showHidePatient)"/> Hide Patient
                                         </div>
                                     </div>
 
+                                </uib-tab>
 
-                                    <div id="resourceGraph"></div>
-                                </div>
-                                <div class="col-md-4">
+                                <uib-tab>
+                                    <uib-tab-heading>Reference errors <span class="badge">{{graphErrors.length}}</span></uib-tab-heading>
+                                    <pre>{{graphErrors | json}}</pre>
+                                </uib-tab>
 
-<!-- todo - selectedBundleEntryErrors not being created on graph select-->
-                                    <!--
-                                    <div uib-alert class="alert-warning" ng-show="selectedBundleEntryErrors.length > 0">
+                                <uib-tab ng-show="selectedBundleEntry.resource.resourceType == 'Binary'" heading="Binary Content">
+                                    <br/>
+                                    <pre>{{base64Decode(selectedBundleEntry.resource.data)}}</pre>
+
+
+                                </uib-tab>
+
+                                <uib-tab ng-show="selectedBundleEntryErrors.length > 0">
+                                    <uib-tab-heading>
+                                        Errors <span class="badge">{{selectedBundleEntryErrors.length}}</span>
+                                    </uib-tab-heading>
+                                    <br/>
+
+
+                                    <div uib-alert class="alert-warning">
                                         <table class="table">
                                             <tr ng-repeat="err in selectedBundleEntryErrors">
                                                 <td>{{err.severity}}</td>
-                                                <td>{{err.diagnostics}}</td>
+                                                <td>
+                                                    {{err.diagnostics}}
+                                                    {{err.details.text}}
+                                                    <div ng-repeat = "ex in err.expression">
+                                                        {{ex}}
+                                                    </div>
+                                                </td>
                                                 <td>
                                                     <div ng-repeat="location in err.location">
                                                         {{location}}
@@ -955,535 +1087,463 @@
                                         </table>
                                     </div>
 
-                                    -->
+                                    <br/>
+                                    <div><strong>Notes</strong></div>
+                                    <ul>
 
-                                    <div class="pull-right">
-                                        <button class="btn btn-link"
-                                                ng-click="selectFromMainGraph(selectedNode.entry.resource)">Details</button>
-                                    </div>
+                                        <li>
+                                            "Resource should have narrative..." means you're missing the .text element
+                                        </li>
 
-                                    <uib-tabset>
-                                        <uib-tab heading="Resource">
-                                            <pre>{{selectedNode.entry.resource | json}}</pre>
-                                        </uib-tab>
-                                        <uib-tab heading="Entry">
-                                            <pre>{{selectedNode.entry | json}}</pre>
-                                        </uib-tab>
-
-                                        <uib-tab ng-show="selectedNode.entry.resource.resourceType == 'DiagnosticReport'" heading="DiagnosticReport">
-                                            <br/>
-                                            <div class="banner">Observations linked to this DiagnosticReport</div>
-
-                                            <div ng-repeat="item in DR" ng-show="item.DR.id == selectedNode.entry.resource.id">
-                                                <table class="table-bordered table">
-                                                    <tr ng-repeat = "obs in item.obs">
-                                                        <td>
-                                                            {{obs.text.div | cleanTextDiv}}
-                                                            <div ng-repeat="coding in obs.code.coding">
-                                                                {{coding.display}}
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            {{obs.valueCodeableConcept.text}} {{obs.valueString}} {{obs.valueQuantity.value}}
-                                                            {{obs.valueQuantity.unit}}
-
-                                                        </td>
-
-                                                    </tr>
-                                                </table>
-
-                                            <!--
-                                                <div ng-repeat = "obs in item.obs">
-                                                    <strong>{{obs.text.div | cleanTextDiv}}</strong>
-                                                    <div style="margin-left: 8px">{{obs.valueCodeableConcept.text}} {{obs.valueString}}   {{obs.valueQuantity.value}}</div>
-                                                </div>
-                                                -->
-
-                                            </div>
-
-                                        </uib-tab>
-
-                                    </uib-tabset>
-
-
-
-                                </div>
-                            </div>
-
-                        </uib-tab>
-
-                        <uib-tab heading = "Canonical graph"  select="fitSingleGraph()">
-                            <div class="row">
-                                <div class="col-md-7">
-                                    <div class="row">
-
-                                        <div class="col-md-12">
-                                            <button class="btn btn-link pull-right" ng-click="fitCanonicalGraph()">Refresh graph (if no display)</button>
-                                        </div>
-                                    </div>
-                                    <div id="canonicalGraph"></div>
-                                </div>
-                                <div class="col-md-5">
-                                    <uib-tabset>
-                                        <uib-tab heading="Json">
-                                            <pre>{{selectedCanResource | json}}</pre>
-                                        </uib-tab>
-                                        <uib-tab ng-show="selectedCanResource.resourceType == 'ValueSet' && selectedCanResource.expansion">
-
-                                            <uib-tab-heading>
-                                                Expansion <span class="badge">{{selectedCanResource.expansion.contains.length}}</span>
-                                            </uib-tab-heading>
-
-                                            <table class="table table-condensed">
-                                                <tr ng-repeat = "concept in selectedCanResource.expansion.contains">
-                                                    <td>
-                                                        {{concept.code}}
-                                                        <div>{{concept.system}}</div>
-                                                        <div>{{concept.version}}</div>
-                                                    </td>
-                                                    <td>{{concept.display}}</td>
-                                                </tr>
-                                            </table>
-                                        </uib-tab>
-
-                                        <uib-tab ng-show="hashRefsByResource[selectedCanResource.id].length > 0">
-                                            <uib-tab-heading>
-                                                Canonicals <span class="badge">{{hashRefsByResource[selectedCanResource.id].length}}</span>
-
-                                            </uib-tab-heading>
-
-                                            <pre>{{hashRefsByResource[selectedCanResource.id] | json}}</pre>
-
-                                        </uib-tab>
-                                    </uib-tabset>
-                                </div>
-                            </div>
-
-                        </uib-tab>
-
-                        <uib-tab heading = "Validation">
-                            <uib-tab-heading>
-                                Validation <span class="badge">{{validationResult.issue.length}}</span>
-                            </uib-tab-heading>
-
-
-                            <!--
-                            <button class="btn btn-primary" ng-show="fhir"
-                                    ng-click="performValidation()">Perform validation</button>
-                            -->
-
-                            <uib-tabset>
-                                <br/>
-                                <uib-tab heading="By resource">
-
-
-
-                                    <div class="row">
-                                        <div class="col-md-2">
-                                            <h4>Resources with issues</h4>
-                                            <div class="myScroll1">
-                                                <div class="list-group">
-                                                    <div
-                                                            ng-class="{'list-group-item':true,listItemSelected:k == input.selectedIssueByResource.resource.id}"
-                                                            ng-repeat="(k,v) in errorsByResource"
-                                                            style="cursor: pointer"
-                                                            ng-click="input.selectedIssueByResource = v">
-                                                        {{v.resource.resourceType}} <span class="badge pull-right">{{v.issues.length}}</span>
-
-
-                                                    </div>
-                                                </div>
-                                            </div>
-
-
-                                        </div>
-
-                                        <div class="col-md-5">
-                                            <h4>Issues</h4>
-                                            <div class="myScroll1">
-                                            <ul class="list-group">
-                                                <li class="list-group-item"
-                                                    ng-repeat="iss in input.selectedIssueByResource.issues">
-                                                    {{iss.diagnostics}}
-                                                    <br/>
-                                                    <div><em>{{iss.location[0]}}</em></div>
-
-
-                                                </li>
-                                            </ul>
-                                            </div>
-
-                                        </div>
-                                        <div class="col-md-5">
-                                            <h4>Resource</h4>
-                                            <div class="myScroll1">
-                                            <pre>{{input.selectedIssueByResource.resource | json}}</pre>
-                                            </div>
-                                        </div>
-
-
-                                    </div>
-
-
-
+                                        <li>"Unable to resolve resource..." errors simply mean that the referenced
+                                        resource was not found on the Validation server. These can generally be ignored.</li>
+                                    </ul>
                                 </uib-tab>
 
-                                <uib-tab heading="List">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="myScroll1">
-                                                <div class="list-group">
-                                                    <div ng-class="{'list-group-item':true,listItemSelected:selectedIssue == iss}"
-                                                         style="cursor: pointer"
-                                                         ng-click="getResourceFromIssue(iss)"
-                                                         ng-repeat="iss in validationResult.issue">
-                                                        {{iss.diagnostics}}
-                                                    </div>
-                                                </div>
-                                            </div>
-
-
-                                        </div>
-                                        <div ng-show="issueResource" class="col-md-6">
-                                            <pre>{{issueResource | json}}</pre>
-                                        </div>
-
-                                    </div>
-
-                                </uib-tab>
-                                <uib-tab heading="Json">
-                                    <pre>{{validationResult | json}}</pre>
-                                </uib-tab>
-                            </uib-tabset>
-
-
-
-
-                        </uib-tab>
-
-                        <uib-tab ng-show="false" heading="Deep validation">
-                            <br/>
-                            <button class="btn btn-primary pull-right" ng-click="deepValidate()">Perform validation</button>
-
-
-                            <div ng-hide="deepValidationResult">
-                                <br/>
-                                The deep validation will save all the resources in the bundle to the Validation Server
-                                ( <strong>{{validationServer.url}}</strong> ) and then validate the entire bundle.
-                                <br/> <br/>
-                                <em>
-                                In some cases, the server might not save
-                                a resource if it has a reference to a resource that has not been saved. In that case,
-                                simply repeat the 'Perform Validation' step (you may need to do this multiple times)
-                                and eventually all resources will be saved)
-                                </em>
-                                <br/>
-                                <br/>
-                                Todo: change to allow a transaction as update as well (if the server supports it)
-                            </div>
-
-
-
-                            <uib-tabset ng-show="deepValidationResult">
-                                <uib-tab heading="OO">
-                                    <pre>{{deepValidationResult | json}}</pre>
-                                </uib-tab>
-                                <uib-tab heading="Table">
-                                    <div class="row">
-                                        <div class="col-md-8">
-                                            <div class="modelScroll">
-                                                <table class="table table-condensed table-bordered">
-                                                    <tr ng-repeat="iss in deepValidationResult.issue"
-                                                        style="cursor: pointer"
-                                                        ng-click="selectFromDeepValidate(iss)">
-
-                                                        <td>
-                                                            <div ng-class="{error:iss.severity == 'error',warning:iss.severity == 'information'}">
-                                                                {{iss.diagnostics}}</div>
-                                                        </td>
-                                                        <td>
-                                                            <div ng-repeat="loc in iss.location">
-                                                                {{loc}}
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                            </div>
-
-                                        </div>
-                                        <div class="col-md-4">
-                                            <pre>{{selectedDeepValidationEntry | json}}</pre>
-                                        </div>
-                                    </div>
-
-
-                                </uib-tab>
-                            </uib-tabset>
-                        </uib-tab>
-
-                        <uib-tab heading="DiagnosticReport" ng-show="DR.length > 0">
-                            <ng-include src = "'includes/bvDiagnosticReport.html'"></ng-include>
-                        </uib-tab>
-
-                        <uib-tab heading="Encounters" ng-show="encounters.length > 0">
-                            <ng-include src = "'includes/bvEncounters.html'"></ng-include>
-                        </uib-tab>
-
-                        <uib-tab heading="CarePlan view" ng-show="false && CarePlans.length > 0">
-                            <pre>{{cpSummary | json}}</pre>
-                        </uib-tab>
-<!--
-                        <uib-tab ng-show = "false || fhir.type == 'document'" heading="Inferno">
-                            <br/>
-                            <button class="btn btn-primary pull-right" ng-click="validateWithInferno()">Perform validation</button>
-
-
-                            <div ng-show="validatingWithInferno">
-                                Calling the Inferno API - please be patient!
-                                <br/><br/>
-                            </div>
-
-                            <div ng-show="infernoError">
-                                Oops, there was an error from inferno (likely a timeout)
-                                <pre>{{infernoError | json}}</pre>
-                            </div>
-
-                            <div ng-hide="infernoValidationResult">
-
-                                <p>This function will call the Inferno API to perfrom validation.</p>
-                                <p>Note that this is an experimental feature so may not be correct or
-                                may fail (currently it seems to be timing out on large documents</p>
-                                <br/>
-                                <br/>
-
-                            </div>
-
-
-
-                            <uib-tabset ng-show="infernoValidationResult">
-                                <uib-tab heading="Table">
-                                    <div class="row">
-                                        <div class="col-md-8">
-                                            <div class="modelScroll">
-                                                <table class="table table-condensed table-bordered">
-                                                    <tr ng-repeat="iss in infernoValidationResult.issue"
-                                                        style="cursor: pointer"
-                                                        ng-click="selectFromInfernoValidate(iss)">
-
-                                                        <td>
-                                                            <div ng-class="{error:iss.severity == 'error',warning:iss.severity == 'information'}">
-                                                                {{iss.details.text}}</div>
-                                                        </td>
-                                                        <td>
-
-                                                            <div ng-repeat="exp in iss.expression">
-                                                                {{exp}}
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                            </div>
-
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div ng-repeat="src in selectedInfernoValidationEntry">
-                                                <pre>{{src | json}}</pre>
-                                            </div>
-
-                                        </div>
-                                    </div>
-
-
-                                </uib-tab>
-                                <uib-tab heading="OO">
-                                    <pre>{{infernoValidationResult | json}}</pre>
+                                <uib-tab ng-show="xmlText"  heading="XML (transformed)">
+                                    <pre>{{xmlText}}</pre>
                                 </uib-tab>
 
-                            </uib-tabset>
-
-
-
-
-
-                        </uib-tab>
--->
-                        <uib-tab ng-show = "fhir.type == 'document'" heading="Document">
-
-                            <uib-tabset>
-                                <uib-tab heading="Rendering">
-                                    <strong>Subject</strong>
-                                    <p  style="margin-left: 10px" ng-bind-html="document.subject.text.div"></p>
-
-                                    <strong>Document metadata</strong>
-                                    <p  style="margin-left: 10px" ng-bind-html="document.composition.text.div"></p>
-
-                                    <div ng-repeat = "section in document.composition.section">
-                                        <hr style="border-top: 1px solid grey; margin: 1px"/>
-                                        <strong>{{section.title}}</strong>
-
-                                        <div class="row">
-
-                                            <div class="col-md-8">
-                                                <p style="margin-left: 10px" ng-bind-html="to_trusted(section.text.div)"></p>
-                                                <!-- <p style="margin-left: 10px" ng-bind-html="section.text.div"></p> -->
-
-                                            </div>
-                                            <div class="col-md-3">
-
-                                                <div ng-repeat = "resource in section.realResources"
-                                                     ng-click="selectResourceFromRender(resource)">
-                                                    <div class="rounded-box">
-                                                        {{resource.display}}
-
-                                                        <em><p ng-bind-html="resource.resource.text.div"></p></em>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-
-                                        </div>
-
-
-
-
-
-                                    </div>
-
-                                    <div><em>Derived from the Composition and Subject text elements as per the spec</em></div>
-
+                                <uib-tab ng-show="fshText" heading="FSH (transformed)">
+                                    <pre>{{fshText}}</pre>
                                 </uib-tab>
-                                <uib-tab heading="By Section">
-                                    <div class="row">
-                                        <div class="col-md-3">
+
+
+
+                                <uib-tab ng-show="selectedBundleEntry.resource.resourceType == 'Composition'"
+                                         heading="Sections">
+
+
+                                    <div class="col-md-6 col-sm-6">
+
+                                        <div class="myScroll1">
+
+
+                                        <div ng-repeat="section in selectedBundleEntry.resource.section">
+                                            <strong>{{section.title}}</strong>
+
+
                                             <div class="list-group">
-                                                <div ng-class="{'list-group-item':true}"
-                                                     ng-repeat = "section in document.composition.section"
-                                                    ng-click="selectSection(section)">
-                                                    {{section.title}}
-                                                    <div class="pull-right badge">{{section.entry.length}}</div>
-                                                    <div>{{section.code.coding[0].system}} {{section.code.coding[0].code}}</div>
+
+
+
+                                                <div ng-class="{'list-group-item':true,'listItemSelected':entry.reference == selectedRef}"
+                                                     ng-repeat="entry in section.entry">
+                                                    <div class="clickable" ng-click="selectResourceFromSection(entry.reference)">
+                                                        {{entry.reference}}</div>
+
+
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="col-md-3">
 
-                                            <table>
-                                                <div class="list-group">
-                                                    <div class="list-group-item" ng-repeat = "entry in selectedSection.entry">
-                                                        <div ng-click="selectEntryFromSection(entry) ">{{entry.reference}}</div>
-                                                    </div>
-                                                </div>
-
-                                            </table>
 
                                         </div>
-                                        <div class="col-md-6">
-                                            <pre>{{selectedEntryFromSection | json}}</pre>
                                         </div>
+
                                     </div>
-
+                                    <div class="col-md-6 col-sm-6">
+                                        <pre>{{resourceFromSection | json}}</pre>
+                                    </div>
 
                                 </uib-tab>
-                            </uib-tabset>
 
+                                <uib-tab ng-show="selectedBundleEntry.resource.resourceType == 'ValueSet' && selectedBundleEntry.resource.expansion">
 
-                        </uib-tab>
+                                    <uib-tab-heading>
+                                        Expansion <span class="badge">{{selectedBundleEntry.resource.expansion.contains.length}}</span>
+                                    </uib-tab-heading>
 
-                        <uib-tab heading = "Observations">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <strong>Observation Codes</strong>
-                                    <div class="myScroll1">
-                                        <div class="list-group">
-                                            <div class="list-group-item"
-                                                 ng-click="selectObservationCode(hashObservations[k])"
-                                                 ng-repeat="(k,v) in hashObservations">
-
-                                                <div class="pull-right badge">
-                                                    {{v.resources.length}}
-                                                </div>
-                                                <div>{{v.code.display}}</div>
-                                                <div>{{v.code.code}} </div>
-
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-
-                                </div>
-                                <div class="col-md-5">
-                                    <strong>{{selectedObservations[0].code.coding[0].code}} {{selectedObservations[0].code.coding[0].display}}</strong>
-                                    <table class="table-bordered table">
-                                        <tr>
-                                            <th>Date</th><th>Age</th><th>Result</th><th>Reference Range</th>
-                                        </tr>
-                                        <tr ng-repeat="obs in selectedObservations"
-                                            ng-click="selectObservation(obs)">
+                                    <table class="table table-condensed">
+                                        <tr ng-repeat = "concept in selectedBundleEntry.resource.expansion.contains">
                                             <td>
-                                                {{moment(obs.effectiveDateTime).format('YYYY-MM-DD')}}
-
-
-
-                                                {{obs.effectivePeriod.start}} {{obs.effectivePeriod.end}}
+                                                {{concept.code}}
+                                                <div>{{concept.system}}</div>
+                                                <div>{{concept.version}}</div>
                                             </td>
-                                            <td>{{obs.effectiveDateTime | getAgeSeconds}}</td>
-                                            <td>{{obs.valueString}}
-
-                                                <div ng-repeat="coding in obs.valueCodeableConcept.coding">
-                                                    {{coding.system}} {{coding.code}}
-                                                    {{coding.display}}
-                                                </div>
-                                                {{obs.valueCodeableConcept.text}}
-
-                                                {{obs.valueQuantity.value}} {{obs.valueQuantity.unit}}
-
-
-                                            </td>
-                                            <td>
-                                                <div ng-repeat = "rr in obs.referenceRange">
-                                                    {{rr.text}}
-                                                </div>
-
-                                            </td>
+                                            <td>{{concept.display}}</td>
                                         </tr>
                                     </table>
+                                </uib-tab>
+
+                                <uib-tab ng-show="hashRefsByResource[selectedBundleEntry.resource.id].length > 0">
+                                    <uib-tab-heading>
+                                        Canonicals <span class="badge">{{hashRefsByResource[selectedBundleEntry.resource.id].length}}</span>
+
+                                    </uib-tab-heading>
+
+                                    <pre>{{hashRefsByResource[selectedBundleEntry.resource.id] | json}}</pre>
+
+                                </uib-tab>
+
+                            </uib-tabset>
+                        </div>
+
+                    </div>
+
+
+                </uib-tab>
+
+
+                <uib-tab heading = "References Graph" select="fitGraph()">
+
+                    <div ng-show="noFullGraph">
+                        <div class="alert-warning alert"
+                            style="margin:50px">
+                            The full graph is not displayed for bundles with more than {{maxForGraph}}
+                            entries as it is too slow to render - and is a bit of a mess anyway.
+                            <br/><br/>
+                            Graphs for individual resources are still shown in the Bundle entries tab -
+                            in the 'References' sub-tab.
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="row" ng-hide="noFullGraph">
+                        <div class="col-md-8">
+                            <div>
+                                <div class="pull-right">
+                                    <input ng-model="input.showHidePatient" type="checkbox"
+                                           ng-click="showHidePatient(input.showHidePatient)"/> Hide Patient
+                                </div>
+                            </div>
+                            <div id="resourceGraph"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="pull-right">
+                                <button class="btn btn-link"
+                                        ng-click="selectFromMainGraph(selectedNode.entry.resource)">Details</button>
+                            </div>
+
+                            <uib-tabset>
+                                <uib-tab heading="Resource">
+                                    <pre>{{selectedNode.entry.resource | json}}</pre>
+                                </uib-tab>
+                                <uib-tab heading="Entry">
+                                    <pre>{{selectedNode.entry | json}}</pre>
+                                </uib-tab>
+
+                                <uib-tab ng-show="selectedNode.entry.resource.resourceType == 'DiagnosticReport'" heading="DiagnosticReport">
+                                    <br/>
+                                    <div class="banner">Observations linked to this DiagnosticReport</div>
+
+                                    <div ng-repeat="item in DR" ng-show="item.DR.id == selectedNode.entry.resource.id">
+                                        <table class="table-bordered table">
+                                            <tr ng-repeat = "obs in item.obs">
+                                                <td>
+                                                    {{obs.text.div | cleanTextDiv}}
+                                                    <div ng-repeat="coding in obs.code.coding">
+                                                        {{coding.display}}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    {{obs.valueCodeableConcept.text}} {{obs.valueString}} {{obs.valueQuantity.value}}
+                                                    {{obs.valueQuantity.unit}}
+
+                                                </td>
+
+                                            </tr>
+                                        </table>
+
+                                    <!--
+                                        <div ng-repeat = "obs in item.obs">
+                                            <strong>{{obs.text.div | cleanTextDiv}}</strong>
+                                            <div style="margin-left: 8px">{{obs.valueCodeableConcept.text}} {{obs.valueString}}   {{obs.valueQuantity.value}}</div>
+                                        </div>
+                                        -->
+
+                                    </div>
+
+                                </uib-tab>
+
+                            </uib-tabset>
+
+
+
+                        </div>
+                    </div>
+
+                </uib-tab>
+
+                <uib-tab heading = "Canonical graph"  select="fitSingleGraph()">
+                    <div class="row">
+                        <div class="col-md-7">
+                            <div class="row">
+
+                                <div class="col-md-12">
+                                    <button class="btn btn-link pull-right" ng-click="fitCanonicalGraph()">Refresh graph (if no display)</button>
+                                </div>
+                            </div>
+                            <div id="canonicalGraph"></div>
+                        </div>
+                        <div class="col-md-5">
+                            <uib-tabset>
+                                <uib-tab heading="Json">
+                                    <pre>{{selectedCanResource | json}}</pre>
+                                </uib-tab>
+                                <uib-tab ng-show="selectedCanResource.resourceType == 'ValueSet' && selectedCanResource.expansion">
+
+                                    <uib-tab-heading>
+                                        Expansion <span class="badge">{{selectedCanResource.expansion.contains.length}}</span>
+                                    </uib-tab-heading>
+
+                                    <table class="table table-condensed">
+                                        <tr ng-repeat = "concept in selectedCanResource.expansion.contains">
+                                            <td>
+                                                {{concept.code}}
+                                                <div>{{concept.system}}</div>
+                                                <div>{{concept.version}}</div>
+                                            </td>
+                                            <td>{{concept.display}}</td>
+                                        </tr>
+                                    </table>
+                                </uib-tab>
+
+                                <uib-tab ng-show="hashRefsByResource[selectedCanResource.id].length > 0">
+                                    <uib-tab-heading>
+                                        Canonicals <span class="badge">{{hashRefsByResource[selectedCanResource.id].length}}</span>
+
+                                    </uib-tab-heading>
+
+                                    <pre>{{hashRefsByResource[selectedCanResource.id] | json}}</pre>
+
+                                </uib-tab>
+                            </uib-tabset>
+                        </div>
+                    </div>
+
+                </uib-tab>
+
+                <uib-tab heading = "Validation">
+                    <uib-tab-heading>
+                        Validation <span class="badge">{{validationResult.issue.length}}</span>
+                    </uib-tab-heading>
+
+
+
+
+                    <!--
+                    <button class="btn btn-primary" ng-show="fhir"
+                            ng-click="performValidation()">Perform validation</button>
+                    -->
+
+
+                    <br/>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <h4>Resources with issues</h4>
+                            <div class="myScroll1">
+                                <div class="list-group">
+                                    <div
+                                            ng-class="{'list-group-item':true,listItemSelected:k == input.selectedIssueByResource.resource.id}"
+                                            ng-repeat="(k,v) in errorsByResource"
+                                            style="cursor: pointer"
+                                            ng-click="input.selectedIssueByResource = v">
+                                        {{v.resource.resourceType}} <span class="badge pull-right">{{v.issues.length}}</span>
+
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                        <div class="col-md-5">
+                            <h4>Issues</h4>
+                            <div class="myScroll1">
+                                <ul class="list-group">
+                                    <li class="list-group-item"
+                                        ng-repeat="iss in input.selectedIssueByResource.issues">
+                                        {{iss.diagnostics}}
+                                        <br/>
+                                        <div><em>{{iss.location[0]}}</em></div>
+
+
+                                    </li>
+                                </ul>
+                            </div>
+
+                        </div>
+                        <div class="col-md-5">
+                            <h4>Resource</h4>
+                            <div class="myScroll1">
+                                <pre>{{input.selectedIssueByResource.resource | json}}</pre>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+
+                    <uib-tabset ng-show="false">
+                        <br/>
+                        <uib-tab heading="By resource">
+
+
+
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <h4>Resources with issues</h4>
+                                    <div class="myScroll1">
+                                        <div class="list-group">
+                                            <div
+                                                    ng-class="{'list-group-item':true,listItemSelected:k == input.selectedIssueByResource.resource.id}"
+                                                    ng-repeat="(k,v) in errorsByResource"
+                                                    style="cursor: pointer"
+                                                    ng-click="input.selectedIssueByResource = v">
+                                                {{v.resource.resourceType}} <span class="badge pull-right">{{v.issues.length}}</span>
+
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+                                <div class="col-md-5">
+                                    <h4>Issues</h4>
+                                    <div class="myScroll1">
+                                    <ul class="list-group">
+                                        <li class="list-group-item"
+                                            ng-repeat="iss in input.selectedIssueByResource.issues">
+                                            {{iss.diagnostics}}
+                                            <br/>
+                                            <div><em>{{iss.location[0]}}</em></div>
+
+
+                                        </li>
+                                    </ul>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-5">
+                                    <h4>Resource</h4>
+                                    <div class="myScroll1">
+                                    <pre>{{input.selectedIssueByResource.resource | json}}</pre>
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+
+
+                        </uib-tab>
+
+                        <uib-tab heading="List">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="myScroll1">
+                                        <div class="list-group">
+                                            <div ng-class="{'list-group-item':true,listItemSelected:selectedIssue == iss}"
+                                                 style="cursor: pointer"
+                                                 ng-click="getResourceFromIssue(iss)"
+                                                 ng-repeat="iss in validationResult.issue">
+                                                {{iss.diagnostics}}
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                                <div ng-show="issueResource" class="col-md-6">
+                                    <pre>{{issueResource | json}}</pre>
+                                </div>
+
+                            </div>
+
+                        </uib-tab>
+                        <uib-tab heading="Json">
+                            <pre>{{validationResult | json}}</pre>
+                        </uib-tab>
+                    </uib-tabset>
+
+
+
+
+                </uib-tab>
+
+
+                <uib-tab heading="DiagnosticReport" ng-show="DR.length > 0">
+                    <ng-include src = "'includes/bvDiagnosticReport.html'"></ng-include>
+                </uib-tab>
+
+                <uib-tab heading="Encounters" ng-show="encounters.length > 0">
+                    <ng-include src = "'includes/bvEncounters.html'"></ng-include>
+                </uib-tab>
+
+                <uib-tab heading="CarePlan view" ng-show="false && CarePlans.length > 0">
+                    <pre>{{cpSummary | json}}</pre>
+                </uib-tab>
+<!--
+                <uib-tab ng-show = "false || fhir.type == 'document'" heading="Inferno">
+                    <br/>
+                    <button class="btn btn-primary pull-right" ng-click="validateWithInferno()">Perform validation</button>
+
+
+                    <div ng-show="validatingWithInferno">
+                        Calling the Inferno API - please be patient!
+                        <br/><br/>
+                    </div>
+
+                    <div ng-show="infernoError">
+                        Oops, there was an error from inferno (likely a timeout)
+                        <pre>{{infernoError | json}}</pre>
+                    </div>
+
+                    <div ng-hide="infernoValidationResult">
+
+                        <p>This function will call the Inferno API to perfrom validation.</p>
+                        <p>Note that this is an experimental feature so may not be correct or
+                        may fail (currently it seems to be timing out on large documents</p>
+                        <br/>
+                        <br/>
+
+                    </div>
+
+
+
+                    <uib-tabset ng-show="infernoValidationResult">
+                        <uib-tab heading="Table">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="modelScroll">
+                                        <table class="table table-condensed table-bordered">
+                                            <tr ng-repeat="iss in infernoValidationResult.issue"
+                                                style="cursor: pointer"
+                                                ng-click="selectFromInfernoValidate(iss)">
+
+                                                <td>
+                                                    <div ng-class="{error:iss.severity == 'error',warning:iss.severity == 'information'}">
+                                                        {{iss.details.text}}</div>
+                                                </td>
+                                                <td>
+
+                                                    <div ng-repeat="exp in iss.expression">
+                                                        {{exp}}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
 
                                 </div>
                                 <div class="col-md-4">
-                                    <strong>Selected Observation</strong>
-                                    <pre>{{selectedObservation | json}}</pre>
+                                    <div ng-repeat="src in selectedInfernoValidationEntry">
+                                        <pre>{{src | json}}</pre>
+                                    </div>
+
                                 </div>
                             </div>
 
-                        </uib-tab>
-
-
-
-                        <uib-tab ng-show = "false" heading="Table">
-
-                            <div class="row" style="margin-top: 8px"  ng-repeat = "entry in fhir.entry">
-                                <div class="col-md-3">
-
-                                    <span class = "resourceType"> {{entry.resource.resourceType}}</span>
-                                </div>
-
-                            </div>
-
 
                         </uib-tab>
-
-
-                        <uib-tab heading="Json">
-                            <div>
-                                <pre ng-show="fhir">  {{fhir | json}} </pre>
-
-                            </div>
+                        <uib-tab heading="OO">
+                            <pre>{{infernoValidationResult | json}}</pre>
                         </uib-tab>
-
-
-
-
 
                     </uib-tabset>
 
@@ -1491,9 +1551,197 @@
 
 
 
+                </uib-tab>
+-->
+                <uib-tab ng-show = "isDocument" heading="Document">
+
+                    <uib-tabset>
+                        <uib-tab heading="Rendering">
+                            <strong>Subject</strong>
+                            <p  style="margin-left: 10px" ng-bind-html="document.subject.text.div"></p>
+
+                            <strong>Document metadata</strong>
+                            <p  style="margin-left: 10px" ng-bind-html="document.composition.text.div"></p>
+
+                            <div ng-repeat = "section in document.composition.section">
+                                <hr style="border-top: 1px solid grey; margin: 1px"/>
+                                <strong>{{section.title}}</strong>
+
+                                <div class="row">
+
+                                    <div class="col-md-8">
+                                        <p style="margin-left: 10px" ng-bind-html="to_trusted(section.text.div)"></p>
+                                        <!-- <p style="margin-left: 10px" ng-bind-html="section.text.div"></p> -->
+
+                                    </div>
+                                    <div class="col-md-3">
+
+                                        <div ng-repeat = "resource in section.realResources"
+                                             ng-click="selectResourceFromRender(resource)">
+                                            <div class="rounded-box">
+                                                {{resource.display}}
+
+                                                <em><p ng-bind-html="resource.resource.text.div"></p></em>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+
+
+
+
+                            </div>
+
+                            <div><em>Derived from the Composition and Subject text elements as per the spec</em></div>
+
+                        </uib-tab>
+                        <uib-tab heading="By Section">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="list-group">
+                                        <div ng-class="{'list-group-item':true}"
+                                             ng-repeat = "section in document.composition.section"
+                                            ng-click="selectSection(section)">
+                                            {{section.title}}
+                                            <div class="pull-right badge">{{section.entry.length}}</div>
+                                            <div>{{section.code.coding[0].system}} {{section.code.coding[0].code}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+
+                                    <table>
+                                        <div class="list-group">
+                                            <div class="list-group-item" ng-repeat = "entry in selectedSection.entry">
+                                                <div ng-click="selectEntryFromSection(entry) ">{{entry.reference}}</div>
+                                            </div>
+                                        </div>
+
+                                    </table>
+
+                                </div>
+                                <div class="col-md-6">
+                                    <pre>{{selectedEntryFromSection | json}}</pre>
+                                </div>
+                            </div>
+
+
+                        </uib-tab>
+                    </uib-tabset>
+
+
+                </uib-tab>
+
+                <uib-tab heading = "Observations">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <strong>Observation Codes</strong>
+                            <div class="myScroll1">
+                                <div class="list-group">
+                                    <div class="list-group-item"
+                                         ng-click="selectObservationCode(hashObservations[k])"
+                                         ng-repeat="(k,v) in hashObservations">
+
+                                        <div class="pull-right badge">
+                                            {{v.resources.length}}
+                                        </div>
+                                        <div>{{v.code.display}}</div>
+                                        <div>{{v.code.code}} </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                        </div>
+                        <div class="col-md-5">
+                            <strong>{{selectedObservations[0].code.coding[0].code}} {{selectedObservations[0].code.coding[0].display}}</strong>
+                            <table class="table-bordered table">
+                                <tr>
+                                    <th>Date</th><th>Age</th><th>Result / Note</th><th>Reference Range</th>
+                                </tr>
+                                <tr ng-repeat="obs in selectedObservations"
+                                    ng-click="selectObservation(obs)">
+                                    <td>
+                                        {{moment(obs.effectiveDateTime).format('YYYY-MM-DD')}}
+
+
+
+                                        {{obs.effectivePeriod.start}} {{obs.effectivePeriod.end}}
+                                    </td>
+                                    <td>{{obs.effectiveDateTime | getAgeSeconds}}</td>
+                                    <td>{{obs.valueString}}
+
+                                        <div ng-repeat="coding in obs.valueCodeableConcept.coding">
+                                            {{coding.system}} {{coding.code}}
+                                            {{coding.display}}
+                                        </div>
+                                        {{obs.valueCodeableConcept.text}}
+
+                                        {{obs.valueQuantity.value}} {{obs.valueQuantity.unit}}
+
+                                        <div ng-repeat="note in obs.note">{{note.text}}</div>
+
+
+                                    </td>
+                                    <td>
+                                        <div ng-repeat = "rr in obs.referenceRange">
+                                            {{rr.text}}
+                                        </div>
+
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Selected Observation</strong>
+                            <div class="pull-right">
+                                <button class="btn btn-link"
+                                        ng-click="selectFromMainGraph(selectedObservation)">Details</button>
+                            </div>
+                            <div class="clearfix"></div>
+                            <pre>{{selectedObservation | json}}</pre>
+                        </div>
+                    </div>
+
+                </uib-tab>
+
+
+
+                <uib-tab ng-show = "false" heading="Table">
+
+                    <div class="row" style="margin-top: 8px"  ng-repeat = "entry in fhir.entry">
+                        <div class="col-md-3">
+
+                            <span class = "resourceType"> {{entry.resource.resourceType}}</span>
+                        </div>
+
+                    </div>
+
+
+                </uib-tab>
+
+
+                <uib-tab heading="Json">
+                    <div>
+                        <pre ng-show="fhir">  {{fhir | json}} </pre>
+
+                    </div>
+                </uib-tab>
+
+
+
+
+
+            </uib-tabset>
+
+
         </div>
-
-
 
     </div>
 

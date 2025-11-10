@@ -338,6 +338,11 @@ angular.module("sampleApp")
         return function(textDiv) {
 
             if (textDiv) {
+
+                const text = textDiv.replace(/<[^>]*>/g, '');
+                return text
+
+                /*
                 //var startDiv = "<div xmlns='http://www.w3.org/1999/xhtml'>";
 
                 var tmp = textDiv.replace(/"/g,"'");
@@ -354,6 +359,7 @@ angular.module("sampleApp")
                 }
 
                 return textDiv;
+                */
             }
 
 

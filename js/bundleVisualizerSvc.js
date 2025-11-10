@@ -62,7 +62,7 @@ angular.module("sampleApp")
                 })
 
             },
-            deepValidation : function (bundle,serverUrl) {
+            deepValidationDEP : function (bundle,serverUrl) {
                 //performs a validation by copying all the bundle contents to a server, then using $validate against Bundle
                 //each resource must have an id
                 //returns an OO

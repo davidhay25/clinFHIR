@@ -28,8 +28,12 @@
                 </div>
 
 
+                <span class="clickable" ng-click="copyToClipboard(downloadBundleText)">Copy to clipboard</span>
+
                 <a ng-show="downloadBundleJsonName" class="pull-right" download="{{downloadBundleJsonName}}.json"
                    href="{{downloadBundleJsonContent}}">Download Bundle</a>
+
+
 
                 <!--  <a class="pull-right" download="{{downloadLinkJsonName}}.json"
                                                        href="{{downloadLinkJsonContent}}">Download</a>-->
