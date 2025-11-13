@@ -18,6 +18,18 @@
     <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
 
 
+    <!-- Highlight.js for syntax coloring -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+
+    <!-- js-beautify for indentation -->
+    <script src="https://cdn.jsdelivr.net/npm/js-beautify@1.14.9/js/lib/beautify-html.min.js"></script>
+
+
+
+
 
     <script src="js/libs/moment.min.js"></script>
 
@@ -39,7 +51,32 @@
 
     <script src="js/libs/fhirpath.min.js"></script>
 
+    <script>
+        //Alert if there are other copies of this page open.
+        (function() {
+            const tabId = Math.random().toString(36).slice(2);
+            const key = 'bundleVisualizer';
 
+            // Read currently active tabs
+            const activeTabs = JSON.parse(localStorage.getItem(key) || '[]');
+
+            if (activeTabs.length > 0) {
+                alert('This page is already open in another tab, which will cause issues. You should close this page and use the other one.');
+            }
+
+            // Add this tab to the list
+            activeTabs.push(tabId);
+            localStorage.setItem(key, JSON.stringify(activeTabs));
+
+            // Remove this tab on unload
+            window.addEventListener('beforeunload', () => {
+                const tabs = JSON.parse(localStorage.getItem(key) || '[]');
+                const updatedTabs = tabs.filter(id => id !== tabId);
+                localStorage.setItem(key, JSON.stringify(updatedTabs));
+            });
+
+        })();
+    </script>
 
 
     <style>
@@ -117,24 +154,24 @@
             height: 550px;
             border: 1px solid lightgray;
         }
-/*
-        table {
-            border-collapse: collapse;
+
+        .scroll-wrapper {
+            max-width: 100%;
+            overflow-x: auto;
         }
 
-        table, th, td {
-            border: 1px solid black;
-            padding: 5px;
+        .scroll-wrapper table td {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            max-width: 300px;
         }
 
-        th {
-            font-weight: bold;
-        }
-        thead {
-            font-weight: bold;
+        .scroll-wrapper table td, table th {
+            padding: 2px 8px; /* top/bottom 8px, left/right 16px */
         }
 
-        */
+
 
         td {
             white-space: normal;      /* allow wrapping */
@@ -180,20 +217,18 @@
 
 
             </div>
-            <div class="col-md-2">
+
+            <div class="col-md-4">
                 <div class="navbar-text">
-                    <div ng-hide = "showSelector || urlPassedIn" class="clickable" ng-click="showSelector = true">Show Selector</div>
+                    {{bundleDisplayName}}
                 </div>
             </div>
 
-
             <div class="col-md-2">
-
-            </div>
-
-
-            <div class="col-md-1">
-
+                <div class="navbar-text">
+                    <div ng-hide = "showSelector || urlPassedIn" class="clickable"
+                         ng-click="reShowSelector() ">Show Selector</div>
+                </div>
             </div>
 
 
@@ -204,10 +239,7 @@
             </div>
 
 
-            <div class="col-md-1 col-sm-1">
 
-
-            </div>
 
 
 
@@ -335,7 +367,7 @@
                         </div>
                         <div class="row">
                             <div class="col-md-8">
-                                <div class="myScroll">
+                                <div class="myScroll1">
                                     <table class="table table-bordered">
                                         <tr><th>Name</th>
                                             <th style="width: 50%">Query</th>
@@ -394,7 +426,7 @@
 
                                 <div class="row">
                                     <div class="col-md-8">
-                                        <div class="myScroll">
+                                        <div class="myScroll1">
                                             <table class="table table-bordered">
                                                 <tr><th>Name</th><th>Query</th></tr>
                                                 <tr ng-click="input.libraryQuery=item"
@@ -435,17 +467,20 @@
                     <div ng-show="input.selectedSelector.code == 'stored'">
                         <div class="alert alert-info">
                             These are Bundles that others have saved to the Library so that they are available to anyone.
-                            Select the Bundle to view.
+                            Select the Bundle to view then click the 'Retrieve bundle' button that appears to the right.
                         </div>
 
 
                             <div class="row">
-                                    <div class="col-md-8">
-                                        <div class="myScroll">
+
+                                <div class="col-md-8">
+                                    <div class="myScroll1">
+                                        <div class="myScroll1">
                                             <table class="table table-bordered">
                                                 <tr><th>Name</th><th>Description</th><th>Author</th><th>Date</th></tr>
-                                                <tr ng-click="input.libraryQuery=item"
+                                                <tr ng-click="input.libraryBundle=bundle"
                                                     ng-repeat="bundle in libraryAllBundles"
+                                                    ng-class="{listItemSelected: input.libraryBundle==bundle}"
                                                     style="cursor: pointer">
                                                     <td>{{bundle.name}}</td>
                                                     <td>{{bundle.description}}</td>
@@ -457,6 +492,13 @@
                                         </div>
 
                                     </div>
+
+                                </div>
+                                <div class="col-md-4">
+                                    <button ng-show = "input.libraryBundle" class="btn btn-primary"
+                                            ng-click="getBundleFromLibrary(input.libraryBundle)">Retrieve Bundle</button>
+                                </div>
+
                                 </div>
 
                     </div>
@@ -1002,7 +1044,7 @@
                             <div class="pull-right">
                                 <a target="_blank"
                                    ng-show="selectedBundleEntry"
-                                   ng-href="http://hl7.org/fhir/{{selectedBundleEntry.resource.resourceType}}.html#resource">{{selectedBundleEntry.resource.resourceType}} in the Spec</a>
+                                   ng-href="http://hl7.org/fhir/{{selectedBundleEntry.resource.resourceType}}.html">{{selectedBundleEntry.resource.resourceType}} in the Spec</a>
                             </div>
 
                             <uib-tabset>
@@ -1018,7 +1060,7 @@
                                     </div>
                                 </uib-tab>
 
-                                <uib-tab heading="Text">
+                                <uib-tab heading="Narrative">
 
                                     <div ng-hide="selectedBundleEntry.resource.text.div">
                                         <div class="alert-info alert">
@@ -1026,7 +1068,21 @@
                                         </div>
                                     </div>
 
-                                    <p ng-bind-html="selectedBundleEntry.resource.text.div"></p>
+                                    <uib-tabset>
+                                        <uib-tab heading="Rendered text">
+                                            <p ng-bind-html="selectedBundleEntry.resource.text.div"></p>
+                                        </uib-tab>
+                                        <uib-tab heading="HTML">
+                                            <pre>
+
+                                                <pre><code id="htmlCode" class="language-html"></code></pre>
+
+
+                                                {{selectedBundleEntry.resource.text.div}}
+                                            </pre>
+                                        </uib-tab>
+                                    </uib-tabset>
+
 
 
                                 </uib-tab>
@@ -1562,9 +1618,13 @@
 
                     <uib-tabset>
                         <uib-tab heading="Rendering">
+                            <div class="alert alert-info">
+                                This tab shows the content of the .text element for the resources in the document
+                            </div>
                             <strong>Subject</strong>
                             <p  style="margin-left: 10px" ng-bind-html="document.subject.text.div"></p>
 
+                            <hr style="border-top: 1px solid grey; margin: 1px"/>
                             <strong>Document metadata</strong>
                             <p  style="margin-left: 10px" ng-bind-html="document.composition.text.div"></p>
 
@@ -1575,8 +1635,14 @@
                                 <div class="row">
 
                                     <div class="col-md-12">
-                                        <p style="margin-left: 10px" ng-bind-html="to_trusted(section.text.div)"></p>
-                                        <!-- <p style="margin-left: 10px" ng-bind-html="section.text.div"></p> -->
+
+                                        <div class="scroll-wrapper">
+                                            <p style="margin-left: 10px" ng-bind-html="to_trusted(section.text.div)"></p>
+                                        </div>
+
+
+
+
 
                                     </div>
 
@@ -1595,10 +1661,10 @@
                         </uib-tab>
                         <uib-tab heading="Rendering and resources">
                             <strong>Subject</strong>
-                            <p  style="margin-left: 10px" ng-bind-html="document.subject.text.div"></p>
+                            <p style="margin-left: 10px" ng-bind-html="document.subject.text.div"></p>
 
                             <strong>Document metadata</strong>
-                            <p  style="margin-left: 10px" ng-bind-html="document.composition.text.div"></p>
+                            <p style="margin-left: 10px" ng-bind-html="document.composition.text.div"></p>
 
                             <div ng-repeat = "section in document.composition.section">
                                 <hr style="border-top: 1px solid grey; margin: 1px"/>
@@ -1606,7 +1672,7 @@
 
                                 <div class="row">
 
-                                    <div class="col-md-8">
+                                    <div class="col-md-9">
                                         <p style="margin-left: 10px" ng-bind-html="to_trusted(section.text.div)"></p>
                                         <!-- <p style="margin-left: 10px" ng-bind-html="section.text.div"></p> -->
 
@@ -1633,11 +1699,6 @@
 
 
                                 </div>
-
-
-
-
-
                             </div>
 
                             <div><em>Derived from the Composition and Subject text elements as per the spec</em></div>

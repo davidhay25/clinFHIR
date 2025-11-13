@@ -10,6 +10,9 @@ angular.module("sampleApp")
         let deepValidateMax = 30    //maximum number of resources allowed in deep validation
 
         return {
+            makeDocumentGraph : function (composition,bundle) {
+                
+            },
             makeDocument : function (bundle,$sce) {
                 let hashResourcesByTypeAndId = {}   //a hash of nodes by {type}/{id}
                 let hashResourcesByFullUrl = {}   //a hash of nodes by {id}

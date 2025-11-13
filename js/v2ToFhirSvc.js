@@ -744,7 +744,7 @@ angular.module("sampleApp")
                 };
 
 
-                console.log(missingReferences)
+
                 return {graphData : data,
                     allReferences:allReferences,
                     nodes: arNodes,

@@ -44,6 +44,10 @@ angular.module("sampleApp")
             $scope.validationServer = $localStorage.validationServer || appConfigSvc.getCurrentConformanceServer();
 
             $scope.showSelector = true; //at startup, show the selector
+            $scope.reShowSelector = function () {
+                delete $scope.bundleDisplayName
+                $scope.showSelector = true
+            }
 
             function getHashCodeDEP(s) {
                 //https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript
@@ -130,7 +134,18 @@ angular.module("sampleApp")
 
             }
 
+            $scope.getBundleFromLibrary = function (item) {
+                $http.get(`bv/getBundle/${item.id}`).then(
+                    function (data) {
+                        $scope.bundleDisplayName = item.name
+                        console.log(data.data)
+                        processBundle(data.data.bundle)
+                    }, function () {
+                        alert("Sorry, I cannot retrieve that Bundle")
+                    }
+                )
 
+            }
 
 
             //when the 'add to library' link is clicked in saved queries.
@@ -165,6 +180,7 @@ angular.module("sampleApp")
                         if (bundle.resourceType !== 'Bundle' || ! bundle.entry || bundle.entry.length < 1 ) {
                             alert("Must return a Bundle with at least one entry")
                         } else {
+                            $scope.bundleDisplayName = item.name
                             processBundle(data.data)
 
                         }
@@ -596,11 +612,13 @@ angular.module("sampleApp")
                 $localStorage.bvQueries.push(newQuery)
                 $scope.savedQueries = $localStorage.bvQueries   //update the UI todo - don't really need 2 vars...
 
+                $scope.bundleDisplayName = name
                 processBundle($scope.executedQueryBundle);      //set when the query is tested
 
             }
 
             $scope.viewNewQueryBundle = function(bundle) {
+                $scope.bundleDisplayName = "New query"
                 processBundle(bundle);
             }
 
@@ -614,6 +632,7 @@ angular.module("sampleApp")
                         if (bundle.resourceType !== 'Bundle' || ! bundle.entry || bundle.entry.length < 1 ) {
                             alert("Must return a Bundle with at least one entry")
                         } else {
+                            $scope.bundleDisplayName = item.name
                             processBundle(data.data)
 
                         }
@@ -677,6 +696,7 @@ angular.module("sampleApp")
 
                 }
                 function process(json,name) {
+                    $scope.bundleDisplayName = "Pasted bundle"
 
                     // $scope.showSelector = false
                     processBundle(json);
@@ -840,6 +860,21 @@ angular.module("sampleApp")
                 delete $scope.fshText
                 delete $scope.xmlText
                 $scope.selectedBundleEntry = entry
+
+
+                let rawHTML = entry.resource.text.div
+                const prettyHTML = html_beautify(rawHTML, { indent_size: 2, wrap_line_length: 120 });
+
+
+                const codeEl = document.getElementById('htmlCode');
+
+// Reset Highlight.js tracking
+                delete codeEl.dataset.highlighted;
+
+                document.getElementById('htmlCode').textContent = prettyHTML ;
+                hljs.highlightAll(); // highlight syntax
+
+
 
 
                 $scope.createGraphOneEntry();
