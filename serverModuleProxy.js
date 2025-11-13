@@ -107,11 +107,7 @@ function setup(app,indb) {
         let resource = req.body
         let resourceType = resource.resourceType
 
-        console.log(resource)
-
         let qry = `${validationServer}/${resourceType}/$validate`
-
-        console.log(`Validate query: ${qry}`)
 
         try {
             let response = await axios.post(qry,resource)
@@ -120,16 +116,12 @@ function setup(app,indb) {
         } catch (ex) {
 
             if (ex.response) {
-                console.log('Status:', ex.response.status);
-                console.log('Headers:', ex.response.headers);
-                console.log('Data:', JSON.stringify(ex.response.data, null, 2));
                 res.json(ex.response.data)
             } else {
                 res.status(500).json({msg:ex.message})
             }
 
-           // console.log(ex)
-           // console.log(ex.data)
+
 
 
         }

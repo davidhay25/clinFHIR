@@ -335,28 +335,32 @@
                         </div>
                         <div class="row">
                             <div class="col-md-8">
-                                <table class="table table-bordered">
-                                    <tr><th>Name</th>
-                                        <th style="width: 50%">Query</th>
-                                        <th>In library</th><th></th></tr>
-                                    <tr ng-click="input.savedQuery=item"
-                                        style="cursor: pointer"
-                                        ng-class="{listItemSelected:input.savedQuery == item}"
-                                        ng-repeat = "item in savedQueries">
-                                        <td>
-                                            {{item.name}}
-                                        </td>
-                                        <td>{{item.qry}}</td>
-                                        <td>{{item.inLibrary}}</td>
-                                        <td><i class="glyphicon glyphicon-remove-sign clickable"
-                                               ng-click="deleteQuery($index)"></i>
-                                        </td>
+                                <div class="myScroll">
+                                    <table class="table table-bordered">
+                                        <tr><th>Name</th>
+                                            <th style="width: 50%">Query</th>
+                                            <th>In library</th><th></th></tr>
+                                        <tr ng-click="input.savedQuery=item"
+                                            style="cursor: pointer"
+                                            ng-class="{listItemSelected:input.savedQuery == item}"
+                                            ng-repeat = "item in savedQueries">
+                                            <td>
+                                                {{item.name}}
+                                            </td>
+                                            <td>{{item.qry}}</td>
+                                            <td>{{item.inLibrary}}</td>
+                                            <td><i class="glyphicon glyphicon-remove-sign clickable"
+                                                   ng-click="deleteQuery($index)"></i>
+                                            </td>
 
-                                        <!--
-                                        <td width="80"><button class="btn btn-link" ng-click="executeSavedQuery(item)">Load</button> </td>
-                                        -->
-                                    </tr>
-                                </table>
+                                            <!--
+                                            <td width="80"><button class="btn btn-link" ng-click="executeSavedQuery(item)">Load</button> </td>
+                                            -->
+                                        </tr>
+                                    </table>
+                                </div>
+
+
                             </div>
                             <div class="col-md-4">
                                 {{input.savedQuery.name}}
@@ -390,19 +394,22 @@
 
                                 <div class="row">
                                     <div class="col-md-8">
-                                        <table class="table table-bordered">
-                                            <tr><th>Name</th><th>Query</th></tr>
-                                            <tr ng-click="input.libraryQuery=item"
-                                                style="cursor: pointer"
-                                                ng-class="{listItemSelected:input.libraryQuery == item}"
-                                                ng-repeat = "item in library">
-                                                <td>
-                                                    {{item.name}}
-                                                </td>
-                                                <td>{{item.qry}}</td>
+                                        <div class="myScroll">
+                                            <table class="table table-bordered">
+                                                <tr><th>Name</th><th>Query</th></tr>
+                                                <tr ng-click="input.libraryQuery=item"
+                                                    style="cursor: pointer"
+                                                    ng-class="{listItemSelected:input.libraryQuery == item}"
+                                                    ng-repeat = "item in library">
+                                                    <td>
+                                                        {{item.name}}
+                                                    </td>
+                                                    <td>{{item.qry}}</td>
 
-                                            </tr>
-                                        </table>
+                                                </tr>
+                                            </table>
+                                        </div>
+
                                     </div>
 
                                     <div class="col-md-1">
@@ -434,18 +441,21 @@
 
                             <div class="row">
                                     <div class="col-md-8">
-                                        <table class="table table-bordered">
-                                            <tr><th>Name</th><th>Description</th><th>Author</th><th>Date</th></tr>
-                                            <tr ng-click="input.libraryQuery=item"
-                                                ng-repeat="bundle in libraryAllBundles"
-                                                style="cursor: pointer">
-                                                <td>{{bundle.name}}</td>
-                                                <td>{{bundle.description}}</td>
-                                                <td>{{bundle.author}}</td>
-                                                <td>{{bundle.date | date}}</td>
+                                        <div class="myScroll">
+                                            <table class="table table-bordered">
+                                                <tr><th>Name</th><th>Description</th><th>Author</th><th>Date</th></tr>
+                                                <tr ng-click="input.libraryQuery=item"
+                                                    ng-repeat="bundle in libraryAllBundles"
+                                                    style="cursor: pointer">
+                                                    <td>{{bundle.name}}</td>
+                                                    <td>{{bundle.description}}</td>
+                                                    <td>{{bundle.author}}</td>
+                                                    <td>{{bundle.date | date}}</td>
 
-                                            </tr>
-                                        </table>
+                                                </tr>
+                                            </table>
+                                        </div>
+
                                     </div>
                                 </div>
 
@@ -926,6 +936,34 @@
 
                                     </div>
                                 </uib-tab>
+
+
+                                <uib-tab heading="Type">
+                                    <div class="myScroll1">
+                                        <uib-accordion>
+                                            <div uib-accordion-group class="panel-default"
+                                                 ng-repeat="es in sortedEntries"
+                                                 headingC="{{es.type}} <span class='badge'>{{es.entries.length}}</span>">
+                                                    <uib-accordion-heading>
+                                                        {{es.type}} <span class='badge pull-right'>{{es.entries.length}}</span>
+                                                    </uib-accordion-heading>
+                                                <div class="list-group">
+                                                    <div ng-repeat = "entry in es.entries"
+                                                         ng-class="{'list-group-item':true,'listItemSelected':selectedBundleEntry == entry}">
+                                                        <div style="padding-left: 10px; cursor: pointer"
+                                                             ng-click="selectBundleEntry(entry,[])">
+                                                            <div> {{entry.resource.text.div | cleanTextDiv | limitTo:50}}</div>
+                                                            <div style="padding-left: 10px"><em>Id: {{entry.resource.id}}</em></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </uib-accordion>
+                                    </div>
+
+                                </uib-tab>
+
 <!--
                                 <uib-tab heading="Type, Name">
                                     <div class="entryListScroll">
@@ -1524,6 +1562,38 @@
 
                     <uib-tabset>
                         <uib-tab heading="Rendering">
+                            <strong>Subject</strong>
+                            <p  style="margin-left: 10px" ng-bind-html="document.subject.text.div"></p>
+
+                            <strong>Document metadata</strong>
+                            <p  style="margin-left: 10px" ng-bind-html="document.composition.text.div"></p>
+
+                            <div ng-repeat = "section in document.composition.section">
+                                <hr style="border-top: 1px solid grey; margin: 1px"/>
+                                <strong>{{section.title}}</strong>
+
+                                <div class="row">
+
+                                    <div class="col-md-12">
+                                        <p style="margin-left: 10px" ng-bind-html="to_trusted(section.text.div)"></p>
+                                        <!-- <p style="margin-left: 10px" ng-bind-html="section.text.div"></p> -->
+
+                                    </div>
+
+
+
+                                </div>
+
+
+
+
+
+                            </div>
+
+                            <div><em>Derived from the Composition and Subject text elements as per the spec</em></div>
+
+                        </uib-tab>
+                        <uib-tab heading="Rendering and resources">
                             <strong>Subject</strong>
                             <p  style="margin-left: 10px" ng-bind-html="document.subject.text.div"></p>
 

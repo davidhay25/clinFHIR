@@ -1247,7 +1247,7 @@ angular.module("sampleApp")
                         const nodeId = obj.nodes[0];  //get the first node
                         const node = vo.graphData.nodes.get(nodeId);
 
-                        
+
                         $scope.selectFromMainGraph(node.entry.resource)
                     })
 
