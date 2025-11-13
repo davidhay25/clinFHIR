@@ -296,28 +296,36 @@ angular.module("sampleApp")
 
                 }
 
+
+
                 //------------- construct the graph based on canonical references
                 let vo = v2ToFhirSvc.makeGraphCanonical(oBundle)
-
-
                 $scope.hashRefsByResource = vo.hashRefsByResource;  //the set of canonical resources from this resource
-                var container = document.getElementById('canonicalGraph');
-                var graphOptions = {
-                    physics: {
-                        enabled: true,
-                        barnesHut: {
-                            gravitationalConstant: -10000,
-                        }
-                    }
-                };
-                $scope.canonicalGraph = new vis.Network(container, vo.graphData, graphOptions);
-                $scope.canonicalGraph.on("click", function (obj) {
+                delete $scope.isCanonical
+                if (Object.keys($scope.hashRefsByResource).length > 0) {
+                    $scope.isCanonical = true
 
-                    var nodeId = obj.nodes[0];  //get the first node
-                    var node = vo.graphData.nodes.get(nodeId);
-                    $scope.selectedCanResource = node.resource;
-                    $scope.$digest();
-                });
+                    var container = document.getElementById('canonicalGraph');
+                    var graphOptions = {
+                        physics: {
+                            enabled: true,
+                            barnesHut: {
+                                gravitationalConstant: -10000,
+                            }
+                        }
+                    };
+                    $scope.canonicalGraph = new vis.Network(container, vo.graphData, graphOptions);
+                    $scope.canonicalGraph.on("click", function (obj) {
+
+                        var nodeId = obj.nodes[0];  //get the first node
+                        var node = vo.graphData.nodes.get(nodeId);
+                        $scope.selectedCanResource = node.resource;
+                        $scope.$digest();
+                    });
+                }
+
+
+
 
 
                 //---------- draw the main graph
@@ -347,8 +355,6 @@ angular.module("sampleApp")
 
                         }
 
-
-
                         $scope.serverRoot = serverRoot;
 
                     } else {
@@ -358,13 +364,20 @@ angular.module("sampleApp")
                     }
                 }
 
+
                 let options = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:serverRoot}
                 drawGraph(options)
 
                 let bundle = angular.copy(oBundle)
 
 
+                //------ make the document summary object for display
                 delete $scope.document;     //contains the document specific resources suitable for layout
+
+                if (bundle.type == 'document' || $scope.isDocument) {
+                    $scope.document = bundleVisualizerSvc.makeDocument(bundle, $sce)
+                }
+                /*
                 if (bundle.type == 'document' || $scope.isDocument) {
                     let arComposition = [];
 
@@ -377,16 +390,25 @@ angular.module("sampleApp")
 
                             let key;
 
-                            //2020-05-10 - hask key is not full Url (as references won't be - updated: but the can!)
-                            key = entry.resource.resourceType + "/" + entry.resource.id
+                            //if the id is an oid (entry.fullUrl has urn:uuid:) then reference will just be the oid
+                            if (entry.fullUrl?.indexOf('urn:uuid:') > -1) {
+                                key = entry.fullUrl
+                            } else {
+                                key = entry.resource.resourceType + "/" + entry.resource.id
+                            }
+
+                            //key = entry.resource.resourceType + "/" + entry.resource.id //temp
 
                             hash[key] = entry.resource;
+
                             if (entry.resource.resourceType == 'Composition') {
                                 arComposition.push(entry.resource)
                             }
                         }
 
                     });
+
+
                     switch (arComposition.length) {
                         case 0 :
                             alert('This is a document, but there is no Composition resource')
@@ -429,7 +451,15 @@ angular.module("sampleApp")
                                         let resource = hash[entry.reference]
                                         if (resource) {
                                             //todo check for list
-                                            section.realResources.push({display:resource.resourceType,resource:resource})
+                                            let item = {display:resource.resourceType,resource:resource}
+
+                                            const json = angular.toJson(resource, true);
+                                            const html = `<pre>${json}</pre>`;
+                                            item.trustedPopover = $sce.trustAsHtml(html);
+
+                                            section.realResources.push(item)
+
+
                                         } else {
                                             section.realResources.push({display:'unknown reference:'+entry.reference})
                                         }
@@ -439,10 +469,20 @@ angular.module("sampleApp")
 
 
                             })
+
+
                         }
 
                     }
                 }
+
+                console.log(angular.copy($scope.document))
+
+                console.log(bundleVisualizerSvc.makeDocument (bundle,$sce) )
+
+
+              */
+
             };
 
 
@@ -453,11 +493,6 @@ angular.module("sampleApp")
             }
 
 
-
-
-
-
-
             $scope.selectSection = function(section) {
                 delete $scope.selectedEntryFromSection
                 $scope.selectedSection = section
@@ -465,9 +500,16 @@ angular.module("sampleApp")
 
             $scope.selectEntryFromSection = function(oReference) {
                 let reference = oReference.reference;
-
-
                 $scope.selectedEntryFromSection = $scope.hashByRef[reference]
+            }
+
+            $scope.popoverText = function (adHoc) {
+
+                let json = angular.toJson(adHoc,true)
+                let rawHtml = `<pre>${json}</pre>`
+                return $sce.trustAsHtml(rawHtml);
+
+
             }
 
             $scope.selectResourceFromRender = function(resource) {
@@ -771,6 +813,8 @@ angular.module("sampleApp")
             $scope.selectBundleEntry = function(entry,entryErrors) {
                 delete $scope.selectedFromSingleGraph;  //does this need to be done?
 
+                delete $scope.selectedFshFromSingleGraph
+
                 let resourceId = entry.resource.id
 
                 $scope.selectedBundleEntryErrors = []     //an array of errors for this entry
@@ -787,10 +831,6 @@ angular.module("sampleApp")
                                 $scope.selectedBundleEntryErrors.push(iss)
                             }
                         }
-
-
-
-
                     }
 
                 }
@@ -800,10 +840,34 @@ angular.module("sampleApp")
                 delete $scope.fshText
                 delete $scope.xmlText
                 $scope.selectedBundleEntry = entry
-                //$scope.selectedBundleEntryErrors = entryErrors;
+
 
                 $scope.createGraphOneEntry();
 
+
+                $http.post("./fsh/transformJsonToFsh",entry.resource).then(
+                    function(data) {
+                        try {
+                            let response = data.data
+
+                            //as the FSH transform is so slow, need to be sure the resource is still selected
+                            if (response.resourceId == $scope.selectedBundleEntry.resource.id) {
+                                $scope.fshText = response.fsh
+
+                            } else {
+                                console.log("Ignoring response for "+ response.resourceId)
+                            }
+                        } catch (ex) {
+                            console.error(angular.toJson(ex))
+                            $scope.fshText = "Unable to transform into FSH"
+                        }
+                    }, function(err) {
+                        console.log("FSH Transform error")
+                    }
+                )
+
+
+/*
 
                 apiService.postWithCancel('fsh/transformJsonToFsh', entry.resource)
                   .then(response => {
@@ -829,7 +893,7 @@ angular.module("sampleApp")
                       console.error('POST failed:', error);
                     }
                   });
-
+*/
 
                 //get the FSH of the resource
                 /*
@@ -871,11 +935,6 @@ angular.module("sampleApp")
                     }
                 )
 
-
-
-
-
-
                 let treeData = v2ToFhirSvc.buildResourceTree(entry.resource);
 
                 //show the tree structure of this resource (adapted from scenario builder)
@@ -888,9 +947,13 @@ angular.module("sampleApp")
 
             $scope.createGraphOneEntry = function(){
 
+
+
                 if (!$scope.selectedBundleEntry) {
                     return;
                 }
+
+                let primaryResourceId = $scope.selectedBundleEntry.resource?.id    //will be the primary resource
 
                 //the fullUrl is a default ?if it exists should we onlt use that???
                 let url = $scope.selectedBundleEntry.fullUrl;// || resource.resourceType + "/" + resource.id;
@@ -913,6 +976,7 @@ angular.module("sampleApp")
                 let options = {bundle:$scope.fhir,
                     hashErrors:$scope.hashErrors,
                     serverRoot:$scope.serverRoot,
+                    primaryResourceId : primaryResourceId,
                     centralResourceId:url}
 
                 options.showInRef = $scope.input.showInRef;
@@ -920,7 +984,7 @@ angular.module("sampleApp")
                 options.recursiveRef = $scope.input.recursiveRef;
                 options.hidePatient = $scope.input.showHidePatient;
 
-                let vo = v2ToFhirSvc.makeGraph(options);
+                let vo = v2ToFhirSvc.makeGraph1(options);
                 $scope.graphErrors = vo.lstErrors
 
 
@@ -1011,39 +1075,26 @@ angular.module("sampleApp")
                     //create FSH of selected resource
                     $http.post("./fsh/transformJsonToFsh",node.resource).then(
                         function(data) {
-
                             try {
                                 let response = data.data
 
                                 if (response.resourceId == fshResourceId) {
                                     $scope.selectedFshFromSingleGraph = response.fsh
-/*
-                                    $scope.selectedFshFromSingleGraph = response.fsh.instances[node.resource.id]
-                                    if (response.fsh.aliases) {
-                                        $scope.selectedFshFromSingleGraph = response.fsh.aliases + "\n\n" +$scope.selectedFshFromSingleGraph
-                                    }
-                                    */
+
                                 } else {
                                     console.log("Ignoring response for "+ response.resourceId)
                                 }
-
-
-
-
-
                             } catch (ex) {
                                 alert(angular.toJson(ex))
                                 $scope.selectedFshFromSingleGraph = "Unable to transform into FSH"
                             }
-
                         }, function(err) {
                             console.log("FSH Transform error")
-
                         }
                     )
 
 
-                    //selectedFshFromSingleGraph
+
 
 
                     $scope.$digest();
@@ -1139,9 +1190,8 @@ angular.module("sampleApp")
 
             function drawGraph(options) {
 
-
-
-                let vo = v2ToFhirSvc.makeGraph(options)
+                //>>>>>>>>>>>> this i sthe new graph routine....
+                let vo = v2ToFhirSvc.makeGraph1(options)
 
                 $scope.graphErrors = vo.lstErrors
 
@@ -1192,6 +1242,19 @@ angular.module("sampleApp")
                         $scope.$digest();
                     });
 
+                    $scope.chart.on("doubleClick", function (obj) {
+
+                        const nodeId = obj.nodes[0];  //get the first node
+                        const node = vo.graphData.nodes.get(nodeId);
+
+                        
+                        $scope.selectFromMainGraph(node.entry.resource)
+                    })
+
+
+
+
+
                     //https://stackoverflow.com/questions/32403578/stop-vis-js-physics-after-nodes-load-but-allow-drag-able-nodes
                     $scope.chart.on("stabilizationIterationsDone", function () {
                         delete $scope.showGraphWarning
@@ -1234,7 +1297,6 @@ angular.module("sampleApp")
                 $http.post("validate",resource).then(
                     function (data) {
 
-
                         //this is an OO
                         $scope.validationResult = data.data
                         let issues = data.data.issue
@@ -1247,6 +1309,7 @@ angular.module("sampleApp")
 
                         //create a hash by resource id
                         $scope.errorsByResource = {}
+                        $scope.allErrors = []
 
                         for (const iss of issues) {
                             let loc = iss.location[0]
@@ -1264,6 +1327,9 @@ angular.module("sampleApp")
                                     $scope.errorsByResource[resource.id] = $scope.errorsByResource[resource.id] || {resource:resource,issues:[]}
                                     $scope.errorsByResource[resource.id].issues.push(iss)
                                 }
+                            } else {
+                                $scope.errorsByResource["Bundle"] = $scope.errorsByResource["Bundle"] || {resource:resource,issues:[]}
+                                $scope.errorsByResource["Bundle"].issues.push(iss)
                             }
                         }
                     }, function (err) {
@@ -1275,7 +1341,7 @@ angular.module("sampleApp")
 
             }
 
-            let validateBundle = function(bundle) {
+            let validateBundleDEPDEP = function(bundle) {
                 delete $scope.bundleValidationResult
                 let url = $scope.validationServer.url + "Bundle/$validate";
                 $http.post(url,bundle).then(

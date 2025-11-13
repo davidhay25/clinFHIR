@@ -10,6 +10,83 @@ angular.module("sampleApp")
         let deepValidateMax = 30    //maximum number of resources allowed in deep validation
 
         return {
+            makeDocument : function (bundle,$sce) {
+                let hashResourcesByTypeAndId = {}   //a hash of nodes by {type}/{id}
+                let hashResourcesByFullUrl = {}   //a hash of nodes by {id}
+
+
+                let document = {}   //the summary document object
+                let composition
+                let patient
+                //create the hashs for references
+                bundle.entry.forEach(function(entry,inx) {
+                    //create hashs for simpler identification of reference targets
+                    let resource = entry.resource
+
+                    //assume only 1 for the moment = //todo check for multiple
+                    switch (entry.resource.resourceType) {
+                        case 'Composition' :
+                            document.composition = entry.resource
+                            break
+                        case 'Patient' :
+                            //no - get the patient form the composition subject
+                           // document.patient = entry.resource
+                            break
+                    }
+
+                    if (entry.fullUrl) {
+                        hashResourcesByFullUrl[entry.fullUrl] = resource
+                    }
+                    hashResourcesByTypeAndId[`${resource.resourceType}/${resource.id}`] = resource  //hash for {type}/{id} lookup
+                })
+
+                if (! document.composition) {
+                    return {}
+                }
+
+                //get the subject
+                if (document.composition.subject) {
+                    document.subject = findResource(document.composition.subject.reference)
+                }
+
+                //now create the sections
+                for (const section of document.composition.section) {
+                    section.realResources = []
+                    for (const entry of section.entry || []) {
+                        let reference = entry.reference
+                        let resource = findResource(reference)
+                        if (resource) {
+                            let item = {display:resource.resourceType,resource:resource}
+
+                            const json = angular.toJson(resource, true);
+                            const html = `<pre>${json}</pre>`;
+                            item.trustedPopover = $sce.trustAsHtml(html);
+
+                            section.realResources.push(item)
+                        } else {
+                            section.realResources.push({display:'unknown reference:'+entry.reference})
+                        }
+                    }
+                }
+
+                return document
+
+
+
+
+
+
+                function findResource(reference) {
+                    let resource = hashResourcesByTypeAndId[reference]
+                    if (!resource) {
+                        //try a full url - eg http://host/type/id - http://hapi.fhir.org/baseR4/Patient/IPS-examples-Patient-01
+                        resource = hashResourcesByFullUrl[reference]
+                    }
+                    return resource
+                }
+
+
+            },
             makeDRSummary : function(DR,hashResourcesByRef) {
                 //create an object to make it easy to list DiagnosticReports
                 let vo = {DR:DR,obs:[]}

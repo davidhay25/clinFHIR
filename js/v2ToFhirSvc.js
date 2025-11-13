@@ -77,48 +77,6 @@ angular.module("sampleApp")
                 return hash
 
             },
-            validateBundleDEP : function(validationServer,bundle) {
-                //validate the contents of a bundle by making separate calls for each resource in it...
-                let deferred = $q.defer();
-                let arQuery = [];
-                let arResult = [];
-
-                bundle.entry.forEach(function (entry) {
-                    if (entry.resource) {
-                        let resource = entry.resource;
-                        let url = validationServer.url + resource.resourceType + "/$validate"
-                        arQuery.push(validate(url,resource))
-                    }
-
-                });
-
-
-                $q.all(arQuery).then(
-                    function(data){
-                        console.log(data.data)
-                        deferred.resolve(arResult)
-                    },function(err) {
-
-                    }
-                );
-
-                function validate(url,resource) {
-                    let deferred = $q.defer();
-                    console.log(url)
-                    $http.post(url,resource).then(
-                        function(data) {
-
-                        },
-                        function(err) {
-
-                        }
-                    )
-
-                }
-
-
-
-            },
             buildResourceTree: function (resource) {
                 //pass in a resource instance...
                 if (! resource) {
@@ -350,6 +308,186 @@ angular.module("sampleApp")
 
 
 
+
+            },
+            makeGraph1: function (options) {
+                //updated 2025-11-12
+
+
+                let bundle = options.bundle;
+                let centralResourceId = options.primaryResourceId;
+                let hidePatient = options.hidePatient
+
+                let issues = []
+
+
+                let centralNodeId = null   //will be the corresponding node
+
+                let hashNodesByTypeAndId = {}   //a hash of nodes by {type}/{id}
+                let hashNodesById = {}   //a hash of nodes by {id}
+                let hashNodesByFullUrl = {}   //a hash of nodes by {id}
+
+                //start by creating all the node with a hash
+                let arNodes = []
+                bundle.entry.forEach(function(entry,inx) {
+                    let nodeId = inx+1      //used for creating links
+                    let resource = entry.resource;
+
+                    //if there's a centralResourceId then get the corresponding nodeId
+                    if (centralResourceId && resource.id == centralResourceId) {
+                        centralNodeId = nodeId
+                    }
+
+
+
+                    let node = {id: nodeId,shape: 'box',resource:resource, entry:entry}
+
+                    let label = ""
+                    if (resource.text && resource.text.div) {
+                        label = $filter('cleanTextDiv')(resource.text.div);
+                        if (label) {
+                            label = label.substring(0,40)
+                        }
+                    }
+                    node.label = label + "\n" + resource.resourceType
+
+                    if (objColours[resource.resourceType]) {
+                        node.color = objColours[resource.resourceType];
+                    }
+
+                    let canAdd = true
+                    if (hidePatient && resource.resourceType == 'Patient') {
+                        canAdd = false
+                    }
+
+                    if (canAdd) {
+                        arNodes.push(node)
+
+                        //create hashs for simpler identification of reference targets
+
+                        if (entry.fullUrl) {
+                            hashNodesByFullUrl[entry.fullUrl] = node
+                        }
+
+                        hashNodesById[`${resource.id}`] = node
+                        hashNodesByTypeAndId[`${resource.resourceType}/${resource.id}`] = node  //hash for {type}/{id} lookup
+
+                    }
+
+                })
+
+
+                let arEdges = []    //all the edges
+
+                for (let node of arNodes) {
+                    let resource = node.resource
+                    findRef(resource,node.id,resource.resourceType)
+                }
+
+                //if there's a centralResourceId, then we only want the nodes that have an edge
+                //so remove all the ones that don't have a reference to or from that resource
+                if (centralResourceId) {
+                    let hashConstrainedNodes = {}       //the nodes to be included
+                    for (let edge of arEdges) {
+                        hashConstrainedNodes[edge.from] = true
+                        hashConstrainedNodes[edge.to] = true
+                    }
+                    let includedNodes = []          //convert to an array ...
+                    for (let node of arNodes) {
+                        if (hashConstrainedNodes[node.id]) {
+                            includedNodes.push(node)
+                        }
+                    }
+                    arNodes = includedNodes     //... and assign to arNodes
+                }
+
+                let nodes = new vis.DataSet(arNodes);
+                let edges = new vis.DataSet(arEdges);
+
+                let graphData = {
+                    nodes: nodes,
+                    edges: edges
+                };
+
+                return {graphData : graphData,lstErrors:issues}
+
+                //find all the references in a node resource and add a link for each one
+                function findRef(resource,sourceId,path) {
+                    //iterate over all the elements in the resource
+                    angular.forEach(resource,function(value,key){
+                        let lPath = path + '.' + key
+                        if (angular.isArray(value)) {
+                            for (const entry of value) {
+                                if (entry.reference) {
+                                    //this is a reference - eg Patient/123. Now find the node it refers to
+                                    addEdge(resource,sourceId,lPath,entry.reference)
+                                } else {
+                                    findRef(entry,sourceId,lPath)
+
+                                }
+                            }
+
+
+                        } else if (angular.isObject(value)) {
+                            //a single object - eg Patient.birthDate
+                            if (value.reference) {
+                                //this is a reference - eg Patient/123. Now find the node it refers to
+                                addEdge(resource,sourceId,lPath,value.reference)
+                            } else {
+                                findRef(value,sourceId,lPath)
+
+                            }
+                        }
+                    })
+                }
+
+
+
+                function addEdge(sourceResource,sourceId,path,reference) {
+                    //find the node that the reference refers to
+
+                    //the reference is of the format type/id
+                    let targetNode = hashNodesByTypeAndId[reference]
+                    if (!targetNode) {
+                        //try a full url - eg http://host/type/id - http://hapi.fhir.org/baseR4/Patient/IPS-examples-Patient-01
+                        targetNode = hashNodesByFullUrl[reference]
+                    }
+
+
+                    if (targetNode) {
+                        let canAdd = false
+                        if (centralNodeId !== null) {   //if set, then only include edges that refer to or are from that node
+                            if (targetNode.id == centralNodeId || sourceId == centralNodeId) {
+                                canAdd = true
+
+                            }
+                        } else {
+                            canAdd = true
+                        }
+
+
+
+                        if (canAdd) {
+                            let edge = {id: 'e' + arEdges.length +1,from: sourceId, to: targetNode.id, label: path,arrows : {to:true}}
+                            arEdges.push(edge)
+                        }
+
+
+                    } else {
+                        let msg = {msg:`Resource ${sourceResource.id} path: ${path} has reference ${reference} to unknown resource`}
+                        issues.push(msg)
+                        console.log(msg)
+                    }
+
+
+
+                }
+
+
+
+            },
+            findResourceInBundle : function (bundle,reference) {
+                //ref style: {type}
 
             },
             makeGraph: function (options) {

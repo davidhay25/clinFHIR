@@ -6,6 +6,29 @@
     width:1200px;
 }
 
+
+/* Outer popover container */
+.popover.custom-popover-big {
+    max-width: 90vw !important;   /* responsive max width */
+    width: auto !important;       /* allow content to define width */
+    max-height: 80vh !important;  /* limit height */
+    overflow: hidden !important;  /* scroll will be on inner content */
+    display: block !important;
+}
+
+/* Inner content scrollable */
+.popover.custom-popover-big .popover-content {
+    display: block !important;     /* ensures block layout */
+    width: auto !important;        /* fit content width */
+    max-width: 90vw !important;    /* match outer popover */
+    max-height: 80vh !important;   /* limit height */
+    overflow-y: auto !important;   /* vertical scroll */
+    overflow-x: hidden !important; /* prevent horizontal scroll */
+    white-space: normal !important;/* wrap text */
+    padding: 10px;                 /* optional padding */
+    box-sizing: border-box;        /* include padding in width */
+}
+
 .answer {
     border: 1px solid gainsboro;
     padding : 8px;

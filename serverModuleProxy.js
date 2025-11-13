@@ -12,6 +12,8 @@ const validationServer = process.env.HAPISERVER || "http://localhost:8080/fhir"
 //const validationServer = "http://hapi-fhir:8080/fhir"
 //const validationServer = "http://localhost:9090/fhir"
 
+//docker run -p 9090:8080 hapiproject/hapi:latest
+
 function setup(app,indb) {
 
     //proxy a GET call - returns whatever is returned in the query.
@@ -42,14 +44,32 @@ function setup(app,indb) {
         let query =  req.query.qry
         if (query) {
 
+            let firstRun = true
+            let returnBundle
 
             try {
-                let bundleType
-                let allEntries = [];
+                //let bundleType
+                //let allEntries = [];
                 let nextUrl = query
                 while (nextUrl) {
                     const response = await axios.get(nextUrl);
 
+                    if (firstRun) {
+                        //get the bundle level data - everything but the entry. Needed for bundles like document...
+                        returnBundle = response.data
+                        firstRun = false
+                        const nextLink = returnBundle.link?.find(link => link.relation === 'next');
+                        nextUrl = nextLink ? nextLink.url : null;
+                    } else {
+                        //this is a subsequent run (after paging). We just add the new entries to the returnBundle
+                        let bundle = response.data
+                        if (bundle.entry) {
+                            returnBundle.entry.push(...bundle.entry);
+                        }
+                        const nextLink = bundle.link?.find(link => link.relation === 'next');
+                        nextUrl = nextLink ? nextLink.url : null;
+                    }
+/*
                     const bundle = response.data;
                     if (! bundleType) {
                         bundleType = bundle.type
@@ -62,9 +82,12 @@ function setup(app,indb) {
                     // Find the 'next' link if present
                     const nextLink = bundle.link?.find(link => link.relation === 'next');
                     nextUrl = nextLink ? nextLink.url : null;
+                    */
                 }
 
-                res.json( {resourceType:'Bundle',type:bundleType, entry:allEntries})
+
+                res.json( returnBundle)
+                //res.json( {resourceType:'Bundle',type:bundleType, entry:allEntries})
 
             } catch (ex) {
                 res.status(400).json({msg:ex.message})
@@ -84,14 +107,31 @@ function setup(app,indb) {
         let resource = req.body
         let resourceType = resource.resourceType
 
+        console.log(resource)
+
         let qry = `${validationServer}/${resourceType}/$validate`
+
+        console.log(`Validate query: ${qry}`)
 
         try {
             let response = await axios.post(qry,resource)
 
             res.json(response.data)
         } catch (ex) {
-            res.status(500).json({msg:ex.message})
+
+            if (ex.response) {
+                console.log('Status:', ex.response.status);
+                console.log('Headers:', ex.response.headers);
+                console.log('Data:', JSON.stringify(ex.response.data, null, 2));
+                res.json(ex.response.data)
+            } else {
+                res.status(500).json({msg:ex.message})
+            }
+
+           // console.log(ex)
+           // console.log(ex.data)
+
+
         }
 
     })

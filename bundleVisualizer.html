@@ -50,6 +50,19 @@
         .resourceType {
             border: 1px solid darkgrey; padding: 2px;
         }
+
+        .issError {
+            background-color: #f2dede;
+        }
+
+        .issWarning {
+            background-color: #faf2cc;
+        }
+
+        .issInfo {
+            background-color:#dff0d8;
+        }
+
     </style>
 
 
@@ -104,7 +117,7 @@
             height: 550px;
             border: 1px solid lightgray;
         }
-
+/*
         table {
             border-collapse: collapse;
         }
@@ -120,6 +133,16 @@
         thead {
             font-weight: bold;
         }
+
+        */
+
+        td {
+            white-space: normal;      /* allow wrapping */
+            word-break: break-all;    /* ✅ forces breaking anywhere if needed */
+            overflow-wrap: anywhere;  /* ✅ modern & preferred version */
+        }
+
+
         .error {
             color: red;
         }
@@ -313,7 +336,9 @@
                         <div class="row">
                             <div class="col-md-8">
                                 <table class="table table-bordered">
-                                    <tr><th>Name</th><th>Query</th><th>In library</th><th></th></tr>
+                                    <tr><th>Name</th>
+                                        <th style="width: 50%">Query</th>
+                                        <th>In library</th><th></th></tr>
                                     <tr ng-click="input.savedQuery=item"
                                         style="cursor: pointer"
                                         ng-class="{listItemSelected:input.savedQuery == item}"
@@ -979,7 +1004,7 @@
 
                                 <uib-tab heading="References"  select="fitSingleGraph()">
                                     <br/>
-                                    <div class="row">
+                               <!--     <div class="row">
 
                                         <div class="col-md-3">
                                             <div  uib-popover="If checked will hide the Patient resource."
@@ -992,7 +1017,7 @@
 
                                     </div>
                                     <br/>
-
+-->
                                     <div class="row">
                                         <div class="col-md-7 col-sm-7">
                                             <div id="singleResourceGraph"></div>
@@ -1048,10 +1073,7 @@
 
                                 </uib-tab>
 
-                                <uib-tab>
-                                    <uib-tab-heading>Reference errors <span class="badge">{{graphErrors.length}}</span></uib-tab-heading>
-                                    <pre>{{graphErrors | json}}</pre>
-                                </uib-tab>
+
 
                                 <uib-tab ng-show="selectedBundleEntry.resource.resourceType == 'Binary'" heading="Binary Content">
                                     <br/>
@@ -1198,8 +1220,6 @@
 
                     </div>
 
-
-
                     <div class="row" ng-hide="noFullGraph">
                         <div class="col-md-8">
                             <div>
@@ -1266,7 +1286,7 @@
 
                 </uib-tab>
 
-                <uib-tab heading = "Canonical graph"  select="fitSingleGraph()">
+                <uib-tab ng-show="isCanonical" heading = "Canonical graph"  select="fitSingleGraph()">
                     <div class="row">
                         <div class="col-md-7">
                             <div class="row">
@@ -1322,60 +1342,84 @@
 
 
 
-
-                    <!--
-                    <button class="btn btn-primary" ng-show="fhir"
-                            ng-click="performValidation()">Perform validation</button>
-                    -->
-
-
                     <br/>
-                    <div class="row">
-                        <div class="col-md-2">
-                            <h4>Resources with issues</h4>
-                            <div class="myScroll1">
-                                <div class="list-group">
-                                    <div
-                                            ng-class="{'list-group-item':true,listItemSelected:k == input.selectedIssueByResource.resource.id}"
-                                            ng-repeat="(k,v) in errorsByResource"
-                                            style="cursor: pointer"
-                                            ng-click="input.selectedIssueByResource = v">
-                                        {{v.resource.resourceType}} <span class="badge pull-right">{{v.issues.length}}</span>
+                    <uib-tabset>
+                        <uib-tab heading="Standard validation">
+
+                            <em>Issues noted by the internal hapi server</em>
+
+                            <div class="pull-right">
+                                <a target="_blank"
+                                   ng-show="input.selectedIssueByResource"
+                                   ng-href="http://hl7.org/fhir/{{input.selectedIssueByResource.resource.resourceType}}.html#resource">
+                                        {{input.selectedIssueByResource.resource.resourceType}} in the Spec</a>
+                            </div>
 
 
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <h4>Resources with issues</h4>
+                                    <div class="myScroll1">
+                                        <div class="list-group">
+                                            <div
+                                                    ng-class="{'list-group-item':true,listItemSelected:k == input.selectedIssueByResource.resource.id}"
+                                                    ng-repeat="(k,v) in errorsByResource"
+                                                    style="cursor: pointer"
+                                                    ng-click="input.selectedIssueByResource = v">
+                                                {{v.resource.resourceType}} <span class="badge pull-right">{{v.issues.length}}</span>
+
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+                                <div class="col-md-5">
+                                    <h4>Issues</h4>
+                                    <div class="myScroll1">
+                                        <ul class="list-group">
+                                            <li ng-class="{'list-group-item':true,issError:iss.severity=='error',issWarning:iss.severity=='warning',issInfo:iss.severity=='information'}"
+
+                                                ng-repeat="iss in input.selectedIssueByResource.issues">
+                                                {{iss.diagnostics}}
+                                                <br/>
+                                                <div><em>{{iss.location[0]}}</em></div>
+
+
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-5">
+                                    <h4>Resource</h4>
+                                    <div class="myScroll1">
+                                        <pre>{{input.selectedIssueByResource.resource | json}}</pre>
                                     </div>
                                 </div>
+
+
                             </div>
+                        </uib-tab>
+                        <uib-tab>
+                            <uib-tab-heading>Reference errors <span class="badge">{{graphErrors.length}}</span></uib-tab-heading>
+                            <em>References to missing resources found while building the graph</em>
+                            <br/>  <br/>
+                            <table class="table-bordered table">
+                                <tr ng-repeat = "err in graphErrors">
+                                    <td>{{err.msg}}</td>
+                                </tr>
+                            </table>
 
 
-                        </div>
 
-                        <div class="col-md-5">
-                            <h4>Issues</h4>
-                            <div class="myScroll1">
-                                <ul class="list-group">
-                                    <li class="list-group-item"
-                                        ng-repeat="iss in input.selectedIssueByResource.issues">
-                                        {{iss.diagnostics}}
-                                        <br/>
-                                        <div><em>{{iss.location[0]}}</em></div>
+                        </uib-tab>
+                        <uib-tab heading="Extended validation">
 
-
-                                    </li>
-                                </ul>
-                            </div>
-
-                        </div>
-                        <div class="col-md-5">
-                            <h4>Resource</h4>
-                            <div class="myScroll1">
-                                <pre>{{input.selectedIssueByResource.resource | json}}</pre>
-                            </div>
-                        </div>
-
-
-                    </div>
-
+                        </uib-tab>
+                    </uib-tabset>
 
                     <uib-tabset ng-show="false">
                         <br/>
@@ -1461,9 +1505,6 @@
                         </uib-tab>
                     </uib-tabset>
 
-
-
-
                 </uib-tab>
 
 
@@ -1478,81 +1519,7 @@
                 <uib-tab heading="CarePlan view" ng-show="false && CarePlans.length > 0">
                     <pre>{{cpSummary | json}}</pre>
                 </uib-tab>
-<!--
-                <uib-tab ng-show = "false || fhir.type == 'document'" heading="Inferno">
-                    <br/>
-                    <button class="btn btn-primary pull-right" ng-click="validateWithInferno()">Perform validation</button>
 
-
-                    <div ng-show="validatingWithInferno">
-                        Calling the Inferno API - please be patient!
-                        <br/><br/>
-                    </div>
-
-                    <div ng-show="infernoError">
-                        Oops, there was an error from inferno (likely a timeout)
-                        <pre>{{infernoError | json}}</pre>
-                    </div>
-
-                    <div ng-hide="infernoValidationResult">
-
-                        <p>This function will call the Inferno API to perfrom validation.</p>
-                        <p>Note that this is an experimental feature so may not be correct or
-                        may fail (currently it seems to be timing out on large documents</p>
-                        <br/>
-                        <br/>
-
-                    </div>
-
-
-
-                    <uib-tabset ng-show="infernoValidationResult">
-                        <uib-tab heading="Table">
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <div class="modelScroll">
-                                        <table class="table table-condensed table-bordered">
-                                            <tr ng-repeat="iss in infernoValidationResult.issue"
-                                                style="cursor: pointer"
-                                                ng-click="selectFromInfernoValidate(iss)">
-
-                                                <td>
-                                                    <div ng-class="{error:iss.severity == 'error',warning:iss.severity == 'information'}">
-                                                        {{iss.details.text}}</div>
-                                                </td>
-                                                <td>
-
-                                                    <div ng-repeat="exp in iss.expression">
-                                                        {{exp}}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </div>
-
-                                </div>
-                                <div class="col-md-4">
-                                    <div ng-repeat="src in selectedInfernoValidationEntry">
-                                        <pre>{{src | json}}</pre>
-                                    </div>
-
-                                </div>
-                            </div>
-
-
-                        </uib-tab>
-                        <uib-tab heading="OO">
-                            <pre>{{infernoValidationResult | json}}</pre>
-                        </uib-tab>
-
-                    </uib-tabset>
-
-
-
-
-
-                </uib-tab>
--->
                 <uib-tab ng-show = "isDocument" heading="Document">
 
                     <uib-tabset>
@@ -1577,7 +1544,15 @@
                                     <div class="col-md-3">
 
                                         <div ng-repeat = "resource in section.realResources"
-                                             ng-click="selectResourceFromRender(resource)">
+
+                                             popover-append-to-body="true"
+                                             uib-popover-html="resource.trustedPopover"
+                                             popover-placement="left"
+                                             popover-class="custom-popover-big"
+                                             popover-trigger="'focus'"
+                                             tabindex="0"
+                                             style="cursor: pointer"
+                                             ng-clickX="selectResourceFromRender(resource)">
                                             <div class="rounded-box">
                                                 {{resource.display}}
 
