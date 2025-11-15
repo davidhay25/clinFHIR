@@ -40,10 +40,14 @@ angular.module("sampleApp")
                         let resource = entry.resource
                         if (resource.resourceType == "Observation") {
                             let code = "unknown"
-                            cc = {}
+                            let cc = {}
                             if (resource.code && resource.code.coding) {
                                 code = resource.code.coding[0].code
                                 cc = resource.code.coding[0]
+                            } else {
+                                if (resource.code?.text) {
+                                    cc.display = resource.code?.text    //just for display anyway
+                                }
                             }
                             hash[code] = hash[code] || {code:cc,resources:[]}
                             hash[code].resources.push(resource)
@@ -60,9 +64,9 @@ angular.module("sampleApp")
                         let date2 = o2.effectiveDateTime;
                         if (date1 && date2) {
                             if (o1.effectiveDateTime > o2.effectiveDateTime) {
-                                return -1
-                            } else {
                                 return 1
+                            } else {
+                                return -1
                             }
                         } else {
                             return 0

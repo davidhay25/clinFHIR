@@ -10,6 +10,59 @@ angular.module("sampleApp")
         let deepValidateMax = 30    //maximum number of resources allowed in deep validation
 
         return {
+
+            getAllergies : function (bundle) {
+                let lst = []
+                for (const entry of bundle.entry) {
+                    let resource = entry.resource
+                    if (resource.resourceType == 'AllergyIntolerance') {
+                        let obj = {}
+                        obj.display = resource.code?.text || resource.code?.coding?.[0].display
+                        lst.push(obj)
+                    }
+                }
+                return lst
+            },
+
+            getMedications : function (bundle) {
+                //create an array of medication display objects.
+                let medResources = ['MedicationStatement','MedicationRequest']
+                let lst = []
+                for (const entry of bundle.entry) {
+                    let resource = entry.resource
+                    if (medResources.indexOf(resource?.resourceType ) > -1){
+                        if (resource.medicationCodeableConcept && resource.medicationCodeableConcept.coding?.length > 0) {
+                            let obj = {}
+                            obj.display = resource.medicationCodeableConcept.text || resource.medicationCodeableConcept.coding[0].display
+                            if (resource.reasonCode) {
+                                obj.reason = []
+                                for (const reason of resource.reasonCode) {
+
+                                    obj.reason.push(reason?.text || reason?.coding?.[0].display)
+                                }
+                            }
+                            if (resource.dosageInstruction) {
+                                obj.dose = []
+                                for (const dose of resource.dosageInstruction) {
+                                    obj.dose.push(dose.text)
+                                }
+                            }
+
+
+                            lst.push(obj)
+
+                        }
+                        if (resource.medicationReference) {
+//todo
+                        }
+                    }
+
+                }
+
+                return lst
+
+            },
+
             makeDocumentGraph : function (composition,bundle) {
                 
             },

@@ -279,8 +279,16 @@ angular.module("sampleApp")
                     })
                 }
 
-                //hash of observations by code
+                //hash of observations by code (It's a hash as there can be multiple values per code
                 $scope.hashObservations = v2ToFhirSvc.makeObservationsHash(oBundle)
+
+                $scope.hasObservations = function () {
+                    return $scope.hashObservations && Object.keys($scope.hashObservations).length > 0;
+                };
+
+                //list of medications. This is a custom object for display - not resources
+                $scope.lstMedications = bundleVisualizerSvc.getMedications(oBundle)
+                $scope.lstAllergies = bundleVisualizerSvc.getAllergies(oBundle)
 
 
                 //create hash by type
@@ -830,6 +838,7 @@ angular.module("sampleApp")
 
             };
 
+            //when an entry/resource is seleced in the left tab of the Bundle entries tab
             $scope.selectBundleEntry = function(entry,entryErrors) {
                 delete $scope.selectedFromSingleGraph;  //does this need to be done?
 
@@ -838,8 +847,9 @@ angular.module("sampleApp")
                 let resourceId = entry.resource.id
 
                 $scope.selectedBundleEntryErrors = []     //an array of errors for this entry
+
                 //only if the bundle has been validated
-                if ($scope.validationResult) {
+                if (resourceId && $scope.validationResult) {
                     for (const iss of $scope.validationResult.issue) {
                         let loc = iss.location[0]
                         const match = loc.match(/\[(\d+)\]/);
@@ -852,9 +862,7 @@ angular.module("sampleApp")
                             }
                         }
                     }
-
                 }
-
 
                 $scope.selectedFromSingleGraph = entry.resource
                 delete $scope.fshText
@@ -862,19 +870,14 @@ angular.module("sampleApp")
                 $scope.selectedBundleEntry = entry
 
 
+                //prettify the html
                 let rawHTML = entry.resource.text.div
                 const prettyHTML = html_beautify(rawHTML, { indent_size: 2, wrap_line_length: 120 });
-
-
                 const codeEl = document.getElementById('htmlCode');
-
-// Reset Highlight.js tracking
+                // Reset Highlight.js tracking
                 delete codeEl.dataset.highlighted;
-
                 document.getElementById('htmlCode').textContent = prettyHTML ;
                 hljs.highlightAll(); // highlight syntax
-
-
 
 
                 $scope.createGraphOneEntry();
@@ -1208,8 +1211,36 @@ angular.module("sampleApp")
             };
 
             $scope.selectObservationCode = function(item) {
+                //item
+                //todo - update graph is valueQuantity set
+                //use display rather than code as the routine that builds the observation list always sets the display (even is there is no code)
+                $scope.selectedObservationDisplay = item.code?.display
 
-                $scope.selectedObservations = item.resources
+                //console.log($scope.hasObservations)
+
+                $scope.selectedObservations = item.resources    //the observations
+                //make the display object for the graph
+
+                let lst = []
+                $scope.selectedObservations.forEach(function(res){
+
+                    if (res.valueQuantity) {
+                        var da = res.effectiveDateTime;
+                        var v = res.valueQuantity.value;
+                        lst.push({x:da,y:v})
+                    }
+
+                });
+
+
+                //- todo - not complete - from observationDisplayCtrl
+                $('#observationsChart').empty();
+                var container = document.getElementById('observationsChart');
+                var dataset = new vis.DataSet(lst);
+                var options = {};
+                var graph2d = new vis.Graph2d(container, dataset, options);
+
+
             }
 
             $scope.selectObservation = function(obs){
@@ -1217,6 +1248,7 @@ angular.module("sampleApp")
             }
 
             $scope.selectResourceFromSection = function(ref){
+
                 $scope.selectedRef = ref        //to highlight under sections
                 $scope.resourceFromSection = $scope.hashByRef[ref]
             }
@@ -1281,9 +1313,15 @@ angular.module("sampleApp")
 
                         const nodeId = obj.nodes[0];  //get the first node
                         const node = vo.graphData.nodes.get(nodeId);
+                        if (! node.entry.resource.id) {
+                            alert("Resource has no id - cannot select it in the Bundle entries tab")
+                        } else {
+                            $scope.selectFromMainGraph(node.entry.resource)
+                        }
 
 
-                        $scope.selectFromMainGraph(node.entry.resource)
+
+                        $scope.$digest();
                     })
 
 
@@ -1308,7 +1346,7 @@ angular.module("sampleApp")
 
 
             //validate each entry
-            $scope.getResourceFromIssue = function (iss) {
+            $scope.getResourceFromIssueDEP = function (iss) {
                 $scope.selectedIssue = iss
 
                 // "Bundle.entry[0].resource.section[5].text.div",
@@ -1359,8 +1397,17 @@ angular.module("sampleApp")
                                     const resource = $scope.fhir.entry[firstIndex].resource
                                     $scope.validationResult.issue.push(iss)
 
-                                    $scope.errorsByResource[resource.id] = $scope.errorsByResource[resource.id] || {resource:resource,issues:[]}
-                                    $scope.errorsByResource[resource.id].issues.push(iss)
+                                    if (resource.id) {
+                                        $scope.errorsByResource[resource.id] = $scope.errorsByResource[resource.id] || {resource:resource,issues:[]}
+                                        $scope.errorsByResource[resource.id].issues.push(iss)
+                                    } else {
+                                        let fakeResource = {resourceType : "No Id"}
+
+                                        $scope.errorsByResource['noId'] = $scope.errorsByResource['noId'] || {resource:fakeResource,issues:[]}
+                                        $scope.errorsByResource['noId'].issues.push(iss)
+                                    }
+
+
                                 }
                             } else {
                                 $scope.errorsByResource["Bundle"] = $scope.errorsByResource["Bundle"] || {resource:resource,issues:[]}

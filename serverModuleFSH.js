@@ -16,12 +16,12 @@ function setup(app) {
                 let json = JSON.stringify(body)
 
                 let config = {logLevel:'silent'}
-                console.time("goFsh");
+
                 gofshClient
                     .fhirToFsh([json],config)
                     .then((result) => {
                         // handle results
-                        console.timeEnd("goFsh");
+
                         result.resourceId = resourceId
                         res.json(result)
                     })

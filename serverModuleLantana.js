@@ -50,7 +50,7 @@ function setup(app) {
         //transform from Json to Xml
 
 
-        console.log(req.body)
+
         let resource = req.body
         if (resource) {
             try {
