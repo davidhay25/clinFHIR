@@ -5,15 +5,17 @@
         <div class="row">
             <div class="col-md-8">
                 <div class="myScroll1">
+
                 <div ng-repeat="item in DR">
 
-                    <div >{{item.DR.effectiveDateTime | date}}</div>
+                    <div><strong>Report date: </strong>{{item.DR.effectiveDateTime | date}}</div>
 
                     <table class="table table-condensed table-bordered">
                         <tr ng-repeat="obs in item.obs">
                             <td style="width: 50%">
                                 <div class="clickable" ng-click="selectDRObs(obs)">
-                                    {{obs.code.coding[0].display}}
+
+                                    {{obs.code.text || obs.code.coding[0].display}}
                                 </div>
                             </td>
                             <td>{{obs.valueCodeableConcept.value}} {{obs.valueCodeableConcept.unit}}

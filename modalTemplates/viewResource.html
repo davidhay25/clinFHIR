@@ -1,0 +1,57 @@
+<div>
+
+<style>
+    .myAlign {
+        position: fixed;
+        left: 230px;
+    }
+</style>
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+                <h3 class="modal-title">View resource</h3>
+            </div>
+
+            <div class="col-md-4">
+                <div class="pull-right">
+                    <button class="btn btn-warning" ng-click="$dismiss()">Close</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-body">
+
+        <uib-tabset>
+
+            <uib-tab heading="Json">
+                <pre>{{params | json}}</pre>
+            </uib-tab>
+
+
+
+        </uib-tabset>
+
+
+
+
+
+
+
+    </div>
+
+    <div class="modal-header">
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+
+
+            </div>
+
+        </div>
+
+
+
+    </div>
+</div>

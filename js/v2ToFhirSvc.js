@@ -41,11 +41,13 @@ angular.module("sampleApp")
                         if (resource.resourceType == "Observation") {
                             let code = "unknown"
                             let cc = {}
+
                             if (resource.code && resource.code.coding) {
                                 code = resource.code.coding[0].code
                                 cc = resource.code.coding[0]
                             } else {
                                 if (resource.code?.text) {
+                                    code = resource.code?.text       //needed for grouping
                                     cc.display = resource.code?.text    //just for display anyway
                                 }
                             }

@@ -1,0 +1,20 @@
+
+<div class="row">
+  <div class="col-md-8">
+    <table class="table table-bordered">
+      <tr><th>Substance</th></tr>
+      <tr ng-repeat="allergy in lstAllergies"
+        ng-click="input.selectedAllergy = allergy">
+        <td>{{allergy.display}}</td>
+
+      </tr>
+    </table>
+  </div>
+
+  <div class="col-md-4">
+    <div class="myScroll1">
+      <pre>{{input.selectedAllergy.resource | json}}</pre>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,31 @@
+
+
+<div class="row">
+  <div class="col-md-8">
+    <table class="table table-bordered">
+      <tr><th>Medication</th><th>Dose</th><th>Reason for taking</th></tr>
+      <tr ng-repeat="med in lstMedications"
+          ng-click="input.selectedMedication = med"
+          style="cursor: pointer">
+        <td>{{med.display}}</td>
+        <td>
+          <div ng-repeat="dose in med.dose">
+            {{dose}}
+          </div>
+        </td>
+        <td>
+          <div ng-repeat="reason in med.reason">
+            {{reason}}
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="col-md-4">
+    <div class="myScroll1">
+      <pre>{{input.selectedMedication.resource | json}}</pre>
+    </div>
+
+  </div>
+</div>
+

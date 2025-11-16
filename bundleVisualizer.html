@@ -194,7 +194,7 @@
     <script src="js/libs/ngStorage.min.js"></script>
     <script src="js/filters.js"></script>
     <script src="js/bundleVisualizerCtrl.js"></script>
-
+    <script src="js/viewResourceCtrl.js"></script>
 
     <title>Bundle Visualizer</title>
 
@@ -876,9 +876,9 @@
 
     </div>
 
-    <div ng-hide = "showSelector" class="row">
+    <div ng-hide = "showSelector">
 
-        <div ng-class="col-md-12">
+        <div>
          <!--   <div ng-class="rightPaneClass">-->
 
             <div ng-show="!fhir || input.showHelp">
@@ -1203,6 +1203,7 @@
 
                                     <div class="col-md-6 col-sm-6">
                                         <div class="myScroll1">
+                                            <em>References from the Composition.section</em>
                                             <div ng-repeat="section in selectedBundleEntry.resource.section">
                                                 <strong>{{section.title}}</strong>
                                                 <div class="list-group">
@@ -1217,7 +1218,9 @@
 
                                     </div>
                                     <div class="col-md-6 col-sm-6">
-                                        <pre>{{resourceFromSection | json}}</pre>
+                                        <div class="myScroll1">
+                                            <pre>{{resourceFromSection | json}}</pre>
+                                        </div>
                                     </div>
 
                                 </uib-tab>
@@ -1560,53 +1563,48 @@
 
                 </uib-tab>
 
-
-                <uib-tab heading="DiagnosticReport" ng-show="DR.length > 0">
-                    <ng-include src = "'includes/bvDiagnosticReport.html'"></ng-include>
-                </uib-tab>
-
-                <uib-tab heading="Encounters" ng-show="encounters.length > 0">
-                    <ng-include src = "'includes/bvEncounters.html'"></ng-include>
-                </uib-tab>
-
-                <uib-tab ng-show="lstMedications.length > 0" heading="Medications">
+                <uib-tab heading="Clinical views">
                     <br/>
-                    <table class="table table-bordered">
-                        <tr><th>Medication</th><th>Dose</th><th>Reason for taking</th></tr>
-                        <tr ng-repeat="med in lstMedications">
-                            <td>{{med.display}}</td>
-                            <td>
-                                <div ng-repeat="dose in med.dose">
-                                    {{dose}}
-                                </div>
-                            </td>
-                            <td>
-                                <div ng-repeat="reason in med.reason">
-                                    {{reason}}
-                                </div>
-                            </td>
-                        </tr>
-                    </table>
+                    <uib-tabset>
 
-                    <em>This display is generated from the MedicationRequest and MedicationStatement resources</em>
+                        <uib-tab ng-show="hasObservations()" heading = "Observations">
+                            <br/>
+                            <ng-include src = "'includes/bvObservations.html'"></ng-include>
+
+
+
+                        </uib-tab>
+
+                        <uib-tab heading="DiagnosticReport" ng-show="DR.length > 0">
+                            <ng-include src = "'includes/bvDiagnosticReport.html'"></ng-include>
+                        </uib-tab>
+
+                        <uib-tab heading="Encounters" ng-show="encounters.length > 0">
+                            <ng-include src = "'includes/bvEncounters.html'"></ng-include>
+                        </uib-tab>
+
+                        <uib-tab ng-show="lstMedications.length > 0" heading="Medications">
+                            <br/>
+
+                            <ng-include src = "'includes/bvMedications.html'"></ng-include>
+
+                            <em>This display is generated from the MedicationRequest and MedicationStatement resources</em>
+                        </uib-tab>
+
+                        <uib-tab ng-show="lstAllergies.length > 0" heading="Allergies">
+                            <br/>
+                            <ng-include src = "'includes/bvAllergies.html'"></ng-include>
+
+                            <em>This display is generated from the MedicationRequest and MedicationStatement resources</em>
+                        </uib-tab>
+
+                        <uib-tab heading="CarePlan view" ng-show="false && CarePlans.length > 0">
+                            <pre>{{cpSummary | json}}</pre>
+                        </uib-tab>
+                    </uib-tabset>
                 </uib-tab>
 
-                <uib-tab ng-show="lstAllergies.length > 0" heading="Allergies">
-                    <br/>
-                    <table class="table table-bordered">
-                        <tr><th>Medication</th></tr>
-                        <tr ng-repeat="all in lstAllergies">
-                            <td>{{all.display}}</td>
 
-                        </tr>
-                    </table>
-
-                    <em>This display is generated from the MedicationRequest and MedicationStatement resources</em>
-                </uib-tab>
-
-                <uib-tab heading="CarePlan view" ng-show="false && CarePlans.length > 0">
-                    <pre>{{cpSummary | json}}</pre>
-                </uib-tab>
 
                 <uib-tab ng-show = "isDocument" heading="Document">
 
@@ -1735,116 +1733,7 @@
 
                 </uib-tab>
 
-                <uib-tab ng-show="hasObservations()" heading = "Observations">
-                    <br/>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <strong>Observation Codes</strong>
-                            <div class="myScroll1">
-                                <div class="list-group">
-                                    <div ng-class="{'list-group-item':true,listItemSelected:v.code.display==selectedObservationDisplay}"
-                                         style="cursor: pointer"
-                                         ng-click="selectObservationCode(hashObservations[k])"
-                                         ng-repeat="(k,v) in hashObservations">
 
-                                        <div class="pull-right badge">
-                                            {{v.resources.length}}
-                                        </div>
-                                        <div>{{v.code.display}}</div>
-                                        <div>{{v.code.code}} </div>
-
-                                    </div>
-                                </div>
-                            </div>
-
-
-
-                        </div>
-                        <div class="col-md-9">
-                            <uib-tabset>
-                                <uib-tab heading="Details">
-                                    <br/>
-                                    <div class="row">
-                                        <div class="col-md-5">
-                                            <strong>{{selectedObservations[0].code.coding[0].code}} {{selectedObservations[0].code.coding[0].display}}</strong>
-                                            <table class="table-bordered table">
-                                                <tr>
-                                                    <th>Date</th><th>Age</th><th>Result / Note</th><th>Reference Range</th>
-                                                </tr>
-                                                <tr ng-repeat="obs in selectedObservations"
-                                                    ng-click="selectObservation(obs)">
-                                                    <td>
-                                                        {{moment(obs.effectiveDateTime).format('YYYY-MM-DD')}}
-
-
-
-                                                        {{obs.effectivePeriod.start}} {{obs.effectivePeriod.end}}
-                                                    </td>
-                                                    <td>{{obs.effectiveDateTime | getAgeSeconds}}</td>
-                                                    <td>{{obs.valueString}}
-
-                                                        <div ng-repeat="coding in obs.valueCodeableConcept.coding">
-                                                            {{coding.system}} {{coding.code}}
-                                                            {{coding.display}}
-                                                        </div>
-                                                        {{obs.valueCodeableConcept.text}}
-
-                                                        {{obs.valueQuantity.value}} {{obs.valueQuantity.unit}}
-
-                                                        <div ng-repeat="note in obs.note">{{note.text}}</div>
-
-
-                                                    </td>
-                                                    <td>
-                                                        <div ng-repeat = "rr in obs.referenceRange">
-                                                            {{rr.text}}
-                                                        </div>
-
-                                                    </td>
-                                                </tr>
-                                            </table>
-
-                                        </div>
-                                        <div class="col-md-7">
-                                            <strong>Selected Observation</strong>
-                                            <div class="pull-right">
-                                                <button class="btn btn-link"
-                                                        ng-click="selectFromMainGraph(selectedObservation)">Details</button>
-                                            </div>
-                                            <div class="clearfix"></div>
-                                            <pre>{{selectedObservation | json}}</pre>
-                                        </div>
-                                    </div>
-
-                                </uib-tab>
-                                <uib-tab heading="Graph">
-                                    <div style="width: 100%; height: 300px; border: 1px solid lightgray;"
-                                         id="observationsChart"></div>
-                                </uib-tab>
-                            </uib-tabset>
-                        </div>
-
-
-
-
-                    </div>
-
-                </uib-tab>
-
-
-
-                <uib-tab ng-show = "false" heading="Table">
-
-                    <div class="row" style="margin-top: 8px"  ng-repeat = "entry in fhir.entry">
-                        <div class="col-md-3">
-
-                            <span class = "resourceType"> {{entry.resource.resourceType}}</span>
-                        </div>
-
-                    </div>
-
-
-                </uib-tab>
 
 
                 <uib-tab heading="Json">

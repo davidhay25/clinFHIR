@@ -1,0 +1,95 @@
+<div class="row">
+  <div class="col-md-3">
+    <strong>Observation Codes</strong>
+    <div class="myScroll1">
+      <div class="list-group">
+        <div ng-class="{'list-group-item':true,listItemSelected:v.code.display==selectedObservationDisplay}"
+             style="cursor: pointer"
+             ng-click="selectObservationCode(hashObservations[k])"
+             ng-repeat="(k,v) in hashObservations">
+
+          <div class="pull-right badge">
+            {{v.resources.length}}
+          </div>
+          <div>{{v.code.display}}</div>
+          <div>{{v.code.code}} </div>
+
+        </div>
+      </div>
+    </div>
+
+
+
+  </div>
+  <div class="col-md-9">
+    <uib-tabset>
+      <uib-tab heading="Details">
+        <br/>
+        <div class="row">
+          <div class="col-md-7">
+            <strong>{{selectedObservations[0].code.coding[0].code}} {{selectedObservations[0].code.coding[0].display}}</strong>
+            <table class="table-bordered table">
+              <tr>
+                <th>Date</th><th>Age</th><th>Result / Note</th><th>Reference Range</th>
+              </tr>
+              <tr ng-repeat="obs in selectedObservations"
+                  style="cursor: pointer"
+                  ng-click="selectObservation(obs)">
+                <td>
+                  {{moment(obs.effectiveDateTime).format('YYYY-MM-DD')}}
+
+
+
+                  {{obs.effectivePeriod.start}} {{obs.effectivePeriod.end}}
+                </td>
+                <td>{{obs.effectiveDateTime | getAgeSeconds}}</td>
+                <td>{{obs.valueString}}
+
+                  <div ng-repeat="coding in obs.valueCodeableConcept.coding">
+                    {{coding.system}} {{coding.code}}
+                    {{coding.display}}
+                  </div>
+                  {{obs.valueCodeableConcept.text}}
+
+                  {{obs.valueQuantity.value}} {{obs.valueQuantity.unit}}
+
+                  <div ng-repeat="note in obs.note">{{note.text}}</div>
+
+
+                </td>
+                <td>
+                  <div ng-repeat = "rr in obs.referenceRange">
+                    {{rr.text}}
+                  </div>
+
+                </td>
+              </tr>
+            </table>
+
+          </div>
+          <div class="col-md-5">
+            <strong>Selected Observation</strong>
+            <div class="pull-right">
+              <button class="btn btn-link"
+                      ng-click="selectFromMainGraph(selectedObservation)">Details</button>
+            </div>
+            <div class="clearfix"></div>
+            <div class="myScroll1">
+              <pre>{{selectedObservation | json}}</pre>
+            </div>
+
+          </div>
+        </div>
+
+      </uib-tab>
+      <uib-tab heading="Graph">
+        <div style="width: 100%; height: 300px; border: 1px solid lightgray;"
+             id="observationsChart"></div>
+      </uib-tab>
+    </uib-tabset>
+  </div>
+
+
+
+
+</div>

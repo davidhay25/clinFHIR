@@ -27,6 +27,7 @@ angular.module("sampleApp")
             $scope.selectors.push({display:"Stored Library Bundles",code:'stored'})
             $scope.input.selectedSelector = $scope.selectors[0]
 
+            //$scope.input.selectedMedication = {}
 
             //used for binary display
             $scope.base64Decode = function (b64) {
@@ -89,6 +90,20 @@ angular.module("sampleApp")
                 )
             }
             getListAllBundles()
+
+            $scope.viewResource = function (resource) {
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/viewResource.html',
+                    size: 'lg',
+                    controller: 'viewResourceCtrl',
+                    resolve : {
+                        resource : function(){
+                            return resource
+                        }
+                    }
+                })
+
+            }
 
             $scope.addBundleToLibrary = function () {
                 $uibModal.open({
@@ -211,11 +226,18 @@ angular.module("sampleApp")
                 $scope.encounters = []
                 delete $scope.selectedDeepValidationEntry
                 delete $scope.deepValidationResult
+                delete $scope.resourceFromSection
+
+                delete $scope.selectedRef
+                delete $scope.resourceFromSection
 
                 $scope.showSelector = false     //hide the selector
 
                 delete $scope.serverRoot;
                 $scope.fhir = oBundle;
+
+                //set up the hashes used when finding a resource from a reference.
+                bundleVisualizerSvc.initResourceLookup(oBundle)
 
                 //now that we have a local hapi server this is much faster
                 $scope.performValidation()
@@ -262,11 +284,6 @@ angular.module("sampleApp")
                         })
                     }
 
-                    /*
-                                        if ($scope.CarePlans.length > 0) {
-                                            $scope.cpSummary = bundleVisualizerSvc.makeCarePlanSummary($scope.CarePlans,$scope.hashByRef)
-                                        }
-                    */
                     Object.keys($scope.hashByName).forEach(function (k,v) {
                         let ar = $scope.hashByName[k]
                         ar.sort(function(a,b){
@@ -843,6 +860,8 @@ angular.module("sampleApp")
                 delete $scope.selectedFromSingleGraph;  //does this need to be done?
 
                 delete $scope.selectedFshFromSingleGraph
+                delete $scope.resourceFromSection
+                delete $scope.selectedRef
 
                 let resourceId = entry.resource.id
 
@@ -871,7 +890,7 @@ angular.module("sampleApp")
 
 
                 //prettify the html
-                let rawHTML = entry.resource.text.div
+                let rawHTML = entry.resource.text?.div
                 const prettyHTML = html_beautify(rawHTML, { indent_size: 2, wrap_line_length: 120 });
                 const codeEl = document.getElementById('htmlCode');
                 // Reset Highlight.js tracking
@@ -1214,6 +1233,9 @@ angular.module("sampleApp")
                 //item
                 //todo - update graph is valueQuantity set
                 //use display rather than code as the routine that builds the observation list always sets the display (even is there is no code)
+
+                delete $scope.selectedObservation
+
                 $scope.selectedObservationDisplay = item.code?.display
 
                 //console.log($scope.hasObservations)
@@ -1250,7 +1272,16 @@ angular.module("sampleApp")
             $scope.selectResourceFromSection = function(ref){
 
                 $scope.selectedRef = ref        //to highlight under sections
-                $scope.resourceFromSection = $scope.hashByRef[ref]
+
+                $scope.resourceFromSection = bundleVisualizerSvc.referenceLookup(ref)
+
+                //$scope.resourceFromSection = $scope.hashByRef[ref]
+
+
+
+                if (! $scope.resourceFromSection) {
+                    $scope.resourceFromSection = "Unable to locate the resource. "
+                }
             }
 
 

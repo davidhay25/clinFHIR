@@ -9,6 +9,9 @@ angular.module("sampleApp")
 
         let deepValidateMax = 30    //maximum number of resources allowed in deep validation
 
+            gHashResourcesByTypeAndId = {}   //a hash of nodes by {type}/{id}
+            gHashResourcesByFullUrl = {}   //a hash of nodes by {id}
+
         return {
 
             getAllergies : function (bundle) {
@@ -17,6 +20,7 @@ angular.module("sampleApp")
                     let resource = entry.resource
                     if (resource.resourceType == 'AllergyIntolerance') {
                         let obj = {}
+                        obj.resource = resource
                         obj.display = resource.code?.text || resource.code?.coding?.[0].display
                         lst.push(obj)
                     }
@@ -33,6 +37,7 @@ angular.module("sampleApp")
                     if (medResources.indexOf(resource?.resourceType ) > -1){
                         if (resource.medicationCodeableConcept && resource.medicationCodeableConcept.coding?.length > 0) {
                             let obj = {}
+                            obj.resource = resource
                             obj.display = resource.medicationCodeableConcept.text || resource.medicationCodeableConcept.coding[0].display
                             if (resource.reasonCode) {
                                 obj.reason = []
@@ -41,10 +46,19 @@ angular.module("sampleApp")
                                     obj.reason.push(reason?.text || reason?.coding?.[0].display)
                                 }
                             }
+                            obj.dose = []
+
+                            //in medication request
                             if (resource.dosageInstruction) {
-                                obj.dose = []
                                 for (const dose of resource.dosageInstruction) {
-                                    obj.dose.push(dose.text)
+                                    obj.dose.push(`${dose.text || ""} ${dose.patientInstruction || ""}` )
+                                }
+                            }
+
+                            //in medication statement
+                            if (resource.dosage) {
+                                for (const dose of resource.dosage) {
+                                    obj.dose.push(`${dose.text || ""} ${dose.patientInstruction || ""}` )
                                 }
                             }
 
@@ -65,6 +79,31 @@ angular.module("sampleApp")
 
             makeDocumentGraph : function (composition,bundle) {
                 
+            },
+            initResourceLookup(bundle) {
+                //initialize the hashs needed for a reference lookup - referenceLookup
+                //called from processBundle
+                gHashResourcesByTypeAndId = {}   //a hash of nodes by {type}/{id}
+                gHashResourcesByFullUrl = {}   //a hash of nodes by {id}
+                bundle.entry.forEach(function(entry,inx) {
+                    let resource = entry.resource
+                    if (entry.fullUrl) {
+                        gHashResourcesByFullUrl[entry.fullUrl] = resource
+                    }
+                    gHashResourcesByTypeAndId[`${resource.resourceType}/${resource.id}`] = resource  //hash for {type}/{id} lookup
+
+                })
+
+            },
+            referenceLookup : function (reference) {
+                //find a resource from a reference, assume initResourceLookup() has been called for this bundle
+                let resource = gHashResourcesByTypeAndId[reference]
+                if (!resource) {
+                    //try a full url - eg http://host/type/id - http://hapi.fhir.org/baseR4/Patient/IPS-examples-Patient-01
+                    resource = gHashResourcesByFullUrl[reference]
+                }
+                return resource
+
             },
             makeDocument : function (bundle,$sce) {
                 let hashResourcesByTypeAndId = {}   //a hash of nodes by {type}/{id}
