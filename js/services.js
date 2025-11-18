@@ -853,7 +853,7 @@ angular.module("sampleApp").service('supportSvc', function(
                 this.getAllResourcesFollowingPaging(url,null,null,dataServer.apiKey).then(
                     function(arrayOfResource){
 
-                        console.log(arrayOfResource)
+                        console.log(arrayOfResource)        //an array of resources
 
                         if (arrayOfResource) {
                             arrayOfResource.forEach(function(resource){        //this is a bundle

@@ -3073,13 +3073,7 @@ console.log(summary);
                     case "AllergyIntolerance" :
 
                         return getCCSummary(resource.code);
-                        /*
-                        if (fhirVersion == 3) {
-                            return getCCSummary(resource.code);
-                         } else {
-                            return getCCSummary(resource.substance);
-                        }
-*/
+
                         break;
                     case "Practitioner" :
                         if (resource.name) {
@@ -3100,14 +3094,13 @@ console.log(summary);
                         break;
                     case "Patient" :
                         if (resource.name) {
-                            var smry = getHumanNameSummary(resource.name[0]);
+                            let smry = getHumanNameSummary(resource.name[0]);
                             if (resource.gender) {
                                 smry += " "+ resource.gender;
                             }
                             if (resource.birthDate){
                                 smry += " "+ resource.birthDate;
                             }
-
 
                             return smry;   //only the forst name
                         } else {

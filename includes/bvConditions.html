@@ -1,0 +1,23 @@
+
+<div class="row">
+  <div class="col-md-8">
+    <table class="table table-bordered">
+      <tr><th>Condition</th><th>Clinical status</th><th>Verification status</th></tr>
+      <tr ng-repeat="condition in lstConditions"
+          style="cursor: pointer"
+        ng-click="input.selectedCondition = condition">
+        <td>{{condition.display}}</td>
+        <td>{{condition.clinicalStatus}}</td>
+        <td>{{condition.verificationStatus}}</td>
+
+      </tr>
+    </table>
+  </div>
+
+  <div class="col-md-4">
+    <div class="myScroll1">
+      <pre>{{input.selectedCondition.resource | json}}</pre>
+    </div>
+
+  </div>
+</div>

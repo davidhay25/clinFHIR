@@ -25,6 +25,19 @@
 
 
     <style>
+
+        body {
+            background: #fcfcfc;
+        }
+
+        .list-group-itemXX {
+            background-color: white;
+        }
+
+        table {
+            background: white;
+        }
+
         #mynetwork {
             width: 100%;
             height: 600px;
@@ -177,30 +190,29 @@
 
         <div class="container-fluid">
             <div class="col-md-2 col-sm-2">
-                <a class="navbar-brand" href="#"
-                   uib-popover-html="displayServers"
-                   popover-trigger="'mouseenter'"
-                   popover-placement="right">
-                    Patient Viewer
-                </a>
+                <div>
+                    <a class="navbar-brand" href="#"
+                       uib-popover-html="displayServers"
+                       popover-trigger="'mouseenter'"
+                       popover-placement="right">
+                        Patient Viewer
+                    </a>
+                </div>
+
+
+
 
 
             </div>
 
-            <div class="col-md-3 col-sm-3">
+            <div class="col-md-4">
                 <div class="navbar-text">
-                    <i class="glyphicon glyphicon-edit clickable" ng-click="selectServer()"> </i>
+                    Server: <i class="glyphicon glyphicon-edit clickable" ng-click="selectServer()"> </i>
                      {{appConfigSvc.getCurrentDataServer().url}}
                 </div>
             </div>
 
-            <div class="col-md-2 col-sm-2">
 
-                <div class="navbar-text" ng-show="currentPatient">
-                    {{ResourceUtilsSvc.getOneLineSummaryOfResource(currentPatient)}} ({{currentPatient.id}})
-
-                </div>
-            </div>
 
             <div class="col-md-1 col-sm-1">
                 <div class="pull-right navbar-form" ng-show="waiting">
@@ -209,23 +221,14 @@
             </div>
 
             <div class="col-md-1 col-sm-1">
-<!--
-                <form ng-show = "appConfigSvc.getCurrentDataServer().smart && ! oauthAccessToken" class="navbar-form navbar-right">
-                    <button class="btn btn-danger" ng-click="smartLogin()">Logon</button>
-                </form>
-
-                <div class="navbar-text " ng-show="currentPatient && !loadedFromBookmark" ng-click="generateShortCut()">
-                    <span class="clickable">Share</span> </div>
-                -->
-
-
                 <form ng-hide = "loadedFromBookmark" class="navbar-form navbar-right">
-
                     <button class="btn btn-primary pull-right" ng-click="findPatient()">Select Patient</button>
+                </form>
+            </div>
 
-                    <!--
-                    <button class="btn btn-primary pull-right" style="margin-right: 8px" ng-click="selectScenario()">Select Scenario</button>
--->
+            <div class="col-md-1 col-sm-1">
+                <form ng-hide = "loadedFromBookmark" class="navbar-form navbar-right">
+                    <button class="btn btn-primary pull-right" ng-click="frontPage()">Front page</button>
                 </form>
             </div>
 
@@ -244,11 +247,7 @@
 
     </nav>
 
-    <div >
-
-
-
-    </div>
+    <div ng-show="currentPatient" class="banner">{{ResourceUtilsSvc.getOneLineSummaryOfResource(currentPatient)}} ({{currentPatient.id}})</div>
 
 
     <div ng-show="appConfigSvc.getCurrentPatient()">
@@ -257,26 +256,59 @@
 
     <div ng-hide="appConfigSvc.getCurrentPatient() || loadedFromBookmark">
 
-        <p>
-            Click the 'Select Patient' button at the upper right to select the patient. If you want to add a new patient, then click the 'Select Patient' button, and in the modal dialog
-            that appears, there's a link to add a new patient.
-        </p>
-<!--
-        <p>There are 2 ways to select a patient to view</p>
+        <div style="font-family: Open Sans, sans-serif;">
+            The Patient viewer application It is targeted at the Clinician or Information Analyst, and will display the resources from a patient record in a
+            number of perspectives. These include:
+            <ul>
+                <li>The resource explorer to examine individual resources</li>
+                <li>The resource references graph that shows connections between resources</li>
+                <li>The terminology explorer that displays coded data</li>
+                <li>Numeric Observations - tables and graphs</li>
+                <li>The encounter timeline that shows resources by encounter</li>
+                <li>A <a href="https://hl7.org/fhirpath/" target="_blank">FhirPath</a> tab for querying within individual resources or the bundle of all resources</li>
 
-        <ul>
-            <li>Click the 'Select Patient' button at the upper right. If you want to add a new patient, then click the 'Select Patient' button, and in the modal dialog
-                that appears, there's a link to add a new patient.</li>
-            <li>Click the 'Select scenario' button. This will display a list of scenarios that have been created that you can view.
-                This still selects the patient for whom the scenario was created, and will display all their resources - not just those in the scenario</li>
-        </ul>
--->
-<!--
-        <p>Please select a patient using the 'Select Patient' button at the upper right</p>
-        <p>If you want to add a new patient, then click the 'Select Patient' button, and in the modal dialog
-        that appears, there's a link to add a new patient.</p>
+            </ul>
+        </div>
 
-        -->
+
+
+        <div style="font-family: Open Sans, sans-serif;">
+            To select a Patient to view, first select the server where the data is stored using the
+            link at the top left (Labelled 'Server'). <em>https://hapi.fhir.org/baseR4/</em> is a good choice
+            if you don't have a specific server in mind.
+            <br/>
+            The <i class="glyphicon glyphicon-edit clickable" ng-click="selectServer()"> </i> icon
+            will display a dialog where you can select another one, or enter the details of some other Server.
+
+            <br/><br/>
+
+            Next, click the 'Select Patient' button at the top right to select the patient to view from that server. You can choose
+            the patient by their name, identifier or Id - or you can create a new one directly. Be aware that it might
+            take a few seconds for a search to be performed.
+
+            <br/><br/>
+            As an alternative, you can select a sample patient from the list below. This is often the easiest if
+            you don't have a specific server/patient in mind (and it's significantly faster to load!).
+            <br/><br/>
+            <strong>Some caveats:</strong>
+            <ul>
+                <li>You shouldn't use this for real patient data - there's no security</li>
+                <li>It's a training tool and will be really slow with large datasets (> 100 resources or so)</li>
+            </ul>
+        </div>
+        <br/>
+        <h4>Sample patients</h4>
+        <div class="myScroll1">
+            <table class="table table-bordered">
+                <tr><th>Name</th><th>Description</th><th>Author</th><th></th></tr>
+                <tr ng-repeat="bundle in bundlesFromLibrary">
+                    <td>{{bundle.name}}</td>
+                    <td>{{bundle.description}}</td>
+                    <td>{{bundle.author}}</td>
+                    <td><button class="btn-primary btn" ng-click="loadFromLibrary(bundle)">Load</button></td>
+                </tr>
+            </table>
+        </div>
 
 
     </div>

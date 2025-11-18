@@ -1,0 +1,169 @@
+<uib-tabset>
+  <uib-tab heading="Rendering">
+    <div class="alert alert-info">
+      This tab shows the content of the .text element for the resources in the document
+    </div>
+    <strong>Subject</strong>
+    <p  style="margin-left: 10px" ng-bind-html="to_trusted(document.subject.text.div)"></p>
+
+    <hr style="border-top: 1px solid grey; margin: 1px"/>
+    <strong>Document metadata</strong>
+    <div class="narrative">
+      <p  style="margin-left: 10px" ng-bind-html="to_trusted(document.composition.text.div)"></p>
+    </div>
+
+
+    <strong>Sections</strong>
+
+    <div ng-repeat = "section in document.composition.section">
+      <hr style="border-top: 1px solid grey; margin: 1px"/>
+      <strong>{{section.title}}</strong>
+
+      <div class="row">
+
+        <div class="col-md-12">
+
+          <div class=" scroll-wrapper">
+            <p style="margin-left: 10px" ng-bind-html="to_trusted(section.text.div)"></p>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div><em>Derived from the Composition and Subject text elements as per the spec</em></div>
+
+  </uib-tab>
+  <uib-tab ng-show = "false" heading="Rendering and resources">
+    <strong>Subject</strong>
+    <p style="margin-left: 10px" ng-bind-html="to_trusted(document.subject.text.div)"></p>
+
+    <strong>Document metadata</strong>
+    <p style="margin-left: 10px" ng-bind-html="to_trusted(document.composition.text.div)"></p>
+
+    <div ng-repeat = "section in document.composition.section">
+      <hr style="border-top: 1px solid grey; margin: 1px"/>
+      <strong>{{section.title}}</strong>
+
+      <div class="row">
+
+        <div class="col-md-9">
+          <p style="margin-left: 10px" ng-bind-html="to_trusted(section.text.div)"></p>
+          <!-- <p style="margin-left: 10px" ng-bind-html="section.text.div"></p> -->
+
+        </div>
+        <div class="col-md-3">
+
+          <div ng-repeat = "resource in section.realResources"
+
+               popover-append-to-body="true"
+               uib-popover-html="resource.trustedPopover"
+               popover-placement="left"
+               popover-class="custom-popover-big"
+               popover-trigger="'focus'"
+               tabindex="0"
+               style="cursor: pointer"
+               ng-clickX="selectResourceFromRender(resource)">
+            <div class="rounded-box">
+              {{resource.display}}
+
+              <em><p ng-bind-html="to_trusted(resource.resource.text.div)"></p></em>
+            </div>
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+
+    <div><em>Derived from the Composition and Subject text elements as per the spec</em></div>
+
+  </uib-tab>
+  <uib-tab heading="Sections">
+    <div class="row">
+      <div class="col-md-3">
+        <div class="list-group">
+          <div ng-class="{'list-group-item':true}"
+               ng-repeat = "section in document.composition.section"
+               style="cursor: pointer"
+               ng-click="selectSection(section)">
+            {{section.title}}
+            <div class="pull-right badge">{{section.entry.length}}</div>
+            <div>{{section.code.coding[0].system}} {{section.code.coding[0].code}}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-9">
+        <uib-tabset>
+          <uib-tab heading="Narrative rendered">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="narrative myScroll1">
+                  <p ng-bind-html="to_trusted(selectedSection.text.div)"></p>
+                </div>
+
+              </div>
+              <!--
+              <div class="col-md-6">
+                <pre><code id="sectionNarrative" class="language-html"></code></pre>
+              </div>
+              -->
+            </div>
+
+
+
+          </uib-tab>
+          <uib-tab heading="Narrative HTML">
+            <div class="myScroll1">
+              <pre><code id="sectionNarrative" class="language-html"></code></pre>
+            </div>
+
+          </uib-tab>
+
+          <uib-tab heading="Resources">
+            <div class="row">
+              <div class="col-md-6">
+                <strong>Reference to resource</strong>
+                <div class="myScroll1">
+                  <table>
+                    <div class="list-group">
+                      <div class="list-group-item"
+                           style="cursor: pointer"
+                           ng-repeat = "entry in selectedSection.entry">
+                        <div ng-click="selectEntryFromSection(entry) ">{{entry.reference}}</div>
+                      </div>
+                    </div>
+                  </table>
+                </div>
+
+              </div>
+              <div class="col-md-6">
+                <div class="myScroll1">
+                <pre>{{resourceFromSection | json}}</pre>
+                </div>
+              </div>
+            </div>
+
+          </uib-tab>
+          <uib-tab heading="Section Json">
+            <div class="myScroll1">
+            <pre>{{selectedSection | json}}</pre>
+            </div>
+          </uib-tab>
+
+        </uib-tabset>
+
+
+
+
+
+
+
+      </div>
+
+    </div>
+
+
+  </uib-tab>
+</uib-tabset>

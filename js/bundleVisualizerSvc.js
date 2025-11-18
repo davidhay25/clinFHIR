@@ -5,7 +5,7 @@ angular.module("sampleApp")
     //also holds the current patient and all their resources...
     //note that the current profile is maintained by resourceCreatorSvc
 
-    .service('bundleVisualizerSvc', function($http,$q) {
+    .service('bundleVisualizerSvc', function($http,$q,$filter) {
 
         let deepValidateMax = 30    //maximum number of resources allowed in deep validation
 
@@ -13,6 +13,49 @@ angular.module("sampleApp")
             gHashResourcesByFullUrl = {}   //a hash of nodes by {id}
 
         return {
+
+            getProcedures : function (bundle) {
+                let lst = []
+                for (const entry of bundle.entry) {
+                    let resource = entry.resource
+                    if (resource.resourceType == 'Procedure') {
+                        let obj = {}
+                        obj.resource = resource
+                        obj.display = resource.code?.text || resource.code?.coding?.[0].display
+                        obj.performed = $filter('date')(resource.performedDateTime)
+                        if (resource.performedPeriod) {
+                            obj.performed = `${$filter('date')(resource.performedPeriod.start)} - 
+                             ${$filter('date')(resource.performedPeriod.end)}`
+                        }
+                        obj.reason = []
+                        resource.reasonCode?.forEach(function (reason) {
+                            obj.reason.push(reason.text || reason.code?.coding?.[0].display)
+                        })
+                        resource.reasonReference?.forEach(function (reason) {
+                            obj.reason.push(reason.display)
+                        })
+                        lst.push(obj)
+                    }
+                }
+                return lst
+            },
+
+
+            getConditions : function (bundle) {
+                let lst = []
+                for (const entry of bundle.entry) {
+                    let resource = entry.resource
+                    if (resource.resourceType == 'Condition') {
+                        let obj = {}
+                        obj.resource = resource
+                        obj.display = resource.code?.text || resource.code?.coding?.[0].display
+                        obj.clinicalStatus = resource.clinicalStatus?.coding?.[0].code
+                        obj.verificationStatus = resource.verificationStatus?.coding?.[0].code
+                        lst.push(obj)
+                    }
+                }
+                return lst
+            },
 
             getAllergies : function (bundle) {
                 let lst = []
@@ -143,7 +186,7 @@ angular.module("sampleApp")
                 if (document.composition.subject) {
                     document.subject = findResource(document.composition.subject.reference)
                 }
-
+/* - not using 'realResources' any more - was in bvDocument "Rendering and resources
                 //now create the sections
                 for (const section of document.composition.section) {
                     section.realResources = []
@@ -163,7 +206,7 @@ angular.module("sampleApp")
                         }
                     }
                 }
-
+*/
                 return document
 
 

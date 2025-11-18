@@ -20,6 +20,33 @@ angular.module("sampleApp")
 
             console.log(appConfigSvc.getCurrentDataServer())
 
+            //get any sample bundles saved in the
+            $http.get(`bv/getAllBundles?showInPV=true`).then(
+                function (data) {
+                    $scope.bundlesFromLibrary = data.data
+                    console.log(data.data)
+
+                }, function (err) {
+                    console.log(err)
+                }
+            )
+            $scope.loadFromLibrary = function (item) {
+                $http.get(`bv/getBundle/${item.id}`).then(
+                    function (data) {
+                        //$scope.bundleDisplayName = item.name
+                        console.log(data.data)
+                        processBundle(data.data.bundle)
+                    }, function () {
+                        alert("Sorry, I cannot retrieve that Bundle")
+                    }
+                )
+            }
+
+            $scope.frontPage = function () {
+                delete $scope.currentPatient
+                appConfigSvc.removeCurrentPatient()
+            }
+
 
             //select server
             $scope.selectServer = function(){
@@ -139,17 +166,6 @@ angular.module("sampleApp")
             //$scope.isSMART = appConfigSvc.getCurrentDataServer().smart;     //if true, this server requires SMART
             //$scope.oauthAccessToken;    //if SMART, this will be the access token...
 
-            //---------- SMART stuff ------ move to a common service eventually..
-            $scope.smartLoginDEP = function() {
-                $http.get('smartAuth/'+appConfigSvc.getCurrentDataServer().name).then(
-                    function(data) {
-                        $window.location.href = data.data.authUrl;
-                    },
-                    function(data) {
-                        alert(data.msg)
-                    }
-                );
-            };
 
 
             $scope.input.showType = {};
@@ -641,13 +657,72 @@ angular.module("sampleApp")
                         console.log(resource)
                         if (resource) {
                             loadPatientById(resource);
-
-
                         }
                     }
                 )
             };
 
+
+            //18Nov2015 - use a server proxy rather than direct ajax calls
+
+
+
+            //18Nov2015 with a bundle, create all the other objects
+            function processBundle(bundle) {
+                console.log(bundle)
+                let resourceHash = {};      //key is type, content is 'pseudo bundle' - has entry attribute
+                let allResources = []
+                let patient;
+                for (let entry of bundle.entry || []) {
+                    let resource = entry.resource
+                    allResources.push(resource)
+                    let type = resource.resourceType
+                    if (type == 'Patient') {
+                        patient = resource
+                    }
+
+                    resourceHash[type] = resourceHash[type] || {entry:[],total:0}
+                    resourceHash[type].entry.push({resource:resource});
+                    resourceHash[type].total ++
+
+                }
+
+                //sort medications for Marks course...
+                let meds = resourceHash['MedicationStatement']
+                if (meds) {
+                    meds.entry.sort(function(m1,m2){
+                        let m1Name = getMedName(m1);
+                        let m2Name = getMedName(m2);
+
+                        console.log(m1Name,m2Name)
+                        if (m1Name > m2Name) {
+                            return 1
+                        } else {
+                            return -1
+                        }
+                    })
+                }
+
+
+                //$scope.terminologySummary = terminologySvc.makeTerminologySummary(data)
+                let vo = terminologySvc.makeTerminologySummary(resourceHash)
+
+                $scope.lstCodedResources = vo.codedResources;
+                $scope.input.arAllSystems = vo.arAllSystems       //all systems found
+
+                renderPatientDetails(resourceHash,$scope.patientShown);     //sets $scope.allResources
+                $scope.$broadcast('patientObservations',resourceHash['Observation']);//used to draw the observation charts...
+
+                $scope.currentPatient = patient
+                appConfigSvc.setCurrentPatient(patient);
+
+                function getMedName(m) {
+
+                    return ResourceUtilsSvc.getOneLineSummaryOfResource(m.resource);
+
+                }
+
+            }
 
             function loadPatientById(resource) {
                 $scope.currentPatient = resource;
@@ -925,9 +1000,13 @@ angular.module("sampleApp")
 
                 $scope.graph[containerId] = network;
 
-                network.on("click", function (obj) {
+                network.on("doubleClick", function (obj) {
 
+                    var nodeId = obj.nodes[0];  //get the first node
+                    var node = graphData.nodes.get(nodeId);
+                    $scope.resourceSelected({resource:node.resource});
 
+/*
                     var modalOptions = {
                         closeButtonText: 'No, I made a mistake',
                         actionButtonText: 'Yes, load it',
@@ -941,6 +1020,7 @@ angular.module("sampleApp")
                         $scope.resourceSelected({resource:node.resource});
 
                     })
+                    */
 
                 });
             }

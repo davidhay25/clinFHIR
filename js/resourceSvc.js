@@ -7,9 +7,17 @@ angular.module("sampleApp").service('resourceSvc', function() {
 
         //look for outgoing references
         var checkLinks = function(list,object,rootPath) {
+
+            //console.log(rootPath)
             angular.forEach(object,function(value,key){
 
-                //console.log(rootPath)
+
+                //console.log(object,value,key)
+                //if iterating over an array, 'key' is the numberic index. We want the path..
+                if (Number.isFinite(key)) {
+                    let ar = rootPath.split('.')
+                    key = ar[ar.length-1]
+                }
 
                 if (value && value.reference) {
                     //console.log('->reference',value.reference)
@@ -17,19 +25,17 @@ angular.module("sampleApp").service('resourceSvc', function() {
                     var reference = value.reference;    //the reference - eg Condition/100
                     //console.log(value,key)
 
-
                     //a bit of a hack - auditEvent has a property called 'reference'
                     if (reference.reference) {
                         reference = reference.reference;
                     }
-
-
 
                     outwardLinks.push({reference:reference,element: rootPath + " " +key,key:key})
 
                 } else {
                     //going to assume that a reference will never have children...
                     if (angular.isObject(value)) {
+
                         checkLinks(list,value,rootPath+'.'+key);
                     }
                 }
@@ -50,6 +56,7 @@ angular.module("sampleApp").service('resourceSvc', function() {
         //console.log(id);
 
         inwardLinks = [];
+        let lastKey
 
 
         //a recursive function
@@ -61,6 +68,14 @@ angular.module("sampleApp").service('resourceSvc', function() {
         var checkInLinks = function (list, object, resourceBeingChecked) {
             angular.forEach(object, function (value, key) {
 
+                let eleName = key
+                if (Number.isFinite(key)) {
+                    // if a number then we're iterating over an array. The element name will be the previous one
+
+                    eleName = lastKey
+                }
+
+
                 //assume that any value that has a reference property is a resource refernece. Should really
                 //recurse down 'object' types
                 if (value.reference) {
@@ -69,11 +84,12 @@ angular.module("sampleApp").service('resourceSvc', function() {
 
                         //console.log(key,resourceBeingChecked)
 
-                        list.push({name: key, resource: resourceBeingChecked});
+                        list.push({name: eleName, resource: resourceBeingChecked});
                     }
 
                 }
 
+                lastKey = key
                 if (angular.isObject(value)) {
                     checkInLinks(list, value, resourceBeingChecked);
                 }

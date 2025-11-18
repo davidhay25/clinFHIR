@@ -1,0 +1,28 @@
+
+<div class="row">
+  <div class="col-md-8">
+    <table class="table table-bordered">
+      <tr><th>Procedure</th><th>Performed</th><th>Reason</th></tr>
+      <tr ng-repeat="procedure in lstProcedures"
+          style="cursor: pointer"
+        ng-click="input.selectedProcedure = procedure">
+        <td>{{procedure.display}}</td>
+        <td>{{procedure.performed}}</td>
+        <td>
+          <div ng-repeat="reason in procedure.reason">
+            {{reason}}
+          </div>
+
+        </td>
+
+      </tr>
+    </table>
+  </div>
+
+  <div class="col-md-4">
+    <div class="myScroll1">
+      <pre>{{input.selectedProcedure.resource | json}}</pre>
+    </div>
+
+  </div>
+</div>

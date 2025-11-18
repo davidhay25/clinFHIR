@@ -28,20 +28,20 @@
                 </div>
 
 
-                <span class="clickable" ng-click="copyToClipboard(downloadBundleText)">Copy to clipboard</span>
+                <span class="clickable" ng-click="copyToClipboard(downloadBundleText)">Copy Bundle to clipboard</span>
 
-                <a ng-show="downloadBundleJsonName" class="pull-right" download="{{downloadBundleJsonName}}.json"
-                   href="{{downloadBundleJsonContent}}">Download Bundle</a>
+                <div>
+                    <a ng-show="downloadBundleJsonName" download="{{downloadBundleJsonName}}.json"
+                       href="{{downloadBundleJsonContent}}">Download Bundle</a>
+                </div>
 
 
 
-                <!--  <a class="pull-right" download="{{downloadLinkJsonName}}.json"
-                                                       href="{{downloadLinkJsonContent}}">Download</a>-->
 
             </div>
 
             <div class="col-md-10 col-sm-9">
-
+                <br/>
                 <div class="row">
                     <div class="col-md-4 col-sm-4">
 
@@ -109,8 +109,10 @@
                                                     <h4>{{outcome.selectedResource.resourceType}}/{{outcome.selectedResource.id}}</h4>
                                                 </div>
                                                 <div class="col-md-2 col-sm-2">
+                                                    <!--
                                                     <a class="pull-right" download="{{downloadLinkJsonName}}.json"
                                                        href="{{downloadLinkJsonContent}}">Download</a>
+                                                       -->
                                                 </div>
                                             </div>
                                             <pre>{{outcome.selectedResource | json:2}}</pre>
@@ -123,7 +125,9 @@
                                                     <h4>{{outcome.selectedResource.resourceType}}/{{outcome.selectedResource.id}}</h4>
                                                 </div>
                                                 <div class="col-md-2 col-sm-2">
+                                                    <!--
                                                     <a class="pull-right" download="{{downloadLinkXmlName}}" href="{{downloadLinkXmlContent}}">Download</a>
+                                                    -->
                                                 </div>
                                             </div>
 
@@ -149,6 +153,7 @@
 
                                         <uib-tab heading="References" select="fitGraphInContainer('resourcenetwork')">
                                             <div id="resourcenetwork"></div>
+                                            <em>Double click to change the focus resource</em>
                                         </uib-tab>
 
                                         <uib-tab heading="Task " ng-show="outcome.selectedResource.resourceType=='Task'">
@@ -253,25 +258,6 @@
         -->
 
     </uib-tab>
-<!--
-    <uib-tab heading="3-D Graph" select="generate3dgraph()">
-        <div id="3d-graph"></div>
-    </uib-tab>
--->
-    <uib-tab heading="Terminology explorer" >
-        <br/>
-
-
-        <div ng-controller="terminologyExplorerCtrl">
-            <ng-include src="'includes/terminologyExplorer.html'"></ng-include>
-        </div>
-
-
-
-
-
-    </uib-tab>
-
 
     <uib-tab heading="Resource references graph"  select="fitGraphInContainer('mynetwork')">
         <br/>
@@ -283,14 +269,14 @@
                     <checkbox ng-model="input.showType[k]" ng-change="setShowType(k,input.showType[k])"/> {{k}}
 
                 </div>
-<!--
-                <div class="pull-right clickable" ng-click="showPatientInGraph()">
-                    <span ng-hide="patientShown">Show Patient</span>
-                    <span ng-show="patientShown">Hide Patient</span>
+                <!--
+                                <div class="pull-right clickable" ng-click="showPatientInGraph()">
+                                    <span ng-hide="patientShown">Show Patient</span>
+                                    <span ng-show="patientShown">Hide Patient</span>
 
-                </div>
+                                </div>
 
-                -->
+                                -->
             </div>
             <div class="col-md-6 col-sm-6">
                 <div id="mynetwork"></div>
@@ -313,6 +299,20 @@
 
             </div>
         </div>
+
+
+    </uib-tab>
+
+    <uib-tab heading="Terminology explorer" >
+        <br/>
+
+
+        <div ng-controller="terminologyExplorerCtrl">
+            <ng-include src="'includes/terminologyExplorer.html'"></ng-include>
+        </div>
+
+
+
 
 
     </uib-tab>
@@ -343,9 +343,8 @@
                                 </a>
                             </div>
 
-                            <select class="form-control">
-                                <option>Vitals Profile</option>
-                            </select>
+
+
                         </div>
 
                     </div>
@@ -569,7 +568,7 @@
         </div>
     </uib-tab>
 
-    <uib-tab  ng-show="documentReferenceList.length > 0" heading="Graphs">
+    <uib-tab  ng-show="false && documentReferenceList.length > 0" heading="Graphs">
 
         <div class="row">
 
@@ -637,7 +636,7 @@
 
     </uib-tab>
 
-    <uib-tab ng-show="1==2" heading="Questionnaires">
+    <uib-tab ng-show="false" heading="Questionnaires">
 
         <div class="row">
 

@@ -113,7 +113,8 @@ angular.module("sampleApp")
                         $scope.input = {};
 
                         $scope.save = function () {
-                            let vo = {name:$scope.input.name,description:$scope.input.description,author:$scope.input.author}
+                            let vo = {name:$scope.input.name,description:$scope.input.description,
+                                showInPV:$scope.input.showInPV,author:$scope.input.author}
                             $scope.$close(vo)
                         }
 
@@ -129,6 +130,7 @@ angular.module("sampleApp")
                     entry.date = new Date()
                     entry.name = vo.name
                     entry.description = vo.description
+                    entry.showInPV = vo.showInPV
                     entry.author = vo.author
                     entry.bundle = $scope.fhir
                     entry.active = true //means this will appear in the main selection list
@@ -201,7 +203,7 @@ angular.module("sampleApp")
                         }
 
                     }, function (err) {
-                        alert("Unable to access the Library")
+                        alert("Error executing query " + angular.toJson(err))
                         //alert(angular.toJson(err))
 
                     }
@@ -247,7 +249,7 @@ angular.module("sampleApp")
 
                 //create a hash for bundle by name
                 $scope.hashByName = {}
-                $scope.hashByRef = {}       //the target of a reference {type}/{id}
+                $scope.hashByRef = {}       //todo - deprecated the target of a reference {type}/{id}
                 if (oBundle.entry) {
                     oBundle.entry.forEach(function(entry) {
                         let resource = entry.resource;
@@ -300,13 +302,15 @@ angular.module("sampleApp")
                 $scope.hashObservations = v2ToFhirSvc.makeObservationsHash(oBundle)
 
                 $scope.hasObservations = function () {
-                    return $scope.hashObservations && Object.keys($scope.hashObservations).length > 0;
+                    return ($scope.hashObservations && (Object.keys($scope.hashObservations).length > 0))
                 };
 
                 //list of medications. This is a custom object for display - not resources
+                //not the most efficient, but doesn't really matter...
                 $scope.lstMedications = bundleVisualizerSvc.getMedications(oBundle)
                 $scope.lstAllergies = bundleVisualizerSvc.getAllergies(oBundle)
-
+                $scope.lstConditions = bundleVisualizerSvc.getConditions(oBundle)
+                $scope.lstProcedures = bundleVisualizerSvc.getProcedures(oBundle)
 
                 //create hash by type
                 $scope.hashEntries = {}
@@ -535,13 +539,28 @@ angular.module("sampleApp")
 
 
             $scope.selectSection = function(section) {
-                delete $scope.selectedEntryFromSection
+               // delete $scope.selectedEntryFromSection
+                delete $scope.resourceFromSection
                 $scope.selectedSection = section
+
+
+                //prettify the html
+                let rawHTML = section.text?.div
+                const prettyHTML = html_beautify(rawHTML, { indent_size: 2, wrap_line_length: 120 });
+                const snEl = document.getElementById('sectionNarrative');
+                // Reset Highlight.js tracking
+                delete snEl.dataset.highlighted;
+                document.getElementById('sectionNarrative').textContent = prettyHTML ;
+                hljs.highlightAll(); // highlight syntax
+
+
+
             }
 
             $scope.selectEntryFromSection = function(oReference) {
                 let reference = oReference.reference;
-                $scope.selectedEntryFromSection = $scope.hashByRef[reference]
+                $scope.resourceFromSection = bundleVisualizerSvc.referenceLookup(reference)
+                //$scope.selectedEntryFromSection = $scope.hashByRef[reference]
             }
 
             $scope.popoverText = function (adHoc) {
@@ -664,7 +683,8 @@ angular.module("sampleApp")
 
                     }, function (err) {
                         $scope.waiting = false
-                        alert("Unable to access the Library")
+                        alert("Error running query: " + angular.toJson(err))
+                        //alert("Unable to access the Library")
                         //alert(angular.toJson(err))
 
                     }
@@ -869,7 +889,7 @@ angular.module("sampleApp")
 
                 //only if the bundle has been validated
                 if (resourceId && $scope.validationResult) {
-                    for (const iss of $scope.validationResult.issue) {
+                    for (const iss of $scope.validationResult.issue || []) {
                         let loc = iss.location[0]
                         const match = loc.match(/\[(\d+)\]/);
                         const firstIndex = match ? parseInt(match[1], 10) : null;
@@ -1249,7 +1269,10 @@ angular.module("sampleApp")
                     if (res.valueQuantity) {
                         var da = res.effectiveDateTime;
                         var v = res.valueQuantity.value;
-                        lst.push({x:da,y:v})
+                        if (da && v) {
+                            lst.push({x:da,y:v})
+                        }
+
                     }
 
                 });
@@ -1257,6 +1280,7 @@ angular.module("sampleApp")
 
                 //- todo - not complete - from observationDisplayCtrl
                 $('#observationsChart').empty();
+
                 var container = document.getElementById('observationsChart');
                 var dataset = new vis.DataSet(lst);
                 var options = {};
@@ -1403,7 +1427,7 @@ angular.module("sampleApp")
 
                         //this is an OO
                         $scope.validationResult = data.data
-                        let issues = data.data.issue
+                        let issues = data.data.issue || []
                         $scope.validationResult.issue = []
 
                         //remove all the 'should have text element' errors

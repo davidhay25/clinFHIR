@@ -15,9 +15,14 @@ function setup(app,client) {
     //todo - exclude those send in from other apps (eg GB)
     app.get("/bv/getAllBundles",async function (req,res){
 
+        let filter = { active: true }
+        if (req.query['showInPV']) {
+            filter.showInPV = true      //note that the actual value of the query is ignored
+        }
+//console.log(filter)
         try {
             const result = await database.collection("bvBundles")
-                .find({ active: true }, { projection: { id: 1, description: 1, date: 1, name:1,author:1 } })
+                .find(filter, { projection: { id: 1, description: 1, date: 1, name:1,author:1,showInPV:1 } })
                 .toArray()
             res.json(result);
         } catch (err) {
@@ -70,11 +75,16 @@ function setup(app,client) {
 
     //get a list of test set.
     app.get('/bvLibrary',async function(req,res){
+
+
         //todo - can add params for filtering...
        //console.log('bv')
+        let filter = { status: { $ne: "hide" }}
+
+
 
         try {
-            const result = await database.collection("bvLibrary").find({ status: { $ne: "hide" } },
+            const result = await database.collection("bvLibrary").find( filter,
                 { projection: { _id: 1, name: 1, description: 1, qry: 1 } }).toArray();
             res.json(result);
         } catch (err) {
@@ -82,32 +92,7 @@ function setup(app,client) {
             res.status(500).send(err);
         }
 
-        /*
 
-       database.collection("bvLibrary").find({}).toArray(function (err, result) {
-           console.log(err,result)
-           if (err) {
-               res.status(500).send(err);
-           } else {
-               res.json(result);
-           }
-       });
-
-       database.collection("bvLibrary")
-           .find(
-               { status: { $ne: "hide" } },
-               { projection: { _id: 1, name: 1, description: 1, qry: 1 } }
-           )
-           .toArray(function (err, result) {
-               console.log(err,result)
-               if (err) {
-                   res.status(500).send(err);
-               } else {
-                   res.json(result);
-               }
-           });
-
-       */
     });
 }
 

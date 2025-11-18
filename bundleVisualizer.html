@@ -50,36 +50,67 @@
     <script src="js/libs/vkbeautify.0.99.00.beta.js"></script>
 
     <script src="js/libs/fhirpath.min.js"></script>
-
     <script>
-        //Alert if there are other copies of this page open.
         (function() {
+            const key = "bundleVisualizerTabs";
             const tabId = Math.random().toString(36).slice(2);
-            const key = 'bundleVisualizer';
+            const HEARTBEAT_INTERVAL = 2000;     // 2 seconds
+            const HEARTBEAT_EXPIRE = 5000;       // 5 seconds
 
-            // Read currently active tabs
-            const activeTabs = JSON.parse(localStorage.getItem(key) || '[]');
+            function getTabs() {
+                return JSON.parse(localStorage.getItem(key) || "{}");
+            }
 
-            if (activeTabs.length > 0) {
+            function setTabs(tabs) {
+                localStorage.setItem(key, JSON.stringify(tabs));
+            }
+
+            // Register this tab with a timestamp
+            let tabs = getTabs();
+            tabs[tabId] = Date.now();
+            setTabs(tabs);
+
+            // Check for other *active* tabs
+            const now = Date.now();
+            const activeOtherTabs = Object.entries(tabs)
+                .filter(([id, ts]) => id !== tabId && (now - ts) < HEARTBEAT_EXPIRE);
+
+            if (activeOtherTabs.length > 0) {
                 alert('This page is already open in another tab, which will cause issues. You should close this page and use the other one.');
             }
 
-            // Add this tab to the list
-            activeTabs.push(tabId);
-            localStorage.setItem(key, JSON.stringify(activeTabs));
+            // Heartbeat updater
+            setInterval(() => {
+                let t = getTabs();
+                t[tabId] = Date.now();
+                setTabs(t);
+            }, HEARTBEAT_INTERVAL);
 
-            // Remove this tab on unload
-            window.addEventListener('beforeunload', () => {
-                const tabs = JSON.parse(localStorage.getItem(key) || '[]');
-                const updatedTabs = tabs.filter(id => id !== tabId);
-                localStorage.setItem(key, JSON.stringify(updatedTabs));
+            // Clean up when this tab closes
+            window.addEventListener("beforeunload", () => {
+                let t = getTabs();
+                delete t[tabId];
+                setTabs(t);
             });
-
         })();
     </script>
 
 
+
     <style>
+
+        body {
+            background: #fcfcfc;
+        }
+
+        .list-group-itemXX {
+            background-color: white;
+        }
+
+        table {
+            background: white;
+        }
+
         .popover-content {
             max-width: 400px;
         }
@@ -99,6 +130,29 @@
         .issInfo {
             background-color:#dff0d8;
         }
+
+        .narrative table {
+            width: 100% !important;
+            max-width: 100% !important;
+            border-collapse: collapse;   /* cleaner borders */
+
+        }
+
+        .narrative th,
+        .narrative td {
+            border: 1px solid #ccc !important;
+            padding: 6px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        /* optional: header background */
+        .narrative th {
+            background: #f3f3f3;
+        }
+
+
+
 
     </style>
 
@@ -932,7 +986,24 @@
                         <div class="col-md-3">
 
                             <uib-tabset>
+                                <uib-tab heading="Type, Id">
+                                    <div class="entryListScroll">
+                                        <div ng-repeat="es in sortedEntries">
+                                            <strong>{{es.type}}</strong>
+                                            <div class="list-group">
+                                                <div ng-repeat = "entry in es.entries"
+                                                     ng-class="{'list-group-item':true,'listItemSelected':selectedBundleEntry == entry}">
+                                                    <div style="padding-left: 10px; cursor: pointer"
+                                                         ng-click="selectBundleEntry(entry,[])">
+                                                        <div> {{entry.resource.text.div | cleanTextDiv | limitTo:50}}</div>
+                                                        <div style="padding-left: 10px"><em>Id: {{entry.resource.id}}</em></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
 
+                                    </div>
+                                </uib-tab>
                                 <uib-tab heading="Type">
                                     <div class="myScroll1">
                                         <uib-accordion>
@@ -958,24 +1029,7 @@
                                     </div>
 
                                 </uib-tab>
-                                <uib-tab heading="Type, Id">
-                                    <div class="entryListScroll">
-                                        <div ng-repeat="es in sortedEntries">
-                                            <strong>{{es.type}}</strong>
-                                            <div class="list-group">
-                                                <div ng-repeat = "entry in es.entries"
-                                                     ng-class="{'list-group-item':true,'listItemSelected':selectedBundleEntry == entry}">
-                                                    <div style="padding-left: 10px; cursor: pointer"
-                                                         ng-click="selectBundleEntry(entry,[])">
-                                                        <div> {{entry.resource.text.div | cleanTextDiv | limitTo:50}}</div>
-                                                        <div style="padding-left: 10px"><em>Id: {{entry.resource.id}}</em></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
 
-                                    </div>
-                                </uib-tab>
                                 <uib-tab heading="Bundle Order">
 
                                     <div class="entryListScroll">
@@ -1039,17 +1093,21 @@
 
                                     <uib-tabset>
                                         <uib-tab heading="Rendered text">
-                                            <p ng-bind-html="selectedBundleEntry.resource.text.div"></p>
+                                            <div class="myScroll1 narrative">
+                                                <p ng-bind-html="to_trusted(selectedBundleEntry.resource.text.div)"></p>
+                                            </div>
+
                                         </uib-tab>
 
 
                                         <uib-tab heading="HTML">
-
-
-
+                                            <div class="myScroll1">
                                                 <pre><code id="htmlCode" class="language-html"></code></pre>
+                                            </div>
 
                                         </uib-tab>
+
+
                                     </uib-tabset>
 
 
@@ -1061,7 +1119,10 @@
                                 <uib-tab heading="Tree">
                                     <br/>
 
-                                    <div id="builderResourceTree"></div>
+                                    <div class="myScroll1">
+                                        <div id="builderResourceTree"></div>
+                                    </div>
+
 
                                 </uib-tab>
 
@@ -1186,18 +1247,23 @@
                                 </uib-tab>
 
                                 <uib-tab ng-show="xmlText"  heading="XML">
-                                    <pre>{{xmlText}}</pre>
+                                    <div class="myScroll1">
+                                        <pre>{{xmlText}}</pre>
+                                    </div>
+
                                     <em>This is transformed from the resource using the <a href="https://github.com/lantanagroup/FHIR.js" target="_blank">Lantana</a>  library</em>
                                 </uib-tab>
 
                                 <uib-tab ng-show="fshText" heading="FSH">
-                                    <pre>{{fshText}}</pre>
+                                    <div class="myScroll1">
+                                        <pre>{{fshText}}</pre>
+                                    </div>
                                     <em>This is transformed from the resource using the Mitre <a href="https://github.com/FHIR/GoFSH" target="_blank">GoFsh</a>  library</em>
                                 </uib-tab>
 
 
 
-                                <uib-tab ng-show="selectedBundleEntry.resource.resourceType == 'Composition'"
+                                <uib-tab ng-show="fales && selectedBundleEntry.resource.resourceType == 'Composition'"
                                          heading="Sections">
 
 
@@ -1563,42 +1629,51 @@
 
                 </uib-tab>
 
-                <uib-tab heading="Clinical views">
+                <uib-tab heading="Clinical resources">
+                    <em class="pull-right">Derived from the resources in the Bundle</em>
                     <br/>
                     <uib-tabset>
 
-                        <uib-tab ng-show="hasObservations()" heading = "Observations">
+                        <uib-tab ng-if="hasObservations()" heading = "Observations">
                             <br/>
                             <ng-include src = "'includes/bvObservations.html'"></ng-include>
-
-
-
                         </uib-tab>
 
-                        <uib-tab heading="DiagnosticReport" ng-show="DR.length > 0">
+                        <uib-tab heading="DiagnosticReport" ng-if="DR.length > 0">
                             <ng-include src = "'includes/bvDiagnosticReport.html'"></ng-include>
                         </uib-tab>
 
-                        <uib-tab heading="Encounters" ng-show="encounters.length > 0">
+                        <uib-tab heading="Conditions" ng-if="lstConditions.length > 0">
+                            <ng-include src = "'includes/bvConditions.html'"></ng-include>
+                        </uib-tab>
+
+
+                        <uib-tab heading="Encounters" ng-if="encounters.length > 0">
                             <ng-include src = "'includes/bvEncounters.html'"></ng-include>
                         </uib-tab>
 
-                        <uib-tab ng-show="lstMedications.length > 0" heading="Medications">
+                        <uib-tab ng-if="lstMedications.length > 0" heading="Medications">
                             <br/>
-
                             <ng-include src = "'includes/bvMedications.html'"></ng-include>
 
                             <em>This display is generated from the MedicationRequest and MedicationStatement resources</em>
                         </uib-tab>
 
-                        <uib-tab ng-show="lstAllergies.length > 0" heading="Allergies">
+                        <uib-tab ng-if="lstAllergies.length > 0" heading="Allergies">
                             <br/>
                             <ng-include src = "'includes/bvAllergies.html'"></ng-include>
 
-                            <em>This display is generated from the MedicationRequest and MedicationStatement resources</em>
+                            <em>This display is generated from the AllergyIntolerance resources</em>
                         </uib-tab>
 
-                        <uib-tab heading="CarePlan view" ng-show="false && CarePlans.length > 0">
+                        <uib-tab ng-if="lstProcedures.length > 0" heading="Procedures">
+                            <br/>
+                            <ng-include src = "'includes/bvProcedures.html'"></ng-include>
+
+                            <em>This display is generated from the Procedure resources</em>
+                        </uib-tab>
+
+                        <uib-tab heading="CarePlan view" ng-if="false && CarePlans.length > 0">
                             <pre>{{cpSummary | json}}</pre>
                         </uib-tab>
                     </uib-tabset>
@@ -1607,129 +1682,8 @@
 
 
                 <uib-tab ng-show = "isDocument" heading="Document">
-
-                    <uib-tabset>
-                        <uib-tab heading="Rendering">
-                            <div class="alert alert-info">
-                                This tab shows the content of the .text element for the resources in the document
-                            </div>
-                            <strong>Subject</strong>
-                            <p  style="margin-left: 10px" ng-bind-html="document.subject.text.div"></p>
-
-                            <hr style="border-top: 1px solid grey; margin: 1px"/>
-                            <strong>Document metadata</strong>
-                            <p  style="margin-left: 10px" ng-bind-html="document.composition.text.div"></p>
-
-                            <div ng-repeat = "section in document.composition.section">
-                                <hr style="border-top: 1px solid grey; margin: 1px"/>
-                                <strong>{{section.title}}</strong>
-
-                                <div class="row">
-
-                                    <div class="col-md-12">
-
-                                        <div class="scroll-wrapper">
-                                            <p style="margin-left: 10px" ng-bind-html="to_trusted(section.text.div)"></p>
-                                        </div>
-
-
-
-
-
-                                    </div>
-
-
-
-                                </div>
-
-
-
-
-
-                            </div>
-
-                            <div><em>Derived from the Composition and Subject text elements as per the spec</em></div>
-
-                        </uib-tab>
-                        <uib-tab heading="Rendering and resources">
-                            <strong>Subject</strong>
-                            <p style="margin-left: 10px" ng-bind-html="document.subject.text.div"></p>
-
-                            <strong>Document metadata</strong>
-                            <p style="margin-left: 10px" ng-bind-html="document.composition.text.div"></p>
-
-                            <div ng-repeat = "section in document.composition.section">
-                                <hr style="border-top: 1px solid grey; margin: 1px"/>
-                                <strong>{{section.title}}</strong>
-
-                                <div class="row">
-
-                                    <div class="col-md-9">
-                                        <p style="margin-left: 10px" ng-bind-html="to_trusted(section.text.div)"></p>
-                                        <!-- <p style="margin-left: 10px" ng-bind-html="section.text.div"></p> -->
-
-                                    </div>
-                                    <div class="col-md-3">
-
-                                        <div ng-repeat = "resource in section.realResources"
-
-                                             popover-append-to-body="true"
-                                             uib-popover-html="resource.trustedPopover"
-                                             popover-placement="left"
-                                             popover-class="custom-popover-big"
-                                             popover-trigger="'focus'"
-                                             tabindex="0"
-                                             style="cursor: pointer"
-                                             ng-clickX="selectResourceFromRender(resource)">
-                                            <div class="rounded-box">
-                                                {{resource.display}}
-
-                                                <em><p ng-bind-html="resource.resource.text.div"></p></em>
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-                                </div>
-                            </div>
-
-                            <div><em>Derived from the Composition and Subject text elements as per the spec</em></div>
-
-                        </uib-tab>
-                        <uib-tab heading="By Section">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <div class="list-group">
-                                        <div ng-class="{'list-group-item':true}"
-                                             ng-repeat = "section in document.composition.section"
-                                            ng-click="selectSection(section)">
-                                            {{section.title}}
-                                            <div class="pull-right badge">{{section.entry.length}}</div>
-                                            <div>{{section.code.coding[0].system}} {{section.code.coding[0].code}}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-
-                                    <table>
-                                        <div class="list-group">
-                                            <div class="list-group-item" ng-repeat = "entry in selectedSection.entry">
-                                                <div ng-click="selectEntryFromSection(entry) ">{{entry.reference}}</div>
-                                            </div>
-                                        </div>
-
-                                    </table>
-
-                                </div>
-                                <div class="col-md-6">
-                                    <pre>{{selectedEntryFromSection | json}}</pre>
-                                </div>
-                            </div>
-
-
-                        </uib-tab>
-                    </uib-tabset>
-
+                    <br/>
+                    <ng-include src = "'includes/bvDocument.html'"></ng-include>
 
                 </uib-tab>
 
