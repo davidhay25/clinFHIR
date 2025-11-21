@@ -3,6 +3,58 @@
 
     <div ng-switch on="entry.resource.resourceType">
 
+        <div class="row" ng-switch-when="CarePlan">
+            <div class="col-md-5">
+                {{entry.resource.category[0].text || "CarePlan"}}
+            </div>
+            <div class="col-md-7">
+
+            </div>
+        </div>
+
+        <div class="row" ng-switch-when="Device">
+            <div class="col-md-12">
+                {{entry.resource.deviceName[0].name || "Device"}}
+            </div>
+
+        </div>
+
+        <div class="row" ng-switch-when="Goal">
+            <div class="col-md-12">
+                {{entry.resource.description.text || "Goal"}}
+            </div>
+        </div>
+
+        <div class="row" ng-switch-when="Organization">
+            <div class="col-md-12">
+                {{entry.resource.name || "Organization"}}
+            </div>
+        </div>
+
+        <div class="row" ng-switch-when="Specimen">
+            <div class="col-md-12">
+                {{entry.resource.type.text || "Specimen"}}
+            </div>
+        </div>
+
+        <div class="row" ng-switch-when="ServiceRequest">
+            <div class="col-md-12">
+                Intent: {{entry.resource.intent}}  Status: {{entry.resource.status}}
+            </div>
+        </div>
+
+        <div class="row" ng-switch-when="DiagnosticReport">
+            <div class="col-md-7">
+                {{entry.resource.code.text || entry.resource.code.coding[0].display}}
+            </div>
+            <div class="col-md-5">
+                <div class="pull-right">
+                    {{entry.resource.effectiveDateTime | date}}
+                </div>
+
+            </div>
+        </div>
+
         <div class="row" ng-switch-when="List">
             <div class="col-md-5">
                 {{entry.resource.title}}

@@ -11,21 +11,24 @@
 
 
 
-<uib-tabset>
+<uib-tabset  active="input.mainTabActive">
     <uib-tab heading="Resource explorer">
 
         <div class="row">
 
             <div class="col-md-2 col-sm-3">
                 <h4>Resource Types</h4>
-                <div class="list-group">
-                    <a href="#"  ng-click="typeSelected(type)"
-                       ng-class="{'list-group-item':true,'active':type.type == outcome.selectedType}"
-                       ng-repeat="type in outcome.resourceTypes ">
-                        {{type.type}}
-                        <span class="pull-right badge">{{type.bundle.total}}</span>
-                    </a>
+                <div class="myScroll600">
+                    <div class="list-group">
+                        <a href="#"  ng-click="typeSelected(type)"
+                           ng-class="{'list-group-item':true,'active':type.type == outcome.selectedType}"
+                           ng-repeat="type in outcome.resourceTypes ">
+                            {{type.type}}
+                            <span class="pull-right badge">{{type.bundle.total}}</span>
+                        </a>
+                    </div>
                 </div>
+
 
 
                 <span class="clickable" ng-click="copyToClipboard(downloadBundleText)">Copy Bundle to clipboard</span>
@@ -45,24 +48,40 @@
                 <div class="row">
                     <div class="col-md-4 col-sm-4">
 
-                        <h4>{{outcome.selectedType}} resources</h4>
-                        <div class="list-group">
-                            <a href="#"
-                               ng-class="{'list-group-item':true,'active':entry.resource.id == outcome.selectedResource.id}"
-                               ng-repeat="entry in outcome.allResourcesOfOneType.entry">
-                                <div style="cursor: pointer" ng-click="resourceSelected(entry)">
-                                    <ng-include src="'includes/resourceDisplayTemplates.html'"></ng-include>
-                                </div>
-                            </a>
+                        <div ng-show="outcome.selectedType">
+                            <h4>{{outcome.selectedType}} resources
+                                <span style="font-weight: normal">
+                            <a target="_blank"
+                               class="pull-right"
+                               ng-href="http://hl7.org/fhir/R4B/{{outcome.selectedType}}.html">Spec</a>
+                            </span>
+                            </h4>
                         </div>
+                        
+                        <div class="myScroll1">
+                            <div class="list-group">
+                                <a href="#"
+                                   ng-class="{'list-group-item':true,'active':entry.resource.id == outcome.selectedResource.id}"
+                                   ng-repeat="entry in outcome.allResourcesOfOneType.entry">
+                                    <div style="cursor: pointer" ng-click="resourceSelected(entry)">
+                                        <ng-include src="'includes/resourceDisplayTemplates.html'"></ng-include>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+
+
+
                     </div>
+
+
                     <div class="col-md-8 col-sm-8">
 
 
 
                         <div ng-show="outcome.selectedResource">
 
-                            <div class="alert alert-warning" style="margin-top: 8px">
+                            <div  ng-show="resourceVersions.entry.length > 1" class="alert alert-warning" style="margin-top: 8px">
                                 <div class="row">
                                     <div class="col-md-10 col-sm-10">
 
@@ -92,30 +111,57 @@
 
                             </div>
 
+                            <div class="alert alert-danger" ng-show="outcome.selectedResource.modifierExtension">
+                                This resource has Modifier Extensions. They can be viewed in the extension tab below.
+                            </div>
                             <div class="row">
                                 <div class="col-md-8 col-sm-8">
 
-                                    <uib-tabset>
+                                    <uib-tabset  active="input.secondaryTabActive">
+
+                                        <uib-tab heading="References" select="fitGraphInContainer('resourcenetwork')">
+                                            <div id="resourcenetwork"></div>
+                                            <em>Double click to change the focus resource, or click in the references lists.</em>
+                                        </uib-tab>
+
                                         <uib-tab heading="Tree">
-                                            <div id="resourceTree"></div>
+                                            <div class="myScroll1">
+                                                <div  class="white" id="resourceTree"></div>
+                                            </div>
+
 
                                         </uib-tab>
                                         <uib-tab heading="Text" >
-                                            <p ng-bind-html="outcome.selectedResource.text.div"></p>
+                                            <p class="white" ng-bind-html="outcome.selectedResource.text.div"></p>
                                         </uib-tab>
                                         <uib-tab heading="Json">
+                                            <!--
                                             <div class="row">
-                                                <div class="col-md-10 col-sm-10">
+                                                <div class="col-md-12">
                                                     <h4>{{outcome.selectedResource.resourceType}}/{{outcome.selectedResource.id}}</h4>
                                                 </div>
-                                                <div class="col-md-2 col-sm-2">
-                                                    <!--
-                                                    <a class="pull-right" download="{{downloadLinkJsonName}}.json"
-                                                       href="{{downloadLinkJsonContent}}">Download</a>
-                                                       -->
-                                                </div>
+
                                             </div>
+                                            -->
+
                                             <pre>{{outcome.selectedResource | json:2}}</pre>
+                                        </uib-tab>
+
+                                        <uib-tab ng-show="outcome.selectedResource.extension || outcome.selectedResource.modifierExtension" heading="Extensions">
+
+                                            <div ng-show="outcome.selectedResource.modifierExtension">
+                                                <div><strong>Modifier extensions</strong></div>
+                                                <pre>{{outcome.selectedResource.modifierExtension | json}}</pre>
+                                            </div>
+
+
+                                            <div ng-show="outcome.selectedResource.extension">
+                                                <div><strong>Extensions</strong></div>
+                                                <pre>{{outcome.selectedResource.extension | json}}</pre>
+                                            </div>
+
+
+
                                         </uib-tab>
 
                                         <uib-tab heading="XML">
@@ -135,6 +181,7 @@
                                             <pre>{{xmlResource}}</pre>
                                         </uib-tab>
 
+
                                         <uib-tab heading="Display"
                                                  ng-show="hasDetailedView.indexOf(outcome.selectedResource.resourceType) > -1">
 
@@ -151,17 +198,13 @@
 
                                         </uib-tab>
 
-                                        <uib-tab heading="References" select="fitGraphInContainer('resourcenetwork')">
-                                            <div id="resourcenetwork"></div>
-                                            <em>Double click to change the focus resource</em>
-                                        </uib-tab>
+
 
                                         <uib-tab heading="Task " ng-show="outcome.selectedResource.resourceType=='Task'">
                                             <br/>
                                             <div ng-controller="pvTaskCtrl">
                                                 <ng-include src="'includes/pvTask.html'"></ng-include>
                                             </div>
-
                                         </uib-tab>
 
 
@@ -191,48 +234,38 @@
 
                                     </uib-tabset>
 
-
-
-
-
                                 </div>
 
                                 <div class="col-md-4 col-sm-4">
-                                    <h4>Outward references</h4>
+                                    <div class="myScroll1">
+                                        <h4>Outward references</h4>
 
-                                    <div class="list-group">
-                                        <a href="#"class="list-group-item"
-                                           ng-repeat="reference in resourceReferences.outwardLinks"
-                                           ng-click="selectNewResource(reference,$event)">
+                                        <div class="list-group">
+                                            <a href="#"class="list-group-item"
+                                               ng-repeat="reference in resourceReferences.outwardLinks"
+                                               ng-click="selectNewResource(reference,$event)">
 
-                                            {{reference.reference}}
-                                            <div><em>{{reference.key}}</em></div>
+                                                {{reference.reference}}
+                                                <div><em>{{reference.key}}</em></div>
+                                            </a>
+                                        </div>
 
+                                        <h4>Inward references</h4>
 
+                                        <div class="list-group">
+                                            <a href="#" class="list-group-item"
+                                               ng-repeat="reference in resourceReferences.inwardLinks"
+                                               ng-click="selectNewResource(reference,$event)">
 
-<!--<pre>{{reference | json}}</pre>
-                                            <div>{{reference.element}} ==> {{reference.reference}}</div>
-                                            <div><p ng-bind-html="reference.resource.text.div"></p></div>
--->
-                                        </a>
-                                    </div>
-
-                                    <h4>Inward references</h4>
-
-                                    <div class="list-group">
-                                        <a href="#" class="list-group-item"
-                                           ng-repeat="reference in resourceReferences.inwardLinks"
-                                           ng-click="selectNewResource(reference,$event)">
-
-
-
-                                            <div>{{reference.resource.resourceType}}/{{reference.resource.id}}
+                                                <div>{{reference.resource.resourceType}}/{{reference.resource.id}}
                                                 </div>
-                                            <div><em>{{reference.name}}</em></div>
-                                            <div><p ng-bind-html="reference.resource.text.div"></p></div>
+                                                <div><em>{{reference.name}}</em></div>
+                                                <div><p ng-bind-html="reference.resource.text.div"></p></div>
 
-                                        </a>
+                                            </a>
+                                        </div>
                                     </div>
+
                                 </div>
                             </div>
                         </div>
@@ -247,15 +280,7 @@
 
         </div>
 
-        <!-- don't think this is needed any more...
-        <a href='#' ng-show="showPatientJson" ng-click="showPatientJson=false">Hide Patient Json</a>
-        <a href="#" ng-hide="showPatientJson" ng-click="showPatientJson=true">Show Patient Json</a>
 
-        <div ng-show="showPatientJson">
-            <pre>{{appConfigSvc.getCurrentPatient() | json}}</pre>
-        </div>
-
-        -->
 
     </uib-tab>
 
@@ -277,16 +302,27 @@
                                 </div>
 
                                 -->
+
+
+                <br/>
+                <button class="btn btn-link" ng-click="updateFilter(false)">Hide all</button>
+                <button class="btn btn-link" ng-click="updateFilter(true)">Show all</button>
+
+
             </div>
             <div class="col-md-6 col-sm-6">
                 <div id="mynetwork"></div>
+                <em>Click a resource to see details in the right pane. Double click to show in the Resource explorer. Scroll to zoom the display (with the mouse in the graph)</em>
 
 
             </div>
             <div class="col-md-4 col-sm-4">
                 <uib-tabset>
                     <uib-tab heading="Tree">
-                        <div id="graphResourceTree"></div>
+                        <div class="myScroll1">
+                            <div id="graphResourceTree"></div>
+                        </div>
+
                     </uib-tab>
                     <uib-tab heading="Text">
                         <p ng-bind-html="selectedGraphNode.resource.text.div"></p>
@@ -321,7 +357,7 @@
         <br/>
         <div ng-controller="observationsDisplayCtrl">
             <div class="row">
-                <div class="col-md-2 col-sm-2">
+                <div class="col-md-3">
                     <div class="list-group">
                         <a href="#"  ng-click="obsSelected(key,value)"
                            ng-class="{'list-group-item':true,'active':1==2}"
@@ -351,7 +387,7 @@
 
 
                 </div>
-                <div class="col-md-10 col-sm-10">
+                <div class="col-md-9">
                     <div ng-hide="observations">
                         <p>This patient has no numeric observations (where Observation.valueQuantity has a value).</p>
                     </div>
@@ -403,12 +439,10 @@
                         <a href="#" class="list-group-item"
                            ng-click="filterTimeLineByCondition(key)"
                            ng-repeat="(key,item) in conditions">
-                            <!--{{item}}  {{key}}-->
+
                             <span class="pull-right badge">{{item.count}}</span>
                             {{ResourceUtilsSvc.getOneLineSummaryOfResource(item.resource)}}
-                            <!--
-                            <codeable-concept cc="item.resource.code"></codeable-concept>
--->
+
                         </a>
                     </div>
                 </div>
@@ -437,9 +471,7 @@
                                                 src="'./displayTemplates/encounter.html'"></ng-include>
                                 </div>
                                 <div class="col-md-6 col-sm-6">
-                                    <pre>
-                                        {{outcome.selectedResource | json}}
-                                    </pre>
+                                    <pre>{{outcome.selectedResource | json}}</pre>
                                 </div>
 
                             </div>
@@ -454,9 +486,7 @@
                                          id="resourcenetworkgraphtl"></div>
                                 </div>
                                 <div class="col-md-6 col-sm-6">
-                                    <pre>
-                                        {{outcome.selectedResource | json}}
-                                    </pre>
+                                    <pre>{{outcome.selectedResource | json}}</pre>
                                 </div>
 
                             </div>
@@ -557,6 +587,10 @@
         </div>
 
 
+    </uib-tab>
+
+    <uib-tab ng-show="false" heading="Json">
+        <pre>{{}}</pre>
     </uib-tab>
 
     <uib-tab ng-show="showGQL" heading="GraphQL">

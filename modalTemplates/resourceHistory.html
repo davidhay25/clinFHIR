@@ -21,8 +21,8 @@
     <div class="modal-body">
 
         <div class="row">
-            <div ng-repeat= "item in hx" class="col-sm-3 col-md-3">
-                <strong>{{hx.length - $index}}</strong>
+            <div ng-repeat= "item in hx track by $index" class="col-sm-3 col-md-3">
+                <strong>{{item.meta.versionId}}</strong>
                 <pre>{{item | json}}</pre>
             </div>
 
@@ -33,7 +33,7 @@
     <div class="modal-header">
         <div class="row">
             <div class="col-md-12 col-sm-12">
-
+                <em>Only the 4 most recent versions are shown in this view</em>
             </div>
 
         </div>

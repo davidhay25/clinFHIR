@@ -2,8 +2,8 @@
 <html>
 <head lang="en">
     <base href="/" />
-
-    <!-- Global site tag (gtag.js) - Google Analytics -->
+<!--
+    Global site tag (gtag.js) - Google Analytics
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-YD055VEN8K"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -11,7 +11,7 @@
         gtag('js', new Date());
         gtag('config', 'G-YD055VEN8K');
     </script>
-
+-->
     <meta charset="UTF-8">
     <script src="js/libs/jquery-1.9.0.min.js"></script>
     <script src="js/libs/angular.min1-5.js"></script>
@@ -27,13 +27,10 @@
     <!-- js-beautify for indentation -->
     <script src="https://cdn.jsdelivr.net/npm/js-beautify@1.14.9/js/lib/beautify-html.min.js"></script>
 
-
-
-
-
     <script src="js/libs/moment.min.js"></script>
 
     <script src="https://cdn.counter.dev/script.js" data-id="62b27fdf-0033-481b-8b59-680638d9162c" data-utcoffset="12"></script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="383f5688-7293-4ac2-9dd3-b82e032bcc81"></script>
 
     <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
     <link rel="stylesheet" type="text/css" href="css/jsTreeThemes/proton/style.css"/>
@@ -425,6 +422,7 @@
                                             <th style="width: 50%">Query</th>
                                             <th>In library</th><th></th></tr>
                                         <tr ng-click="input.savedQuery=item"
+                                            ng-dblclick = "executeSavedQuery(item)"
                                             style="cursor: pointer"
                                             ng-class="{listItemSelected:input.savedQuery == item}"
                                             ng-repeat = "item in savedQueries">
@@ -1477,7 +1475,6 @@
                                         {{input.selectedIssueByResource.resource.resourceType}} in the Spec</a>
                             </div>
 
-
                             <div class="row">
                                 <div class="col-md-2">
                                     <h4>Resources with issues</h4>
@@ -1494,15 +1491,14 @@
                                             </div>
                                         </div>
                                     </div>
-
-
                                 </div>
 
                                 <div class="col-md-5">
                                     <h4>Issues</h4>
                                     <div class="myScroll1">
                                         <ul class="list-group">
-                                            <li ng-class="{'list-group-item':true,issError:iss.severity=='error',issWarning:iss.severity=='warning',issInfo:iss.severity=='information'}"
+                                            <li
+                                                    ng-class="{'list-group-item':true,issError:iss.severity=='error',issWarning:iss.severity=='warning',issInfo:iss.severity=='information'}"
 
                                                 ng-repeat="iss in input.selectedIssueByResource.issues">
                                                 {{iss.diagnostics}}
@@ -1522,9 +1518,9 @@
                                     </div>
                                 </div>
 
-
                             </div>
                         </uib-tab>
+
                         <uib-tab>
                             <uib-tab-heading>Reference errors <span class="badge">{{graphErrors.length}}</span></uib-tab-heading>
                             <em>References to missing resources found while building the graph</em>
@@ -1538,9 +1534,52 @@
 
 
                         </uib-tab>
+
                         <uib-tab heading="Extended validation">
+                            <button class="btn btn-link pull-right" ng-click="validateFromIG()">Validate against Au Patient summary</button>
+                            <div class="clearfix"></div>
+                            <div class="row" ng-show="extendedOO">
+                                <div class="col-md-2">
+                                    <checkbox ng-model="input.issError"></checkbox> Error <span class="badge">{{input.issErrorCount}}</span>
+                                </div>
+                                <div class="col-md-2">
+                                    <checkbox ng-model="input.issWarning"></checkbox> Warning <span class="badge">{{input.issWarningCount}}</span>
+                                </div>
+                                <div class="col-md-2">
+                                    <checkbox ng-model="input.issInfo"></checkbox> Information <span class="badge">{{input.issInfoCount}}</span>
+                                </div>
+                            </div>
+                            <br/>
+                            <div class="row">
+                                <div class="col-md-8" ng-show="extendedOO">
+                                    <div class="myScroll1">
+                                        <table class="table-bordered table">
+                                            <tr><th style="width: 10%">Severity</th><th style="width: 50%">Diagnostics</th><th>Location</th></tr>
+                                            <tr ng-repeat = "iss in extendedOO.issue"
+                                                ng-show = canShowIssue(iss)
+                                                ng-class="{issError:iss.severity=='error',issWarning:iss.severity=='warning',issInfo:iss.severity=='information'}"
+                                                ng-click="getExtendedIssueResource(iss)">
+                                                <td>{{iss.severity}}</td>
+                                                <td>{{iss.diagnostics}}</td>
+                                                <td>{{iss.location[0]}}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="myScroll1">
+                                        <pre ng-show="extendedOO">{{extendedIssueResource | json}}</pre>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
 
                         </uib-tab>
+
+
                     </uib-tabset>
 
                     <uib-tabset ng-show="false">

@@ -3092,10 +3092,12 @@ angular.module("sampleApp").service('resourceCreatorSvc',
             var objGroups = {};
             allResourcesAsList.forEach(function (resource, inx) {
                 if (resource.resourceType == 'Encounter') {
-                    var klass = resource.class || 'unknown';
+                    var klass = resource.class?.code || 'unknown';
+
                     if (!objGroups[klass]) {
                         var id = arGroups.length + 1;
-                        arGroups.push({id: id, content: klass});
+                        arGroups.push({id: id, content: ""});   //class doesn't add value...
+                        //arGroups.push({id: id, content: klass});
                         objGroups[klass] = id;
                     }
                 }
@@ -3157,7 +3159,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
                         if (include) {
                             var node = {id: inx, start: resource.period.start, resource: resource};
-                            var klass = resource.class || 'unknown';
+                            var klass = resource.class?.code || 'unknown';
                             node.group = objGroups[klass];
                             ar.push(node);
                         }

@@ -89,6 +89,11 @@
     overflow-y: scroll;
 }
 
+.myScroll600 {
+    height: 600px;
+    overflow-y: scroll;
+}
+
 .scoreResult {
     border : 1px solid #eeeeee;
     padding : 5px;

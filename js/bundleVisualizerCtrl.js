@@ -17,7 +17,11 @@ angular.module("sampleApp")
 
             $scope.input = {};
 
-            $scope.maxForGraph = 100 //the maximum resources for which the full graph is generated.
+            $scope.input.issError = true
+            $scope.input.issWarning = true
+            $scope.input.issInfo = true
+
+            $scope.maxForGraph = 200 //the maximum resources for which the full graph is generated.
 
             $scope.selectors = []
             $scope.selectors.push({display:"Paste Bundle",code:'paste'})
@@ -163,6 +167,72 @@ angular.module("sampleApp")
                 )
 
             }
+
+
+            //validate the current bundle against an external validation server
+            //just for au ATM
+            $scope.validateFromIG = function () {
+                delete $scope.extendedOO
+                $scope.input.issErrorCount = 0
+                $scope.input.issWarningCount = 0
+                $scope.input.issInfoCount = 0
+                let url = `https://smile.sparked-fhir.com/aucore/fhir/DEFAULT/Bundle/$validate`
+                $scope.waiting = true
+                $http.post(url,$scope.fhir).then(
+                    function (data) {
+                        let OO = data.data
+                        console.log(OO)
+                        $scope.extendedOO = OO
+                        for (let iss of OO.issue || []) {
+                            switch (iss.severity) {
+                                case 'error' :
+                                    $scope.input.issErrorCount++
+                                    break
+                                case 'warning' :
+                                    $scope.input.issWarningCount++
+                                    break
+                                case 'information' :
+                                    $scope.input.issInfoCount++
+                                    break
+                            }
+                        }
+
+                    }, function (err) {
+                        alert("Error executing validate query " + angular.toJson(err))
+                        //alert(angular.toJson(err))
+
+                    }
+                ).finally(function () {
+                    $scope.waiting = false
+                })
+            }
+
+            $scope.getExtendedIssueResource = function (iss) {
+                delete $scope.extendedIssueResource
+                let loc = iss.location[0]
+                const match = loc.match(/\[(\d+)\]/);
+                const firstIndex = match ? parseInt(match[1], 10) : null;
+                if (firstIndex !== null) {
+                    $scope.extendedIssueResource = $scope.fhir.entry[firstIndex].resource
+
+                }
+            }
+
+            $scope.canShowIssue = function (iss) {
+
+                if (iss.severity == 'error' && $scope.input.issError) {
+                    return true
+                }
+                if (iss.severity == 'warning' && $scope.input.issWarning) {
+                    return true
+                }
+                if (iss.severity == 'information' && $scope.input.issInfo) {
+                    return true
+                }
+                return false
+
+            }
+
 
 
             //when the 'add to library' link is clicked in saved queries.
@@ -1338,14 +1408,7 @@ angular.module("sampleApp")
                     }
                 };
 
-                var graphOptionsDEP = {
-                    physics: {
-                        enabled: true,
-                        barnesHut: {
-                            gravitationalConstant: -10000,
-                        }
-                    }
-                };
+
 
 
                 delete  $scope.noFullGraph
@@ -1669,16 +1732,7 @@ angular.module("sampleApp")
                             $scope.urlPassedIn = true;  //flag that the bundle is to be retreived and displayed - not the selector
                             //if the first entry in the bundle is a Bundle, then this must be a bundle of bundles from a FHIR server. Select it
                             processBundle(bundle)
-                            /*
-                            if (response.entry[0].resource.resourceType == 'Bundle') {
-                               // $scope.toggleSidePane();    //hide the sidepane
-                                processBundle(response.entry[0].resource)
-                            } else {
-                                //the first entry is not a Bundle - just process it
-                             //   $scope.toggleSidePane();    //hide the sidepane
-                                processBundle(response)
-                            }
-*/
+
                         }
 
 

@@ -85,9 +85,12 @@ angular.module("sampleApp")
                     resolve: {
                         hx: function () {
                             let ar = []
-                            entries.forEach(function (entry) {
+                            let arEntries = entries.slice(0,4)
+
+                            arEntries.forEach(function (entry) {
                                 ar.push(entry.resource)
                             });
+
                             return ar
                         },
 
@@ -145,7 +148,7 @@ angular.module("sampleApp")
 
             //if the user has passed in parameters
             let search = $location.search();
-            console.log(search)
+
             //the data server. assume one only passed in...
             if (search.data) {
                 appConfigSvc.setServerType('data',search.data);
@@ -169,15 +172,25 @@ angular.module("sampleApp")
 
 
             $scope.input.showType = {};
-            $scope.setShowType = function(type,show) {
-                console.log(type,show)
-                //$scope.input.showType[type] =  show;
 
-                //todo - inefficient - refactor renderPatientDetails to pull ont the graph...
-                //renderPatientDetails($scope.allResources,true);
+            $scope.setShowType = function(type,show) {
+
                 drawGraph();
 
             };
+
+            //hide all resources in the main resource graph
+            $scope.updateFilter = function (show) {
+                for (let key of Object.keys($scope.input.showType)) {
+                    $scope.input.showType[key] = show
+
+                }
+                drawGraph();
+            }
+
+
+
+
 
             //select graph options
 
@@ -591,6 +604,7 @@ angular.module("sampleApp")
                 // console.log(timelineData)
 
                 $('#encTimeline').empty();     //otherwise the new timeline is added below the first...
+
                 var tlContainer = document.getElementById('encTimeline');
 
                 var timeline = new vis.Timeline(tlContainer);
@@ -654,6 +668,11 @@ angular.module("sampleApp")
                     controller: 'findPatientCtrl'
                 }).result.then(
                     function(resource){
+
+                        $('#mynetwork').text('Creating graph, please wait...');
+
+
+
                         console.log(resource)
                         if (resource) {
                             loadPatientById(resource);
@@ -945,9 +964,34 @@ angular.module("sampleApp")
                 var graphData = resourceCreatorSvc.createGraphOfInstances( $scope.allResourcesAsList,true,$scope.input.showType);
                 $scope.graphData = graphData;
                 var container = document.getElementById('mynetwork');
+
+                let graphOptions = {
+                    physics: {
+                        enabled: true,
+                        barnesHut: {
+                            gravitationalConstant: -10000,
+                            centralGravity: 0.3,
+                            springLength: 120,
+                            springConstant: 0.04,
+                            damping: 0.09,
+                            avoidOverlap: 0.2
+                        },
+                        stabilization: {
+                            iterations: 200,   // try lowering from default (1000)
+                            updateInterval: 25
+                        }
+                    }
+                };
+
                 if (container) {
-                    var network = new vis.Network(container, graphData, {});
+                    let network = new vis.Network(container, graphData, graphOptions);
                     $scope.graph['mynetwork'] = network;
+
+                    network.on("stabilizationIterationsDone", function () {
+                        delete $scope.showGraphWarning
+                        network.setOptions( { physics: false } );
+                    });
+
                     network.on("click", function (obj) {
 
                         var nodeId = obj.nodes[0];  //get the first node
@@ -960,6 +1004,29 @@ angular.module("sampleApp")
 
                         $scope.$digest();
                     });
+
+                    network.on("doubleClick", function (obj) {
+
+                        let nodeId = obj.nodes[0];  //get the first node
+                        let node = graphData.nodes.get(nodeId);
+
+                        if (node?.resource) {
+                            setUpForResource(node.resource)
+                            $scope.input.mainTabActive = 0          //the resource explorer tab
+
+
+                            $timeout(function () {
+                                // $scope.input.secondaryTabActive = 4     //the graph tab
+                                $scope.fitGraphInContainer('resourcenetwork')
+
+                            },0)
+                        }
+
+
+                        $scope.$digest();
+                    });
+
+
                 } else {
                     //alert("can't find the element 'mynetwork' in the page")
                 }
@@ -986,6 +1053,38 @@ angular.module("sampleApp")
                 $scope.outcome.allResourcesOfOneType = vo.bundle;
             };
 
+
+            function setUpForResource(resource) {
+                if (! resource) {
+                    return
+                }
+
+                $scope.resourceSelected({resource:resource});
+
+                let type = resource.resourceType
+                for (let item of $scope.outcome.resourceTypes) {
+                    if (item.type == type) {
+                        $scope.typeSelected(item)       //selects the type
+
+                        for (let item of $scope.outcome.resourceTypes) {
+                            if (item.type == type) {
+                                $scope.outcome.allResourcesOfOneType = item.bundle
+
+                                for (let entry of $scope.outcome.allResourcesOfOneType.entry) {
+                                    if (entry.resource.id == resource.id) {
+                                        $scope.resourceSelected(entry)
+                                        break
+                                    }
+                                }
+                                break
+                            }
+                        }
+                        break
+                    }
+                }
+
+            }
+
             function createGraphOneResource(resource,containerId) {
 
                 //todo this is likely inefficient as may have already been done..
@@ -996,15 +1095,78 @@ angular.module("sampleApp")
                 var container = document.getElementById(containerId);
 
                 let options = {layout:{improvedLayout : false}}
-                var network = new vis.Network(container, graphData, options);
+
+                let graphOptions = {
+                    layout: {
+                        improvedLayout : false
+                    },
+                    physics: {
+                        enabled: true,
+                        barnesHut: {
+                            gravitationalConstant: -10000,
+                            centralGravity: 0.3,
+                            springLength: 120,
+                            springConstant: 0.04,
+                            damping: 0.09,
+                            avoidOverlap: 0.2
+                        },
+                        stabilization: {
+                            iterations: 200,   // try lowering from default (1000)
+                            updateInterval: 25
+                        }
+                    }
+                };
+
+                var network = new vis.Network(container, graphData, graphOptions);
 
                 $scope.graph[containerId] = network;
+
+                network.on("stabilizationIterationsDone", function () {
+                    delete $scope.showGraphWarning
+                    network.setOptions( { physics: false } );
+                });
 
                 network.on("doubleClick", function (obj) {
 
                     var nodeId = obj.nodes[0];  //get the first node
                     var node = graphData.nodes.get(nodeId);
+
+
+                    if (node?.resource) {
+                        setUpForResource(node.resource)
+                    }
+
+
+                    /*
+
                     $scope.resourceSelected({resource:node.resource});
+
+                    let type = node.resource.resourceType
+                    for (let item of $scope.outcome.resourceTypes) {
+                        if (item.type == type) {
+                            $scope.typeSelected(item)       //selects the type
+
+                            for (let item of $scope.outcome.resourceTypes) {
+                                if (item.type == type) {
+                                    $scope.outcome.allResourcesOfOneType = item.bundle
+
+                                    for (let entry of $scope.outcome.allResourcesOfOneType.entry) {
+                                        if (entry.resource.id == node.resource.id) {
+                                            $scope.resourceSelected(entry)
+                                            break
+                                        }
+                                    }
+                                    break
+                                }
+                            }
+                            break
+                        }
+                    }
+
+
+*/
+
+
 
 /*
                     var modalOptions = {
@@ -1095,7 +1257,16 @@ angular.module("sampleApp")
 
 
             $scope.selectNewResource = function(reference) {
-                $scope.resourceSelected({resource:reference.resource})
+
+                if (reference?.resource) {
+                    setUpForResource(reference.resource)
+                }
+
+
+
+
+
+
 
             };
             //--------------------------------
@@ -1122,16 +1293,24 @@ angular.module("sampleApp")
                 resourceCreatorSvc.loadVersions(resource).then(
                     function(data) {
                         $scope.resourceVersions = data.data;    //a bundle of all the versions for this resource...
+                      //  console.log($scope.resourceVersions)
                     }
                 )
             };
 
-            $scope.selectVersion = function(resource) {
-                $scope.outcome.selectedResource = resource;     //todo - any side effects of a version rather than the latest?
+            $scope.selectVersion = function(resource,index) {
+                //$scope.outcome.selectedResourceVersionIndex = index
 
-                drawResourceTree(resource)
+                if (resource) {
+                    $scope.outcome.selectedResource = resource;     //todo - any side effects of a version rather than the latest?
 
-                $scope.resourceSelected({resource:resource});
+                    drawResourceTree(resource)
+
+                    $scope.resourceSelected({resource:resource});
+
+                } else {
+                    alert("This resource version is missing. It was likely deleted (and subsequently restored)")
+                }
 
 
             };

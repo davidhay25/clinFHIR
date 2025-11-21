@@ -14,7 +14,7 @@ angular.module("sampleApp")
                     console.log(user);
                 } else {
                     console.log('no user')
-                    logicalModelSvc.setCurrentUser(null);
+                  //  logicalModelSvc.setCurrentUser(null);
                     // No user is signed in.
                 }
             });

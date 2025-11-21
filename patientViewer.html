@@ -12,6 +12,10 @@
     <script src="js/libs/moment.min.js"></script>
     <script src="https://cdn.counter.dev/script.js" data-id="62b27fdf-0033-481b-8b59-680638d9162c" data-utcoffset="12"></script>
 
+
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="383f5688-7293-4ac2-9dd3-b82e032bcc81"></script>
+
+
     <script src="js/libs/firebase.js"></script>
     <script src="js/libs/angularfire.min.js"></script>
     <script src="js/libs/showdown.min.js"></script>
@@ -31,6 +35,10 @@
         }
 
         .list-group-itemXX {
+            background-color: white;
+        }
+
+        .white {
             background-color: white;
         }
 
@@ -61,6 +69,7 @@
             width: 100%;
             height: 400px;
             border: 1px solid lightgray;
+            background-color: white;
         }
     </style>
 
@@ -257,7 +266,7 @@
     <div ng-hide="appConfigSvc.getCurrentPatient() || loadedFromBookmark">
 
         <div style="font-family: Open Sans, sans-serif;">
-            The Patient viewer application It is targeted at the Clinician or Information Analyst, and will display the resources from a patient record in a
+            The Patient viewer application is targeted at the Clinician or Information Analyst, and will display the resources from a patient record in a
             number of perspectives. These include:
             <ul>
                 <li>The resource explorer to examine individual resources</li>
@@ -274,7 +283,7 @@
 
         <div style="font-family: Open Sans, sans-serif;">
             To select a Patient to view, first select the server where the data is stored using the
-            link at the top left (Labelled 'Server'). <em>https://hapi.fhir.org/baseR4/</em> is a good choice
+            link at the top of the screen (Labelled 'Server'). <em>https://hapi.fhir.org/baseR4/</em> is a good choice
             if you don't have a specific server in mind.
             <br/>
             The <i class="glyphicon glyphicon-edit clickable" ng-click="selectServer()"> </i> icon
