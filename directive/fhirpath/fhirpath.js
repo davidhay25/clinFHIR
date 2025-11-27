@@ -12,7 +12,7 @@ angular.module('sampleApp')
             },
 
             templateUrl: 'directive/fhirpath/fhirpath.html',
-            controller: function($scope,$http){
+            controller: function($scope,$http,umamiSvc){
 
                 $scope.input = {};
 
@@ -29,7 +29,7 @@ angular.module('sampleApp')
                     delete $scope.FHIRPathResult;
                     delete $scope.FHIRPathError;
                     try {
-
+                        umamiSvc.track('pvAction:fhirPath', {fhirpath:path});
 
 
                         $scope.FHIRPathResult = fhirpath.evaluate($scope.resource, path,null,fhirpath_r4_model);

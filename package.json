@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@sentry/node": "^10.26.0",
     "adm-zip": "^0.5.16",
     "axios": "^1.12.2",
     "cors": "^2.8.5",

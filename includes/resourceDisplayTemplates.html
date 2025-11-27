@@ -37,6 +37,12 @@
             </div>
         </div>
 
+        <div class="row" ng-switch-when="Task">
+            <div class="col-md-12">
+                {{entry.resource.description || "Task"}}
+            </div>
+        </div>
+
         <div class="row" ng-switch-when="ServiceRequest">
             <div class="col-md-12">
                 Intent: {{entry.resource.intent}}  Status: {{entry.resource.status}}

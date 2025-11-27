@@ -11,6 +11,22 @@ function setup(app,client) {
 
 
 
+    //create a list of all tags currently defined in the library
+    app.get("/bv/getAllTags",async function (req,res){
+
+
+        try {
+            const tagsA = await database.collection("bvBundles").distinct("tags");
+            const tagsB = await database.collection("bvLibrary").distinct("tags");
+            const allTags = [...new Set([...tagsA, ...tagsB])];
+            res.json(allTags);
+
+        } catch (err) {
+            console.error(err);
+            res.status(500).send(err);
+        }
+    })
+
     //retrieve all the bundles saved in the library
     //todo - exclude those send in from other apps (eg GB)
     app.get("/bv/getAllBundles",async function (req,res){
@@ -31,6 +47,29 @@ function setup(app,client) {
         }
     })
 
+
+
+    //delete (hide) a nundle
+    app.delete("/bv/getBundle/:id",async function (req,res){
+
+        let id = req.params.id;
+        let query = {id:id}
+        //console.log('bv',query)
+        try {
+            const result = await database.collection("bvBundles").updateOne(
+                { id: id },            // filter
+                { $set: { active: "false" } }  // update
+            );
+
+           // const result = await database.collection("bvBundles").findOne(query)
+            //  console.log('bv',result)
+            res.json(result);
+        } catch (err) {
+            console.error(err);
+            res.status(500).send(err);
+        }
+    })
+
     //retrieve a single stored bundle by id. Bundles can be stored from within BV - and also saved
     //into the db by other apps (eg GtaphBuilder) when 'exporting' bundles to BV for viewing
     app.get("/bv/getBundle/:id",async function (req,res){
@@ -40,7 +79,6 @@ function setup(app,client) {
         //console.log('bv',query)
         try {
             const result = await database.collection("bvBundles").findOne(query)
-          //  console.log('bv',result)
             res.json(result);
         } catch (err) {
             console.error(err);
@@ -85,7 +123,7 @@ function setup(app,client) {
 
         try {
             const result = await database.collection("bvLibrary").find( filter,
-                { projection: { _id: 1, name: 1, description: 1, qry: 1 } }).toArray();
+                { projection: { _id: 1, name: 1, description: 1, qry: 1,tags:1 } }).toArray();
             res.json(result);
         } catch (err) {
             console.error(err);

@@ -14,6 +14,22 @@ angular.module("sampleApp")
 
         return {
 
+            makeProfileSummary : function (resource) {
+                let summary = []
+                for (const ed of resource.snapshot?.element || []) {
+                    let item = {}
+                    item.path = $filter('dropFirstInPath')(ed.path)
+                    item.short = ed.short
+                    item.mult = `${ed.min}..${ed.max}`
+                    item.type = ed.type
+                    item.valueSet = ed.binding?.valueSet
+                    summary.push(item)
+
+                }
+                return summary
+
+            },
+
             getProcedures : function (bundle) {
                 let lst = []
                 for (const entry of bundle.entry) {

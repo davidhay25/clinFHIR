@@ -1,9 +1,9 @@
 
 angular.module("sampleApp")
     .controller('resourceViewerCtrl',
-        function ($scope,supportSvc,appConfigSvc,resourceCreatorSvc,resourceSvc,$sce,sessionSvc,
+        function ($scope,supportSvc,appConfigSvc,resourceCreatorSvc,resourceSvc,$sce,sessionSvc,umamiSvc,
                   $uibModal, $timeout,GetDataFromServer,modalService,ResourceUtilsSvc,builderSvc,$window,$http,$location,
-                  $firebaseObject,Utilities,terminologySvc) {
+                  $firebaseObject,Utilities,terminologySvc,bundleVisualizerSvc) {
 
 
 
@@ -31,11 +31,19 @@ angular.module("sampleApp")
                 }
             )
             $scope.loadFromLibrary = function (item) {
+
+                umamiSvc.track('pvSelect:library', {value:`${item.id} ${item.name}`});
                 $http.get(`bv/getBundle/${item.id}`).then(
                     function (data) {
                         //$scope.bundleDisplayName = item.name
                         console.log(data.data)
+
+                        $scope.bundle = data.data.bundle
+
                         processBundle(data.data.bundle)
+
+
+
                     }, function () {
                         alert("Sorry, I cannot retrieve that Bundle")
                     }
@@ -194,121 +202,6 @@ angular.module("sampleApp")
 
             //select graph options
 
-            $scope.selectScenarioDEP = function(){
-                let url = appConfigSvc.getCurrentDataServer().url + "DocumentReference?type=51899-3&_include=DocumentReference:subject";
-
-                //only get public scenarios
-                url += "&security-label=http://terminology.hl7.org/CodeSystem/v3-Confidentiality|U";
-
-                $http.get(url).then(
-                    function(data) {
-                        console.log(data);
-                        if (data.data && data.data.entry) {
-                            $uibModal.open({
-                                backdrop: 'static',      //means can't close by clicking on the backdrop. stuffs up the original settings...
-                                keyboard: false,       //same as above.
-                                templateUrl: 'modalTemplates/selectScenario.html',
-                                size:'lg',
-                                controller : function($scope,hashResource){
-                                    let docRefSystem = 'http://clinfhir.com/fhir/CodeSystem/attachment-format';
-                                    $scope.hashResource = hashResource;
-                                    $scope.ResourceUtilsSvc = ResourceUtilsSvc;
-
-                                    $scope.select = function(){
-                                        $scope.$close({docRef:$scope.selectedDocRef,patient:$scope.selectedPatient})
-                                    };
-
-                                    $scope.selectScenario = function(docRef){
-                                        console.log(docRef);
-                                        $scope.selectedDocRef = docRef;
-                                        delete $scope.scenarioDescription;
-                                        let hashPatient =  hashResource['Patient'];
-                                        let ar = docRef.subject.reference.split('/');
-                                        let id = ar[ar.length-1];
-
-                                        $scope.selectedPatient = hashPatient[id];
-
-                                        console.log(ResourceUtilsSvc.getOneLineSummaryOfResource($scope.selectedPatient))
-
-                                        //find a description - will have the system url http://clinfhir.com/fhir/CodeSystem/graph/attachment-format
-                                        if (docRef.content && docRef.content.length > 0) {
-                                            //let b64 = atob(docRef.content[1].attachment);
-                                            delete $scope.bundle;
-                                            docRef.content.forEach(function(content) {
-                                                let format = content.format;
-                                                if (format && format.system && format.system == docRefSystem) {
-                                                    switch (format.code) {
-                                                        case 'notes' :
-                                                            $scope.scenarioDescription = atob(content.attachment.data)
-                                                            break;
-                                                        case 'bundle' :
-                                                            $scope.bundle = angular.fromJson(atob(content.attachment.data))
-                                                    }
-                                                }
-
-                                            });
-
-                                            if ($scope.bundle && $scope.bundle.entry){
-                                                //the docref has the list of resources in it
-                                                //todo - do I really want the
-                                                $scope.types = {};
-
-                                                $scope.bundle.entry.forEach(function (entry) {
-                                                    if (entry.fullUrl) {
-                                                        let ar = entry.fullUrl.split('/')
-                                                        let type = ar[ar.length -2]
-                                                        console.log(type)
-                                                        $scope.types[type] = $scope.types[type] || {cnt:0}
-                                                        $scope.types[type].cnt++
-                                                    }
-                                                })
-                                            }
-
-
-                                            //let docRefSystem = 'http://clinfhir.com/fhir/CodeSystem/graph/attachment-format';
-
-                                            //$scope.scenarioDescription = atob(docRef.content[1].attachment.data)
-                                        }
-/*
-                                        //look for other scenarios (graphs) for this patient
-                                        let hashDocRef = hashResource['DocumentReference'];
-                                        let cnt = 1;
-                                        angular.forEach(hashDocRef,function(k,v){
-                                          //  if (v)
-                                        })
-*/
-                                    }
-
-                                },
-                                resolve : {
-                                    hashResource : function(){
-                                        let hashResource = {};
-                                        data.data.entry.forEach(function (entry) {
-                                            let resource = entry.resource;
-                                            hashResource[resource.resourceType] = hashResource[resource.resourceType] || {};
-                                            let hash = hashResource[resource.resourceType];
-                                            hash[resource.id] = hash[resource.id]
-                                            hash[resource.id] = resource;
-
-                                            //hashResource[resource.resourceType].push(resource)
-                                        });
-                                        return hashResource
-                                    }}
-                            }).result.then(
-                                function(vo) {
-                                    if (vo.patient) {
-                                        loadPatientById(vo.patient);
-                                    }
-                                }
-                            )
-                        } else {alert("Sorry, there are no public scenarios on this server")}
-                    },
-                    function(err) {
-                        console.log(err)
-                    }
-                )
-
-            };
 
             $scope.patientShown = true;
             $scope.showPatientInGraph = function(){
@@ -638,6 +531,28 @@ angular.module("sampleApp")
             }
 
 
+            $scope.selectResourceFromSection = function (resource) {
+                setUpForResource(resource)
+                $scope.input.secondaryTabActive = 0
+            }
+            $scope.getResourceTextFromReference = function(ref){
+                //assume reference is {type}/{targetId}. may need to revisit this at some point
+                let ar = ref.split('/')
+                let targetId = ar[ar.length-1]
+                if ($scope.bundle?.entry) {    //todo currentl only set when loading form library
+                    for (let entry of $scope.bundle.entry) {
+                        if (entry.resource?.id == targetId) {
+
+                            let text = {text:ResourceUtilsSvc.getOneLineSummaryOfResource(entry.resource),resource:entry.resource}
+
+                            return text
+                        }
+                    }
+                }
+
+            }
+
+
 
 
             //used by patientViewer to select a patient to display
@@ -689,6 +604,9 @@ angular.module("sampleApp")
             //18Nov2015 with a bundle, create all the other objects
             function processBundle(bundle) {
                 console.log(bundle)
+
+
+                let hasComposition
                 let resourceHash = {};      //key is type, content is 'pseudo bundle' - has entry attribute
                 let allResources = []
                 let patient;
@@ -700,10 +618,27 @@ angular.module("sampleApp")
                         patient = resource
                     }
 
+                    if (type == 'Composition') {
+                        hasComposition = true
+                    }
+
+
                     resourceHash[type] = resourceHash[type] || {entry:[],total:0}
                     resourceHash[type].entry.push({resource:resource});
                     resourceHash[type].total ++
 
+                }
+
+                //if there's a composition in the bundle we create the document object and display the
+                //document tab. Maybe better to look at the bundle type
+                if (hasComposition) {
+                    $scope.document = bundleVisualizerSvc.makeDocument(bundle, $sce)
+                    console.log($scope.document)
+                }
+
+                //used to display the HTML when displaying a document
+                $scope.to_trusted = function(html_code) {
+                    return $sce.trustAsHtml(html_code);
                 }
 
                 //sort medications for Marks course...
@@ -746,6 +681,11 @@ angular.module("sampleApp")
             function loadPatientById(resource) {
                 $scope.currentPatient = resource;
                 //load the existing resources for this patient...
+
+
+
+
+
                 appConfigSvc.setCurrentPatient(resource);
                 $scope.waiting = true;
                 supportSvc.getAllData(appConfigSvc.getCurrentPatient().id).then(
@@ -1233,7 +1173,7 @@ angular.module("sampleApp")
                     $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(resource, true)], {type: "text/text"}));
                     $scope.downloadLinkJsonName = resource.resourceType + "-" + resource.id;
 
-
+/*
 
                     //GetDataFromServer.getXmlResource(resource.resourceType + "/" + resource.id).then(
                     GetDataFromServer.getXmlResource(resource.resourceType + "/" + resource.id + "?_format=xml&_pretty=true").then(
@@ -1250,6 +1190,8 @@ angular.module("sampleApp")
                     ).finally(function(){
                         //delete $scope.progressMessage
                     })
+
+                    */
 
                 }
 

@@ -1,4 +1,6 @@
 
+require("./instrument.js");
+
 let fs = require('fs')
 
 let http = require('http');
@@ -14,7 +16,30 @@ var app = express();
 app.use(cors());
 
 
+const Sentry = require("@sentry/node");
+Sentry.captureMessage(`Server startup`, 'info');
+/*
+try {
+    foo();
+} catch (e) {
+    console.log(e)
+    Sentry.captureException(e);
+}
+*/
 app.use(bodyParser.json({limit:'50mb',type:['application/json+fhir','application/fhir+json','application/json']}))
+
+
+app.post('/telemetry', async function(req,res) {
+
+    const err = new Error("Resource not found");
+    err.details = req.body
+    Sentry.captureException(err);
+
+    res.json({})
+
+
+})
+
 
 //let statsModule = require("./serverModuleStats")
 let lantanaModule = require("./serverModuleLantana")
@@ -36,6 +61,7 @@ registryModule.setup(app)
 /* temp*/
 process.on('uncaughtException', function(err) {
     console.log('>>>>>>>>>>>>>>> Caught exception: ' + err);
+    Sentry.captureException(err);
 });
 
 //var db;

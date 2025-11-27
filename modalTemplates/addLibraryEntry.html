@@ -1,0 +1,61 @@
+<div>
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+
+                <h3>Save this Query in the library</h3>
+
+            </div>
+
+
+            <div class="col-md-4 col-sm-4">
+
+                <div class="pull-right">
+                    <button class="btn btn-link" ng-click="$dismiss()">Cancel</button>
+                    <button class="btn btn-primary"
+                            ng-show="input.description && input.name"
+                            ng-click="save()">Save bundle</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="modal-body">
+
+        <table class="table table-bordered">
+
+            <tr><td>Name</td><td>
+                <input type="text" class="form-control" autofocus ng-model="input.name"></input>
+            </td></tr>
+
+            <tr><td>Description</td><td>
+                <textarea class="form-control" rows="5"  ng-model="input.description"></textarea>
+            </td></tr>
+
+            <tr><td>Tags</td><td>
+                <div class="row">
+                    <div class="col-md-3" ng-repeat="tag in tags">
+                        <checkbox ng-model="input.selectedTag[tag]"></checkbox> {{tag}}
+                    </div>
+                </div>
+
+                <br/>
+
+                <input type="text" class="form-control" ng-model="input.tag" placeholder="New tag"></input>
+            </td></tr>
+
+            <tr><td>Author</td><td>
+                <input type="text" class="form-control" ng-model="input.author"></input>
+            </td></tr>
+        </table>
+
+    </div>
+
+    <div class="modal-header">
+       <div class="alert alert-danger">
+           <strong>Don't use this with any patient identifiable data! This bundle will be available for anyone to view.</strong>
+       </div>
+
+    </div>
+</div>

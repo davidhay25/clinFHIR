@@ -3,17 +3,17 @@
     <div class="alert alert-info">
       This tab shows the content of the .text element for the resources in the document
     </div>
-    <strong>Subject</strong>
+    <h4>Subject</h4>
     <p  style="margin-left: 10px" ng-bind-html="to_trusted(document.subject.text.div)"></p>
 
     <hr style="border-top: 1px solid grey; margin: 1px"/>
-    <strong>Document metadata</strong>
+    <h4>Document metadata</h4>
     <div class="narrative">
       <p  style="margin-left: 10px" ng-bind-html="to_trusted(document.composition.text.div)"></p>
     </div>
 
 
-    <strong>Sections</strong>
+    <h4>Sections</h4>
 
     <div ng-repeat = "section in document.composition.section">
       <hr style="border-top: 1px solid grey; margin: 1px"/>

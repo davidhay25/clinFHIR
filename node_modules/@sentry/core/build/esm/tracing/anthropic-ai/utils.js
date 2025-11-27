@@ -1,0 +1,30 @@
+import { captureException } from '../../exports.js';
+import { SPAN_STATUS_ERROR } from '../spanstatus.js';
+import { ANTHROPIC_AI_INSTRUMENTED_METHODS } from './constants.js';
+
+/**
+ * Check if a method path should be instrumented
+ */
+function shouldInstrument(methodPath) {
+  return ANTHROPIC_AI_INSTRUMENTED_METHODS.includes(methodPath );
+}
+
+/**
+ * Capture error information from the response
+ * @see https://docs.anthropic.com/en/api/errors#error-shapes
+ */
+function handleResponseError(span, response) {
+  if (response.error) {
+    span.setStatus({ code: SPAN_STATUS_ERROR, message: response.error.type || 'internal_error' });
+
+    captureException(response.error, {
+      mechanism: {
+        handled: false,
+        type: 'auto.ai.anthropic.anthropic_error',
+      },
+    });
+  }
+}
+
+export { handleResponseError, shouldInstrument };
+//# sourceMappingURL=utils.js.map

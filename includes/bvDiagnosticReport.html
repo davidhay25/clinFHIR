@@ -13,7 +13,8 @@
                     <table class="table table-condensed table-bordered">
                         <tr ng-repeat="obs in item.obs">
                             <td style="width: 50%">
-                                <div class="clickable" ng-click="selectDRObs(obs)">
+                                <div  style="cursor: pointer"
+                                        class="clickable" ng-click="selectDRObs(obs)">
 
                                     {{obs.code.text || obs.code.coding[0].display}}
                                 </div>

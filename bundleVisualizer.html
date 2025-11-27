@@ -30,6 +30,7 @@
     <script src="js/libs/moment.min.js"></script>
 
     <script src="https://cdn.counter.dev/script.js" data-id="62b27fdf-0033-481b-8b59-680638d9162c" data-utcoffset="12"></script>
+
     <script defer src="https://cloud.umami.is/script.js" data-website-id="383f5688-7293-4ac2-9dd3-b82e032bcc81"></script>
 
     <link rel="stylesheet" type="text/css" href="css/jsTreeStyle.css"/>
@@ -155,11 +156,35 @@
 
 
     <script>
-        angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase','ngSanitize','ui.checkbox']).config(function($locationProvider) {
+        let app = angular.module("sampleApp",['ui.bootstrap','ngStorage','firebase','ngSanitize','ui.checkbox']).config(function($locationProvider) {
             $locationProvider.html5Mode(true);
             $locationProvider.hashPrefix('!');
         });
         angular.module("sampleApp").constant("moment", moment);
+
+        app.config(function ($provide) {
+
+            $provide.decorator('$exceptionHandler', function ($delegate) {
+                return function (exception, cause) {
+                    console.log("Untrapped exception",exception.stack)
+
+                    let obj = {type:'err',module:'model',msg:exception.stack}
+                    $.ajax({
+                        type: "POST",
+                        url: "telemetry",
+                        contentType: "application/json",
+                        data: JSON.stringify(obj)
+                    });
+
+                    let msg = "There was an unexpected error. Details have been saved to the server, " +
+                        "but your last action may have failed. You should restart the browser and check."
+
+                    alert(msg);
+                };
+            });
+        });
+
+
 
     </script>
 
@@ -246,7 +271,8 @@
     <script src="js/filters.js"></script>
     <script src="js/bundleVisualizerCtrl.js"></script>
     <script src="js/viewResourceCtrl.js"></script>
-
+    <script src="js/umamiSvc.js"></script>
+    <script src="js/viewVSCtrl.js"></script>
     <title>Bundle Visualizer</title>
 
 </head>
@@ -286,7 +312,7 @@
 
             <div class="col-md-2">
                 <div class="navbar-text">
-                    <button class="btn btn-primary" ng-hide = "showSelector || urlPassedIn" class="clickable"
+                    <button class="btn btn-primary" ng-hide = "showSelector" class="clickable"
                          ng-click="reShowSelector() ">Show Selector</button>
                 </div>
             </div>
@@ -473,41 +499,57 @@
                             you wish to execute and details plus the 'Run query' button will appear to the right.
                         </div>
 
+                        <div class="row">
+                            <div class="col-md-1">
 
-                                <div class="row">
-                                    <div class="col-md-8">
-                                        <div class="myScroll1">
-                                            <table class="table table-bordered">
-                                                <tr><th>Name</th><th>Query</th></tr>
-                                                <tr ng-click="input.libraryQuery=item"
-                                                    style="cursor: pointer"
-                                                    ng-class="{listItemSelected:input.libraryQuery == item}"
-                                                    ng-repeat = "item in library">
-                                                    <td>
-                                                        {{item.name}}
-                                                    </td>
-                                                    <td>{{item.qry}}</td>
+                               Tags
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-control" ng-model="input.selectedLibraryTag"
+                                        ng-options="tag for tag in libraryTags"></select>
 
-                                                </tr>
-                                            </table>
-                                        </div>
+                            </div>
+                        </div>
+                        <br/>
 
-                                    </div>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="myScroll1">
+                                    <table class="table table-bordered">
+                                        <tr><th>Name</th><th>Query</th><th>Tags</th></tr>
+                                        <tr ng-click="input.libraryQuery=item"
+                                            style="cursor: pointer"
+                                            ng-class="{listItemSelected:input.libraryQuery == item}"
+                                            ng-show="showLibraryEntry(item)"
+                                            ng-repeat = "item in library">
+                                            <td>
+                                                {{item.name}}
+                                            </td>
+                                            <td>{{item.qry}}</td>
+                                            <td style="width: 10%">
+                                                <div ng-repeat="tag in item.tags">{{tag}}</div>
+                                            </td>
 
-                                    <div class="col-md-1">
-                                    </div>
-                                    <div class="col-md-3">
-                                        {{input.libraryQuery.name}}
-                                        <br/><br/>
-                                        {{input.libraryQuery.description}}
-                                        <br/> <br/>
-
-                                        <button ng-show = "input.libraryQuery" class="btn btn-primary"
-                                                ng-click="executeLibraryQuery(input.libraryQuery)">Run query</button>
-
-
-                                    </div>
+                                        </tr>
+                                    </table>
                                 </div>
+
+                            </div>
+
+                            <div class="col-md-1">
+                            </div>
+                            <div class="col-md-3">
+                                {{input.libraryQuery.name}}
+                                <br/><br/>
+                                {{input.libraryQuery.description}}
+                                <br/> <br/>
+
+                                <button ng-show = "input.libraryQuery" class="btn btn-primary"
+                                        ng-click="executeLibraryQuery(input.libraryQuery)">Run query</button>
+
+
+                            </div>
+                        </div>
 
 
                     </div>
@@ -527,7 +569,7 @@
                                     <div class="myScroll1">
                                         <div class="myScroll1">
                                             <table class="table table-bordered">
-                                                <tr><th>Name</th><th>Description</th><th>Author</th><th>Date</th></tr>
+                                                <tr><th>Name</th><th>Description</th><th>Author</th><th>PV</th><th>Date</th></tr>
                                                 <tr ng-click="input.libraryBundle=bundle"
                                                     ng-repeat="bundle in libraryAllBundles"
                                                     ng-class="{listItemSelected: input.libraryBundle==bundle}"
@@ -535,6 +577,7 @@
                                                     <td>{{bundle.name}}</td>
                                                     <td>{{bundle.description}}</td>
                                                     <td>{{bundle.author}}</td>
+                                                    <td>{{bundle.showInPV}}</td>
                                                     <td>{{bundle.date | date}}</td>
 
                                                 </tr>
@@ -547,6 +590,10 @@
                                 <div class="col-md-4">
                                     <button ng-show = "input.libraryBundle" class="btn btn-primary"
                                             ng-click="getBundleFromLibrary(input.libraryBundle)">Retrieve Bundle</button>
+
+                                    <button ng-show = "input.libraryBundle" class="btn btn-danger"
+                                            ng-click="deleteBundleFromLibrary(input.libraryBundle)">Delete Bundle</button>
+
                                 </div>
 
                                 </div>
@@ -562,369 +609,6 @@
         </div>
 
 
-<!--
-
-        <uib-tabset ng-show="false">
-            <uib-tab heading="Select Bundle">
-                <br/>
-                <div class="row">
-                    <div class="col-md-2">
-                        <div class="list-group">
-                            <div ng-class="{'list-group-item':true,listItemSelected:sel==input.selectedSelector}"
-                                 style="cursor: pointer"
-                                 ng-click="input.selectedSelector = sel"
-                                 ng-repeat = "sel in selectors">
-                                {{sel.display}}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-10">
-
-
-                        <div ng-show="input.selectedSelector.code == 'paste'">
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <textarea class="form-control" rows = '20' ng-model="input.newBundle"></textarea>
-                                </div>
-                                <div class="col-md-4">
-                                    <button ng-show = "input.newBundle" class="btn btn-success"
-                                            ng-click="viewNewBundle(input.newBundle)">View bundle</button>
-
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <div ng-show="input.selectedSelector.code == 'query'">
-                            <div class="row">
-                                <div class="col-md-6">
-
-
-
-                                    <label>Query to execute</label>
-                                    <textarea class="form-control" ng-model="input.newQuery" placeholder="The query."></textarea>
-                                    <span class="help-block pull-right">To use the local Hapi server just use the query = eg 'Patient?name=hay'</span>
-                                    <div> <span class="help-block pull-right">To use any other server, use the full query (incl. http)</span></div>
-
-                                    <br/><br/>
-                                    <label>Query name</label>
-                                    <div>
-                                        <input class="form-control" ng-model="input.newQueryName"
-                                               placeholder="A name for the query (required if query is to be saved"/>
-                                    </div>
-                                    <span class="help-block pull-right">Required if the query is to be saved</span>
-                                    <br/><br/>
-                                    <label>Query description</label>
-                                    <textarea class="form-control" ng-model="input.newQueryDescription"
-                                              placeholder="A description of the query."></textarea>
-                                    <span class="help-block pull-right">If the query is saved, this is a description of what it contains</span>
-                                </div>
-                                <div class="col-md-6">
-                                    <div>
-                                        <button ng-show = "input.newQuery && ! testQueryBundle" class="btn btn-primary"
-                                                ng-click="testNewQuery(input.newQuery)">Run query</button>
-
-                                        <button ng-show = "executedQueryBundle" class="btn btn-warning"
-                                                ng-click="clearQuery()">Clear</button>
-
-                                        <button ng-show = "executedQueryBundle && input.newQueryName" class="btn btn-danger"
-                                                ng-click="addNewQuery(input.newQuery,input.newQueryName,input.newQueryDescription)">
-                                            Add query to list and view</button>
-
-                                        <button ng-show = "executedQueryBundle" class="btn btn-success"
-                                                ng-click="viewNewQueryBundle(executedQueryBundle)">View bundle</button>
-
-                                        <div ng-show="executedQueryBundle" class="myScroll1">
-                                            <pre>{{executedQueryBundle | json}}</pre>
-                                        </div>
-
-
-                                    </div>
-
-                                    <br/>
-                                    <strong ng-show="executedQuery">Executed query</strong>
-                                    <div>{{executedQuery}}</div>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <div ng-show="input.selectedSelector.code == 'saved'">
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <table class="table table-bordered">
-                                        <tr><th>Name</th><th>Query</th><th>In library</th><th></th></tr>
-                                        <tr ng-click="input.savedQuery=item"
-                                            style="cursor: pointer"
-                                            ng-class="{listItemSelected:input.savedQuery == item}"
-                                            ng-repeat = "item in savedQueries">
-                                            <td>
-                                                {{item.name}}
-                                            </td>
-                                            <td>{{item.qry}}</td>
-                                            <td>{{item.inLibrary}}</td>
-                                            <td><i class="glyphicon glyphicon-remove-sign clickable"
-                                                   ng-click="deleteQuery($index)"></i>
-                                            </td>
-
-
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div class="col-md-4">
-                                    {{input.savedQuery.name}}
-                                    <br/><br/>
-                                    {{input.savedQuery.description}}
-                                    <br/> <br/>
-
-                                    <button ng-show = "input.savedQuery" class="btn btn-primary"
-                                            ng-click="executeSavedQuery(input.savedQuery)">Run query</button>
-
-                                    <button ng-show = "input.savedQuery && ! input.savedQuery.inLibrary" class="btn btn-danger"
-                                            ng-click="addLinkToLibrary(input.savedQuery)">Save to Library</button>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <div ng-show="input.selectedSelector.code == 'library'">
-                            <div class="row">
-                                <div class="col-md-8">
-
-                                    <div class="row">
-                                        <div class="col-md-8">
-                                            <table class="table table-bordered">
-                                                <tr ng-click="input.libraryQuery=item"
-                                                    style="cursor: pointer"
-                                                    ng-class="{listItemSelected:input.libraryQuery == item}"
-                                                    ng-repeat = "item in library">
-                                                    <td>
-                                                        {{item.name}}
-                                                    </td>
-                                                    <td>{{item.qry}}</td>
-
-                                                </tr>
-                                            </table>
-                                        </div>
-                                        <div class="col-md-4">
-                                            {{input.libraryQuery.name}}
-                                            <br/><br/>
-                                            {{input.libraryQuery.description}}
-                                            <br/> <br/>
-
-                                            <button ng-show = "input.libraryQuery" class="btn btn-primary"
-                                                    ng-click="executeLibraryQuery(input.libraryQuery)">Run query</button>
-
-
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                </div>
-                            </div>
-                        </div>
-
-
-
-                    </div>
-                </div>
-
-
-            </uib-tab>
-
-            <uib-tab>
-                <uib-tab-heading>
-                    Home
-                </uib-tab-heading>
-
-                <div class="row">
-
-                    <div class="col-md-6">
-
-                        <h4>Description</h4>
-
-                        <p>Displays the contents of a FHIR Bundle in a number of different visualizations.</p>
-
-                        There are 2 ways to specify the bundle:
-                        <ul>
-                            <li>By entering a query url that will return a Bundle. Generally this will be to
-                            a FHIR server, but it can be any Bundle accessible via HTTP. Url's can be saved in
-                            the browser cache for easy access if needed. Saved queries are in the list to the
-                            right, use the 'enter query' tab above to enter a new one</li>
-                            <li>You can paste a bundle directly into the tab above - either Json or XML is
-                            supported.</li>
-                        </ul>
-
-                        <br/>
-                        <h4>Configuration</h4>
-
-                        <div><strong>Data server:</strong> {{dataServer.name}} ({{dataServer.url}}) <span class="clickable" ng-click="changeServer('data')">Change</span> </div>
-                        <br/>
-
-                        <p>The data server is the 'default' server when creating a query. You can however specify any server you want by using the
-                            full url when creating the query.</p>
-
-                        <br/>
-
-
-
-                        <h4>Validation options</h4>
-
-                        <strong>Validation server:</strong>
-
-                        {{validationServer.name}} ({{validationServer.url}})
-                        <span class="clickable" ng-click="changeServer('validation')">Change</span>
-                        <br/><br/>
-                        <p>Used when validating the bundle and its contents. This occurs automatically when a bundle is
-                            processed and displayed, unless disabled using the otion below. </p>
-                        <br/>
-
-
-
-
-
-
-
-                    </div>
-
-                    <div class="col-md-6">
-
-
-                        <h4>Saved queries</h4>
-                        <table class="table table-bordered">
-                            <tr ng-repeat = "item in savedQueries">
-                                <td>
-                                    <div class = 'clickable' ng-click="executeSavedQuery(item)">{{item.name}}</div>
-                                </td>
-                                <td>{{item.qry}}</td>
-                                <td><i class="glyphicon glyphicon-remove-sign clickable" ng-click="deleteQuery($index)"></i>
-                                </td>
-
-                            </tr>
-                        </table>
-
-
-                        <div>
-                            <em>Queries are saved in the local browser cache</em>
-                        </div>
-
-
-
-                    </div>
-
-                </div>
-
-
-
-            </uib-tab>
-
-
-            <uib-tab heading = "Paste in bundle">
-                <div class="row">
-                    <div class="col-md-4">
-                        <br/>
-                        <p>Paste a bundle into the text area to the right. </p>
-                        <p>Click the 'View bundle' button (that will appear) to start the Visualizer.</p>
-                        <p>Either Json or XML can be used. XML will be converted to Json (using the <a href="https://github.com/lantanagroup/FHIR.js">Lantana</a> library) before
-                        being displayed.</p>
-
-                        <button ng-show = "input.newBundle" class="btn btn-success"
-                                ng-click="viewNewBundle(input.newBundle)">View bundle</button>
-
-
-                    </div>
-                    <div class="col-md-8">
-                        <textarea class="form-control" rows = '20' ng-model="input.newBundle"></textarea>
-                    </div>
-
-                </div>
-
-
-            </uib-tab>
-            <uib-tab heading = "Enter query url">
-                <br/>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <p>Enter a query that returns a FHIR bundle</p>
-                        <p>The query can be to a FHIR server or standard server (like a bundle stored in Github)</p>
-                        <p>You can use the currently configured data server (<strong>{{dataServer.url}}</strong>) or any other server. To specify another server
-                            simply use the full url - eg http://myserver/mybundle. If you leave off the 'http' the app will assume
-                            you are making standard <a href="http://hl7.org/fhir/http.html#search" target="_blank">FHIR query</a> (Only a GET is supported)</p>
-                        <p>You can change the configured server <span class="clickable" ng-click="changeServer('data')">here.</span> </p>
-                        <p>If you want to save the query (so it will appear in your personal list, you need to specify
-                            a name in the box below and click the 'Add query to list' button that appears after testing
-                            the query.</p>
-
-
-                        <br/><br/>
-                        <label>Query to execute</label>
-                        <textarea class="form-control" ng-model="input.newQuery" placeholder="The query."></textarea>
-                        <span class="help-block pull-right">To use the local Hapi server just use the query = eg 'Patient?name=hay'</span>
-                        <div> <span class="help-block pull-right">To use any other server, use the full query (incl. http)</span></div>
-
-                        <br/><br/>
-                        <label>Query name</label>
-                        <div>
-                            <input class="form-control" ng-model="input.newQueryName" placeholder="A name for the query (required if query is to be saved"/>
-                        </div>
-                        <span class="help-block pull-right">Required if the query is to be saved</span>
-                        <br/><br/>
-
-                        <div>
-                            <button ng-show = "input.newQuery && ! testQueryBundle" class="btn btn-primary"
-                                    ng-click="testNewQuery(input.newQuery)">Test query</button>
-
-                            <button ng-show = "executedQueryBundle" class="btn btn-warning"
-                                    ng-click="clearQuery()">Clear</button>
-
-                            <button ng-show = "executedQueryBundle && input.newQueryName" class="btn btn-danger"
-                                    ng-click="addNewQuery(input.newQuery,input.newQueryName)">Add query to list and view</button>
-
-                            <button ng-show = "executedQueryBundle" class="btn btn-success"
-                                    ng-click="viewNewQueryBundle(executedQueryBundle)">View bundle</button>
-                        </div>
-
-                        <br/>
-                        <strong ng-show="executedQuery">Executed query</strong>
-                        <div>{{executedQuery}}</div>
-                    </div>
-                    <div class="col-md-6">
-                        <pre>{{executedQueryBundle | json}}</pre>
-                    </div>
-
-
-
-                </div>
-            </uib-tab>
-            <uib-tab heading = "Examples">
-                <br/>
-                <div class="row">
-                    <div class="col-md-6">
-                        <table class="table table-bordered">
-                            <tr ng-repeat="example in exampleIndex.contents">
-                                <td><div class="clickable" ng-click="selectExample(example)">{{example.name}}</div></td>
-                                <td>{{example.display}}</td>
-
-                            </tr>
-                        </table>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="clickable" ng-click="loadExample(exampleBundle)">Load</div>
-                            </div>
-                        </div>
-                        <pre>{{exampleBundle | json}}</pre>
-
-                    </div>
-                </div>
-
-            </uib-tab>
-
-        </uib-tabset>
-
-        -->
 
     </div>
 
@@ -992,7 +676,7 @@
                                                 <div ng-repeat = "entry in es.entries"
                                                      ng-class="{'list-group-item':true,'listItemSelected':selectedBundleEntry == entry}">
                                                     <div style="padding-left: 10px; cursor: pointer"
-                                                         ng-click="selectBundleEntry(entry,[])">
+                                                         ng-click="selectBundleEntry(entry)">
                                                         <div> {{entry.resource.text.div | cleanTextDiv | limitTo:50}}</div>
                                                         <div style="padding-left: 10px"><em>Id: {{entry.resource.id}}</em></div>
                                                     </div>
@@ -1196,6 +880,10 @@
                                 </uib-tab>
 
 
+                                <uib-tab ng-show="selectedResourceProfile" heading="Profile">
+                                    <ng-include src = "'includes/bvProfile.html'"></ng-include>
+
+                                </uib-tab>
 
                                 <uib-tab ng-show="selectedBundleEntry.resource.resourceType == 'Binary'" heading="Binary Content">
                                     <br/>
@@ -1538,6 +1226,13 @@
                         <uib-tab heading="Extended validation">
                             <button class="btn btn-link pull-right" ng-click="validateFromIG()">Validate against Au Patient summary</button>
                             <div class="clearfix"></div>
+
+                            <div class="alert-danger alert" ng-show="evOperationError">
+                                The server returned an error code while performing the Validation operation. The error details are shown.
+                                This *should* be an error in the actual operation rather than an issue with the Bundle itself.
+
+                            </div>
+
                             <div class="row" ng-show="extendedOO">
                                 <div class="col-md-2">
                                     <checkbox ng-model="input.issError"></checkbox> Error <span class="badge">{{input.issErrorCount}}</span>
@@ -1679,15 +1374,18 @@
                         </uib-tab>
 
                         <uib-tab heading="DiagnosticReport" ng-if="DR.length > 0">
+                            <br/>
                             <ng-include src = "'includes/bvDiagnosticReport.html'"></ng-include>
                         </uib-tab>
 
                         <uib-tab heading="Conditions" ng-if="lstConditions.length > 0">
+                            <br/>
                             <ng-include src = "'includes/bvConditions.html'"></ng-include>
                         </uib-tab>
 
 
                         <uib-tab heading="Encounters" ng-if="encounters.length > 0">
+                            <br/>
                             <ng-include src = "'includes/bvEncounters.html'"></ng-include>
                         </uib-tab>
 
@@ -1713,6 +1411,7 @@
                         </uib-tab>
 
                         <uib-tab heading="CarePlan view" ng-if="false && CarePlans.length > 0">
+                            <br/>
                             <pre>{{cpSummary | json}}</pre>
                         </uib-tab>
                     </uib-tabset>
@@ -1746,12 +1445,6 @@
         </div>
 
     </div>
-
-
-
-
-
-
 
 
 

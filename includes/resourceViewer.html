@@ -9,7 +9,7 @@
     }
 </style>
 
-
+<script defer src="https://cloud.umami.is/script.js" data-website-id="383f5688-7293-4ac2-9dd3-b82e032bcc81"></script>
 
 <uib-tabset  active="input.mainTabActive">
     <uib-tab heading="Resource explorer">
@@ -50,14 +50,14 @@
 
                         <div ng-show="outcome.selectedType">
                             <h4>{{outcome.selectedType}} resources
-                                <span style="font-weight: normal">
+                                <span >
                             <a target="_blank"
-                               class="pull-right"
+                               class="pull-right badge"
                                ng-href="http://hl7.org/fhir/R4B/{{outcome.selectedType}}.html">Spec</a>
                             </span>
                             </h4>
                         </div>
-                        
+
                         <div class="myScroll1">
                             <div class="list-group">
                                 <a href="#"
@@ -164,7 +164,7 @@
 
                                         </uib-tab>
 
-                                        <uib-tab heading="XML">
+                                        <uib-tab ng-show="false" heading="XML">
 
                                             <div class="row">
                                                 <div class="col-md-10 col-sm-10">
@@ -209,26 +209,38 @@
 
 
                                         <uib-tab heading="Sections" ng-show="outcome.selectedResource.resourceType=='Composition'">
-                                            <div ng-repeat = "section in outcome.selectedResource.section">
-                                                <h5>{{section.title}}
-                                                    (<span ng-repeat = "code in section.code.coding">{{code.code}}</span>)
-                                                </h5>
-                                                <div class="row">
-                                                    <div class="col-sm-8 col-md-8">
-                                                        <div style="margin-left: 10px">
-                                                            <div ng-repeat = "entry in section.entry">
-                                                                --> {{entry.reference}}
+
+                                            <div class="myScroll1">
+
+                                                <div ng-repeat = "section in outcome.selectedResource.section">
+                                                    <h5>{{section.title}}
+                                                        (<span ng-repeat = "code in section.code.coding">{{code.code}}</span>)
+                                                    </h5>
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <div style="margin-left: 10px">
+
+                                                                <div ng-repeat = "entry in section.entry">
+                                                                   <!-- {{entry.reference}} -->
+                                                                    <div  style="padding: 5px; cursor: pointer" ng-click="selectResourceFromSection(getResourceTextFromReference(entry.reference).resource)">
+                                                                        {{getResourceTextFromReference(entry.reference).text}}
+                                                                    </div>
+
+                                                                </div>
+
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                    <div class="col-sm-4 col-md-4">
+                                                        <!--
+                                                        <div class="col-sm-4 col-md-4">
 
-                                                        <div class="pull-right clickable"
-                                                             ng-click="showText(section)">View Text</div>
+                                                            <div class="pull-right clickable"
+                                                                 ng-click="showText(section)">View Text</div>
 
+                                                        </div>
+                                                        -->
                                                     </div>
+
                                                 </div>
-
                                             </div>
                                         </uib-tab>
 
@@ -503,6 +515,13 @@
 
 
     </uib-tab>
+
+    <uib-tab ng-show="document" heading="Document">
+        <ng-include src="'includes/pvDocument.html'"></ng-include>
+
+    </uib-tab>
+
+
 
     <uib-tab heading="FHIRPath">
         <br/>

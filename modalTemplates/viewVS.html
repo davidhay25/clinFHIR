@@ -1,0 +1,72 @@
+
+<div>
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+                <h3 class="modal-title">View ValueSet</h3>
+            </div>
+
+
+            <div class="col-md-4 col-sm-4">
+
+
+                <button class="btn btn-link pull-right" ng-click="$dismiss()">Close</button>
+<!--
+                <button class="btn btn-primary pull-right" ng-click="select()">Select</button>
+                -->
+
+            </div>
+
+
+        </div>
+
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-1">
+                Language
+            </div>
+            <div class="col-md-3">
+                <select ng-model="input.selectedLanguage" class="form-control"
+                        ng-options = "item.display for item in languages"></select>
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" ng-model="input.filter" placeholder="Filter text"/>
+            </div>
+            <div class="col-md-3">
+                <div ng-if="expandedVS.expansion.contains">{{expandedVS.expansion.contains.length}} concepts</div>
+            </div>
+
+            <div class="col-md-2">
+                <button class="btn btn-primary pull-right" ng-click="expandVSInTS(url)">Expand</button>
+            </div>
+        </div>
+        <br/>
+        <uib-tabset>
+            <uib-tab heading="Concepts">
+                <table class="table table-bordered table-condensed">
+                    <tr><th>Display</th><th>Code</th><th>System</th></tr>
+                    <tr ng-repeat="concept in expandedVS.expansion.contains">
+                        <td>{{concept.display}}</td>
+                        <td>
+                            <div  class="clickable" ng-click="lookup(concept)">{{concept.code}}</div></td>
+                        <td>{{concept.system}}</td>
+                    </tr>
+                </table>
+            </uib-tab>
+            <uib-tab heading="Json">
+                <pre>{{expandedVS | json}}</pre>
+            </uib-tab>
+        </uib-tabset>
+
+
+    </div>
+
+
+    <div class="modal-header">
+
+        {{url}}
+    </div>
+</div>

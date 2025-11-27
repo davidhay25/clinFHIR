@@ -1,6 +1,6 @@
 angular.module("sampleApp")
     .controller('bundleVisualizerCtrl',
-        function ($scope,$uibModal,$http,v2ToFhirSvc,$timeout,modalService,apiService,
+        function ($scope,$uibModal,$http,v2ToFhirSvc,$timeout,modalService,apiService, umamiSvc,
                   GetDataFromServer,$window,appConfigSvc,$localStorage,$q,moment,bundleVisualizerSvc,$sce) {
 
 
@@ -12,8 +12,11 @@ angular.module("sampleApp")
                 return $sce.trustAsHtml(html_code);
             }
 
-            //todo - get this from config
+            //todo - get these from config
             let localhapiserver = "http://localhost:9090/fhir"
+
+
+            let terminologyServer = "https://smile.sparked-fhir.com/aucore/fhir/DEFAULT"
 
             $scope.input = {};
 
@@ -54,6 +57,37 @@ angular.module("sampleApp")
                 $scope.showSelector = true
             }
 
+
+
+            $scope.viewProfileVS = function (item) {
+                let vs = item.valueSet
+                if (vs) {
+                    $scope.viewVS(vs)
+                } else {
+                    alert("There is no ValueSet bound to this element")
+                }
+
+            }
+
+            $scope.viewVS = function (url) {
+
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/viewVS.html',
+                    backdrop: 'static',
+                    size : 'lg',
+                    controller: 'viewVSCtrl',
+
+                    resolve: {
+                        url: function () {
+                            return url
+                        }, terminologyServer : function () {
+                            return terminologyServer
+                        }
+                    }
+
+                })
+            }
+
             function getHashCodeDEP(s) {
                 //https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript
                 var hash = 0, i, chr;
@@ -72,6 +106,8 @@ angular.module("sampleApp")
 
 
             function getLibrarySummary() {
+                delete $scope.library
+                delete $scope.input.selectedLibraryTag
                 $http.get('bvLibrary').then(
                     function (data) {
                         $scope.library = data.data
@@ -79,8 +115,29 @@ angular.module("sampleApp")
                         alert(angular.toJson(err))
                     }
                 )
+
+                $http.get('bv/getAllTags').then(
+                    function (data) {
+                        $scope.libraryTags = data.data
+                        $scope.libraryTags.splice(0,0,"")   //insert a blank at the beginning for all tags
+                        //set the 'tags selected' true
+                        $scope.input.selectedLibraryTag = $scope.libraryTags[0]
+
+                    }, function (err) {
+                        alert(angular.toJson(err))
+                    }
+                )
             }
             getLibrarySummary()
+
+            $scope.showLibraryEntry = function (item) {
+                if (! $scope.input.selectedLibraryTag) {
+                    return true
+                }
+                if (item.tags?.length > 0 && item.tags.indexOf($scope.input.selectedLibraryTag) >-1) {
+                    return true
+                }
+            }
 
 
             //this is a list of bundles saved to the library
@@ -155,18 +212,43 @@ angular.module("sampleApp")
 
             }
 
+            //delete (hide) the bundle
+            $scope.deleteBundleFromLibrary = function (item) {
+                if (confirm("This will remove the Bundle from the Library. Are you sure")) {
+                    $http.delete(`bv/getBundle/${item.id}`).then(
+                        function (data) {
+                            umamiSvc.track('bvBundle:libraryBundle:delete', {value:item.qry});
+                            getListAllBundles()
+                            alert("Bundle has been removed")
+
+                        }, function () {
+
+                            alert("Sorry, I cannot delete that Bundle")
+                        }
+                    )
+                }
+
+
+            }
+
+
             $scope.getBundleFromLibrary = function (item) {
                 $http.get(`bv/getBundle/${item.id}`).then(
                     function (data) {
+                        umamiSvc.track('bvBundle:libraryBundle:retrieve', {value:item.qry});
                         $scope.bundleDisplayName = item.name
                         console.log(data.data)
                         processBundle(data.data.bundle)
                     }, function () {
+
                         alert("Sorry, I cannot retrieve that Bundle")
                     }
                 )
 
             }
+
+
+
 
 
             //validate the current bundle against an external validation server
@@ -176,35 +258,45 @@ angular.module("sampleApp")
                 $scope.input.issErrorCount = 0
                 $scope.input.issWarningCount = 0
                 $scope.input.issInfoCount = 0
-                let url = `https://smile.sparked-fhir.com/aucore/fhir/DEFAULT/Bundle/$validate`
+
+                let url = `${terminologyServer}/Bundle/$validate`
+                delete $scope.evOperationError       //true if the actual validation call was successful - not the actual result
                 $scope.waiting = true
                 $http.post(url,$scope.fhir).then(
                     function (data) {
+
                         let OO = data.data
-                        console.log(OO)
+                        //console.log(OO)
                         $scope.extendedOO = OO
-                        for (let iss of OO.issue || []) {
-                            switch (iss.severity) {
-                                case 'error' :
-                                    $scope.input.issErrorCount++
-                                    break
-                                case 'warning' :
-                                    $scope.input.issWarningCount++
-                                    break
-                                case 'information' :
-                                    $scope.input.issInfoCount++
-                                    break
-                            }
-                        }
+                        getIssueTypeCount($scope.extendedOO)
 
                     }, function (err) {
-                        alert("Error executing validate query " + angular.toJson(err))
-                        //alert(angular.toJson(err))
+                        $scope.evOperationError = true
+                        $scope.extendedOO = err.data    //we assume the server returned an OO
+                        getIssueTypeCount($scope.extendedOO)
+
 
                     }
                 ).finally(function () {
                     $scope.waiting = false
                 })
+
+                function getIssueTypeCount(OO) {
+                    for (let iss of OO.issue || []) {
+                        switch (iss.severity) {
+                            case 'error' :
+                                $scope.input.issErrorCount++
+                                break
+                            case 'warning' :
+                                $scope.input.issWarningCount++
+                                break
+                            case 'information' :
+                                $scope.input.issInfoCount++
+                                break
+                        }
+                    }
+                }
+
             }
 
             $scope.getExtendedIssueResource = function (iss) {
@@ -240,19 +332,63 @@ angular.module("sampleApp")
             //todo - may want snapshot of bundle rather than live link
             //todo - may add a modal to update description, add category etc
             $scope.addLinkToLibrary = function (item) {
-                if (confirm("Are you sure you want to add this link to the Library? Any other user will be able to execute it...")) {
-                    item.type = 'link'
 
-                    $http.post('bvLibrary',item).then(
-                        function (data) {
-                            alert("Link has been added to the Library")
-                            item.inLibrary = true   //saved in localStorage so will update
-                            getLibrarySummary()
-                        }, function (err) {
-                            alert(angular.toJson(err))
+                    $uibModal.open({
+                        templateUrl: 'modalTemplates/addLibraryEntry.html',
+                        size: 'lg',
+                        controller: function ($scope, item) {
+
+                            $scope.input = {tags:{}}
+                            $scope.input.name = item.name
+                            $scope.input.description = item.description
+
+
+                            $http.get('bv/getAllTags').then(
+                                function (data) {
+                                    $scope.tags = data.data
+                                }, function (err) {
+                                    alert(angular.toJson(err))
+                                }
+                            )
+
+
+
+
+                            $scope.save = function () {
+                                let vo = {name:$scope.input.name,
+                                    description:$scope.input.description,
+                                    qry: item.qry,
+                                    author:$scope.input.author}
+
+                                if ($scope.input.tag) {
+                                    vo.tags = [$scope.input.tag]
+                                }
+
+                                $scope.$close(vo)
+                            }
+
+                        },
+                        resolve : {
+                            item : function(){
+                                return item
+                            }
                         }
-                    )
-                }
+                    }).result.then(function (vo) {
+
+                        vo.type = 'link'
+                        $http.post('bvLibrary',vo).then(
+                            function (data) {
+                                alert("Link has been added to the Library")
+                                item.inLibrary = true   //saved in localStorage so will update
+                                getLibrarySummary()
+                            }, function (err) {
+                                alert(angular.toJson(err))
+                            }
+                        )
+                    })
+
+
+
 
 
 
@@ -261,18 +397,23 @@ angular.module("sampleApp")
             $scope.executeLibraryQuery = function (item) {
                 //todo - keep separate from executeSavedQuery as we want to support 'snapshotted' bundles in the future
                 let newQry = `proxyRequest?qry=${encodeURIComponent(item.qry)}`
+                umamiSvc.track('bvBundle:libraryQuery', {value:item.qry});
                 $http.get(newQry).then(
                     function (data) {
+
                         let bundle = data.data
                         if (bundle.resourceType !== 'Bundle' || ! bundle.entry || bundle.entry.length < 1 ) {
                             alert("Must return a Bundle with at least one entry")
+
                         } else {
                             $scope.bundleDisplayName = item.name
+
                             processBundle(data.data)
 
                         }
 
                     }, function (err) {
+
                         alert("Error executing query " + angular.toJson(err))
                         //alert(angular.toJson(err))
 
@@ -302,6 +443,12 @@ angular.module("sampleApp")
 
                 delete $scope.selectedRef
                 delete $scope.resourceFromSection
+
+                delete $scope.input.issErrorCount
+                delete $scope.input.issWarningCount
+                delete $scope.input.issInfoCount
+                delete $scope.extendedOO
+                delete $scope.evOperationError
 
                 $scope.showSelector = false     //hide the selector
 
@@ -489,9 +636,12 @@ angular.module("sampleApp")
                 //------ make the document summary object for display
                 delete $scope.document;     //contains the document specific resources suitable for layout
 
+
                 if (bundle.type == 'document' || $scope.isDocument) {
                     $scope.document = bundleVisualizerSvc.makeDocument(bundle, $sce)
                 }
+
+
                 /*
                 if (bundle.type == 'document' || $scope.isDocument) {
                     let arComposition = [];
@@ -654,6 +804,7 @@ angular.module("sampleApp")
                     qry = `${localhapiserver}/${qry}`
                 }
 
+                umamiSvc.track('bvBundle:newQuery', {value:qry});
 
                 delete $scope.executedQueryBundle
 
@@ -661,6 +812,7 @@ angular.module("sampleApp")
                 $scope.waiting = true
                 $http.get(newQry).then(
                     function (data) {
+
                         $scope.waiting = false
                         let bundle = data.data
                         if (bundle.resourceType !== 'Bundle' || ! bundle.entry || bundle.entry.length < 1 ) {
@@ -671,6 +823,7 @@ angular.module("sampleApp")
 
                     }, function (err) {
                         $scope.waiting = false
+
                         alert("Unable to get any response from that Query. Is it a complete query - including the 'http' ?")
                         //alert(angular.toJson(err))
 
@@ -737,10 +890,12 @@ angular.module("sampleApp")
             }
 
             $scope.executeSavedQuery = function (item) {
+                umamiSvc.track('bvBundle:savedQuery', {value:item.qry});
                 let newQry = `proxyRequest?qry=${encodeURIComponent(item.qry)}`
                 $scope.waiting = true
                 $http.get(newQry).then(
                     function (data) {
+
                         $scope.waiting = false
                         let bundle = data.data
                         if (bundle.resourceType !== 'Bundle' || ! bundle.entry || bundle.entry.length < 1 ) {
@@ -752,6 +907,7 @@ angular.module("sampleApp")
                         }
 
                     }, function (err) {
+
                         $scope.waiting = false
                         alert("Error running query: " + angular.toJson(err))
                         //alert("Unable to access the Library")
@@ -773,6 +929,9 @@ angular.module("sampleApp")
             $scope.viewNewBundle = function(bundle,name) {
                 //view a bundle directly. If 'name' is not null, then save for this user
 
+                //?do I care about the format, erors
+
+                umamiSvc.track('bvBundle:adhocBundle');
 
                 let json
                 if (bundle.substr(0,1) == "<") {
@@ -868,92 +1027,39 @@ angular.module("sampleApp")
 
             };
 
-            $scope.changeServerDEP = function(type) {
-                $uibModal.open({
-                    templateUrl: 'modalTemplates/setBVServer.html',
-                    size: 'lg',
-                    controller: function ($scope,allServers,serverType) {
-                        $scope.input = {};
-                        $scope.serverType = serverType
-
-
-
-                        $scope.checkServer = function(url) {
-                            $scope.canSave = false
-                            if (url.substr(url.length -1) !== '/') {
-                                url += '/';
-                                $scope.input.url += '/'
-                            }
-                            url += "metadata";
-                            $http.get(url).then(
-                                function(data) {
-                                    if (data.data && data.data.resourceType == 'CapabilityStatement' ) {
-                                        $scope.canSave = true
-                                    } else {
-                                        alert("This url did not return a CapabilityStataement from "+ url)
-                                    }
-                                },
-                                function (err) {
-                                    alert("This url did not return a CapabilityStatement from "+ url)
-                                }
-                            )
-
-
-                        }
-
-                        $scope.allServers = allServers;
-
-                        $scope.setServer = function(svr) {
-
-                            $scope.input.url = svr.url
-                            $scope.input.name = svr.name
-                            $scope.canSave = true
-                        }
-
-                        $scope.save = function() {
-                            let name = $scope.input.name || "User defined"
-                            let svr = {name:name,url:$scope.input.url}
-                            $scope.$close(svr)
-                        }
-
-                    },
-                    resolve : {
-
-                        allServers : function(){
-                            return appConfigSvc.getAllServers();
-                        },
-                        serverType : function() {
-                            return type
-                        }
-                    }
-                }).result.then(
-                    function(svr) {
-                        switch (type) {
-                            case "validation" :
-                                $localStorage.validationServer = svr;
-                                $scope.validationServer = svr;
-                                break
-                            case "data" :
-                                $localStorage.dataServer = svr;
-                                $scope.dataServer = svr;
-                                break
-                        }
-
-
-                    }
-                )
-
-            };
 
             //when an entry/resource is seleced in the left tab of the Bundle entries tab
-            $scope.selectBundleEntry = function(entry,entryErrors) {
+            $scope.selectBundleEntry = function(entry) {
                 delete $scope.selectedFromSingleGraph;  //does this need to be done?
 
                 delete $scope.selectedFshFromSingleGraph
                 delete $scope.resourceFromSection
                 delete $scope.selectedRef
+                delete $scope.selectedResourceProfile
 
                 let resourceId = entry.resource.id
+
+                //assume only 1 profile - if any
+                let profile = entry.resource.meta?.profile?.[0]
+
+                console.log(profile)
+
+                //get the profile and set it. todo for now, just look at the aussie server, but need some way to specify where the
+                //todo profile is saved.
+                if (profile) {
+                    $http.get(`https://smile.sparked-fhir.com/aucore/fhir/DEFAULT/StructureDefinition?url=${profile}`).then(
+                        function (data) {
+                            if (data.data.entry?.[0]) {
+                                $scope.selectedResourceProfile = data.data.entry[0].resource
+                                $scope.selectedResourceProfileSummary = bundleVisualizerSvc.makeProfileSummary(data.data.entry[0].resource)
+
+
+                            }
+
+                        }
+                    )
+                }
+
 
                 $scope.selectedBundleEntryErrors = []     //an array of errors for this entry
 
@@ -1680,7 +1786,7 @@ angular.module("sampleApp")
                                 let vo = data.data
 
                                 if (vo.bundle.entry?.length > 0) {
-                                    $scope.urlPassedIn = true;  //flag that the bundle is to be retreived and displayed - not the selector
+                                   // $scope.urlPassedIn = true;  //flag that the bundle is to be retreived and displayed - not the selector
                                     //if the first entry in the bundle is a Bundle, then this must be a bundle of bundles from a FHIR server. Select it
                                     processBundle(vo.bundle)
                                 }
@@ -1729,7 +1835,7 @@ angular.module("sampleApp")
                         }
 
                         if (bundle.entry?.length > 0) {
-                            $scope.urlPassedIn = true;  //flag that the bundle is to be retreived and displayed - not the selector
+                           // $scope.urlPassedIn = true;  //flag that the bundle is to be retreived and displayed - not the selector
                             //if the first entry in the bundle is a Bundle, then this must be a bundle of bundles from a FHIR server. Select it
                             processBundle(bundle)
 

@@ -22,6 +22,7 @@ function setup(app,indb) {
         if (query) {
             query = decodeURIComponent(query)
 
+            console.log(query)
 
             try {
                 const response = await axios.get(query);

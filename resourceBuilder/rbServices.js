@@ -3070,6 +3070,10 @@ console.log(summary);
                             return resource.resourceType;
                         }
                         break;
+                    case "DiagnosticReport":
+                        return resource.code?.text || resource.code?.coding?.[0]?.display || 'DiagnosticReport'
+
+                        break;
                     case "AllergyIntolerance" :
 
                         return getCCSummary(resource.code);

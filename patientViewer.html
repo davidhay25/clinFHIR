@@ -10,10 +10,10 @@
     <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
     <script src="js/libs/lodash.core.js"></script>
     <script src="js/libs/moment.min.js"></script>
-    <script src="https://cdn.counter.dev/script.js" data-id="62b27fdf-0033-481b-8b59-680638d9162c" data-utcoffset="12"></script>
 
 
     <script defer src="https://cloud.umami.is/script.js" data-website-id="383f5688-7293-4ac2-9dd3-b82e032bcc81"></script>
+
 
 
     <script src="js/libs/firebase.js"></script>
@@ -78,7 +78,7 @@
     <script src="js/libs/angular-bootstrap-checkbox.js"></script>
 
     <script>
-        angular.module("sampleApp",['ui.checkbox','ui.bootstrap',"firebase",'ngStorage','ngSanitize']).config(function($locationProvider) {
+         let app = angular.module("sampleApp",['ui.checkbox','ui.bootstrap',"firebase",'ngStorage','ngSanitize']).config(function($locationProvider) {
 
             // enable html5Mode for pushstate ('#'-less URLs)
             $locationProvider.html5Mode(true);
@@ -90,32 +90,11 @@
             $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|blob):/);
         }]);
 
-        //http://www.devblogrbmz.com/angular-default-request-headers-and-interceptors/
-        //http://www.webdeveasy.com/interceptors-in-angularjs-and-useful-examples/
 
-        //pretty sure this isn't used...
-
-        /*
-        angular.module("sampleApp").factory('authIntercept',['sessionSvc',function(sessionSvc){
-            return {
-                'request': function(config){
-
-                    console.log('intercept '+ sessionSvc.getAuthToken());
-                  //
-
-                    if (sessionSvc.getAuthToken()) {
-                        config.headers['Authorization'] = sessionSvc.getAuthToken();
-                        config.headers['myAuth'] = sessionSvc.getAuthToken();
-                    }
-                    return config
-                }
-            }
-        }]).config(function($httpProvider){
-            $httpProvider.interceptors.push('authIntercept')
-        })
-*/
 
     </script>
+
+    <script src="js/umamiSvc.js"></script>
 
     <script src="js/libs/ngStorage.min.js"></script>
     <script src="js/services.js"></script>
@@ -160,6 +139,9 @@
     <script src="js/createSampleBundleSvc.js"></script>
     <script src="js/terminologySvc.js"></script>
     <script src="js/terminologyExplorerCtrl.js"></script>
+    <script src="js/bundleVisualizerSvc.js"></script>
+
+
     <!-- for the 3d graph - and others
 
      <script src="js/questionnaireSvc.js"></script>
@@ -214,7 +196,7 @@
 
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="navbar-text">
                     Server: <i class="glyphicon glyphicon-edit clickable" ng-click="selectServer()"> </i>
                      {{appConfigSvc.getCurrentDataServer().url}}
@@ -229,9 +211,9 @@
                 </div>
             </div>
 
-            <div class="col-md-1 col-sm-1">
+            <div class="col-md-2">
                 <form ng-hide = "loadedFromBookmark" class="navbar-form navbar-right">
-                    <button class="btn btn-primary pull-right" ng-click="findPatient()">Select Patient</button>
+                    <button class="btn btn-primary pull-right" ng-click="findPatient()">Select Patient from server</button>
                 </form>
             </div>
 
@@ -265,59 +247,75 @@
 
     <div ng-hide="appConfigSvc.getCurrentPatient() || loadedFromBookmark">
 
-        <div style="font-family: Open Sans, sans-serif;">
-            The Patient viewer application is targeted at the Clinician or Information Analyst, and will display the resources from a patient record in a
-            number of perspectives. These include:
-            <ul>
-                <li>The resource explorer to examine individual resources</li>
-                <li>The resource references graph that shows connections between resources</li>
-                <li>The terminology explorer that displays coded data</li>
-                <li>Numeric Observations - tables and graphs</li>
-                <li>The encounter timeline that shows resources by encounter</li>
-                <li>A <a href="https://hl7.org/fhirpath/" target="_blank">FhirPath</a> tab for querying within individual resources or the bundle of all resources</li>
+        <div class="row">
+            <div class="col-md-6">
+                <div style="font-family: Open Sans, sans-serif;">
+                    The Patient viewer application is targeted at the Clinician or Information Analyst, and will display the resources from a patient record in a
+                    number of perspectives. These include:
+                    <br/> <br/>
+                    <ul>
+                        <li>The resource explorer to examine individual resources</li>
+                        <li>The resource references graph that shows connections between resources</li>
+                        <li>The terminology explorer that displays coded data</li>
+                        <li>Numeric Observations - tables and graphs</li>
+                        <li>The encounter timeline that shows resources by encounter</li>
+                        <li>A <a href="https://hl7.org/fhirpath/" target="_blank">FhirPath</a> tab for querying within individual resources or the bundle of all resources</li>
 
-            </ul>
+                    </ul>
+                </div>
+
+
+
+                <div style="font-family: Open Sans, sans-serif;">
+                    There are a couple of ways to select the Patient to view.
+                    <br/> <br/>
+                    The simplest is to select one of the sample patients to the right. These have specific scenarios
+                    represented as FHIR resources.
+                    <br/> <br/>
+                    Alternatively, you can select the patient directly from a FHIR server. To do this,  first select the
+                    server where the data is stored using the
+                    link at the top of the screen (Labelled 'Server'). <em>https://hapi.fhir.org/baseR4/</em> is a good choice
+                    if you don't have a specific server in mind.
+
+                    The <i class="glyphicon glyphicon-edit clickable" ng-click="selectServer()"> </i> icon
+                    will display a dialog where you can select another one, or enter the details of some other Server.
+
+                    <br/><br/>
+
+                    Next, click the 'Select Patient' button at the top right to select the patient to view from that server. You can choose
+                    the patient by their name, identifier or Id - or you can create a new one directly. Be aware that it might
+                    take a few seconds for a search to be performed. Also, if the resulting bundle of resources is large,
+                    it can take a while for the full resource graph to be displayed.
+
+
+                    <br/><br/>
+
+                    <strong>Some caveats:</strong>
+                    <ul>
+                        <li>You shouldn't use this for real patient data - there's no security</li>
+                        <li>It's a training tool and may be really slow with large datasets (> 150 resources or so)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h4>Sample patients</h4>
+                <div class="myScroll1">
+                    <table class="table table-bordered">
+                        <tr><th>Name</th><th>Description</th><th>Author</th><th></th></tr>
+                        <tr ng-repeat="bundle in bundlesFromLibrary">
+                            <td>{{bundle.name}}</td>
+                            <td>{{bundle.description}}</td>
+                            <td>{{bundle.author}}</td>
+                            <td><button class="btn-primary btn" ng-click="loadFromLibrary(bundle)">Load</button></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
         </div>
 
 
-
-        <div style="font-family: Open Sans, sans-serif;">
-            To select a Patient to view, first select the server where the data is stored using the
-            link at the top of the screen (Labelled 'Server'). <em>https://hapi.fhir.org/baseR4/</em> is a good choice
-            if you don't have a specific server in mind.
-            <br/>
-            The <i class="glyphicon glyphicon-edit clickable" ng-click="selectServer()"> </i> icon
-            will display a dialog where you can select another one, or enter the details of some other Server.
-
-            <br/><br/>
-
-            Next, click the 'Select Patient' button at the top right to select the patient to view from that server. You can choose
-            the patient by their name, identifier or Id - or you can create a new one directly. Be aware that it might
-            take a few seconds for a search to be performed.
-
-            <br/><br/>
-            As an alternative, you can select a sample patient from the list below. This is often the easiest if
-            you don't have a specific server/patient in mind (and it's significantly faster to load!).
-            <br/><br/>
-            <strong>Some caveats:</strong>
-            <ul>
-                <li>You shouldn't use this for real patient data - there's no security</li>
-                <li>It's a training tool and will be really slow with large datasets (> 100 resources or so)</li>
-            </ul>
-        </div>
         <br/>
-        <h4>Sample patients</h4>
-        <div class="myScroll1">
-            <table class="table table-bordered">
-                <tr><th>Name</th><th>Description</th><th>Author</th><th></th></tr>
-                <tr ng-repeat="bundle in bundlesFromLibrary">
-                    <td>{{bundle.name}}</td>
-                    <td>{{bundle.description}}</td>
-                    <td>{{bundle.author}}</td>
-                    <td><button class="btn-primary btn" ng-click="loadFromLibrary(bundle)">Load</button></td>
-                </tr>
-            </table>
-        </div>
+
 
 
     </div>

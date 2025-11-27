@@ -1,0 +1,60 @@
+
+<uib-tabset>
+  <uib-tab heading="Table">
+    <div class="myScroll1">
+      <table class="table table-bordered">
+        <tr ng-repeat="item in selectedResourceProfileSummary">
+          <td >{{item.path }}</td>
+          <td>{{item.short}}</td>
+          <td style="width: 8%">{{item.mult}}</td>
+          <td>
+            <div ng-repeat="type in item.type">
+              <div ng-hide="type.code == 'CodeableConcept'">
+                {{type.code}}
+              </div>
+
+              <div ng-show="type.code == 'CodeableConcept'">
+                <span class="clickable" ng-click="viewProfileVS(item)">CodeableConcept</span>
+              </div>
+            </div>
+
+
+
+          </td>
+        </tr>
+
+      </table>
+    </div>
+
+  </uib-tab>
+
+
+  <uib-tab heading="Elements">
+    <div class="myScroll1">
+      <div class="row">
+        <div class="col-md-3">
+          <div class="list-group">
+            <div style="cursor: pointer"
+                    ng-click="input.selectedED = ed"
+                    ng-repeat="ed in selectedResourceProfile.snapshot.element">
+              {{ed.path}}
+            </div>
+          </div>
+        </div>
+        <div class="col-md-9">
+            <pre ng-show="input.selectedED">{{input.selectedED | json}}</pre>
+
+        </div>
+
+      </div>
+    </div>
+
+
+  </uib-tab>
+  <uib-tab heading="Json">
+    <div class="myScroll1">
+      <pre>{{selectedResourceProfile | json}}</pre>
+    </div>
+  </uib-tab>
+</uib-tabset>
+

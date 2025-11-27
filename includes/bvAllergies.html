@@ -4,6 +4,7 @@
     <table class="table table-bordered">
       <tr><th>Substance</th></tr>
       <tr ng-repeat="allergy in lstAllergies"
+          style="cursor: pointer"
         ng-click="input.selectedAllergy = allergy">
         <td>{{allergy.display}}</td>
 
