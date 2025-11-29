@@ -9,13 +9,16 @@ angular.module("sampleApp")
 
         let deepValidateMax = 30    //maximum number of resources allowed in deep validation
 
+        extObligation = "http://hl7.org/fhir/StructureDefinition/obligation"
+
             gHashResourcesByTypeAndId = {}   //a hash of nodes by {type}/{id}
             gHashResourcesByFullUrl = {}   //a hash of nodes by {id}
 
         return {
 
             makeProfileSummary : function (resource) {
-                let summary = []
+                let summary = []    //summary by item
+                let hashActor = {}  //summary by actor
                 for (const ed of resource.snapshot?.element || []) {
                     let item = {}
                     item.path = $filter('dropFirstInPath')(ed.path)
@@ -23,10 +26,51 @@ angular.module("sampleApp")
                     item.mult = `${ed.min}..${ed.max}`
                     item.type = ed.type
                     item.valueSet = ed.binding?.valueSet
+                    item.obligations = []
+
+                    for (const ext of ed.extension || []) {
+                        if (ext.url == extObligation) {
+                            let obligation = {json:ext}
+                            for (const subExt of ext?.extension || []) {
+                                switch (subExt.url) {
+                                    case "code" :
+                                        obligation.code = subExt.valueCode
+                                        break
+                                    case "actor" :
+                                        let canonical = subExt.valueCanonical
+                                        let ar = canonical.split('/')
+                                        obligation.actor = ar[ar.length-1]
+                                        break
+                                }
+                            }
+                            item.obligations.push(obligation)
+                            if (obligation.actor && obligation.code) {
+                                let actor = obligation.actor
+                                let path = item.path
+
+                                hashActor[actor] = hashActor[actor] || {elements: {}}
+
+                                hashActor[actor].elements[path] = hashActor[actor].elements[path] || []
+
+                                let vo = {obligationCode:obligation.code}
+
+                                hashActor[actor].elements[path].push(vo)
+                               // hashActor[obligation.actor].elements.push(vo)
+                            }
+
+
+                        }
+
+
+                    }
+
+
                     summary.push(item)
 
                 }
-                return summary
+
+                console.log(hashActor)
+                return {summary: summary,hashActor:hashActor}
 
             },
 

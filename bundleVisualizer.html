@@ -273,6 +273,9 @@
     <script src="js/viewResourceCtrl.js"></script>
     <script src="js/umamiSvc.js"></script>
     <script src="js/viewVSCtrl.js"></script>
+
+    <script src="js/profileCtrl.js"></script>
+
     <title>Bundle Visualizer</title>
 
 </head>
@@ -881,9 +884,15 @@
 
 
                                 <uib-tab ng-show="selectedResourceProfile" heading="Profile">
-                                    <ng-include src = "'includes/bvProfile.html'"></ng-include>
+                                    <div ng-controller="profileCtrl">
+                                        <ng-include src = "'includes/bvProfile.html'"></ng-include>
+                                    </div>
+
 
                                 </uib-tab>
+
+
+
 
                                 <uib-tab ng-show="selectedBundleEntry.resource.resourceType == 'Binary'" heading="Binary Content">
                                     <br/>
@@ -1154,7 +1163,7 @@
                     <uib-tabset>
                         <uib-tab heading="Standard validation">
 
-                            <em>Issues noted by the internal hapi server</em>
+                            <em>Issues noted by the internal hapi server. Excludes 'missing text element' and profile validation errors.</em>
 
                             <div class="pull-right">
                                 <a target="_blank"
@@ -1224,6 +1233,7 @@
                         </uib-tab>
 
                         <uib-tab heading="Extended validation">
+                            <em>Validation against an Implementation Guide</em>
                             <button class="btn btn-link pull-right" ng-click="validateFromIG()">Validate against Au Patient summary</button>
                             <div class="clearfix"></div>
 

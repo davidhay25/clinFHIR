@@ -2,6 +2,8 @@ angular.module("sampleApp")
     .controller('viewVSCtrl',
         function ($scope,url,$http,$uibModal,terminologyServer) {
 
+            $scope.terminologyServer = terminologyServer
+
 
             $scope.url = url
 

@@ -1051,6 +1051,7 @@ angular.module("sampleApp")
                         function (data) {
                             if (data.data.entry?.[0]) {
                                 $scope.selectedResourceProfile = data.data.entry[0].resource
+
                                 $scope.selectedResourceProfileSummary = bundleVisualizerSvc.makeProfileSummary(data.data.entry[0].resource)
 
 
@@ -1569,39 +1570,30 @@ angular.module("sampleApp")
 
 
 
-            //validate each entry
-            $scope.getResourceFromIssueDEP = function (iss) {
-                $scope.selectedIssue = iss
-
-                // "Bundle.entry[0].resource.section[5].text.div",
-                let loc = iss.location[0]
-
-                const match = loc.match(/\[(\d+)\]/);
-                const firstIndex = match ? parseInt(match[1], 10) : null;
-
-                if (firstIndex !== null) {
-                    $scope.issueResource = $scope.fhir.entry[firstIndex].resource
-                }
-
-
-
-
-            }
 
             //used by bundle validate
-            let validate = function(resource) {
+            let validate = function(bundle) {
                 let hashErrors = {};    //related to position in bundle...
-                $http.post("validate",resource).then(
+
+                //ensure that all resources
+
+
+                $http.post("validate",bundle).then(
                     function (data) {
 
                         //this is an OO
                         $scope.validationResult = data.data
                         let issues = data.data.issue || []
+
                         $scope.validationResult.issue = []
 
                         //remove all the 'should have text element' errors
                         const exclude = "dom-6:"
                         issues = issues.filter(item => !item.diagnostics.includes(exclude));
+
+                        //remove all the 'cannot validate' errors
+                        const exclude1 = "not fetch unknown profiles"
+                        issues = issues.filter(item => !item.diagnostics.includes(exclude1));
 
 
                         //create a hash by resource id
@@ -1609,34 +1601,38 @@ angular.module("sampleApp")
                         $scope.allErrors = []
 
                         for (const iss of issues) {
-                            let loc = iss.location[0]
+                            if (iss.location) {
+                                let loc = iss.location[0]
 
-                            const match = loc.match(/\[(\d+)\]/);
-                            const firstIndex = match ? parseInt(match[1], 10) : null;
+                                const match = loc.match(/\[(\d+)\]/);
+                                const firstIndex = match ? parseInt(match[1], 10) : null;
 
-                            if (firstIndex !== null) {
-                                if (firstIndex > $scope.fhir.entry.length) {
-                                    console.error(`Theres an issue with a location of ${loc} but there are only ${$scope.fhir.entry.length} entries  in the bundle`)
-                                } else {
-                                    const resource = $scope.fhir.entry[firstIndex].resource
-                                    $scope.validationResult.issue.push(iss)
-
-                                    if (resource.id) {
-                                        $scope.errorsByResource[resource.id] = $scope.errorsByResource[resource.id] || {resource:resource,issues:[]}
-                                        $scope.errorsByResource[resource.id].issues.push(iss)
+                                if (firstIndex !== null) {
+                                    if (firstIndex > $scope.fhir.entry.length) {
+                                        console.error(`Theres an issue with a location of ${loc} but there are only ${$scope.fhir.entry.length} entries  in the bundle`)
                                     } else {
-                                        let fakeResource = {resourceType : "No Id"}
 
-                                        $scope.errorsByResource['noId'] = $scope.errorsByResource['noId'] || {resource:fakeResource,issues:[]}
-                                        $scope.errorsByResource['noId'].issues.push(iss)
+                                        const resource = $scope.fhir.entry[firstIndex].resource
+                                        $scope.validationResult.issue.push(iss)
+
+                                        let id = resource.id || `location:${firstIndex}`
+
+                                        $scope.errorsByResource[id] = $scope.errorsByResource[id] || {resource:resource,issues:[]}
+                                        $scope.errorsByResource[id].issues.push(iss)
+
+
                                     }
-
-
+                                } else {
+                                    $scope.errorsByResource["Bundle"] = $scope.errorsByResource["Bundle"] || {resource:{},issues:[]}
+                                    $scope.errorsByResource["Bundle"].issues.push(iss)
                                 }
+
                             } else {
-                                $scope.errorsByResource["Bundle"] = $scope.errorsByResource["Bundle"] || {resource:resource,issues:[]}
-                                $scope.errorsByResource["Bundle"].issues.push(iss)
+                                $scope.errorsByResource["NoLocation"] = $scope.errorsByResource["NoLocation"] || {resource:{},issues:[]}
+                                $scope.errorsByResource["NoLocation"].issues.push(iss)
                             }
+
+
                         }
                     }, function (err) {
                         console.log(err)

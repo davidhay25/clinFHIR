@@ -31,7 +31,7 @@ app.use(bodyParser.json({limit:'50mb',type:['application/json+fhir','application
 
 app.post('/telemetry', async function(req,res) {
 
-    const err = new Error("Resource not found");
+    const err = new Error("clinFHIR unhandled error");
     err.details = req.body
     Sentry.captureException(err);
 
