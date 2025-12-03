@@ -69,7 +69,7 @@ angular.module("sampleApp")
 
                 }
 
-                console.log(hashActor)
+               // console.log(hashActor)
                 return {summary: summary,hashActor:hashActor}
 
             },

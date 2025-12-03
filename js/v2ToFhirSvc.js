@@ -321,7 +321,8 @@ angular.module("sampleApp")
 
 
                 let bundle = options.bundle;
-                let centralResourceId = options.primaryResourceId;
+                //let centralResourceId = options.primaryResourceId;
+                let centralResourceId = options.centralResourceId   //updated dec1
                 let hidePatient = options.hidePatient
 
                 let issues = []
@@ -339,12 +340,12 @@ angular.module("sampleApp")
                     let nodeId = inx+1      //used for creating links
                     let resource = entry.resource;
 
+
                     //if there's a centralResourceId then get the corresponding nodeId
-                    if (centralResourceId && resource.id == centralResourceId) {
+                    //This will generally be the fullUrl (rather than the resource id) but we check both
+                    if (centralResourceId && (entry.fullUrl == centralResourceId || resource.id == centralResourceId)) {
                         centralNodeId = nodeId
                     }
-
-
 
                     let node = {id: nodeId,shape: 'box',resource:resource, entry:entry}
 
@@ -370,7 +371,6 @@ angular.module("sampleApp")
                         arNodes.push(node)
 
                         //create hashs for simpler identification of reference targets
-
                         if (entry.fullUrl) {
                             hashNodesByFullUrl[entry.fullUrl] = node
                         }

@@ -2,16 +2,7 @@
 <html>
 <head lang="en">
     <base href="/" />
-<!--
-    Global site tag (gtag.js) - Google Analytics
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YD055VEN8K"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-YD055VEN8K');
-    </script>
--->
+
     <meta charset="UTF-8">
     <script src="js/libs/jquery-1.9.0.min.js"></script>
     <script src="js/libs/angular.min1-5.js"></script>
@@ -48,6 +39,8 @@
     <script src="js/libs/vkbeautify.0.99.00.beta.js"></script>
 
     <script src="js/libs/fhirpath.min.js"></script>
+
+    <!-- I don't think this is needed in BV - who cares how many tabs are open
     <script>
         (function() {
             const key = "bundleVisualizerTabs";
@@ -74,7 +67,7 @@
                 .filter(([id, ts]) => id !== tabId && (now - ts) < HEARTBEAT_EXPIRE);
 
             if (activeOtherTabs.length > 0) {
-                alert('This page is already open in another tab, which will cause issues. You should close this page and use the other one.');
+                alert('This page is already open in another tab, which may cause issues. You should close this page and use the other one.');
             }
 
             // Heartbeat updater
@@ -91,8 +84,9 @@
                 setTabs(t);
             });
         })();
-    </script>
 
+    </script>
+-->
 
 
     <style>
@@ -295,17 +289,13 @@
                     </a>
                 </span>
 
-
             </div>
 
-            <div class="col-md-5">
+            <div class="col-md-4">
                 <div class="navbar-text">
                     {{bundleDisplayName}}
                 </div>
             </div>
-
-
-
 
             <div class="col-md-1">
                 <form class="navbar-form navbar-left">
@@ -315,11 +305,19 @@
 
             <div class="col-md-2">
                 <div class="navbar-text">
+
                     <button class="btn btn-primary" ng-hide = "showSelector" class="clickable"
-                         ng-click="reShowSelector() ">Show Selector</button>
+                         ng-click="reShowSelector()">Show Selector</button>
                 </div>
             </div>
 
+            <div class="col-md-1">
+                <div class="navbar-text">
+                    <a style="font-size: 24px;padding-top: 8px"
+                       href="https://docs.google.com/document/d/1Hra56reIh3pxDOtDqS7NC2epyyBZlb-bqpnUga1y_p0/edit?tab=t.0#heading=h.p77qav9sz3tf"
+                       target="_blank" class="glyphicon glyphicon-info-sign"></a>
+                </div>
+            </div>
 
             <div class="col-md-2">
                 <div class="pull-right">
@@ -355,7 +353,7 @@
                     <!-- Paste a bundle directly into the app-->
                     <div ng-show="input.selectedSelector.code == 'paste'">
                         <div class="alert alert-info">
-                            Paste the Bundle into the text box. A 'view Bundle' button will appear that will display the Bundle contents.
+                            Paste the Bundle into the text box or upload from the local filesystem. A 'view Bundle' button will appear that will display the Bundle contents.
                             <strong>Don't use this with real Patient data! It's for testing and learning only.</strong>
                         </div>
 
@@ -364,8 +362,26 @@
                                 <textarea class="form-control" rows = '20' ng-model="input.newBundle"></textarea>
                             </div>
                             <div class="col-md-4">
+
+
+                                <div ng-hide="input.newBundle">
+                                    <input type="file"
+                                           onchange="angular.element(this).scope().fileSelected(this)"
+                                           id="fileUploadFileRef"
+                                           accept="application/json" />
+<!--
+                                    <br/>
+                                    <button
+                                            ng-show="jsonFileSelected"
+                                            class="btn btn-primary" ng-click="uploadJson()">Upload Json file</button>
+                                    -->
+
+                                </div>
+
+
                                 <button ng-show = "input.newBundle" class="btn btn-success"
                                         ng-click="viewNewBundle(input.newBundle)">View bundle</button>
+
 
                             </div>
                         </div>
@@ -524,6 +540,7 @@
                                             style="cursor: pointer"
                                             ng-class="{listItemSelected:input.libraryQuery == item}"
                                             ng-show="showLibraryEntry(item)"
+                                            ng-dblclick = "executeLibraryQuery(item)"
                                             ng-repeat = "item in library">
                                             <td>
                                                 {{item.name}}

@@ -52,9 +52,66 @@ angular.module("sampleApp")
             $scope.validationServer = $localStorage.validationServer || appConfigSvc.getCurrentConformanceServer();
 
             $scope.showSelector = true; //at startup, show the selector
+
+            //re-show the selection options if in the view screen
             $scope.reShowSelector = function () {
                 delete $scope.bundleDisplayName
+                delete $scope.input.newBundle
+                delete $scope.selectedFileName
                 $scope.showSelector = true
+
+                //clear the contents of the file selector
+                let fileInput = document.getElementById('fileUploadFileRef');
+                fileInput.value = "";   // clear the selected file
+                //$scope.jsonFileSelected = false;  // reset your flag
+            }
+
+
+
+           // $scope.jsonFileSelected = false;
+
+            //called when a file is selected in the input selector
+            $scope.fileSelected = function (input) {
+                $scope.$apply(function () {
+                    if (input.files && input.files.length > 0) {
+                        //$scope.jsonFileSelected = true;
+
+                        // Get the first file's name
+                        $scope.selectedFileName = input.files[0].name;
+
+                        // Optionally, auto-upload
+                        $scope.uploadJson();
+                    }
+                });
+            };
+
+
+            $scope.uploadJson = function() {
+                let id = "#fileUploadFileRef"    //in qMetadata
+                let file = $(id)
+                let fileList = file[0].files
+                if (fileList.length == 0) {
+                    alert("Please select a file first")
+                    return;
+                }
+
+                let fileObject = fileList[0]  //is a complex object
+
+                let r = new FileReader();
+
+                //called when the upload completes
+                r.onloadend = function (e) {
+                    let data = e.target.result;
+
+                    $scope.input.newBundle = data
+
+                    $scope.$digest()
+
+
+                }
+
+                //perform the read...
+                r.readAsText(fileObject);
             }
 
 
@@ -398,6 +455,8 @@ angular.module("sampleApp")
                 //todo - keep separate from executeSavedQuery as we want to support 'snapshotted' bundles in the future
                 let newQry = `proxyRequest?qry=${encodeURIComponent(item.qry)}`
                 umamiSvc.track('bvBundle:libraryQuery', {value:item.qry});
+                $scope.waiting = true
+
                 $http.get(newQry).then(
                     function (data) {
 
@@ -418,7 +477,9 @@ angular.module("sampleApp")
                         //alert(angular.toJson(err))
 
                     }
-                )
+                ).finally(function () {
+                    $scope.waiting = false
+                })
             }
 
 
@@ -431,6 +492,9 @@ angular.module("sampleApp")
 
             //validate the resources in the bundle, then draw the graph (which needs the errors to display)
             let processBundle = function(oBundle,validationServer) {
+
+
+                $scope.selectBundleEntry(null)  //clears all the variables associated with displaying a resource
 
                 delete $scope.hashErrors
                 // $scope.CarePlans = []       //a list of all Careplans in the bundle (
@@ -450,7 +514,13 @@ angular.module("sampleApp")
                 delete $scope.extendedOO
                 delete $scope.evOperationError
 
-                $scope.showSelector = false     //hide the selector
+                delete $scope.input.selectedED
+
+
+
+
+
+                //$scope.showSelector = false     //hide the selector
 
                 delete $scope.serverRoot;
                 $scope.fhir = oBundle;
@@ -641,112 +711,8 @@ angular.module("sampleApp")
                     $scope.document = bundleVisualizerSvc.makeDocument(bundle, $sce)
                 }
 
+                $scope.showSelector = false     //hide the selector
 
-                /*
-                if (bundle.type == 'document' || $scope.isDocument) {
-                    let arComposition = [];
-
-                    //create a hash by type & id - to find document references
-                    let hash = {};
-
-                    bundle.entry.forEach(function (entry) {
-                        if (entry.resource) {
-
-
-                            let key;
-
-                            //if the id is an oid (entry.fullUrl has urn:uuid:) then reference will just be the oid
-                            if (entry.fullUrl?.indexOf('urn:uuid:') > -1) {
-                                key = entry.fullUrl
-                            } else {
-                                key = entry.resource.resourceType + "/" + entry.resource.id
-                            }
-
-                            //key = entry.resource.resourceType + "/" + entry.resource.id //temp
-
-                            hash[key] = entry.resource;
-
-                            if (entry.resource.resourceType == 'Composition') {
-                                arComposition.push(entry.resource)
-                            }
-                        }
-
-                    });
-
-
-                    switch (arComposition.length) {
-                        case 0 :
-                            alert('This is a document, but there is no Composition resource')
-                            break;
-                        case 1 :
-                            $scope.document = {composition : arComposition[0]};
-                            break;
-                        default:
-                            alert('There were '+arComposition.length + ' Composition resources, and there should only be 1')
-                    }
-
-                    //if there's exactly one composition...
-                    if ($scope.document.composition) {
-                        //now get the subject
-                        if ($scope.document.composition.subject) {
-                            if ($scope.document.composition.subject.reference) {
-
-                                //the reference won't
-                                $scope.document.subject = hash[$scope.document.composition.subject.reference];
-
-                                if (!$scope.document.subject) {
-                                    alert('The subject reference from Composition ('+$scope.document.composition.subject.reference+') is not in the bundle')
-                                }
-                            } else {
-                                alert('The composition resource is missing the subject reference')
-                            }
-                        } else {
-                            alert('The composition resource is missing the subject property')
-                        }
-
-                        //get the resources referenced from the composition
-                        $scope.document.sectionResources = []
-
-                        if ($scope.document.composition.section) {
-                            $scope.document.composition.section.forEach(function(section,inx){
-                                //let section = angular.copy(oSection)
-                                section.realResources = []
-                                if (section.entry) {
-                                    section.entry.forEach(function (entry) {
-                                        let resource = hash[entry.reference]
-                                        if (resource) {
-                                            //todo check for list
-                                            let item = {display:resource.resourceType,resource:resource}
-
-                                            const json = angular.toJson(resource, true);
-                                            const html = `<pre>${json}</pre>`;
-                                            item.trustedPopover = $sce.trustAsHtml(html);
-
-                                            section.realResources.push(item)
-
-
-                                        } else {
-                                            section.realResources.push({display:'unknown reference:'+entry.reference})
-                                        }
-
-                                    })
-                                }
-
-
-                            })
-
-
-                        }
-
-                    }
-                }
-
-                console.log(angular.copy($scope.document))
-
-                console.log(bundleVisualizerSvc.makeDocument (bundle,$sce) )
-
-
-              */
 
             };
 
@@ -926,10 +892,7 @@ angular.module("sampleApp")
 
             //------- passed a bundle in json or xml ------
 
-            $scope.viewNewBundle = function(bundle,name) {
-                //view a bundle directly. If 'name' is not null, then save for this user
-
-                //?do I care about the format, erors
+            $scope.viewNewBundle = function(bundle) {
 
                 umamiSvc.track('bvBundle:adhocBundle');
 
@@ -940,7 +903,7 @@ angular.module("sampleApp")
                         function(data) {
                             json = data.data
 
-                            process(json,name)
+                            process(json)
                         },
                         function(err) {
                             console.log(err)
@@ -957,11 +920,13 @@ angular.module("sampleApp")
                         return;
                     }
 
-
                     try {
-                        process(json,name)
+                        process(json)
                     } catch (ex) {
-                        alert("Unable to parse - not a valid FHIR bundle")
+
+
+
+                        alert(`Error during processing: ${angular.toJson(ex)}. Is this a valid Bundle?`)
                     }
 
                 }
@@ -969,8 +934,12 @@ angular.module("sampleApp")
 
 
                 }
-                function process(json,name) {
-                    $scope.bundleDisplayName = "Pasted bundle"
+
+                //called to process a pasted or uploaded bundle
+                function process(json) {
+
+                //$scope.selectedFileName set if an uplaoded bundle
+                    $scope.bundleDisplayName = $scope.selectedFileName || "Pasted bundle"
 
                     // $scope.showSelector = false
                     processBundle(json);
@@ -1028,7 +997,8 @@ angular.module("sampleApp")
             };
 
 
-            //when an entry/resource is seleced in the left tab of the Bundle entries tab
+            //when an entry/resource is selected in the left tab of the Bundle entries tab
+            //also called when processing a new bundle with null to clear all the selected entry vars
             $scope.selectBundleEntry = function(entry) {
                 delete $scope.selectedFromSingleGraph;  //does this need to be done?
 
@@ -1036,6 +1006,26 @@ angular.module("sampleApp")
                 delete $scope.resourceFromSection
                 delete $scope.selectedRef
                 delete $scope.selectedResourceProfile
+
+                delete $scope.selectedFromSingleGraph
+                delete $scope.fshText
+                delete $scope.xmlText
+                delete $scope.selectedBundleEntry
+
+
+                $('#builderResourceTree').jstree('destroy');
+
+                if ($scope.singleResourceChart) {
+                    $scope.singleResourceChart.destroy();
+                }
+
+
+
+                if (!entry) {
+                    return
+                }
+                $scope.selectedBundleEntry = entry
+                $scope.selectedFromSingleGraph = entry.resource
 
                 let resourceId = entry.resource.id
 
@@ -1051,12 +1041,8 @@ angular.module("sampleApp")
                         function (data) {
                             if (data.data.entry?.[0]) {
                                 $scope.selectedResourceProfile = data.data.entry[0].resource
-
                                 $scope.selectedResourceProfileSummary = bundleVisualizerSvc.makeProfileSummary(data.data.entry[0].resource)
-
-
                             }
-
                         }
                     )
                 }
@@ -1080,10 +1066,7 @@ angular.module("sampleApp")
                     }
                 }
 
-                $scope.selectedFromSingleGraph = entry.resource
-                delete $scope.fshText
-                delete $scope.xmlText
-                $scope.selectedBundleEntry = entry
+
 
 
                 //prettify the html
@@ -1201,16 +1184,17 @@ angular.module("sampleApp")
 
             $scope.createGraphOneEntry = function(){
 
-
-
                 if (!$scope.selectedBundleEntry) {
                     return;
                 }
 
                 let primaryResourceId = $scope.selectedBundleEntry.resource?.id    //will be the primary resource
 
+                //This is a bit tricky a there as the reference in the bundle could be to the fullUrl or
+                //to the resource id
+
                 //the fullUrl is a default ?if it exists should we onlt use that???
-                let url = $scope.selectedBundleEntry.fullUrl;// || resource.resourceType + "/" + resource.id;
+                let url = $scope.selectedBundleEntry.fullUrl; // || resource.resourceType + "/" + resource.id;
                 if (!url) {
                     //If the resource has an id, then construct the url from that.
                     //If a serverRoot has been passed in, then make the url an absolute one.
@@ -1223,6 +1207,7 @@ angular.module("sampleApp")
                         }
                     }
                 } else {
+
                     //if there is a full url, then strip of any guid marker
                     //  2022-10-25 - why do this? url = url.replace("urn:uuid:","")
                 }
@@ -1276,8 +1261,11 @@ angular.module("sampleApp")
                    // delete $scope.selectedFshFromSingleGraph
                     var nodeId = obj.nodes[0];  //get the first node
                     var node = vo.graphData.nodes.get(nodeId);
+                    if (node) {
+                        $scope.selectFromSingleGraph()
+                    }
 
-                    $scope.selectFromSingleGraph()
+
                 })
 
 
@@ -1292,7 +1280,13 @@ angular.module("sampleApp")
                     }
                     delete $scope.selectedFshFromSingleGraph
                     clickNodeId = nodeId
+
                     var node = vo.graphData.nodes.get(nodeId);
+
+                    //occurs when double click on space
+                    if (! node) {
+                        return
+                    }
 
                     $scope.selectedFromSingleGraph = node.resource;
                     fshResourceId = $scope.selectedFromSingleGraph.id
