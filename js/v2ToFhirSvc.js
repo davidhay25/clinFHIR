@@ -452,11 +452,18 @@ angular.module("sampleApp")
                 function addEdge(sourceResource,sourceId,path,reference) {
                     //find the node that the reference refers to
 
+                    //if the reference is actually an object with a .reference property (ie an element name)
+                    //from a PR by benny779 -
+                    let actualReference = reference
+                    if (reference.reference) {
+                        actualReference = reference.reference
+                    }
+
                     //the reference is of the format type/id
-                    let targetNode = hashNodesByTypeAndId[reference]
+                    let targetNode = hashNodesByTypeAndId[actualReference]
                     if (!targetNode) {
                         //try a full url - eg http://host/type/id - http://hapi.fhir.org/baseR4/Patient/IPS-examples-Patient-01
-                        targetNode = hashNodesByFullUrl[reference]
+                        targetNode = hashNodesByFullUrl[actualReference]
                     }
 
 

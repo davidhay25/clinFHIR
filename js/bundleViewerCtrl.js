@@ -16,7 +16,8 @@ angular.module("sampleApp")
             let localhapiserver = "http://localhost:9090/fhir"
 
 
-            let terminologyServer = "https://smile.sparked-fhir.com/aucore/fhir/DEFAULT"
+            //let terminologyServer = "https://smile.sparked-fhir.com/aucore/fhir/DEFAULT"
+            let terminologyServer = " https://tx.dev.hl7.org.au/fhir"
 
             $scope.input = {};
 
@@ -115,6 +116,33 @@ angular.module("sampleApp")
             }
 
 
+            //delete any entries in the library that have this query
+            $scope.deleteLibraryQuery = function (item) {
+                if (confirm(`Are you sure you wish to remove this item from the library`)) {
+                    let qry = `bvLibrary/${item['_id']}`
+                    $http.delete(qry).then(
+                        function () {
+                            alert("Library entry has been removed")
+                            umamiSvc.track('bvBundle:libraryQuery:delete', {value:item.qry});
+                            //update the entry in the local list of queries (if it exists)
+                            for (let local of $scope.savedQueries) {
+                                if (local.qry == item.qry) {
+                                    delete local.inLibrary
+                                    break
+                                }
+                            }
+                            getLibrarySummary()         //update the library list
+
+
+
+                        }, function (err) {
+                            alert(`There was a problem: ${angular.toJson(err)}`)
+                        }
+                    )
+                }
+
+                console.log(item)
+            }
 
             $scope.viewProfileVS = function (item) {
                 let vs = item.valueSet
@@ -227,9 +255,9 @@ angular.module("sampleApp")
                 $uibModal.open({
                     templateUrl: 'modalTemplates/addBundleEntry.html',
                     size: 'lg',
-                    controller: function ($scope, bundle) {
+                    controller: function ($scope, bundle, user) {
                         $scope.input = {};
-
+                        $scope.userEmail = user?.email
                         $scope.save = function () {
                             let vo = {name:$scope.input.name,description:$scope.input.description,
                                 showInPV:$scope.input.showInPV,author:$scope.input.author}
@@ -240,6 +268,9 @@ angular.module("sampleApp")
                     resolve : {
                         bundle : function(){
                             return $scope.fhir
+                        },
+                        user : function () {
+                            return $scope.user
                         }
                     }
                 }).result.then(function (vo) {
@@ -252,6 +283,9 @@ angular.module("sampleApp")
                     entry.author = vo.author
                     entry.bundle = $scope.fhir
                     entry.active = true //means this will appear in the main selection list
+                    if ($scope.user?.email) {
+                        entry.userEmail = $scope.user?.email
+                    }
 
 
                     $http.post('bv/saveBundle',entry).then(
@@ -363,7 +397,6 @@ angular.module("sampleApp")
                 const firstIndex = match ? parseInt(match[1], 10) : null;
                 if (firstIndex !== null) {
                     $scope.extendedIssueResource = $scope.fhir.entry[firstIndex].resource
-
                 }
             }
 
@@ -372,9 +405,11 @@ angular.module("sampleApp")
                 if (iss.severity == 'error' && $scope.input.issError) {
                     return true
                 }
+
                 if (iss.severity == 'warning' && $scope.input.issWarning) {
                     return true
                 }
+
                 if (iss.severity == 'information' && $scope.input.issInfo) {
                     return true
                 }
@@ -395,6 +430,7 @@ angular.module("sampleApp")
                         size: 'lg',
                         controller: function ($scope, item) {
 
+
                             $scope.input = {tags:{}}
                             $scope.input.name = item.name
                             $scope.input.description = item.description
@@ -409,8 +445,6 @@ angular.module("sampleApp")
                             )
 
 
-
-
                             $scope.save = function () {
                                 let vo = {name:$scope.input.name,
                                     description:$scope.input.description,
@@ -421,9 +455,16 @@ angular.module("sampleApp")
                                     vo.tags = [$scope.input.tag]
                                 }
 
+                                for (let tag of $scope.tags) {
+                                    if ($scope.input.selectedTag[tag]) {
+                                        vo.tags = vo.tags || []
+                                        vo.tags.push(tag)
+                                    }
+                                }
+
+
                                 $scope.$close(vo)
                             }
-
                         },
                         resolve : {
                             item : function(){
@@ -445,16 +486,12 @@ angular.module("sampleApp")
                     })
 
 
-
-
-
-
             }
 
             $scope.executeLibraryQuery = function (item) {
                 //todo - keep separate from executeSavedQuery as we want to support 'snapshotted' bundles in the future
                 let newQry = `proxyRequest?qry=${encodeURIComponent(item.qry)}`
-                umamiSvc.track('bvBundle:libraryQuery', {value:item.qry});
+                umamiSvc.track('bvBundle:libraryQuery:execute', {value:item.qry});
                 $scope.waiting = true
 
                 $http.get(newQry).then(
@@ -856,7 +893,7 @@ angular.module("sampleApp")
             }
 
             $scope.executeSavedQuery = function (item) {
-                umamiSvc.track('bvBundle:savedQuery', {value:item.qry});
+                umamiSvc.track('bvBundle:savedQuery:execute', {value:item.qry});
                 let newQry = `proxyRequest?qry=${encodeURIComponent(item.qry)}`
                 $scope.waiting = true
                 $http.get(newQry).then(
@@ -894,7 +931,7 @@ angular.module("sampleApp")
 
             $scope.viewNewBundle = function(bundle) {
 
-                umamiSvc.track('bvBundle:adhocBundle');
+                umamiSvc.track('bvBundle:adhocBundle:view');
 
                 let json
                 if (bundle.substr(0,1) == "<") {
@@ -1228,8 +1265,6 @@ angular.module("sampleApp")
 
 
                 let container = document.getElementById('singleResourceGraph');
-
-
                 let graphOptions = {
                     physics: {
                         enabled: true,
@@ -1843,5 +1878,42 @@ angular.module("sampleApp")
                 //nothing passed in when the app was started- read bundles from the defined server
 
             }
+
+
+            //--------- login stuff
+            //called whenever the auth state changes - eg login/out, initial load, create user etc.
+            firebase.auth().onAuthStateChanged(function(user) {
+                if (user) {
+                    $scope.user = {email:user.email,displayName : user.displayName}
+                    $scope.$digest()
+                } else {
+                    delete $scope.user
+                    $scope.$digest()
+                }
+            });
+
+            $scope.login=function(){
+                $uibModal.open({
+                    backdrop: 'static',      //means can't close by clicking on the backdrop.
+                    keyboard: false,       //same as above.
+                    templateUrl: 'modalTemplates/login.html',
+                    controller: 'loginCtrl'
+                })
+            };
+
+            $scope.logout=function(){
+                firebase.auth().signOut().then(function() {
+                    delete $scope.user;
+
+                    alert('You have been logged out')
+
+
+                }, function(error) {
+                    alert('Sorry, there was an error logging out - please try again')
+                });
+
+            };
+
+
         }
     );

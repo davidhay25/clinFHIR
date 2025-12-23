@@ -1,3 +1,13 @@
+
+/*  Used on a talbe col */
+.nowrap {
+    white-space: nowrap;
+    overflow-x: auto;
+    display: block;
+}
+
+
+
 .nb-modal-window .modal-dialog {
     width: 1200px;
 }

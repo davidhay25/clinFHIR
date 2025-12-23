@@ -3,6 +3,8 @@
 
 //const axios = require('axios')
 
+const { ObjectId } = require('mongodb');
+
 let database;
 
 function setup(app,client) {
@@ -114,12 +116,9 @@ function setup(app,client) {
     //get a list of test set.
     app.get('/bvLibrary',async function(req,res){
 
-
         //todo - can add params for filtering...
        //console.log('bv')
         let filter = { status: { $ne: "hide" }}
-
-
 
         try {
             const result = await database.collection("bvLibrary").find( filter,
@@ -129,9 +128,24 @@ function setup(app,client) {
             console.error(err);
             res.status(500).send(err);
         }
-
-
     });
+
+    app.delete('/bvLibrary/:id',async function(req,res){
+        const id = req.params.id;
+
+        const result = await database.collection('bvLibrary').updateOne(
+            { _id: new ObjectId(id) },
+            { $set: { status: "hide", setAt: new Date() } }
+        );
+
+        if (result.matchedCount === 0) {
+            return res.status(404).send({ error: 'Item not found' });
+        }
+
+        res.sendStatus(204);
+
+    })
+
 }
 
 
