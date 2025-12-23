@@ -451,12 +451,17 @@ angular.module("sampleApp")
 
                 function addEdge(sourceResource,sourceId,path,reference) {
                     //find the node that the reference refers to
+                    //there are also circumstances where this is an element name
+                    let actualReference = reference
+                    if (reference.reference) {
+                        actualReference = reference.reference
+                    }
 
                     //the reference is of the format type/id
-                    let targetNode = hashNodesByTypeAndId[reference]
+                    let targetNode = hashNodesByTypeAndId[actualReference]
                     if (!targetNode) {
                         //try a full url - eg http://host/type/id - http://hapi.fhir.org/baseR4/Patient/IPS-examples-Patient-01
-                        targetNode = hashNodesByFullUrl[reference]
+                        targetNode = hashNodesByFullUrl[actualReference]
                     }
 
 
@@ -799,12 +804,12 @@ angular.module("sampleApp")
                                         //if (obj.reference && obj.reference.indexOf('urn:uuid') !== -1) {
                                         if (thing.indexOf('urn:uuid') !== -1) {
                                             // this is an uuid
-                                            refs.push({path: lpath, reference: obj.reference})
+                                            refs.push({path: lpath, reference: thing})
                                         } else {
                                             if (thing.indexOf('http') == 0) {
                                                 //if (obj.reference.indexOf('http') == 0) {
                                                 //this is an absolute reference
-                                                refs.push({path: lpath, reference: obj.reference})
+                                                refs.push({path: lpath, reference: thing})
                                             } else {
                                                 //construct an absolute reference from the server root if possible
                                                 //get the 'serverRoot' from the fullUrl of the entry
@@ -815,10 +820,10 @@ angular.module("sampleApp")
                                                 if (serverRoot) {
                                                     //if there's a serverRoot and it this is a relative reference, then convert to an absolute reference
 
-                                                    refs.push({path: lpath, reference: serverRoot + obj.reference})
+                                                    refs.push({path: lpath, reference: serverRoot + thing})
 
                                                 } else {
-                                                    refs.push({path: lpath, reference: obj.reference})
+                                                    refs.push({path: lpath, reference: thing})
                                                 }
                                             }
                                         }
