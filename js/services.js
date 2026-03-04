@@ -849,7 +849,11 @@ angular.module("sampleApp").service('supportSvc', function(
                 //some implement paging and small default sizes (hapi) and some don't (grahame)
 
                 var url = dataServer.url + "Patient/"+patientId + '/$everything';
-                umami.track('pvSelect:patient', {value:url});
+
+                if (window.umami) {
+                    window.umami.track('pvSelect:patient', {value:url});
+                }
+
 
                 this.getAllResourcesFollowingPaging(url,null,null,dataServer.apiKey).then(
                     function(arrayOfResource){

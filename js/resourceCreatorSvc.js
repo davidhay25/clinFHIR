@@ -3009,6 +3009,7 @@ angular.module("sampleApp").service('resourceCreatorSvc',
                     if (resource.id.indexOf('urn:') > -1) {
                         objNodes[resource.id] = inx;
                     } else {
+
                         objNodes[resource.resourceType + "/" + resource.id] = inx;
                     }
 

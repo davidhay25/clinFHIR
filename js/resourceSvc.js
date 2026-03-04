@@ -1,4 +1,4 @@
-angular.module("sampleApp").service('resourceSvc', function() {
+angular.module("sampleApp").service('resourceSvc', function($filter) {
 
     var outwardLinks = [];
     var inwardLinks = [];
@@ -23,12 +23,18 @@ angular.module("sampleApp").service('resourceSvc', function() {
                     //console.log('->reference',value.reference)
 
                     var reference = value.reference;    //the reference - eg Condition/100
+
                     //console.log(value,key)
 
                     //a bit of a hack - auditEvent has a property called 'reference'
                     if (reference.reference) {
                         reference = reference.reference;
                     }
+
+                    //console.log(reference,$filter('referenceFromUrl')(reference))
+
+                    //so this is added to allow for absolute references - where the server url is in the reference
+                    reference = $filter('referenceFromUrl')(reference)
 
                     outwardLinks.push({reference:reference,element: rootPath + " " +key,key:key})
 
@@ -71,7 +77,6 @@ angular.module("sampleApp").service('resourceSvc', function() {
                 let eleName = key
                 if (Number.isFinite(key)) {
                     // if a number then we're iterating over an array. The element name will be the previous one
-
                     eleName = lastKey
                 }
 
@@ -80,7 +85,13 @@ angular.module("sampleApp").service('resourceSvc', function() {
                 //recurse down 'object' types
                 if (value.reference) {
                     //This is a reference. Is it to the resource being evaluated?
-                    if (value.reference == id) {
+
+                    //need to allow for absolute urls in the reference (like firely do)
+                    let reference = $filter('referenceFromUrl')(value.reference)
+
+
+                    //note id is often (?always) type/id
+                    if (reference == id) {
 
                         //console.log(key,resourceBeingChecked)
 

@@ -38,21 +38,7 @@ angular.module('sampleApp')
                         $scope.FHIRPathError = ex.message;
                     }
 
-/*
- var url = "clinFHIR/executeFP";
-                    var data = {path:path,resource:$scope.resource}
 
-                    $http.post(url,data).then(
-                        function(data) {
-                            //console.log(data.data)
-                            $scope.FHIRPathResult = data.data;
-                        },
-                        function (err){
-                            console.log(err)
-                        }
-                    );
-
-*/
                 }
             }
         }

@@ -92,6 +92,21 @@ angular.module("sampleApp")
 
         }
     })
+    .filter('referenceFromUrl', function() {
+        return function(s) {
+            //assume a url in the format: (http://hl7.org/fhir/us/core/CodeSystem/careplan-category
+            if (s) {
+                var ar = s.split('/')
+                if (ar.length > 2) {
+                    return `${ar[ar.length-2]}/${ar[ar.length-1]}`
+                } else {
+                    return s
+                }
+
+            }
+
+        }
+    })
 
     .filter('manualText',['builderSvc',function(builderSvc){
         //return the manually entered text

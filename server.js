@@ -48,6 +48,7 @@ let lantanaModule = require("./serverModuleLantana")
 const proxyModule = require("./serverModuleProxy.js")
 const bvModule = require("./serverModuleBV.js")
 
+
 const fshModule = require("./serverModuleFSH.js")
 const qaModule = require("./serverModuleQA.js")
 qaModule.setup(app)
@@ -150,6 +151,7 @@ process.argv.forEach(function (val, index) {
 fshModule.setup(app)
 lantanaModule.setup(app)
 proxyModule.setup(app);
+//igModule.setup1(app)
 
 
 

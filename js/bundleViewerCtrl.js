@@ -553,10 +553,6 @@ angular.module("sampleApp")
 
                 delete $scope.input.selectedED
 
-
-
-
-
                 //$scope.showSelector = false     //hide the selector
 
                 delete $scope.serverRoot;

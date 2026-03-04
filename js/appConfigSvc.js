@@ -129,7 +129,9 @@ angular.module("sampleApp")
 
 
 
-        defaultConfig.allKnownServers.push({name:"Vonk R4 server",url:" https://vonk.fire.ly/R4/",version:4,everythingOperation:false});
+        //defaultConfig.allKnownServers.push({name:"Vonk R4 server",url:" https://vonk.fire.ly/R4/",version:4,everythingOperation:false});
+        defaultConfig.allKnownServers.push({name:"Firely R4 server",url:" https://server.fire.ly/",version:4,everythingOperation:true});
+
 
         defaultConfig.allKnownServers.push({name:'TermiNZ R4',version:4,url:"https://terminz.azurewebsites.net/fhir/"});
         defaultConfig.allKnownServers.push({name:'OntoserverR4 (terminology)',version:4,url:"https://r4.ontoserver.csiro.au/fhir/",isTerminology:true});
@@ -321,9 +323,10 @@ angular.module("sampleApp")
             },
             getAllServers : function(version) {
                 //return all the servers. can specify a FHIR version...
-                if (! $localStorage.config) {
+                //2026-3-7 - dont support local changes any more...
+               // if (! $localStorage.config) {
                     $localStorage.config = defaultConfig;
-                }
+              //  }
                 if (version) {
                     var lst = []
                     $localStorage.config.allKnownServers.forEach(function(svr){

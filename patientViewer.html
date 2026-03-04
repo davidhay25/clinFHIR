@@ -190,10 +190,6 @@
                     </a>
                 </div>
 
-
-
-
-
             </div>
 
             <div class="col-md-3">
@@ -202,8 +198,6 @@
                      {{appConfigSvc.getCurrentDataServer().url}}
                 </div>
             </div>
-
-
 
             <div class="col-md-1 col-sm-1">
                 <div class="pull-right navbar-form" ng-show="waiting">
@@ -219,11 +213,21 @@
 
             <div class="col-md-1 col-sm-1">
                 <form ng-hide = "loadedFromBookmark" class="navbar-form navbar-right">
-                    <button class="btn btn-primary pull-right" ng-click="frontPage()">Front page</button>
+                    <button class="btn btn-primary pull-right"
+                            ng-show="currentPatient"
+                            ng-click="frontPage()">Front page</button>
                 </form>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-1">
+                <div class="navbar-text pull-right">
+                    <a style="font-size: 24px;padding-top: 8px"
+                       href="https://docs.google.com/document/d/1Hra56reIh3pxDOtDqS7NC2epyyBZlb-bqpnUga1y_p0/edit?tab=t.0#heading=h.p77qav9sz3tf"
+                       target="_blank" class="glyphicon glyphicon-info-sign"></a>
+                </div>
+            </div>
+
+            <div class="col-md-2">
                 <div class="pull-right">
                     <a href="https://www.intersystems.com/" target="_blank">
                         <img style="padding-top: 8px;padding-bottom: 8px" src="/icons/sb-intersystems.png"/>
