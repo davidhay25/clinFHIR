@@ -640,12 +640,14 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
                 //console.log(data.data)
                 try {
                     let response = data.data
+                    $scope.selectedFshFromSingleGraph = response.fsh
+                    /*
                     $scope.selectedFshFromSingleGraph = response.fsh.instances[resource.id]
 
                     if (response.fsh.aliases) {
                         $scope.selectedFshFromSingleGraph = response.fsh.aliases + "\n\n" +$scope.selectedFshFromSingleGraph
                     }
-
+*/
 
                 } catch (ex) {
                     $scope.selectedFshFromSingleGraph = "Unable to transform into FSH"

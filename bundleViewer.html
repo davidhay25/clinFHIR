@@ -371,7 +371,9 @@
             <div class="col-md-2">
                 <div class="pull-right">
                     <a href="https://www.intersystems.com/" target="_blank">
+                        <!--
                         <img style="padding-top: 8px;padding-bottom: 8px" src="/icons/sb-intersystems.png"/>
+                        -->
                     </a>
 
                 </div>
@@ -1258,7 +1260,14 @@
 
                             </div>
                             <div class="col-md-5">
-                                <h4>Resource</h4>
+
+
+
+                                <h4>Resource <span class="clickable" style="font-weight: normal"
+                                                   ng-click="selectFromMainGraph(input.selectedIssueByResource.resource)">(Details)</span></h4>
+
+
+
                                 <div class="myScroll1">
                                     <pre>{{input.selectedIssueByResource.resource | json}}</pre>
                                 </div>

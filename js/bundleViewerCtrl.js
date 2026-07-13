@@ -1637,15 +1637,16 @@ angular.module("sampleApp")
                                         console.error(`Theres an issue with a location of ${loc} but there are only ${$scope.fhir.entry.length} entries  in the bundle`)
                                     } else {
 
-                                        const resource = $scope.fhir.entry[firstIndex].resource
-                                        $scope.validationResult.issue.push(iss)
+                                        const resource = $scope.fhir.entry[firstIndex]?.resource
+                                        if (resource) {
+                                            $scope.validationResult.issue.push(iss)
 
-                                        let id = resource.id || `location:${firstIndex}`
+                                            let id = resource.id || `location:${firstIndex}`
 
-                                        $scope.errorsByResource[id] = $scope.errorsByResource[id] || {resource:resource,issues:[]}
-                                        $scope.errorsByResource[id].issues.push(iss)
-
-
+                                            $scope.errorsByResource[id] = $scope.errorsByResource[id] || {resource:resource,issues:[]}
+                                            $scope.errorsByResource[id].issues.push(iss)
+                                        }
+                                        
                                     }
                                 } else {
                                     $scope.errorsByResource["Bundle"] = $scope.errorsByResource["Bundle"] || {resource:{},issues:[]}

@@ -1,0 +1,119 @@
+# docker-compose.yml for inte
+# start with   docker-compose up -d
+# needs to align with the nginx from portal image
+
+services:
+
+  # main portal app with Portal page. built on nginx with the nginx config in the image
+  # don't need a separate nginx here
+  portal:
+    image: davidhay25/portal
+    container_name: portal
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Certificates managed by Certbot
+    # may20  - /opt/letsencrypt:/etc/letsencrypt
+      # ACME challenge webroot for Certbot
+   # may20  - /opt/certbot-webroot:/opt/certbot-webroot
+      - /etc/letsencrypt:/etc/letsencrypt
+      - /opt/certbot-webroot:/opt/certbot-webroot
+    networks:
+      - clinfhir-network
+    depends_on:
+      - forms
+      - clinfhir
+
+
+  netshoot: # handy network troubleshooting container
+    image: nicolaka/netshoot
+    container_name: netshoot
+    command: sleep infinity   # Keeps the container running
+    networks:
+      - clinfhir-network
+    tty: true
+    stdin_open: true
+
+  mongodb:
+    image: mongo                 # the most current MongoDB version
+    container_name: mongodbCS1
+    restart: unless-stopped
+    networks:
+      - clinfhir-network
+    # ports:
+    #  - "27017:27017"               # expose MongoDB to host
+    volumes:
+      - ./mongodb_data:/data/db       # bind to a path - won't get deleted with docker compose down -v
+
+  hapi-fhir:
+      image: hapiproject/hapi:latest
+      container_name: hapi-fhir
+      ports:            # expose HAPI FHIR server to host - for testing only
+        - "9090:8080"          # Host port : Container port
+      volumes:
+        - ./hapi_data:/data      # optional: persist data (if using embedded DB)
+      environment:
+        SPRING_DATASOURCE_URL: jdbc:h2:file:/data/hapi;DB_CLOSE_ON_EXIT=FALSE
+        SPRING_DATASOURCE_DRIVERCLASSNAME: org.h2.Driver
+        SPRING_DATASOURCE_USERNAME: sa
+        SPRING_DATASOURCE_PASSWORD: null
+      restart: unless-stopped  
+
+      networks:
+      - clinfhir-network    
+
+  forms:
+    image: davidhay25/forms
+    container_name: forms
+    depends_on:
+      - mongodb                      # ensures MongoDB starts first
+    environment:
+      MONGOHOSTNAME: mongodb
+      ENVIRONMENT: clinfhir         # if canshare (default) then specific UI changes
+      QURLPREFIX: http://clinfhir.com/questionnaire
+      CONFIG_PATH: /app/secrets/nzhtsconfig.config  
+  # ports:
+    #  - "9500:9500"                  # hostPort:containerPort for web access
+    volumes:
+      - /opt/clinfhir/secrets:/app/secrets
+         # bind to a path - won't get deleted with docker compose down -v
+    networks:
+      - clinfhir-network
+
+  clinfhir:
+    image: davidhay25/cf
+    container_name: clinfhir
+    restart: unless-stopped
+    depends_on:
+      - mongodb                      # ensures MongoDB starts first
+    environment:
+      #MONGOHOSTNAME: mongodb
+      MONGO_URL: mongodb://mongodb:27017/clinfhir
+      HAPISERVER: http://hapi-fhir:8080/fhir # internal URL for HAPI server - used by serverModuleProxy in clinfhir
+    # ports:
+    #   - "8080:8080"                  # hostPort:containerPort for web access
+    networks:
+      - clinfhir-network
+
+  gb2:
+    image: davidhay25/gb2
+    container_name: gb2
+    depends_on:
+      - mongodb                      # ensures MongoDB starts first
+    environment:
+      MONGOHOSTNAME: mongodb
+      HAPISERVER: http://hapi-fhir:8080/fhir # internal URL for HAPI server - used by serverModuleProxy in clinfhir
+    # :
+    #   - "8090:8090"                  # hostPort:containerPort for web access
+    networks:
+      - clinfhir-network
+
+
+networks:
+  clinfhir-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:                      # named volume definition
+  # hapi_data:
