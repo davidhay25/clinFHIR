@@ -3,7 +3,7 @@ angular.module("sampleApp")
     .controller('resourceViewerCtrl',
         function ($scope,supportSvc,appConfigSvc,resourceCreatorSvc,resourceSvc,$sce,sessionSvc,umamiSvc,
                   $uibModal, $timeout,GetDataFromServer,modalService,ResourceUtilsSvc,builderSvc,$window,$http,$location,
-                  $firebaseObject,Utilities,terminologySvc,bundleVisualizerSvc) {
+                  Utilities,terminologySvc,bundleVisualizerSvc) {
 
 
 
@@ -107,7 +107,7 @@ angular.module("sampleApp")
             }
 
             //was a 'share' link (like in logocal modeller passed)...
-
+/*
             //create a shortcut to this patient
             $scope.generateShortCut = function() {
                 var hash = Utilities.generateHash();
@@ -124,6 +124,8 @@ angular.module("sampleApp")
                 )
             };
 
+            */
+/*
             //if a shortcut has been used there will be a hash so load that
             var hash = $location.hash();
             if (hash) {
@@ -152,7 +154,7 @@ angular.module("sampleApp")
                 )
             }
 
-
+*/
 
             //if the user has passed in parameters
             let search = $location.search();
@@ -1270,6 +1272,7 @@ angular.module("sampleApp")
                     delete $scope.vitalsTable;
                     return;
                 }
+
 
                 supportSvc.getVitals({patientId:appConfigSvc.getCurrentPatient().id}).then(
                     function(vo){

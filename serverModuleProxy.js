@@ -6,7 +6,9 @@ const axios = require('axios')
 //assume a local hapi server (in a container) listening on port 8080 - todo environment var
 //and don't change the service name in the compose file!!!
 
-const validationServer = process.env.HAPISERVER || "http://localhost:8080/fhir"
+//temp const validationServer = process.env.HAPISERVER || "http://localhost:8080/fhir"
+
+let validationServer = "https://r4.ontoserver.csiro.au/fhir"
 
 
 //const validationServer = "http://hapi-fhir:8080/fhir"
@@ -105,14 +107,24 @@ function setup(app,indb) {
     //validation option
 
     app.post('/validate',async function(req,res){
-        let resource = req.body
+        //pass in the resorce to be validated (usually a Bundle) and an optional validation server
+        let obj = req.body
+
+        let resource = obj.resource
         let resourceType = resource.resourceType
 
-        let qry = `${validationServer}/${resourceType}/$validate`
+        let userValidationServer = obj.validationServer //what VS the user supplied
+
+        let serverToUse = userValidationServer || validationServer
+
+        serverToUse = serverToUse.endsWith('/') ? serverToUse : serverToUse + '/'
+
+        let qry = `${serverToUse}${resourceType}/$validate`
+
+        console.log(qry)
 
         try {
             let response = await axios.post(qry,resource)
-
             res.json(response.data)
         } catch (ex) {
 
@@ -121,9 +133,6 @@ function setup(app,indb) {
             } else {
                 res.status(500).json({msg:ex.message})
             }
-
-
-
 
         }
 

@@ -329,7 +329,7 @@
                 <div class="navbar-text">
 
                     <button class="btn btn-primary" ng-hide = "showSelector" class="clickable"
-                         ng-click="reShowSelector()">Show Selector</button>
+                         ng-click="reShowSelector()">Choose different Bundle</button>
                 </div>
             </div>
 
@@ -512,7 +512,7 @@
                             you wish to execute and details plus the 'Run query' button will appear to the right.
                         </div>
                         <div class="row">
-                            <div class="col-md-8">
+                            <div class="col-md-10">
                                 <div class="myScroll1">
                                     <table class="table table-bordered">
                                         <tr><th>Name</th>
@@ -541,9 +541,11 @@
 
 
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-2">
+                                <div ng-show="input.savedQuery.name"><strong>Name:</strong></div>
                                 {{input.savedQuery.name}}
                                 <br/><br/>
+                                <div ng-show="input.savedQuery.description"><strong>Description:</strong></div>
                                 {{input.savedQuery.description}}
                                 <br/> <br/>
 
@@ -584,7 +586,7 @@
                         <br/>
 
                         <div class="row">
-                            <div class="col-md-8">
+                            <div class="col-md-10">
                                 <div class="myScroll1">
                                     <table class="table table-bordered">
                                         <tr><th>Name</th><th>Query</th><th>Tags</th></tr>
@@ -611,11 +613,12 @@
 
                             </div>
 
-                            <div class="col-md-1">
-                            </div>
-                            <div class="col-md-3">
+
+                            <div class="col-md-2">
+                                <div ng-show="input.libraryQuery.name"><strong>Name:</strong></div>
                                 {{input.libraryQuery.name}}
                                 <br/><br/>
+                                <div ng-show="input.libraryQuery.description"><strong>Description:</strong></div>
                                 {{input.libraryQuery.description}}
                                 <br/> <br/>
 
@@ -640,11 +643,11 @@
 
                             <div class="row">
 
-                                <div class="col-md-8">
+                                <div class="col-md-10">
                                     <div class="myScroll1">
                                         <div class="myScroll1">
                                             <table class="table table-bordered">
-                                                <tr><th>Name</th><th>Description</th><th>Author</th><th>PV</th><th>Date</th></tr>
+                                                <tr><th>Name</th><th>Description</th><th>Author</th><th>Show in Patient Viewer</th><th>Date</th></tr>
                                                 <tr ng-click="input.libraryBundle=bundle"
                                                     ng-dblclick = "getBundleFromLibrary(input.libraryBundle)"
                                                     ng-repeat="bundle in libraryAllBundles"
@@ -653,7 +656,9 @@
                                                     <td>{{bundle.name}}</td>
                                                     <td>{{bundle.description}}</td>
                                                     <td>{{bundle.author}}</td>
-                                                    <td>{{bundle.showInPV}}</td>
+                                                    <td>
+                                                        {{bundle.showInPV ? 'Yes' : 'No'}}
+                                                    </td>
                                                     <td>{{bundle.date | date}}</td>
                                                     <td ng-show="user.email">
                                                         <i class="glyphicon glyphicon-remove-sign clickable"
@@ -667,7 +672,7 @@
                                     </div>
 
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-2">
                                     <button ng-show = "input.libraryBundle" class="btn btn-primary"
                                             ng-click="getBundleFromLibrary(input.libraryBundle)">Retrieve Bundle</button>
 <!--
@@ -723,10 +728,11 @@
                         <uib-tabset>
                             <uib-tab heading="Type">
                                 <div class="myScroll1">
+
+
                                     <uib-accordion>
                                         <div uib-accordion-group class="panel-default"
-                                             ng-repeat="es in sortedEntries"
-                                             headingC="{{es.type}} <span class='badge'>{{es.entries.length}}</span>">
+                                             ng-repeat="es in sortedEntries">
                                             <uib-accordion-heading>
                                                 {{es.type}} <span class='badge pull-right'>{{es.entries.length}}</span>
                                             </uib-accordion-heading>
@@ -1106,10 +1112,15 @@
 
                         <uib-tabset>
                             <uib-tab heading="Resource">
-                                <pre>{{selectedNode.entry.resource | json}}</pre>
+                                <div class="myScroll1">
+                                    <pre>{{selectedNode.entry.resource | json}}</pre>
+                                </div>
+
                             </uib-tab>
                             <uib-tab heading="Entry">
-                                <pre>{{selectedNode.entry | json}}</pre>
+                                <div class="myScroll1">
+                                    <pre>{{selectedNode.entry | json}}</pre>
+                                </div>
                             </uib-tab>
 
                             <uib-tab ng-show="selectedNode.entry.resource.resourceType == 'DiagnosticReport'" heading="DiagnosticReport">
@@ -1213,8 +1224,21 @@
                 <br/>
                 <uib-tabset>
                     <uib-tab heading="Standard validation">
-
+<!--
                         <em>Issues noted by the internal hapi server. Excludes 'missing text element' and profile validation errors.</em>
+                        -->
+                        <br/>
+
+
+
+
+                        <em>Uses <a target="_blank" href="https://www.ontoserver.csiro.au/site/">Ontoserver</a>
+                            for validation. Excludes 'missing text element' and won't validate profiled resources.
+                        May take a few seconds for the validation to be completed.</em>
+
+
+
+
 
                         <div class="pull-right">
                             <a target="_blank"
@@ -1291,7 +1315,41 @@
                     </uib-tab>
 
                     <uib-tab heading="Extended validation">
-                        <em>Validation against an Implementation Guide</em>
+                        <br/>
+
+
+                        <div class="row">
+                            <div class="col-md-8">
+                                <em>Specify the Validation Server to use. Useful for profiled resources (eg conformant to an Implementation Guide) where the profiles are on a specific server.</em>
+
+
+
+
+                            </div>
+                            <div class="col-md-4">
+
+                                <table class="table">
+                                    <tr>
+                                        <td>Select Server</td>
+                                        <td></td>
+                                        <td><button class="btn-link btn">Validate</button> </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Add Server</td>
+                                        <td><input class="form-control" ng-model="additionalTS"/> </td>
+                                        <td></td>
+                                    </tr>
+                                </table>
+
+
+
+                            </div>
+                        </div>
+
+
+
+
+
                         <button class="btn btn-link pull-right"
                                 ng-click="validateFromIG()">Validate against Au Patient summary</button>
                         <div class="clearfix"></div>

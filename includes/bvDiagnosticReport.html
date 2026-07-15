@@ -8,7 +8,13 @@
 
                 <div ng-repeat="item in DR">
 
-                    <div><strong>Report date: </strong>{{item.DR.effectiveDateTime | date}}</div>
+
+                    <div >
+                        <strong>Report date: </strong>
+                        <span class="clickable" ng-click="selectDR(item.DR)">   {{item.DR.effectiveDateTime | date}}</span>
+                    </div>
+
+
 
                     <table class="table table-condensed table-bordered">
                         <tr ng-repeat="obs in item.obs">
@@ -31,14 +37,18 @@
 
             <div class="col-md-4">
                 <div class="pull-right">
-                    <button class="btn btn-link"
-                            ng-click="selectFromMainGraph(selectedDRObservation)">Details</button>
+                    <button ng-show = "selectedDRObservation" class="btn btn-link"
+                            ng-click="selectFromMainGraph(selectedDRObservation)">Obs. Details</button>
+
+                    <button ng-show = "selectedDR" class="btn btn-link"
+                            ng-click="selectFromMainGraph(selectedDR)">DR. Details</button>
                 </div>
                 <div class="clearfix"></div>
 
                 <div class="myScroll1">
+                    <pre ng-show="selectedDR">{{selectedDR | json}}</pre>
 
-                <pre>{{selectedDRObservation | json}}</pre>
+                <pre ng-show="selectedDRObservation">{{selectedDRObservation | json}}</pre>
 
 
             </div>

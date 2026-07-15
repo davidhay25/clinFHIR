@@ -15,6 +15,9 @@ angular.module("sampleApp")
             //todo - get these from config
             let localhapiserver = "http://localhost:9090/fhir"
 
+            //locally scoped terminology servers. Add Ontoserver as the OO analysis is different
+            $scope.terminologyServers = $localStorage.terminologyServers || ["https://r4.ontoserver.csiro.au/fhir"]
+
 
             //let terminologyServer = "https://smile.sparked-fhir.com/aucore/fhir/DEFAULT"
             let terminologyServer = " https://tx.dev.hl7.org.au/fhir"
@@ -339,9 +342,6 @@ angular.module("sampleApp")
             }
 
 
-
-
-
             //validate the current bundle against an external validation server
             //just for au ATM
             $scope.validateFromIG = function () {
@@ -351,13 +351,26 @@ angular.module("sampleApp")
                 $scope.input.issInfoCount = 0
 
                 let url = `${terminologyServer}/Bundle/$validate`
+                let obj = {resource:$scope.fhir,validationServer:terminologyServer}
+
+/*
+                //ensure that all resources
+
+
+                $scope.validating = true
+                $http.post("validate",obj).then(
+
+                */
+
                 delete $scope.evOperationError       //true if the actual validation call was successful - not the actual result
                 $scope.waiting = true
-                $http.post(url,$scope.fhir).then(
+
+
+                $http.post("validate",obj).then(
+                //$http.post(url,$scope.fhir).then(
                     function (data) {
 
                         let OO = data.data
-                        //console.log(OO)
                         $scope.extendedOO = OO
                         getIssueTypeCount($scope.extendedOO)
 
@@ -392,12 +405,15 @@ angular.module("sampleApp")
 
             $scope.getExtendedIssueResource = function (iss) {
                 delete $scope.extendedIssueResource
-                let loc = iss.location[0]
-                const match = loc.match(/\[(\d+)\]/);
-                const firstIndex = match ? parseInt(match[1], 10) : null;
-                if (firstIndex !== null) {
-                    $scope.extendedIssueResource = $scope.fhir.entry[firstIndex].resource
+                if (iss?.location) {
+                    let loc = iss.location[0]
+                    const match = loc.match(/\[(\d+)\]/);
+                    const firstIndex = match ? parseInt(match[1], 10) : null;
+                    if (firstIndex !== null) {
+                        $scope.extendedIssueResource = $scope.fhir.entry[firstIndex].resource
+                    }
                 }
+
             }
 
             $scope.canShowIssue = function (iss) {
@@ -520,11 +536,15 @@ angular.module("sampleApp")
             }
 
 
-            //performs bundle using local hapi server
+            //performs bundle using default server
             $scope.performValidation = function(){
+
+                validate($scope.fhir)
+               /*
                 validate($scope.fhir,$scope.validationServer.url,function(hashErrors){
                     $scope.hashErrors = hashErrors;
                 })
+                */
             }
 
             //validate the resources in the bundle, then draw the graph (which needs the errors to display)
@@ -538,8 +558,8 @@ angular.module("sampleApp")
 
                 $scope.DR = []          //list of DiagnosticReports
                 $scope.encounters = []
-                delete $scope.selectedDeepValidationEntry
-                delete $scope.deepValidationResult
+                //delete $scope.selectedDeepValidationEntry
+                //delete $scope.deepValidationResult
                 delete $scope.resourceFromSection
 
                 delete $scope.selectedRef
@@ -552,6 +572,11 @@ angular.module("sampleApp")
                 delete $scope.evOperationError
 
                 delete $scope.input.selectedED
+
+
+                delete $scope.input.selectedIssueByResource
+                delete $scope.errorsByResource
+                //input.selectedIssueByResource
 
                 //$scope.showSelector = false     //hide the selector
 
@@ -753,7 +778,13 @@ angular.module("sampleApp")
 
 
             $scope.selectDRObs = function(obs) {
+                delete $scope.selectedDR
                 $scope.selectedDRObservation = obs
+            }
+
+            $scope.selectDR = function(dr) {
+                delete $scope.selectedDRObservation
+                $scope.selectedDR = dr
             }
 
 
@@ -1137,58 +1168,6 @@ angular.module("sampleApp")
                 )
 
 
-/*
-
-                apiService.postWithCancel('fsh/transformJsonToFsh', entry.resource)
-                  .then(response => {
-
-                      try {
-                          let response = data.data
-                          $scope.fshText = response.fsh.instances[entry.resource.id]
-                          if (response.fsh.aliases) {
-                              $scope.fshText = response.fsh.aliases + "\n\n" +$scope.fshText
-                          }
-
-
-                      } catch (ex) {
-                          $scope.fshText = "Unable to transform into FSH"
-                      }
-
-
-                  })
-                  .catch(error => {
-                    if (error && error.status === -1) {
-                      console.log('Previous POST canceled');
-                    } else {
-                      console.error('POST failed:', error);
-                    }
-                  });
-*/
-
-                //get the FSH of the resource
-                /*
-                $http.post("fsh/transformJsonToFsh",entry.resource).then(
-                    function(data) {
-                        //console.log(data.data)
-                        try {
-                            let response = data.data
-                            $scope.fshText = response.fsh.instances[entry.resource.id]
-                            if (response.fsh.aliases) {
-                                $scope.fshText = response.fsh.aliases + "\n\n" +$scope.fshText
-                            }
-
-
-                        } catch (ex) {
-                            $scope.fshText = "Unable to transform into FSH"
-                        }
-
-                    }, function(err) {
-                        console.log("FSH Transform error")
-
-                    }
-                )
-                */
-
                 //get the Xml
                 $http.post("transformXML",entry.resource).then(
                     function(data) {
@@ -1390,6 +1369,9 @@ angular.module("sampleApp")
                     if (entry.resource && (entry.resource.id == resource.id)) {
                         $scope.selectBundleEntry (entry,[])
                         $scope.setTab.mainTabActive = $scope.ui.tabEntries
+
+
+
                     }
                 })
             }
@@ -1576,8 +1558,6 @@ angular.module("sampleApp")
 
 
 
-
-
                     //https://stackoverflow.com/questions/32403578/stop-vis-js-physics-after-nodes-load-but-allow-drag-able-nodes
                     $scope.chart.on("stabilizationIterationsDone", function () {
                         delete $scope.showGraphWarning
@@ -1589,21 +1569,19 @@ angular.module("sampleApp")
                     $scope.noFullGraph = true
                 }
 
-
             }
 
 
-
-
-
             //used by bundle validate
-            let validate = function(bundle) {
+            //allow a separate validation server to be supplied
+            let validate = function(bundle,validationServer) {
                 let hashErrors = {};    //related to position in bundle...
 
                 //ensure that all resources
+                let obj = {resource:bundle,validationServer:validationServer}
 
-
-                $http.post("validate",bundle).then(
+                $scope.waiting = true
+                $http.post("validate",obj).then(
                     function (data) {
 
                         //this is an OO
@@ -1649,121 +1627,34 @@ angular.module("sampleApp")
                                         
                                     }
                                 } else {
-                                    $scope.errorsByResource["Bundle"] = $scope.errorsByResource["Bundle"] || {resource:{},issues:[]}
+                                    $scope.errorsByResource["Bundle"] = $scope.errorsByResource["Bundle"] || {resource:{resourceType:'Bundle'},issues:[]}
                                     $scope.errorsByResource["Bundle"].issues.push(iss)
                                 }
 
                             } else {
-                                $scope.errorsByResource["NoLocation"] = $scope.errorsByResource["NoLocation"] || {resource:{},issues:[]}
+                                $scope.errorsByResource["NoLocation"] = $scope.errorsByResource["NoLocation"] || {resource:{resourceType:'No Location'},issues:[]}
                                 $scope.errorsByResource["NoLocation"].issues.push(iss)
                             }
 
-
                         }
+                        console.log($scope.errorsByResource)
+
                     }, function (err) {
                         console.log(err)
-                    }
-                )
-
-
-
-            }
-
-            let validateBundleDEPDEP = function(bundle) {
-                delete $scope.bundleValidationResult
-                let url = $scope.validationServer.url + "Bundle/$validate";
-                $http.post(url,bundle).then(
-                    function(data) {
-
-                        $scope.bundleValidationResult= data.data;
-
-
-                    },function(err) {
-                        console.log(err)
-                        $scope.bundleValidationResult = err.data;
-
-                    }
-                )
-
-            }
-
-
-
-            //perform a validation of the resources in the bundle...
-            let validateBundleDEP = function(bundle,cb) {
-
-                let url = $scope.validationServer.url + "Bundle/$validate";
-
-
-                //bundle validation...
-                $scope.waiting = true;
-                //delete $scope.hashErrors;
-                $http.post(url,bundle).then(
-                    function(data) {
-
-                        $scope.validationResult = data.data;
-
-
-                    },function(err) {
-                        console.log(err)
-                        $scope.validationResult = err.data;
-
+                        alert(angular.toJson(err.data))
                     }
                 ).finally(
                     function () {
-                        $scope.waiting = false;
-
-                        //count of errors for each resource
-                        let hashErrors = {};
-                        $scope.validationResult.issue.forEach(function (issue) {
-                            if (issue.location) {
-                                let g1 = issue.location[0].indexOf('[')
-                                let g2 = issue.location[0].indexOf(']')
-                                if (g1 && g2) {
-                                    let inx = issue.location[0].substr(g1+1,g2-g1-1)
-
-                                    hashErrors[inx-1] = hashErrors[inx-1] || [];
-
-
-                                    if (issue.location) {
-                                        issue.location.forEach(function (loc,inx) {
-
-                                            let ar = loc.split('.');
-                                            ar.splice(0,3);
-                                            issue.location[inx] = ar.join('.')
-
-                                        })
-                                    }
-
-
-
-                                    hashErrors[inx-1].push(issue)
-                                }
-                            }
-                        });
-
-                        cb(hashErrors)
-
-
-                        if ($scope.validationResult || $scope.validationResult.issue) {
-                            $scope.valErrors = 0, $scope.valWarnings=0;
-
-                            $scope.validationResult.issue.forEach(function(iss){
-                                if (iss.severity == 'error') {
-                                    $scope.valErrors++
-                                } else {
-                                    $scope.valWarnings++
-                                }
-                            })
-
-                        }
-
-
+                        $scope.waiting = false
                     }
                 )
 
+            }
 
-            };
+
+
+
+
 
             $scope.copyToClipboard = function(){
                 if ($scope.fhir) {

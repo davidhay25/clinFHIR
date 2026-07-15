@@ -102,13 +102,40 @@
             </div>
         </div>
 
+        <div class="row" ng-switch-when="MedicationStatement">
+            <div style="padding: 8px">
+                <div ng-show="entry.resource.status">
+                    <span class=" pull-right">{{entry.resource.status}}</span>
+                </div>
+
+                {{ResourceUtilsSvc.getOneLineSummaryOfResource(entry.resource)}}
+            </div>
+
+        </div>
+
+        <div class="row" ng-switch-when="Condition">
+            <div style="padding: 8px">
+                <div ng-show="entry.resource.clinicalStatus">
+                    <span class=" pull-right">{{entry.resource.clinicalStatus.coding[0].code}}</span>
+                </div>
+
+                {{ResourceUtilsSvc.getOneLineSummaryOfResource(entry.resource)}}
+            </div>
+
+
+
+
+        </div>
+
+
+
         <div class="row" ng-switch-default>
             <div class="col-md-12">
 
 
-
-
                 {{ResourceUtilsSvc.getOneLineSummaryOfResource(entry.resource)}}
+
+
 
 
             </div>

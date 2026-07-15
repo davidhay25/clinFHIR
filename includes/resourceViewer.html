@@ -382,7 +382,7 @@
 
                     <!-- Show the vitals if there are any observations-->
 
-                    <div ng-show="hasVitals">
+                    <div ng-show="false && hasVitals">
                         <div class="rounded-box">
                             <div class="list-group">
                                 <a href="#" class="list-group-item" ng-click="getVitals()">
@@ -609,6 +609,13 @@
     </uib-tab>
 
 
+    <uib-tab heading="Json">
+        <br/>
+        <div class="myScroll1">
+            <pre>{{bundle | json}}</pre>
+        </div>
+
+    </uib-tab>
 
     <uib-tab ng-show="showGQL" heading="GraphQL">
         <br/>
