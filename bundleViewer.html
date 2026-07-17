@@ -8,10 +8,6 @@
     <script src="js/libs/angular.min1-5.js"></script>
     <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
 
-
-
-
-
     <!-- Highlight.js for syntax coloring -->
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
@@ -306,7 +302,7 @@
         <div class="container-fluid">
             <div class="col-md-2 ">
                 <span>
-                    <a class="navbar-brand" href="#" ng-click="showVersion()">
+                    <a class="navbar-brand" href="https://clinfhir.com" >
                         Bundle Viewer
                     </a>
                 </span>
@@ -329,7 +325,7 @@
                 <div class="navbar-text">
 
                     <button class="btn btn-primary" ng-hide = "showSelector" class="clickable"
-                         ng-click="reShowSelector()">Choose different Bundle</button>
+                         ng-click="reShowSelector()">Choose a different Bundle</button>
                 </div>
             </div>
 
@@ -504,6 +500,67 @@
                         </div>
                     </div>
 
+
+                    <!-- make an IPS query-->
+                    <div ng-show="input.selectedSelector.code == 'ips'">
+                        <div class="alert alert-info">
+                            Retrieve an <a href="https://hl7.org/fhir/uv/ips/en/" target="_blank">IPS </a> document from a server that supports the
+                             <a href="https://build.fhir.org/ig/HL7/fhir-ips/en/OperationDefinition-summary.html" target="_blank">$summary </a>
+                            operation and returns an IPS document.
+
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <select class="form-control" ng-model="input.selectedIPSServer"
+                                        ng-options="svr for svr in ipsServers">{{svr}}</select>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control"
+                                       placeholder="Patient name"
+                                       ng-model="input.ipsName"/>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-link"
+                                        ng-click="getIPSPatients(input.selectedIPSServer,input.ipsName)">Search</button>
+                            </div>
+                        </div>
+
+                        <br/>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="myScroll1">
+                                    <ul class="list-group">
+                                        <li ng-class="{'list-group-item':true, listItemSelected:entry.resource == selectedIPSPatient}"
+                                            ng-repeat="entry in ipsPatientsBundle.entry"
+                                            style="cursor: pointer"
+
+                                            ng-click="selectIPSPatient(entry.resource)">
+                                            {{getIPSPatientName(entry.resource)}}
+                                        </li>
+                                    </ul>
+                                </div>
+
+
+                            </div>
+                            <div class="col-md-6">
+                                <div class="myScroll1">
+                                    <pre ng-show="selectedIPSPatient">{{selectedIPSPatient | json}}</pre>
+                                </div>
+
+
+
+                            </div>
+                            <div class="col-md-2">
+                                <button ng-model="selectedIPSPatient" class="btn btn-primary"
+                                        ng-click="loadIPSPatient(input.selectedIPSServer,selectedIPSPatient)">Load IPS</button>
+                            </div>
+                        </div>
+
+
+
+                    </div>
+
                     <!-- Saved links-->
                     <div ng-show="input.selectedSelector.code == 'saved'">
                         <div class="alert alert-info">
@@ -647,7 +704,7 @@
                                     <div class="myScroll1">
                                         <div class="myScroll1">
                                             <table class="table table-bordered">
-                                                <tr><th>Name</th><th>Description</th><th>Author</th><th>Show in Patient Viewer</th><th>Date</th></tr>
+                                                <tr><th>Name</th><th>Description</th><th>Author</th><th>Show in Patient Viewer</th><th>Resource</th><th>Date</th></tr>
                                                 <tr ng-click="input.libraryBundle=bundle"
                                                     ng-dblclick = "getBundleFromLibrary(input.libraryBundle)"
                                                     ng-repeat="bundle in libraryAllBundles"
@@ -659,6 +716,7 @@
                                                     <td>
                                                         {{bundle.showInPV ? 'Yes' : 'No'}}
                                                     </td>
+                                                    <td>{{bundle.entryCount}}</td>
                                                     <td>{{bundle.date | date}}</td>
                                                     <td ng-show="user.email">
                                                         <i class="glyphicon glyphicon-remove-sign clickable"
@@ -673,6 +731,15 @@
 
                                 </div>
                                 <div class="col-md-2">
+<!--
+                                    {{input.libraryBundle.date | date}}
+
+
+-->
+                                    <div class="alert alert-warning" ng-show="input.libraryBundle.entryCount > 200">
+                                        There are over 200 resources in this Graph. The full graph won't be shown,
+                                        though the rest of the functionality is fine. Validation will likely be slow as well.
+                                    </div>
                                     <button ng-show = "input.libraryBundle" class="btn btn-primary"
                                             ng-click="getBundleFromLibrary(input.libraryBundle)">Retrieve Bundle</button>
 <!--
@@ -732,7 +799,8 @@
 
                                     <uib-accordion>
                                         <div uib-accordion-group class="panel-default"
-                                             ng-repeat="es in sortedEntries">
+                                             ng-repeat="es in sortedEntries"
+                                                is-open="es.isOpen">
                                             <uib-accordion-heading>
                                                 {{es.type}} <span class='badge pull-right'>{{es.entries.length}}</span>
                                             </uib-accordion-heading>
@@ -1229,12 +1297,20 @@
                         -->
                         <br/>
 
+                        <div class="alert-warning alert" ng-show="validating">
+                            Validation in progress. Please wait...
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-7">
+                                <em>Uses <a target="_blank" href="https://www.ontoserver.csiro.au/site/">Ontoserver</a>
+                                    for validation. Excludes 'missing text element' and won't validate profiled resources (you
+                                    can use the extended validation for this, and specify a different Validation Server if needed).
+                                    May take a few seconds for the validation to be completed.</em>
+                            </div>
+                        </div>
 
 
-
-                        <em>Uses <a target="_blank" href="https://www.ontoserver.csiro.au/site/">Ontoserver</a>
-                            for validation. Excludes 'missing text element' and won't validate profiled resources.
-                        May take a few seconds for the validation to be completed.</em>
 
 
 
@@ -1300,6 +1376,9 @@
                         </div>
                     </uib-tab>
 
+
+
+
                     <uib-tab>
                         <uib-tab-heading>Reference errors <span class="badge">{{graphErrors.length}}</span></uib-tab-heading>
                         <em>References to missing resources found while building the graph</em>
@@ -1320,61 +1399,40 @@
 
                         <div class="row">
                             <div class="col-md-8">
+
                                 <em>Specify the Validation Server to use. Useful for profiled resources (eg conformant to an Implementation Guide) where the profiles are on a specific server.</em>
 
 
+                                <div class="alert-danger alert" ng-show="evOperationError">
+                                    The server returned an error code while performing the Validation operation. The error details are shown.
+                                    This *should* be an error in the actual operation rather than an issue with the Bundle itself.
+
+                                </div>
+
+                                <br/> <br/>
+
+                                <div class="row" ng-show="extendedOO">
+                                    <div class="col-md-2">
+                                        <checkbox ng-model="input.issError"></checkbox> Error <span class="badge">{{input.issErrorCount}}</span>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <checkbox ng-model="input.issWarning"></checkbox> Warning <span class="badge">{{input.issWarningCount}}</span>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <checkbox ng-model="input.issInfo"></checkbox> Information <span class="badge">{{input.issInfoCount}}</span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="pull-right">
+                                            <div class="rounded-box-filled"><strong>{{validationServer}}</strong></div>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                                <br/>
 
 
-                            </div>
-                            <div class="col-md-4">
-
-                                <table class="table">
-                                    <tr>
-                                        <td>Select Server</td>
-                                        <td></td>
-                                        <td><button class="btn-link btn">Validate</button> </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Add Server</td>
-                                        <td><input class="form-control" ng-model="additionalTS"/> </td>
-                                        <td></td>
-                                    </tr>
-                                </table>
-
-
-
-                            </div>
-                        </div>
-
-
-
-
-
-                        <button class="btn btn-link pull-right"
-                                ng-click="validateFromIG()">Validate against Au Patient summary</button>
-                        <div class="clearfix"></div>
-
-                        <div class="alert-danger alert" ng-show="evOperationError">
-                            The server returned an error code while performing the Validation operation. The error details are shown.
-                            This *should* be an error in the actual operation rather than an issue with the Bundle itself.
-
-                        </div>
-
-                        <div class="row" ng-show="extendedOO">
-                            <div class="col-md-2">
-                                <checkbox ng-model="input.issError"></checkbox> Error <span class="badge">{{input.issErrorCount}}</span>
-                            </div>
-                            <div class="col-md-2">
-                                <checkbox ng-model="input.issWarning"></checkbox> Warning <span class="badge">{{input.issWarningCount}}</span>
-                            </div>
-                            <div class="col-md-2">
-                                <checkbox ng-model="input.issInfo"></checkbox> Information <span class="badge">{{input.issInfoCount}}</span>
-                            </div>
-                        </div>
-                        <br/>
-                        <div class="row">
-                            <div class="col-md-8" ng-show="extendedOO">
-                                <div class="myScroll1">
+                                <div class="myScroll1" ng-show="extendedOO">
                                     <table class="table-bordered table">
                                         <tr><th style="width: 10%">Severity</th><th style="width: 50%">Diagnostics</th><th>Location</th></tr>
                                         <tr ng-repeat = "iss in extendedOO.issue"
@@ -1388,13 +1446,54 @@
                                     </table>
                                 </div>
 
+
+
+
                             </div>
                             <div class="col-md-4">
+
+                                <table class="table">
+                                    <tr>
+                                        <td>Select Server</td>
+                                        <td>
+                                            <select ng-model="input.selectedVS" class="form-control"
+                                                    ng-change="input.additionalVS = ''"
+                                                    ng-options="vs for vs in validationServers"></select>
+                                        </td>
+                                        <td>
+                                            <i class="glyphicon glyphicon-remove-sign clickable"
+                                               style="padding-top: 8px"
+                                               ng-click="deleteVS(input.selectedVS)"></i>
+                                        </td>
+
+                                    </tr>
+                                    <tr>
+                                        <td>Add Server</td>
+                                        <td colspan="2"><input class="form-control" ng-model="input.additionalVS"/> </td>
+
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3">
+                                            <button class="btn-link btn pull-right"
+                                                    ng-click="validateSpecificVS(input.selectedVS,input.additionalVS)">Validate</button>
+                                        </td>
+                                    </tr>
+                                </table>
+
+
+
                                 <div class="myScroll1">
                                     <pre ng-show="extendedOO">{{extendedIssueResource | json}}</pre>
                                 </div>
+
                             </div>
                         </div>
+
+
+
+
+
+
 
 
 

@@ -438,9 +438,13 @@ angular.module("sampleApp").controller('queryCtrl',function($scope,$uibModal,$lo
         $scope.query = qry;
         $scope.waiting = true;
 
+
         //if using the CF proxy
         if ($scope.input.useProxy) {
-            qry = "proxyfhir/" + qry;
+            //qry = "proxyfhir/" + qry;
+
+            //change to use the proxy defined for bundleviewer
+            qry = `proxyRequest?qry=${encodeURIComponent(qry)}`
         }
 
 

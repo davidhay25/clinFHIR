@@ -16,9 +16,9 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2025-11-05';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2026-07-18';     //will trigger a reload when this changes
 
-        defaultConfig.standardExtensionUrl = {};
+        defaultConfig.standardExtensionUrl = {};    //todo - pretty sur eno longer used - was logical model
         defaultConfig.standardSystem = {};
         defaultConfig.standardCode = {};
         
@@ -137,9 +137,9 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:'OntoserverR4 (terminology)',version:4,url:"https://r4.ontoserver.csiro.au/fhir/",isTerminology:true});
 
         defaultConfig.allKnownServers.push({name:'Ontoserver-PC',version:3,url:"https://primarycare.ontoserver.csiro.au/fhir/"});
-        defaultConfig.allKnownServers.push({name:'HSPC Tutorial',version:3,url:"https://api-v8-stu3.hspconsortium.org/ClinFHIRTutorial/open/",everythingOperation:false});
+        //defaultConfig.allKnownServers.push({name:'HSPC Tutorial',version:3,url:"https://api-v8-stu3.hspconsortium.org/ClinFHIRTutorial/open/",everythingOperation:false});
 
-        defaultConfig.allKnownServers.push({name:'HSPC-COF-R4',version:4,url:"https://api.logicahealth.org/CoFsandboxR4/open/",everythingOperation:true});
+        //defaultConfig.allKnownServers.push({name:'HSPC-COF-R4',version:4,url:"https://api.logicahealth.org/CoFsandboxR4/open/",everythingOperation:true});
         defaultConfig.allKnownServers.push({name:'SMART-healthIt',version:4,url:"https://r4.smarthealthit.org/",everythingOperation:true});
 
 

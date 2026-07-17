@@ -37,6 +37,7 @@ function setup(app,client) {
         if (req.query['showInPV']) {
             filter.showInPV = true      //note that the actual value of the query is ignored
         }
+/* original
 //console.log(filter)
         try {
             const result = await database.collection("bvBundles")
@@ -47,6 +48,38 @@ function setup(app,client) {
             console.error(err);
             res.status(500).send(err);
         }
+
+*/
+        try {
+            const result = await database.collection("bvBundles")
+                .aggregate([
+                    { $match: filter },
+                    {
+                        $project: {
+                            id: 1,
+                            description: 1,
+                            date: 1,
+                            name: 1,
+                            author: 1,
+                            showInPV: 1,
+                            entryCount: {
+                                $size: {
+                                    $ifNull: ["$bundle.entry", []]
+                                }
+                            }
+                        }
+                    }
+                ])
+                .toArray();
+
+            res.json(result);
+        } catch (err) {
+            console.error(err);
+            res.status(500).send(err);
+        }
+
+
+
     })
 
 

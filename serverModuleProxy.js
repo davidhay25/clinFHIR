@@ -19,6 +19,7 @@ let validationServer = "https://r4.ontoserver.csiro.au/fhir"
 function setup(app,indb) {
 
     //proxy a GET call - returns whatever is returned in the query.
+    //todo - is this function used any more?
     app.get('/proxyGet', async function(req,res){
         let query =  req.query.qry
         if (query) {
@@ -47,6 +48,8 @@ function setup(app,indb) {
         let query =  req.query.qry
         if (query) {
 
+            console.log(query)
+
             let firstRun = true
             let returnBundle
 
@@ -56,6 +59,9 @@ function setup(app,indb) {
                 let nextUrl = query
                 while (nextUrl) {
                     const response = await axios.get(nextUrl);
+
+
+
 
                     if (firstRun) {
                         //get the bundle level data - everything but the entry. Needed for bundles like document...
@@ -72,20 +78,7 @@ function setup(app,indb) {
                         const nextLink = bundle.link?.find(link => link.relation === 'next');
                         nextUrl = nextLink ? nextLink.url : null;
                     }
-/*
-                    const bundle = response.data;
-                    if (! bundleType) {
-                        bundleType = bundle.type
-                    }
 
-                    if (bundle.entry) {
-                        allEntries.push(...bundle.entry);
-                    }
-
-                    // Find the 'next' link if present
-                    const nextLink = bundle.link?.find(link => link.relation === 'next');
-                    nextUrl = nextLink ? nextLink.url : null;
-                    */
                 }
 
 
@@ -93,6 +86,7 @@ function setup(app,indb) {
                 //res.json( {resourceType:'Bundle',type:bundleType, entry:allEntries})
 
             } catch (ex) {
+                console.log(ex.response?.data)
                 res.status(400).json({msg:ex.message})
             }
         } else {
@@ -121,7 +115,7 @@ function setup(app,indb) {
 
         let qry = `${serverToUse}${resourceType}/$validate`
 
-        console.log(qry)
+        //console.log(qry)
 
         try {
             let response = await axios.post(qry,resource)

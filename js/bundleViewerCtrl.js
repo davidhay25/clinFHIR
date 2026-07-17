@@ -4,6 +4,7 @@ angular.module("sampleApp")
                   GetDataFromServer,$window,appConfigSvc,$localStorage,$q,moment,bundleVisualizerSvc,$sce) {
 
 
+            $scope.input = {};
             //the window.search parameter is checked at the bottom of this controller. That ensures
             //all functions have been loaded...
 
@@ -16,13 +17,26 @@ angular.module("sampleApp")
             let localhapiserver = "http://localhost:9090/fhir"
 
             //locally scoped terminology servers. Add Ontoserver as the OO analysis is different
-            $scope.terminologyServers = $localStorage.terminologyServers || ["https://r4.ontoserver.csiro.au/fhir"]
+            //Always ensure there is at least one VS - Ontoserver by default
+            $localStorage.validationServers = $localStorage.validationServers || []
+            $localStorage.ipsServers = $localStorage.ipsServers || []
 
+            if ($localStorage.validationServers.length == 0){
+                $localStorage.validationServers.push("https://r4.ontoserver.csiro.au/fhir")
+            }
+            $scope.validationServers = $localStorage.validationServers
+            $scope.input.selectedVS = $scope.validationServers[0]
+
+            if ($localStorage.ipsServers.length == 0){
+                $localStorage.ipsServers.push("https://hl7-ips-server.hl7.org/fhir")
+            }
+            $scope.ipsServers = $localStorage.ipsServers
+            $scope.input.selectedIPSServer = $scope.ipsServers[0]
 
             //let terminologyServer = "https://smile.sparked-fhir.com/aucore/fhir/DEFAULT"
             let terminologyServer = " https://tx.dev.hl7.org.au/fhir"
 
-            $scope.input = {};
+
 
             $scope.input.issError = true
             $scope.input.issWarning = true
@@ -33,6 +47,7 @@ angular.module("sampleApp")
             $scope.selectors = []
             $scope.selectors.push({display:"Paste Bundle",code:'paste'})
             $scope.selectors.push({display:"New Query",code:'query'})
+            $scope.selectors.push({display:"IPS queries",code:'ips'})
             $scope.selectors.push({display:"Locally saved queries",code:'saved'})
             $scope.selectors.push({display:"Shared Library Queries",code:'library'})
             $scope.selectors.push({display:"Stored Library Bundles",code:'stored'})
@@ -52,8 +67,10 @@ angular.module("sampleApp")
             $scope.setTab = {}          //for setting the tab from code
 
             $scope.moment = moment
-            $scope.dataServer = $localStorage.dataServer || {url:"http://hapi.fhir.org/baseR4/"}
-            $scope.validationServer = $localStorage.validationServer || appConfigSvc.getCurrentConformanceServer();
+
+
+           // $scope.dataServer = $localStorage.dataServer || {url:"http://hapi.fhir.org/baseR4/"}
+           // $scope.validationServer = $localStorage.validationServer || appConfigSvc.getCurrentConformanceServer();
 
             $scope.showSelector = true; //at startup, show the selector
 
@@ -71,6 +88,80 @@ angular.module("sampleApp")
             }
 
 
+            //---- IPS functions
+
+            //retrieve patienst fom IPS server
+            $scope.getIPSPatients = function (server,name) {
+                delete $scope.selectedIPSPatient
+                delete $scope.ipsPatientsBundle
+                let qry = `${server}/Patient?name=${name}`
+                let newQry = `proxyRequest?qry=${encodeURIComponent(qry)}`
+                $scope.waiting = true
+                $http.get(newQry).then(
+                    function (data) {
+                        $scope.ipsPatientsBundle = data.data
+                    },
+                    function (err) {
+                        alert(angular.toJson(err))
+                    }
+                ).finally(
+                    function () {
+                        $scope.waiting = false
+                    }
+                )
+
+
+
+                //umamiSvc.track('bvBundle:libraryQuery:execute', {value:item.qry});
+
+            }
+
+            //return a Patient from
+            $scope.getIPSPatientName = function (pat) {
+                if (! pat) {
+                    return ""
+                }
+                if (pat.name) {
+                    let name = pat.name[0]
+                    if (name.text) {
+                        return name.text
+                    } else {
+                        return `${name.given?.[0]} ${name.family}`
+                    }
+                } else {
+                    return pat.id
+                }
+                //$scope.selectedIPSPatient
+            }
+
+            $scope.selectIPSPatient = function (pat) {
+                $scope.selectedIPSPatient = pat
+            }
+
+            //perfrom the $summary operation and load the result
+            $scope.loadIPSPatient = function (server,pat) {
+                let qry = `${server}/Patient/${pat.id}/$summary`
+                console.log(qry)
+                let newQry = `proxyRequest?qry=${encodeURIComponent(qry)}`
+                $scope.waiting = true
+                $http.get(newQry).then(
+                    function (data) {
+                        processBundle(data.data)
+
+                    },
+                    function (err) {
+                        alert(`There was an error attempting to retrieve the IPS - ${err.message || 'Unknown server error' }`)
+                        //alert(angular.toJson(err))
+                    }
+                ).finally(
+                    function () {
+                        $scope.waiting = false
+                    }
+                )
+
+            }
+
+            //-------------
 
            // $scope.jsonFileSelected = false;
 
@@ -147,7 +238,7 @@ angular.module("sampleApp")
                 console.log(item)
             }
 
-            $scope.viewProfileVS = function (item) {
+            $scope.viewProfileVSDEP = function (item) {
                 let vs = item.valueSet
                 if (vs) {
                     $scope.viewVS(vs)
@@ -157,7 +248,7 @@ angular.module("sampleApp")
 
             }
 
-            $scope.viewVS = function (url) {
+            $scope.viewVSDEP = function (url) {
 
                 $uibModal.open({
                     templateUrl: 'modalTemplates/viewVS.html',
@@ -176,17 +267,7 @@ angular.module("sampleApp")
                 })
             }
 
-            function getHashCodeDEP(s) {
-                //https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript
-                var hash = 0, i, chr;
-                if (s.length === 0) return hash;
-                for (i = 0; i < s.length; i++) {
-                    chr   = s.charCodeAt(i);
-                    hash  = ((hash << 5) - hash) + chr;
-                    hash |= 0; // Convert to 32bit integer
-                }
-                return hash;
-            }
+
 
             //queries now stored in local browser cache
             $scope.savedQueries = $localStorage.bvQueries || []
@@ -341,29 +422,56 @@ angular.module("sampleApp")
 
             }
 
+            $scope.deleteVS = function (vs) {
+                let g = $localStorage.validationServers.indexOf(vs)
+                if (g > -1) {
+                    if (confirm("Are you sure you wish to remove this Validation Server?")) {
+                        $localStorage.validationServers.splice(g,1)
+                        if ($localStorage.validationServers.length > 0) {
+                            $scope.input.selectedVS = $localStorage.validationServers[0]
+                        } else {
+                            delete $scope.input.selectedVS
+                        }
+                    }
 
-            //validate the current bundle against an external validation server
-            //just for au ATM
-            $scope.validateFromIG = function () {
+                }
+
+            }
+
+            //validate the current bundle against a specified validation server
+
+            $scope.validateSpecificVS = function (selectedVS, newVS) {
+
+                if (! selectedVS && ! newVS) {
+                    alert("No Validation Server specified")
+                    return
+                }
+
                 delete $scope.extendedOO
+                delete $scope.evOperationError       //true if the actual validation call was successful - not the actual result
+
                 $scope.input.issErrorCount = 0
                 $scope.input.issWarningCount = 0
                 $scope.input.issInfoCount = 0
 
-                let url = `${terminologyServer}/Bundle/$validate`
-                let obj = {resource:$scope.fhir,validationServer:terminologyServer}
+                let validationServer =  selectedVS
+                if (newVS) {
+                    if (newVS.endsWith('/')) {
+                        newVS = newVS.substring(0,newVS.length - 1)
+                    }
+                    validationServer = newVS
+                }
 
-/*
-                //ensure that all resources
+                $scope.validationServer = validationServer //for UI
+
+                //let url = `${selectedVS}/Bundle/$validate`
+                //let url = `${terminologyServer}/Bundle/$validate`
 
 
-                $scope.validating = true
-                $http.post("validate",obj).then(
+                let obj = {resource:$scope.fhir,validationServer:validationServer}
 
-                */
-
-                delete $scope.evOperationError       //true if the actual validation call was successful - not the actual result
                 $scope.waiting = true
+                $scope.validating = true
 
 
                 $http.post("validate",obj).then(
@@ -374,6 +482,18 @@ angular.module("sampleApp")
                         $scope.extendedOO = OO
                         getIssueTypeCount($scope.extendedOO)
 
+                        //if this is a newVS then add it to the list of known oned
+                        if (newVS) {
+                            if ($scope.validationServers.indexOf(newVS) == -1) {
+
+                               // $scope.validationServers.push(newVS)
+                                $localStorage.validationServers.push(newVS)
+                            }
+
+                        }
+
+
+
                     }, function (err) {
                         $scope.evOperationError = true
                         $scope.extendedOO = err.data    //we assume the server returned an OO
@@ -383,6 +503,7 @@ angular.module("sampleApp")
                     }
                 ).finally(function () {
                     $scope.waiting = false
+                    $scope.validating = false
                 })
 
                 function getIssueTypeCount(OO) {
@@ -548,7 +669,7 @@ angular.module("sampleApp")
             }
 
             //validate the resources in the bundle, then draw the graph (which needs the errors to display)
-            let processBundle = function(oBundle,validationServer) {
+            let processBundle = function(oBundle) {
 
 
                 $scope.selectBundleEntry(null)  //clears all the variables associated with displaying a resource
@@ -1077,6 +1198,21 @@ angular.module("sampleApp")
                 delete $scope.selectedBundleEntry
 
 
+
+
+                //Open the accordian to the selected resource type
+                if ($scope.sortedEntries && entry && entry.resource) {
+                    for (let ent of $scope.sortedEntries) {
+                        if (ent.type == entry.resource.resourceType) {
+                            ent.isOpen = true
+                            break
+                        }
+                    }
+                }
+
+
+
+
                 $('#builderResourceTree').jstree('destroy');
 
                 if ($scope.singleResourceChart) {
@@ -1366,7 +1502,8 @@ angular.module("sampleApp")
             //use in other places as well
             $scope.selectFromMainGraph = function (resource){
                 $scope.fhir.entry.forEach(function (entry){
-                    if (entry.resource && (entry.resource.id == resource.id)) {
+                    if (entry.resource && (entry.resource?.id == resource?.id)) {
+
                         $scope.selectBundleEntry (entry,[])
                         $scope.setTab.mainTabActive = $scope.ui.tabEntries
 
@@ -1577,10 +1714,12 @@ angular.module("sampleApp")
             let validate = function(bundle,validationServer) {
                 let hashErrors = {};    //related to position in bundle...
 
+
                 //ensure that all resources
                 let obj = {resource:bundle,validationServer:validationServer}
 
                 $scope.waiting = true
+                $scope.validating = true
                 $http.post("validate",obj).then(
                     function (data) {
 
@@ -1597,6 +1736,8 @@ angular.module("sampleApp")
                         //remove all the 'cannot validate' errors
                         const exclude1 = "not fetch unknown profiles"
                         issues = issues.filter(item => !item.diagnostics.includes(exclude1));
+
+
 
 
                         //create a hash by resource id
@@ -1637,7 +1778,7 @@ angular.module("sampleApp")
                             }
 
                         }
-                        console.log($scope.errorsByResource)
+                        //console.log($scope.errorsByResource)
 
                     }, function (err) {
                         console.log(err)
@@ -1646,6 +1787,7 @@ angular.module("sampleApp")
                 ).finally(
                     function () {
                         $scope.waiting = false
+                        $scope.validating = false
                     }
                 )
 
