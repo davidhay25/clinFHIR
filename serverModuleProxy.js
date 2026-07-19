@@ -48,7 +48,7 @@ function setup(app,indb) {
         let query =  req.query.qry
         if (query) {
 
-            console.log(query)
+            //console.log(query)
 
             let firstRun = true
             let returnBundle

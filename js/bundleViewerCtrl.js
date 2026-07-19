@@ -23,9 +23,12 @@ angular.module("sampleApp")
 
             if ($localStorage.validationServers.length == 0){
                 $localStorage.validationServers.push("https://r4.ontoserver.csiro.au/fhir")
+                $localStorage.validationServers.push("https://hl7-ips-server.hl7.org/fhir")
             }
+            
             $scope.validationServers = $localStorage.validationServers
             $scope.input.selectedVS = $scope.validationServers[0]
+
 
             if ($localStorage.ipsServers.length == 0){
                 $localStorage.ipsServers.push("https://hl7-ips-server.hl7.org/fhir")
@@ -34,7 +37,7 @@ angular.module("sampleApp")
             $scope.input.selectedIPSServer = $scope.ipsServers[0]
 
             //let terminologyServer = "https://smile.sparked-fhir.com/aucore/fhir/DEFAULT"
-            let terminologyServer = " https://tx.dev.hl7.org.au/fhir"
+            //let terminologyServer = " https://tx.dev.hl7.org.au/fhir" only used at $scope.viewVSDEP
 
 
 
@@ -46,7 +49,7 @@ angular.module("sampleApp")
 
             $scope.selectors = []
             $scope.selectors.push({display:"Paste Bundle",code:'paste'})
-            $scope.selectors.push({display:"New Query",code:'query'})
+            $scope.selectors.push({display:"Query for Bundle",code:'query'})
             $scope.selectors.push({display:"IPS queries",code:'ips'})
             $scope.selectors.push({display:"Locally saved queries",code:'saved'})
             $scope.selectors.push({display:"Shared Library Queries",code:'library'})
@@ -646,8 +649,12 @@ angular.module("sampleApp")
                         }
 
                     }, function (err) {
+                        if (err.status == '400') {
+                            alert("This query is no longer valid. The Bundle cannot be retrieved.")
+                        } else {
+                            alert("Error executing query " + angular.toJson(err))
+                        }
 
-                        alert("Error executing query " + angular.toJson(err))
                         //alert(angular.toJson(err))
 
                     }
@@ -976,42 +983,11 @@ angular.module("sampleApp")
                         $scope.waiting = false
 
                         alert("Unable to get any response from that Query. Is it a complete query - including the 'http' ?")
-                        //alert(angular.toJson(err))
+
 
                     }
                 )
 
-/*
-                return
-
-
-                if (qry.substr(0,4) !== 'http') {
-                    qry = $scope.dataServer.url + qry
-                }
-                $scope.executedQuery = qry
-
-
-
-
-                let proxiedQuery = "proxyfhir/" + qry
-                //$http.get(qry).then(
-                $http.get(proxiedQuery).then(
-                    function (data) {
-                        //todo - same logic as when query supplied - might be to a FHIR server or not
-                        let bundle = data.data
-                        if (bundle.resourceType !== 'Bundle' || ! bundle.entry || bundle.entry.length < 1 ) {
-                            alert("Must return a Bundle with at least one entry")
-                        } else {
-                            $scope.executedQueryBundle = data.data;
-                        }
-
-
-                    },
-                    function (err) {
-                        alert(angular.toJson(err))
-                    }
-                )
-                */
             }
 
 
@@ -1570,14 +1546,16 @@ angular.module("sampleApp")
 
             };
 
-            $scope.selectObservationCode = function(item) {
+            //when selecting an observation in bvObservations.html
+            $scope.selectObservationCode = function(k,item) {
                 //item
                 //todo - update graph is valueQuantity set
                 //use display rather than code as the routine that builds the observation list always sets the display (even is there is no code)
 
+                $scope.selectedObservationCode = k
                 delete $scope.selectedObservation
 
-                $scope.selectedObservationDisplay = item.code?.display
+                //$scope.selectedObservationDisplay = item.code?.display
 
                 //console.log($scope.hasObservations)
 
@@ -1737,6 +1715,10 @@ angular.module("sampleApp")
                         const exclude1 = "not fetch unknown profiles"
                         issues = issues.filter(item => !item.diagnostics.includes(exclude1));
 
+                        //remove all the 'meta source' errors
+                        const exclude2 = ".meta.source"
+                        issues = issues.filter(item => !item.location?.[0]?.includes(exclude2));
+
 
 
 
@@ -1796,13 +1778,53 @@ angular.module("sampleApp")
 
 
 
+            $scope.linkToClipboard = function (item) {
+
+                let link = `${$window.location.protocol}//${$window.location.host}/clinfhir/bundleViewer.html?bundleid=${item.id}`
+
+                if ($window.location.host.indexOf('localhost') > -1) {
+                    link = `${$window.location.protocol}//${$window.location.host}/bundleViewer.html?bundleid=${item.id}`
+                }
+
+
+                //alert(link)
+                navigator.clipboard.writeText(link)
+                    .then(function () {
+                        alert(`The link to this Bundle (${link}) has been copied to the clipboard. It will directly load the Bundle.`);
+                    })
+                    .catch(function (err) {
+                        console.error("Clipboard copy failed", err);
+                        alert("Unable to copy the link ${link}. It should still work though.");
+                    });
+
+
+            }
 
 
             $scope.copyToClipboard = function(){
                 if ($scope.fhir) {
                     //https://stackoverflow.com/questions/29267589/angularjs-copy-to-clipboard
+
+                    console.log(angular.toJson($scope.fhir,true))
+
+                   // clippie(angular.toJson($scope.fhir,true))
+
+                    const text = angular.toJson($scope.fhir, true);
+
+                    navigator.clipboard.writeText(text)
+                        .then(function () {
+                            alert("The bundle has been copied to the clipboard.");
+                        })
+                        .catch(function (err) {
+                            console.error("Clipboard copy failed", err);
+                            alert("Unable to copy the bundle.");
+                        });
+
+                    return
+
                     var copyElement = document.createElement("span");
-                    copyElement.appendChild(document.createTextNode(angular.toJson($scope.fhir),2));
+                    copyElement.appendChild(document.createTextNode(angular.toJson($scope.fhir, true)));
+                   // document.createTextNode(angular.toJson($scope.fhir, true))
                     copyElement.id = 'tempCopyToClipboard';
                     angular.element(document.body.append(copyElement));
 
@@ -1817,14 +1839,23 @@ angular.module("sampleApp")
                     window.getSelection().removeAllRanges();
                     copyElement.remove();
 
+
                     alert("The bundle has been copied to the clipboard.")
                 }
 
             };
 
-            //has a query been passed in. Used by BundleVisualizer to pass across a bundle
+
+
+
+            //has a query been passed in. Used by BundleVisualizer (?? I meant formViewer) to pass across a bundle
             let search = $window.location.search;
             //processBundle must be before search
+
+            //July 2026 - change to a link to a stored bundle. If was a url query then can just share the query so not needed
+//  ng-click="getBundleFromLibrary(input.libraryBundle)">Retrieve Bundle</button>  param = {id:}
+
+
 
             if (search) {
                 //for now, assume the search is in the format bundleid={id}
@@ -1840,9 +1871,14 @@ angular.module("sampleApp")
                             function (data) {
                                 let vo = data.data
 
-                                if (vo.bundle.entry?.length > 0) {
+                                if (vo.bundle?.entry?.length > 0) {
                                    // $scope.urlPassedIn = true;  //flag that the bundle is to be retreived and displayed - not the selector
                                     //if the first entry in the bundle is a Bundle, then this must be a bundle of bundles from a FHIR server. Select it
+
+                                    //find the entry in the list of all bundles so we can get the name for display
+                                    let ar2 = $scope.libraryAllBundles.filter(b => b.id == bundleid)
+                                    $scope.bundleDisplayName = ar2?.[0]?.name || ""
+
                                     processBundle(vo.bundle)
                                 }
 

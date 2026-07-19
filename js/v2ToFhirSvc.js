@@ -40,18 +40,21 @@ angular.module("sampleApp")
                         let resource = entry.resource
                         if (resource.resourceType == "Observation") {
                             let code = "unknown"
+                            let text = resource.code?.text
                             let cc = {}
 
                             if (resource.code && resource.code.coding) {
                                 code = resource.code.coding[0].code
                                 cc = resource.code.coding[0]
                             } else {
+                                //no coding - o? nly a text
                                 if (resource.code?.text) {
                                     code = resource.code?.text       //needed for grouping
                                     cc.display = resource.code?.text    //just for display anyway
                                 }
                             }
-                            hash[code] = hash[code] || {code:cc,resources:[]}
+
+                            hash[code] = hash[code] || {code:cc,text:text,resources:[]}
                             hash[code].resources.push(resource)
                         }
 

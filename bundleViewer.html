@@ -265,7 +265,9 @@
     <script src="js/appConfigSvc.js"></script>
     <script src="js/libs/ngStorage.min.js"></script>
     <script src="js/filters.js"></script>
+    <!--
     <script src="js/bundleVisualizerCtrl.js"></script>
+    -->
     <script src="js/viewResourceCtrl.js"></script>
     <script src="js/umamiSvc.js"></script>
     <script src="js/viewVSCtrl.js"></script>
@@ -515,14 +517,23 @@
                                 <select class="form-control" ng-model="input.selectedIPSServer"
                                         ng-options="svr for svr in ipsServers">{{svr}}</select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-2">
                                 <input type="text" class="form-control"
                                        placeholder="Patient name"
                                        ng-model="input.ipsName"/>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-2">
                                 <button class="btn btn-link"
                                         ng-click="getIPSPatients(input.selectedIPSServer,input.ipsName)">Search</button>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="pull-right">
+                                    <a class="iconSpacing" href="https://build.fhir.org/ig/HL7/fhir-ips/en/index.html" target="_blank"> IPS Spec</a>
+                                    <a class="iconSpacing"  href="https://international-patient-summary.net/" target="_blank"> IPS Web Page</a>
+                                </div>
+
+
+
                             </div>
                         </div>
 
@@ -552,7 +563,7 @@
 
                             </div>
                             <div class="col-md-2">
-                                <button ng-model="selectedIPSPatient" class="btn btn-primary"
+                                <button ng-show="selectedIPSPatient" ng-model="selectedIPSPatient" class="btn btn-primary"
                                         ng-click="loadIPSPatient(input.selectedIPSServer,selectedIPSPatient)">Load IPS</button>
                             </div>
                         </div>
@@ -572,7 +583,7 @@
                             <div class="col-md-10">
                                 <div class="myScroll1">
                                     <table class="table table-bordered">
-                                        <tr><th>Name</th>
+                                        <tr><th>Name</th><th>Description</th>
                                             <th style="width: 50%">Query</th>
                                             <th>In library</th><th></th></tr>
                                         <tr ng-click="input.savedQuery=item"
@@ -583,6 +594,7 @@
                                             <td>
                                                 {{item.name}}
                                             </td>
+                                            <td>{{item.description}}</td>
                                             <td>{{item.qry}}</td>
                                             <td>{{item.inLibrary}}</td>
                                             <td><i class="glyphicon glyphicon-remove-sign clickable"
@@ -646,7 +658,7 @@
                             <div class="col-md-10">
                                 <div class="myScroll1">
                                     <table class="table table-bordered">
-                                        <tr><th>Name</th><th>Query</th><th>Tags</th></tr>
+                                        <tr><th>Name</th><th>Description</th><th>Query</th><th>Tags</th></tr>
                                         <tr ng-click="input.libraryQuery=item"
                                             style="cursor: pointer"
                                             ng-class="{listItemSelected:input.libraryQuery == item}"
@@ -655,6 +667,9 @@
                                             ng-repeat = "item in library">
                                             <td>
                                                 {{item.name}}
+                                            </td>
+                                            <td>
+                                                {{item.description}}
                                             </td>
                                             <td>{{item.qry}}</td>
                                             <td style="width: 10%">
@@ -740,12 +755,21 @@
                                         There are over 200 resources in this Graph. The full graph won't be shown,
                                         though the rest of the functionality is fine. Validation will likely be slow as well.
                                     </div>
+
+
+
+
+
                                     <button ng-show = "input.libraryBundle" class="btn btn-primary"
                                             ng-click="getBundleFromLibrary(input.libraryBundle)">Retrieve Bundle</button>
-<!--
-                                    <button ng-show = "input.libraryBundle" class="btn btn-danger"
-                                            ng-click="deleteBundleFromLibrary(input.libraryBundle)">Delete Bundle</button>
-                                    -->
+
+
+                                    <div ng-show="input.libraryBundle">
+                                        <br/><br/>
+                                        <button class="btn btn-link" ng-click="linkToClipboard(input.libraryBundle)">Copy link to this Bundle</button>
+                                    </div>
+
+
 
                                 </div>
 
@@ -936,7 +960,7 @@
 
                             </uib-tab>
 
-                            <uib-tab heading="References"  select="fitSingleGraph()">
+                            <uib-tab heading="Graph"  select="fitSingleGraph()">
                                 <br/>
                            <!--     <div class="row">
 
@@ -1044,11 +1068,8 @@
                                                     {{ex}}
                                                 </div>
                                             </td>
-                                            <td>
-                                                <div ng-repeat="location in err.location">
-                                                    {{location}}
-                                                </div>
-                                            </td>
+
+
                                         </tr>
                                     </table>
                                 </div>
@@ -1302,9 +1323,9 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-7">
+                            <div class="col-md-12">
                                 <em>Uses <a target="_blank" href="https://www.ontoserver.csiro.au/site/">Ontoserver</a>
-                                    for validation. Excludes 'missing text element' and won't validate profiled resources (you
+                                    for validation. Excludes 'missing text element', and 'meta.source' locations and won't validate profiled resources (you
                                     can use the extended validation for this, and specify a different Validation Server if needed).
                                     May take a few seconds for the validation to be completed.</em>
                             </div>

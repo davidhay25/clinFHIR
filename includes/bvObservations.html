@@ -3,16 +3,16 @@
     <strong>Observation Codes</strong>
     <div class="myScroll1">
       <div class="list-group">
-        <div ng-class="{'list-group-item':true,listItemSelected:v.code.display && v.code.display==selectedObservationDisplay}"
+        <div ng-class="{'list-group-item':true,listItemSelected: k==selectedObservationCode}"
              style="cursor: pointer"
-             ng-click="selectObservationCode(hashObservations[k])"
+             ng-click="selectObservationCode(k,hashObservations[k])"
              ng-repeat="(k,v) in hashObservations">
 
           <div class="pull-right badge">
             {{v.resources.length}}
           </div>
-          <div>{{v.code.display}}</div>
-          <div>{{v.code.code}} </div>
+          <div>{{v.code.display || v.text}}</div>
+          <div>{{v.code.code}}  </div>
 
         </div>
       </div>
@@ -38,12 +38,12 @@
                 <td>
                   {{moment(obs.effectiveDateTime).format('YYYY-MM-DD')}}
 
-
-
                   {{obs.effectivePeriod.start}} {{obs.effectivePeriod.end}}
                 </td>
                 <td>{{obs.effectiveDateTime | getAgeSeconds}}</td>
-                <td>{{obs.valueString}}
+                <td>
+
+                  {{obs.valueString}}
 
                   <div ng-repeat="coding in obs.valueCodeableConcept.coding">
                     {{coding.system}} {{coding.code}}
@@ -52,6 +52,22 @@
                   {{obs.valueCodeableConcept.text}}
 
                   {{obs.valueQuantity.value}} {{obs.valueQuantity.unit}}
+
+
+                  <table class="table">
+                    <tr ng-repeat="comp in obs.component">
+                      <td>
+                        <div ng-repeat="coding in comp.code.coding">
+                          {{coding.display}}
+                        </div>
+                        {{comp.code.text}}
+                      </td>
+                      <td>{{comp.valueQuantity.value}} {{comp.valueQuantity.unit}}</td>
+
+                    </tr>
+                  </table>
+
+
 
                   <div ng-repeat="note in obs.note">{{note.text}}</div>
 

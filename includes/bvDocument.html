@@ -80,11 +80,12 @@
     <div><em>Derived from the Composition and Subject text elements as per the spec</em></div>
 
   </uib-tab>
+
   <uib-tab heading="Sections">
     <div class="row">
       <div class="col-md-3">
         <div class="list-group">
-          <div ng-class="{'list-group-item':true}"
+          <div ng-class="{'list-group-item':true,listItemSelected:selectedSection == section}"
                ng-repeat = "section in document.composition.section"
                style="cursor: pointer"
                ng-click="selectSection(section)">
@@ -139,6 +140,13 @@
 
               </div>
               <div class="col-md-6">
+
+                <div ng-show="resourceFromSection" class="pull-right">
+                  <button class="btn btn-link"
+                          ng-click="selectFromMainGraph(resourceFromSection)">Details</button>
+                </div>
+                <div class="clearfix"></div>
+
                 <div class="myScroll1">
                 <pre>{{resourceFromSection | json}}</pre>
                 </div>
