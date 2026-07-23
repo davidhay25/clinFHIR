@@ -129,7 +129,7 @@
                 <div class="myScroll1">
                   <table>
                     <div class="list-group">
-                      <div class="list-group-item"
+                      <div ng-class="{'list-group-item':true,listItemSelected:entry.reference == selectedImmResourceReference}"
                            style="cursor: pointer"
                            ng-repeat = "entry in selectedSection.entry">
                         <div ng-click="selectEntryFromSection(entry) ">{{entry.reference}}</div>

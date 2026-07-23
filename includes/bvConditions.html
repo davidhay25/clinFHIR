@@ -5,7 +5,8 @@
       <tr><th>Condition</th><th>Clinical status</th><th>Verification status</th></tr>
       <tr ng-repeat="condition in lstConditions"
           style="cursor: pointer"
-        ng-click="input.selectedCondition = condition">
+          ng-class="{listItemSelected:input.selectedCondition == condition}"
+          ng-click="input.selectedCondition = condition">
         <td>{{condition.display}}</td>
         <td>{{condition.clinicalStatus}}</td>
         <td>{{condition.verificationStatus}}</td>
@@ -15,6 +16,13 @@
   </div>
 
   <div class="col-md-4">
+    <div class="pull-right">
+      <button class="btn btn-link"
+              ng-show="input.selectedCondition"
+              ng-click="selectFromMainGraph(input.selectedCondition.resource)">Details</button>
+    </div>
+    <div class="clearfix"></div>
+
     <div class="myScroll1">
       <pre>{{input.selectedCondition.resource | json}}</pre>
     </div>

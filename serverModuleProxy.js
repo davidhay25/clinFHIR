@@ -8,7 +8,8 @@ const axios = require('axios')
 
 //temp const validationServer = process.env.HAPISERVER || "http://localhost:8080/fhir"
 
-let validationServer = "https://r4.ontoserver.csiro.au/fhir"
+//let validationServer = "https://r4.ontoserver.csiro.au/fhir"
+let validationServer = "https://tx.ontoserver.csiro.au/fhir"
 
 
 //const validationServer = "http://hapi-fhir:8080/fhir"
@@ -87,7 +88,13 @@ function setup(app,indb) {
 
             } catch (ex) {
                 console.log(ex.response?.data)
-                res.status(400).json({msg:ex.message})
+                let resp = ex.response?.data
+                if (resp) {
+                    res.status(400).json(resp)
+                } else {
+                    res.status(400).json({msg:ex.message})
+                }
+
             }
         } else {
             res.status(400).json({msg:"Must include a 'qry' parameter"})
@@ -96,10 +103,47 @@ function setup(app,indb) {
 
     })
 
+    //uses POST to make it easier to pass parameters
+    app.post('/expandValueSet', async function(req,res){
+        let obj = req.body
+        let url = obj.url
+        let filter = obj.filter
+
+        if (! url) {
+            res.status(400).json({msg:"url is required"})
+            return
+        }
+
+        let ar = url.split('|')
+        let qry = `${obj.server}/ValueSet/$expand?url=${ar[0]}`
+        if (ar.length > 1) {
+            qry += `&valueSetVersion=${ar[1]}`   //the version
+        }
+
+        if (filter) {
+            qry += `&filter=${filter}`   //the version
+        }
+
+
+        //console.log(qry)
+
+        try {
+            let response = await axios.get(qry)
+            res.json(response.data)
+        } catch (ex) {
+
+            if (ex.response) {
+                res.json(ex.response.data)
+            } else {
+                res.status(500).json({msg:ex.message})
+            }
+
+        }
+
+    })
 
 
     //validation option
-
     app.post('/validate',async function(req,res){
         //pass in the resorce to be validated (usually a Bundle) and an optional validation server
         let obj = req.body

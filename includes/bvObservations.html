@@ -34,6 +34,10 @@
               </tr>
               <tr ng-repeat="obs in selectedObservations"
                   style="cursor: pointer"
+
+
+                  ng-class="{listItemSelected:selectedObservation == obs}"
+
                   ng-click="selectObservation(obs)">
                 <td>
                   {{moment(obs.effectiveDateTime).format('YYYY-MM-DD')}}
@@ -87,6 +91,7 @@
             <strong>Selected Observation</strong>
             <div class="pull-right">
               <button class="btn btn-link"
+                      ng-show="selectedObservation"
                       ng-click="selectFromMainGraph(selectedObservation)">Details</button>
             </div>
             <div class="clearfix"></div>

@@ -11,16 +11,20 @@
 
                     <div >
                         <strong>Report date: </strong>
-                        <span class="clickable" ng-click="selectDR(item.DR)">   {{item.DR.effectiveDateTime | date}}</span>
+                        <span class="clickable" ng-click="selectDR(item.DR)">
+                            {{item.DR.effectiveDateTime | date}}</span>
                     </div>
 
 
 
                     <table class="table table-condensed table-bordered">
-                        <tr ng-repeat="obs in item.obs">
+                        <tr ng-repeat="obs in item.obs"
+                            ng-class="{listItemSelected:selectedDRObservation == obs}"
+                        >
                             <td style="width: 50%">
                                 <div  style="cursor: pointer"
                                         class="clickable" ng-click="selectDRObs(obs)">
+
 
                                     {{obs.code.text || obs.code.coding[0].display}}
                                 </div>

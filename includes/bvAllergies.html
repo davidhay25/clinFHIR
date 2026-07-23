@@ -5,6 +5,7 @@
       <tr><th>Substance</th></tr>
       <tr ng-repeat="allergy in lstAllergies"
           style="cursor: pointer"
+          ng-class="{listItemSelected:input.selectedAllergy == allergy}"
         ng-click="input.selectedAllergy = allergy">
         <td>{{allergy.display}}</td>
 
@@ -13,6 +14,13 @@
   </div>
 
   <div class="col-md-4">
+    <div class="pull-right">
+      <button class="btn btn-link"
+              ng-show="input.selectedAllergy"
+              ng-click="selectFromMainGraph(input.selectedAllergy.resource)">Details</button>
+    </div>
+    <div class="clearfix"></div>
+
     <div class="myScroll1">
       <pre>{{input.selectedAllergy.resource | json}}</pre>
     </div>

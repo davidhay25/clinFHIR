@@ -23,7 +23,6 @@ angular.module("sampleApp")
         objColours.Location = '#cc9900';
         objColours.HealthcareService = '#FFFFCC';
         objColours.MedicationDispense = '#FFFFCC';
-        //objColours.Composition = '#FFFFCC';
         objColours.Medication = '#FF9900';
         objColours.Measure = '#FF9900';
         objColours.Task = '#FF9900';

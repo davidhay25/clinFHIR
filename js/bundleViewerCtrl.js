@@ -18,14 +18,64 @@ angular.module("sampleApp")
 
             //locally scoped terminology servers. Add Ontoserver as the OO analysis is different
             //Always ensure there is at least one VS - Ontoserver by default
+
+
+            $localStorage.bvServers = $localStorage.bvServers || []
+
+            function checkServers() {
+                if ($localStorage.bvServers.length == 0){
+                    $localStorage.bvServers.push({url:"https://tx.ontoserver.csiro.au/fhir",display:"Ontoserver tx",validate:true})
+                    $localStorage.bvServers.push({url:"https://hapi.fhir.org/baseR4",display:"HAPI r4",validate:true})
+                    $localStorage.bvServers.push({url:"https://r4.ontoserver.csiro.au/fhir",display:"Ontoserver r4",validate:true})
+                    $localStorage.bvServers.push({url:"https://hl7-ips-server.hl7.org/fhir",display:"IPS server",validate:true,summary:true})
+                }
+            }
+            checkServers()
+
+
+            $scope.validationServers = []
+            $scope.ipsServers = []
+
+            function setServers() {
+                $scope.validationServers = []
+                $scope.ipsServers = []
+                if (! $localStorage.bvServers) {
+                    $localStorage.bvServers = []
+                    checkServers()
+                }
+                for (const server of $localStorage.bvServers) {
+                    if (server.validate) {
+                        $scope.validationServers.push(server)
+                    }
+
+                    if (server.summary) {
+                        $scope.ipsServers.push(server)
+                    }
+                }
+                $scope.input.selectedVS = $scope.validationServers?.[0]   //default VS is the first one
+                $scope.input.selectedIPSServer= $scope.ipsServers?.[0]
+
+            }
+            setServers()
+
+           // $scope.input.selectedVS = $scope.validationServers?.[0]   //default VS is the first one
+
+            //remmber the selected one
+            if ($localStorage.bvSelectedVS) {
+                for (let i =0 ; i < $scope.validationServers.length; i++) {
+                    if ($scope.validationServers[i].url == $localStorage.bvSelectedVS.url) {
+                        $scope.input.selectedVS = $scope.validationServers[i]
+                        break
+                    }
+                }
+
+            }
+
+            /*
             $localStorage.validationServers = $localStorage.validationServers || []
+
             $localStorage.ipsServers = $localStorage.ipsServers || []
 
-            if ($localStorage.validationServers.length == 0){
-                $localStorage.validationServers.push("https://r4.ontoserver.csiro.au/fhir")
-                $localStorage.validationServers.push("https://hl7-ips-server.hl7.org/fhir")
-            }
-            
             $scope.validationServers = $localStorage.validationServers
             $scope.input.selectedVS = $scope.validationServers[0]
 
@@ -36,6 +86,7 @@ angular.module("sampleApp")
             $scope.ipsServers = $localStorage.ipsServers
             $scope.input.selectedIPSServer = $scope.ipsServers[0]
 
+            */
             //let terminologyServer = "https://smile.sparked-fhir.com/aucore/fhir/DEFAULT"
             //let terminologyServer = " https://tx.dev.hl7.org.au/fhir" only used at $scope.viewVSDEP
 
@@ -50,7 +101,7 @@ angular.module("sampleApp")
             $scope.selectors = []
             $scope.selectors.push({display:"Paste Bundle",code:'paste'})
             $scope.selectors.push({display:"Query for Bundle",code:'query'})
-            $scope.selectors.push({display:"IPS queries",code:'ips'})
+            $scope.selectors.push({display:"IPS Bundles",code:'ips'})
             $scope.selectors.push({display:"Locally saved queries",code:'saved'})
             $scope.selectors.push({display:"Shared Library Queries",code:'library'})
             $scope.selectors.push({display:"Stored Library Bundles",code:'stored'})
@@ -97,7 +148,14 @@ angular.module("sampleApp")
             $scope.getIPSPatients = function (server,name) {
                 delete $scope.selectedIPSPatient
                 delete $scope.ipsPatientsBundle
-                let qry = `${server}/Patient?name=${name}`
+
+                let qry = `${server.url}/Patient`
+                if (name) {
+                    qry += `?name=${name}`
+                } else {
+                    qry += `?_count=50`
+                    //$scope.ipsMessage = "Only 50 patients will be returned"
+                }
                 let newQry = `proxyRequest?qry=${encodeURIComponent(qry)}`
                 $scope.waiting = true
                 $http.get(newQry).then(
@@ -143,17 +201,38 @@ angular.module("sampleApp")
 
             //perfrom the $summary operation and load the result
             $scope.loadIPSPatient = function (server,pat) {
-                let qry = `${server}/Patient/${pat.id}/$summary`
+                let qry = `${server.url}/Patient/${pat.id}/$summary`
                 console.log(qry)
                 let newQry = `proxyRequest?qry=${encodeURIComponent(qry)}`
                 $scope.waiting = true
                 $http.get(newQry).then(
                     function (data) {
+
+                        //set the validation server to the IPS server
+                        // $scope.input.selectedVS
+                        for (let i = 0; i < $scope.validationServers.length; i++) {
+                            if ($scope.validationServers[i].url == server.url) {
+                                $scope.input.selectedVS = $scope.validationServers[i]
+                                break;
+                            }
+                        }
+
+
                         processBundle(data.data)
 
                     },
                     function (err) {
-                        alert(`There was an error attempting to retrieve the IPS - ${err.message || 'Unknown server error' }`)
+                        console.log(err)
+                        if (err.data?.resourceType == 'OperationOutcome') {
+                            let msg = ""
+                            for (let iss of err.data?.issue) {
+                                msg += iss.diagnostics
+                            }
+                            alert(msg)
+                        } else {
+                            alert(`There was an error attempting to retrieve the IPS - ${err || 'Unknown error from server' }`)
+
+                        }
                         //alert(angular.toJson(err))
                     }
                 ).finally(
@@ -425,7 +504,7 @@ angular.module("sampleApp")
 
             }
 
-            $scope.deleteVS = function (vs) {
+            $scope.deleteVSDEP = function (vs) {
                 let g = $localStorage.validationServers.indexOf(vs)
                 if (g > -1) {
                     if (confirm("Are you sure you wish to remove this Validation Server?")) {
@@ -441,21 +520,61 @@ angular.module("sampleApp")
 
             }
 
+
+            function getIssueTypeCount(OO) {
+                for (let iss of OO.issue || []) {
+                    switch (iss.severity) {
+                        case 'error' :
+                            $scope.input.issErrorCount++
+                            break
+                        case 'warning' :
+                            $scope.input.issWarningCount++
+                            break
+                        case 'information' :
+                            $scope.input.issInfoCount++
+                            break
+                    }
+                }
+            }
+
+
+            //produce the re
+            function processOOBySeverity (OO) {
+
+
+                $scope.input.issErrorCount = 0
+                $scope.input.issWarningCount = 0
+                $scope.input.issInfoCount = 0
+
+                $scope.extendedOO = OO
+                getIssueTypeCount($scope.extendedOO)
+
+                /* - temp, looking for a better way to manage servers
+                //if this is a newVS then add it to the list of known oned
+                if (newVS) {
+                    if ($scope.validationServers.indexOf(newVS) == -1) {
+
+                        // $scope.validationServers.push(newVS)
+                        $localStorage.validationServers.push(newVS)
+                    }
+
+                }
+                */
+
+
+
+            }
+
             //validate the current bundle against a specified validation server
 
-            $scope.validateSpecificVS = function (selectedVS, newVS) {
+            $scope.validateSpecificVSDEP = function (selectedVS, newVS) {
 
                 if (! selectedVS && ! newVS) {
                     alert("No Validation Server specified")
                     return
                 }
 
-                delete $scope.extendedOO
-                delete $scope.evOperationError       //true if the actual validation call was successful - not the actual result
 
-                $scope.input.issErrorCount = 0
-                $scope.input.issWarningCount = 0
-                $scope.input.issInfoCount = 0
 
                 let validationServer =  selectedVS
                 if (newVS) {
@@ -467,10 +586,6 @@ angular.module("sampleApp")
 
                 $scope.validationServer = validationServer //for UI
 
-                //let url = `${selectedVS}/Bundle/$validate`
-                //let url = `${terminologyServer}/Bundle/$validate`
-
-
                 let obj = {resource:$scope.fhir,validationServer:validationServer}
 
                 $scope.waiting = true
@@ -481,21 +596,8 @@ angular.module("sampleApp")
                 //$http.post(url,$scope.fhir).then(
                     function (data) {
 
-                        let OO = data.data
-                        $scope.extendedOO = OO
-                        getIssueTypeCount($scope.extendedOO)
 
-                        //if this is a newVS then add it to the list of known oned
-                        if (newVS) {
-                            if ($scope.validationServers.indexOf(newVS) == -1) {
-
-                               // $scope.validationServers.push(newVS)
-                                $localStorage.validationServers.push(newVS)
-                            }
-
-                        }
-
-
+                        processOOBySeverity (data.data)
 
                     }, function (err) {
                         $scope.evOperationError = true
@@ -508,22 +610,6 @@ angular.module("sampleApp")
                     $scope.waiting = false
                     $scope.validating = false
                 })
-
-                function getIssueTypeCount(OO) {
-                    for (let iss of OO.issue || []) {
-                        switch (iss.severity) {
-                            case 'error' :
-                                $scope.input.issErrorCount++
-                                break
-                            case 'warning' :
-                                $scope.input.issWarningCount++
-                                break
-                            case 'information' :
-                                $scope.input.issInfoCount++
-                                break
-                        }
-                    }
-                }
 
             }
 
@@ -664,15 +750,111 @@ angular.module("sampleApp")
             }
 
 
+            $scope.queryValueSet = function (url,filter) {
+                let obj = {server:$scope.input.selectedVS.url,url:url,filter:filter}
+                delete $scope.expandedVS
+                delete $scope.expandedVSError
+                delete $scope.expandedVSOO
+                $http.post('expandValueSet',obj).then(
+                    function (data) {
+                        console.log(data)
+                        if (data.data.resourceType == 'OperationOutcome') {
+                            $scope.expandedVSOO = data.data
+                        } else {
+                            $scope.expandedVS = data.data
+                        }
+
+
+                    }, function (err) {
+                        $scope.expandedVSError = err.data
+                        console.log(err)
+                    }
+                )
+
+                let qry = `${$scope.input.selectedVS.url}/ValueSet/$expand?url=${filter}`
+                console.log(qry)
+
+            }
+
+
+            $scope.updateServers = function () {
+
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/editServers.html',
+                    size: 'lg',
+                    controller: function ($scope, servers,$http) {
+                        $scope.input = {};
+                        $scope.servers = servers
+                        $scope.test = function (inx) {
+                            let qry = `${$scope.servers[inx].url}/metadata`
+                            $scope.waiting = true
+                            $http.get(qry).then(
+                                function () {
+                                    alert(`The server at ${$scope.servers[inx].url} returned a CapabilityStatement resource`)
+                                }, function (err) {
+                                    alert(angular.toJson(err.data))
+                                }
+                            ).finally(function () {
+                                $scope.waiting = false
+                            })
+                        }
+                        
+                        $scope.save = function () {
+                            $scope.$close($scope.servers)
+                        }
+
+                        $scope.delete = function (inx) {
+                            if (confirm(`Are you sure you wish to remove the ${$scope.servers[inx].display} server`)) {
+                                $scope.servers.splice(inx,1)
+                            }
+                        }
+                        $scope.add = function () {
+                            let obj = {display:$scope.input.display,url:$scope.input.url,
+                                validate:$scope.input.validate,summary:$scope.input.summary}
+                            $scope.servers.push(obj)
+                            delete $scope.display
+                            delete $scope.url
+                            delete $scope.summary
+                            delete $scope.validate
+                        }
+
+                    },
+                    resolve : {
+                        servers : function(){
+                            return (angular.copy($localStorage.bvServers)) //pass in a clone so we can cancel
+                        }
+                    }
+                }).result.then(function (servers) {
+
+                    //update the local storage
+                    $localStorage.bvServers = servers
+                    setServers() //refresh the individual servers list
+
+
+
+                })
+
+            }
+
+
             //performs bundle using default server
             $scope.performValidation = function(){
 
-                validate($scope.fhir)
-               /*
-                validate($scope.fhir,$scope.validationServer.url,function(hashErrors){
-                    $scope.hashErrors = hashErrors;
-                })
-                */
+                delete $scope.extendedOO
+                delete $scope.evOperationError       //true if the actual validation call was successful - not the actual result
+                delete $scope.errorsByResource
+                delete $scope.errorsByResource
+                delete $scope.input.selectedIssueByResource
+
+
+                //remmeber for next time
+                $localStorage.bvSelectedVS = $scope.input.selectedVS
+                if ($scope.input.selectedVS.url) {
+                    validate($scope.fhir,$scope.input.selectedVS.url)
+                }
+
+
+
             }
 
             //validate the resources in the bundle, then draw the graph (which needs the errors to display)
@@ -704,6 +886,7 @@ angular.module("sampleApp")
 
                 delete $scope.input.selectedIssueByResource
                 delete $scope.errorsByResource
+                delete $scope.selectedImmResourceReference
                 //input.selectedIssueByResource
 
                 //$scope.showSelector = false     //hide the selector
@@ -714,7 +897,7 @@ angular.module("sampleApp")
                 //set up the hashes used when finding a resource from a reference.
                 bundleVisualizerSvc.initResourceLookup(oBundle)
 
-                //now that we have a local hapi server this is much faster
+                //validate using the default server
                 $scope.performValidation()
 
                 $scope.isDocument = false
@@ -937,6 +1120,7 @@ angular.module("sampleApp")
 
             $scope.selectEntryFromSection = function(oReference) {
                 let reference = oReference.reference;
+                $scope.selectedImmResourceReference = reference
                 $scope.resourceFromSection = bundleVisualizerSvc.referenceLookup(reference)
                 //$scope.selectedEntryFromSection = $scope.hashByRef[reference]
             }
@@ -1477,16 +1661,21 @@ angular.module("sampleApp")
             //From the 'references graph' when a resource is clicked, then selected for view in bundle entries tab
             //use in other places as well
             $scope.selectFromMainGraph = function (resource){
-                $scope.fhir.entry.forEach(function (entry){
-                    if (entry.resource && (entry.resource?.id == resource?.id)) {
+                if (resource.id) {
+                    $scope.fhir.entry.forEach(function (entry){
+                        if (entry.resource && (entry.resource?.id == resource?.id)) {
 
-                        $scope.selectBundleEntry (entry,[])
-                        $scope.setTab.mainTabActive = $scope.ui.tabEntries
+                            $scope.selectBundleEntry (entry,[])
+                            $scope.setTab.mainTabActive = $scope.ui.tabEntries
 
 
 
-                    }
-                })
+                        }
+                    })
+                } else {
+                    alert("This resource has no Id, you'll need to select it manually.")
+                }
+
             }
 
 
@@ -1665,9 +1854,6 @@ angular.module("sampleApp")
                         } else {
                             $scope.selectFromMainGraph(node.entry.resource)
                         }
-
-
-
                         $scope.$digest();
                     })
 
@@ -1683,14 +1869,82 @@ angular.module("sampleApp")
                 } else {
                     $scope.noFullGraph = true
                 }
-
             }
 
+
+            //produce the 'validate by resource' vars
+
+            function processOOByResource(OO,hideCommon) {
+
+                //this is an OO
+                $scope.validationResult = OO
+                let issues = OO.issue || []
+
+                $scope.validationResult.issue = []
+
+                if (hideCommon) {
+                    //remove all the 'should have text element' errors
+                    const exclude = "dom-6:"
+                    issues = issues.filter(item => !item.diagnostics.includes(exclude));
+
+                    //remove all the 'cannot validate' errors
+                    const exclude1 = "not fetch unknown profiles"
+                    issues = issues.filter(item => !item.diagnostics.includes(exclude1));
+
+                    //remove all the 'meta source' errors
+                    const exclude2 = ".meta.source"
+                    issues = issues.filter(item => !item.location?.[0]?.includes(exclude2));
+
+                }
+
+
+
+                //create a hash by resource id
+                $scope.errorsByResource = {}
+                $scope.allErrors = []
+
+                for (const iss of issues) {
+                    if (iss.location) {
+                        let loc = iss.location[0]
+
+                        const match = loc.match(/\[(\d+)\]/);
+                        const firstIndex = match ? parseInt(match[1], 10) : null;
+
+                        if (firstIndex !== null) {
+                            if (firstIndex > $scope.fhir.entry.length) {
+                                console.error(`Theres an issue with a location of ${loc} but there are only ${$scope.fhir.entry.length} entries  in the bundle`)
+                            } else {
+
+                                const resource = $scope.fhir.entry[firstIndex]?.resource
+                                if (resource) {
+                                    $scope.validationResult.issue.push(iss)
+
+                                    let id = resource.id || `location:${firstIndex}`
+
+                                    $scope.errorsByResource[id] = $scope.errorsByResource[id] || {resource:resource,issues:[]}
+                                    $scope.errorsByResource[id].issues.push(iss)
+                                }
+
+                            }
+                        } else {
+                            $scope.errorsByResource["Bundle"] = $scope.errorsByResource["Bundle"] || {resource:{resourceType:'Bundle'},issues:[]}
+                            $scope.errorsByResource["Bundle"].issues.push(iss)
+                        }
+
+                    } else {
+                        $scope.errorsByResource["NoLocation"] = $scope.errorsByResource["NoLocation"] || {resource:{resourceType:'No Location'},issues:[]}
+                        $scope.errorsByResource["NoLocation"].issues.push(iss)
+                    }
+
+                }
+                //console.log($scope.errorsByResource)
+
+            }
 
             //used by bundle validate
             //allow a separate validation server to be supplied
             let validate = function(bundle,validationServer) {
-                let hashErrors = {};    //related to position in bundle...
+                //let hashErrors = {};    //related to position in bundle...
 
 
                 //ensure that all resources
@@ -1701,66 +1955,8 @@ angular.module("sampleApp")
                 $http.post("validate",obj).then(
                     function (data) {
 
-                        //this is an OO
-                        $scope.validationResult = data.data
-                        let issues = data.data.issue || []
-
-                        $scope.validationResult.issue = []
-
-                        //remove all the 'should have text element' errors
-                        const exclude = "dom-6:"
-                        issues = issues.filter(item => !item.diagnostics.includes(exclude));
-
-                        //remove all the 'cannot validate' errors
-                        const exclude1 = "not fetch unknown profiles"
-                        issues = issues.filter(item => !item.diagnostics.includes(exclude1));
-
-                        //remove all the 'meta source' errors
-                        const exclude2 = ".meta.source"
-                        issues = issues.filter(item => !item.location?.[0]?.includes(exclude2));
-
-
-
-
-                        //create a hash by resource id
-                        $scope.errorsByResource = {}
-                        $scope.allErrors = []
-
-                        for (const iss of issues) {
-                            if (iss.location) {
-                                let loc = iss.location[0]
-
-                                const match = loc.match(/\[(\d+)\]/);
-                                const firstIndex = match ? parseInt(match[1], 10) : null;
-
-                                if (firstIndex !== null) {
-                                    if (firstIndex > $scope.fhir.entry.length) {
-                                        console.error(`Theres an issue with a location of ${loc} but there are only ${$scope.fhir.entry.length} entries  in the bundle`)
-                                    } else {
-
-                                        const resource = $scope.fhir.entry[firstIndex]?.resource
-                                        if (resource) {
-                                            $scope.validationResult.issue.push(iss)
-
-                                            let id = resource.id || `location:${firstIndex}`
-
-                                            $scope.errorsByResource[id] = $scope.errorsByResource[id] || {resource:resource,issues:[]}
-                                            $scope.errorsByResource[id].issues.push(iss)
-                                        }
-                                        
-                                    }
-                                } else {
-                                    $scope.errorsByResource["Bundle"] = $scope.errorsByResource["Bundle"] || {resource:{resourceType:'Bundle'},issues:[]}
-                                    $scope.errorsByResource["Bundle"].issues.push(iss)
-                                }
-
-                            } else {
-                                $scope.errorsByResource["NoLocation"] = $scope.errorsByResource["NoLocation"] || {resource:{resourceType:'No Location'},issues:[]}
-                                $scope.errorsByResource["NoLocation"].issues.push(iss)
-                            }
-
-                        }
-                        //console.log($scope.errorsByResource)
+                        processOOByResource(data.data,true)
+                        processOOBySeverity(data.data)
 
                     }, function (err) {
                         console.log(err)
@@ -1774,9 +1970,6 @@ angular.module("sampleApp")
                 )
 
             }
-
-
-
 
             $scope.linkToClipboard = function (item) {
 
@@ -1820,27 +2013,7 @@ angular.module("sampleApp")
                             alert("Unable to copy the bundle.");
                         });
 
-                    return
 
-                    var copyElement = document.createElement("span");
-                    copyElement.appendChild(document.createTextNode(angular.toJson($scope.fhir, true)));
-                   // document.createTextNode(angular.toJson($scope.fhir, true))
-                    copyElement.id = 'tempCopyToClipboard';
-                    angular.element(document.body.append(copyElement));
-
-                    // select the text
-                    var range = document.createRange();
-                    range.selectNode(copyElement);
-                    window.getSelection().removeAllRanges();
-                    window.getSelection().addRange(range);
-
-                    // copy & cleanup
-                    document.execCommand('copy');
-                    window.getSelection().removeAllRanges();
-                    copyElement.remove();
-
-
-                    alert("The bundle has been copied to the clipboard.")
                 }
 
             };

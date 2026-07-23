@@ -90,6 +90,13 @@
 
     <style>
 
+
+        .my-table td,
+        .my-table th {
+            padding: 10px 10px;
+        }
+
+
         body {
             background: #fcfcfc;
         }
@@ -508,14 +515,16 @@
                         <div class="alert alert-info">
                             Retrieve an <a href="https://hl7.org/fhir/uv/ips/en/" target="_blank">IPS </a> document from a server that supports the
                              <a href="https://build.fhir.org/ig/HL7/fhir-ips/en/OperationDefinition-summary.html" target="_blank">$summary </a>
-                            operation and returns an IPS document.
+                            operation and returns an IPS document. To add a server to the list, use the 'Servers' link.
 
                         </div>
 
                         <div class="row">
                             <div class="col-md-4">
                                 <select class="form-control" ng-model="input.selectedIPSServer"
-                                        ng-options="svr for svr in ipsServers">{{svr}}</select>
+                                        placeholder="Select server"
+                                        ng-options="svr.url for svr in ipsServers">{{svr}}</select>
+                                <div ng-hide="input.ipsName"><em>Only 50 patients returned if no name specified.</em></div>
                             </div>
                             <div class="col-md-2">
                                 <input type="text" class="form-control"
@@ -524,10 +533,16 @@
                             </div>
                             <div class="col-md-2">
                                 <button class="btn btn-link"
+                                        ng-show="input.selectedIPSServer"
                                         ng-click="getIPSPatients(input.selectedIPSServer,input.ipsName)">Search</button>
                             </div>
                             <div class="col-md-4">
                                 <div class="pull-right">
+
+
+                                    <span class="iconSpacing clickable" ng-click="updateServers()">Servers</span>
+
+
                                     <a class="iconSpacing" href="https://build.fhir.org/ig/HL7/fhir-ips/en/index.html" target="_blank"> IPS Spec</a>
                                     <a class="iconSpacing"  href="https://international-patient-summary.net/" target="_blank"> IPS Web Page</a>
                                 </div>
@@ -1311,37 +1326,61 @@
 
 
                 <br/>
+
+                <div class="pull-right">
+                   <table class = "my-table" style="border-collapse: collapse; ">
+                       <tr>
+                           <td>Validation Server</td>
+                           <td><select ng-model="input.selectedVS" class="form-control"
+                                       ng-changeX="input.additionalVS = ''"
+                                       ng-options="vs.url for vs in validationServers"></select></td>
+                           <td><div class="clickable" ng-click="updateServers()">Servers</div>  </td>
+                           <td>
+                               <div ng-show="input.selectedVS" class="clickable" ng-click="performValidation()">Validate</div>
+                           </td>
+                       </tr>
+                   </table>
+
+                </div>
+
+
                 <uib-tabset>
-                    <uib-tab heading="Standard validation">
-<!--
-                        <em>Issues noted by the internal hapi server. Excludes 'missing text element' and profile validation errors.</em>
-                        -->
+                    <uib-tab heading="Issues by Resource">
+
                         <br/>
 
                         <div class="alert-warning alert" ng-show="validating">
                             Validation in progress. Please wait...
                         </div>
-
+<!--
                         <div class="row">
-                            <div class="col-md-12">
+
+                            <div class="col-md-6">
                                 <em>Uses <a target="_blank" href="https://www.ontoserver.csiro.au/site/">Ontoserver</a>
                                     for validation. Excludes 'missing text element', and 'meta.source' locations and won't validate profiled resources (you
                                     can use the extended validation for this, and specify a different Validation Server if needed).
                                     May take a few seconds for the validation to be completed.</em>
                             </div>
+                            <div class="col-md-1">
+                                Validation Server
+                            </div>
+                            <div class="col-md-4">
+                                <select ng-model="input.selectedVS" class="form-control"
+                                        ng-change="input.additionalVS = ''"
+                                        ng-options="vs for vs in validationServers"></select>
+                            </div>
+                            <div class="col-md-1">
+                                <button class="btn-link btn">Validate</button>
+                            </div>
+
                         </div>
-
-
-
-
-
-
+                        -->
 
                         <div class="pull-right">
                             <a target="_blank"
                                ng-show="input.selectedIssueByResource"
                                ng-href="http://hl7.org/fhir/R4B/{{input.selectedIssueByResource.resource.resourceType}}.html#resource">
-                                    {{input.selectedIssueByResource.resource.resourceType}} in the Spec</a>
+                                    {{input.selectedIssueByResource.resource.resourceType}} resource in the Spec</a>
                         </div>
 
                         <div class="row">
@@ -1359,6 +1398,7 @@
 
                                         </div>
                                     </div>
+                                    <em>Excludes 'missing text element', and 'meta.source' locations</em>
                                 </div>
                             </div>
 
@@ -1383,46 +1423,41 @@
                             <div class="col-md-5">
 
 
+                                <div ng-show="input.selectedIssueByResource.resource">
+                                    <h4>Resource <span class="clickable" style="font-weight: normal"
+                                                       ng-click="selectFromMainGraph(input.selectedIssueByResource.resource)">(Details)</span></h4>
 
-                                <h4>Resource <span class="clickable" style="font-weight: normal"
-                                                   ng-click="selectFromMainGraph(input.selectedIssueByResource.resource)">(Details)</span></h4>
 
 
+                                    <div class="myScroll1">
+                                        <pre>{{input.selectedIssueByResource.resource | json}}</pre>
+                                    </div>
 
-                                <div class="myScroll1">
-                                    <pre>{{input.selectedIssueByResource.resource | json}}</pre>
                                 </div>
+
+
+
                             </div>
 
                         </div>
                     </uib-tab>
 
+                    <uib-tab heading="Issues by severity">
 
 
-
-                    <uib-tab>
-                        <uib-tab-heading>Reference errors <span class="badge">{{graphErrors.length}}</span></uib-tab-heading>
-                        <em>References to missing resources found while building the graph</em>
-                        <br/>  <br/>
-                        <table class="table-bordered table">
-                            <tr ng-repeat = "err in graphErrors">
-                                <td>{{err.msg}}</td>
-                            </tr>
-                        </table>
-
-
-
-                    </uib-tab>
-
-                    <uib-tab heading="Extended validation">
-                        <br/>
-
+                        <div class="pull-right">
+                            <br/>
+                            <a target="_blank"
+                               ng-show="extendedIssueResource"
+                               ng-href="http://hl7.org/fhir/R4B/{{extendedIssueResource.resourceType}}.html#resource">
+                                {{extendedIssueResource.resourceType}} resource in the Spec</a>
+                        </div>
 
                         <div class="row">
                             <div class="col-md-8">
-
+<!--
                                 <em>Specify the Validation Server to use. Useful for profiled resources (eg conformant to an Implementation Guide) where the profiles are on a specific server.</em>
-
+-->
 
                                 <div class="alert-danger alert" ng-show="evOperationError">
                                     The server returned an error code while performing the Validation operation. The error details are shown.
@@ -1456,7 +1491,7 @@
                                 <div class="myScroll1" ng-show="extendedOO">
                                     <table class="table-bordered table">
                                         <tr><th style="width: 10%">Severity</th><th style="width: 50%">Diagnostics</th><th>Location</th></tr>
-                                        <tr ng-repeat = "iss in extendedOO.issue"
+                                        <tr style="cursor: pointer" ng-repeat = "iss in extendedOO.issue"
                                             ng-show = canShowIssue(iss)
                                             ng-class="{issError:iss.severity=='error',issWarning:iss.severity=='warning',issInfo:iss.severity=='information'}"
                                             ng-click="getExtendedIssueResource(iss)">
@@ -1473,33 +1508,11 @@
                             </div>
                             <div class="col-md-4">
 
-                                <table class="table">
-                                    <tr>
-                                        <td>Select Server</td>
-                                        <td>
-                                            <select ng-model="input.selectedVS" class="form-control"
-                                                    ng-change="input.additionalVS = ''"
-                                                    ng-options="vs for vs in validationServers"></select>
-                                        </td>
-                                        <td>
-                                            <i class="glyphicon glyphicon-remove-sign clickable"
-                                               style="padding-top: 8px"
-                                               ng-click="deleteVS(input.selectedVS)"></i>
-                                        </td>
+                                <div ng-show="extendedIssueResource">
+                                    <h4>Resource <span class="clickable" style="font-weight: normal"
+                                                       ng-click="selectFromMainGraph(extendedIssueResource)">(Details)</span></h4>
 
-                                    </tr>
-                                    <tr>
-                                        <td>Add Server</td>
-                                        <td colspan="2"><input class="form-control" ng-model="input.additionalVS"/> </td>
-
-                                    </tr>
-                                    <tr>
-                                        <td colspan="3">
-                                            <button class="btn-link btn pull-right"
-                                                    ng-click="validateSpecificVS(input.selectedVS,input.additionalVS)">Validate</button>
-                                        </td>
-                                    </tr>
-                                </table>
+                                </div>
 
 
 
@@ -1521,6 +1534,79 @@
 
                     </uib-tab>
 
+
+
+                    <uib-tab>
+                        <uib-tab-heading>Reference errors <span class="badge">{{graphErrors.length}}</span></uib-tab-heading>
+                        <em>References to missing resources found while building the graph</em>
+                        <br/>  <br/>
+                        <table class="table-bordered table">
+                            <tr ng-repeat = "err in graphErrors">
+                                <td>{{err.msg}}</td>
+                            </tr>
+                        </table>
+
+
+
+                    </uib-tab>
+
+
+                    <uib-tab heading="ValueSet lookup">
+                        <br/>
+                        <em>Paste a ValueSet url into the box below (with optional filter) to list the
+                            members of that ValueSet. This is useful when a Validating server (currently </em><strong>{{input.selectedVS.display}} ({{input.selectedVS.url}})</strong>)<em>,
+                         indicates
+                        that a specific value is not in that ValueSet.
+
+                        Note that this is not necessarily an error
+                        as the specific binding in the underlying profile indicates whether a code must
+                        come from the ValueSet. <br/>A different server can be selected using the Validation Server dropdown above.
+
+
+                    </em>
+
+                        <br/>  <br/>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" placeholder = "ValueSet Url" ng-model="input.vsUrl">
+                            </div>
+                            <div class="col-md-2">
+                                <input type="text" class="form-control"placeholder="Optional filter" ng-model="input.vsFilter">
+                            </div>
+                            <div class="col-md-1">
+                                <button class="btn btn-link"
+                                        ng-show="input.vsUrl"
+                                        ng-click="queryValueSet(input.vsUrl,input.vsFilter)">Query</button>
+                            </div>
+                        </div>
+
+                        <br/>
+                        <table class="table table-bordered">
+                            <tr ng-repeat="concept in expandedVS.expansion.contains">
+                                <td>{{concept.code}}</td>
+                                <td>{{concept.display}}</td>
+                                <td>{{concept.system}}</td>
+                            </tr>
+                        </table>
+
+                        <div ng-show = "expandedVSError" class="alert alert-danger">
+                            {{expandedVSError}}
+                        </div>
+
+                        <div ng-show = "expandedVSOO" class="alert alert-danger">
+                            <table class="table table-bordered">
+                                <tr ng-repeat="iss in expandedVSOO.issue">
+                                    <td>{{iss.diagnostics}}
+                                        <div ng-hide="iss.diagnostics">{{iss.details.text}}</div>
+                                    </td>
+                                    <td>{{iss.severity}}</td>
+
+                                </tr>
+                            </table>
+                        </div>
+
+
+                    </uib-tab>
 
                 </uib-tabset>
 
