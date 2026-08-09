@@ -7,14 +7,166 @@ angular.module("sampleApp")
 
     .service('bundleVisualizerSvc', function($http,$q,$filter) {
 
-        let deepValidateMax = 30    //maximum number of resources allowed in deep validation
+
+
+        //configuration instructions for rendering a document from the referenced resources in the section
+        let renderConfig = []
+        $http.get('artifacts/bvResourceRender.json').then(
+            function (data) {
+                renderConfig = data.data
+        })
+
 
         extObligation = "http://hl7.org/fhir/StructureDefinition/obligation"
 
-            gHashResourcesByTypeAndId = {}   //a hash of nodes by {type}/{id}
-            gHashResourcesByFullUrl = {}   //a hash of nodes by {id}
+        gHashResourcesByTypeAndId = {}   //a hash of nodes by {type}/{id}
+        gHashResourcesByFullUrl = {}   //a hash of nodes by {id}
 
         return {
+
+            makeRenderObject :function (bundle) {
+                //create the data object used when rendering the clinical view of a document from section resources
+                //object is a hash keyed on section name. contents has the rows for the table
+                let that = this
+                let log = []
+
+                //get the composition resource
+                let composition
+                let ar = bundle.entry.filter(entry => entry.resource.resourceType == 'Composition')
+                if (ar.length > 0) {
+                    composition = ar[0].resource
+                } else {return}
+
+                console.log(composition)
+                if (! composition) {
+                    alert("No composition found")
+                    return {}
+                }
+
+                //create a hash of section entries in the composition on code.
+                let hashSections = {}
+                for (const section of composition.section) {
+                    let coding = section?.code?.coding[0]
+                    if (coding) {
+                        let key = `${coding.code}|${coding.system}`
+                        //the hashSections entry has the section - plus all the referenced resources
+                        hashSections[key] = {section:section,resources:[]}
+
+                        for (let entry of section.entry || []) {
+                            let ref = entry?.reference
+                            if (ref) {
+                                let resource = that.referenceLookup(ref)
+                                if (resource) {
+                                    hashSections[key].resources.push(resource)
+                                } else {
+                                    log.push({msg:"section entry reference to resource not in bundle",details:entry})
+                                }
+                            } else {
+                                log.push({msg:"section entry has no reference",details:entry})
+                            }
+                        }
+
+                    } else {
+                        let msg = {'display':'Section with no code',details:section}
+                    }
+                    //let v =  {title:title}
+                }
+
+
+
+                console.log(hashSections)
+                let vo = []
+/*
+
+                let section = {title:"Conditions",header:[],rows:[]}
+                section.header.push('col1')
+                section.header.push('col2')
+                section.header.push('col2')
+
+                let cols = []
+                cols.push({display:'col1'})
+                cols.push({display:'col2'})
+                cols.push({display:'col3'})
+                section.rows.push(cols)
+
+                cols=[]
+                cols.push({display:'r2, col1'})
+                cols.push({display:'r2, col2'})
+                cols.push({display:'r2 col3'})
+                section.rows.push(cols)
+
+                vo.push({title:"Conditions",section:section})
+*/
+
+                for (let cSection of renderConfig) {
+
+                    let docSection = hashSections[cSection.key] //the section from the composition
+                    if (docSection) {
+                        let section = {title:cSection.title,header:[],rows:[],resources:[]}
+                        //construct the headers array from the column definitions
+                        for (let col of cSection.cols) {
+                            section.header.push(col.header)
+                        }
+
+
+                        //iterate over the references in the section
+                        for (let resource of docSection.resources) {
+                            let resourceType = resource.resourceType //there can be different resourcetyoes in a section
+                            //now iterate over the columns collection to get the content for each one
+                            let row = []    //a single row with an array of columns
+                            for (let col of cSection.cols) {
+                                let display = ""    //the value that will be displayed
+                                for (let content of col.contents) { //there can be multiple definitions for each type
+                                    if (content.type == resourceType) { //this is a matching resource type
+
+                                        let value = resource[content.element] //todo - what if nested path ?? fhirpath
+                                        if (value) {
+                                            //some elements are multiple
+                                            if (! Array.isArray(value)) {
+                                                value = [value]
+                                            }
+
+                                            for (let detail of value) {
+                                                switch (content.dt) {
+                                                    case "CodeableConcept":
+                                                        display += detail.text || detail.coding?.[0]?.display || detail.coding?.[0]?.code
+                                                        break
+                                                    default:
+                                                        display += detail
+
+                                                }
+
+                                            }
+
+                                            //display += value    //todo need better separatot
+                                        }
+                                    }
+                                }
+                                //now add the display to the col
+                                row.push({display:display})
+                            }
+                            section.rows.push(row)
+                            section.resources.push(resource)
+                        }
+                        vo.push({title:cSection.title,section:section})
+
+                    } else {
+                        log.push({msg:`Section in config file (${cSection.key}) not found in Composition section`})
+                    }
+
+                    //let oSection = {title:section.title,header:[],rows:[]}
+
+                    //
+
+                }
+
+console.log(vo,log)
+
+                return {vo:vo,log:log}
+
+
+
+            },
 
             makeProfileSummary : function (resource) {
                 let summary = []    //summary by item
@@ -209,6 +361,7 @@ angular.module("sampleApp")
 
             },
             makeDocument : function (bundle,$sce) {
+                //create a document object to be used in the specific document views
                 let hashResourcesByTypeAndId = {}   //a hash of nodes by {type}/{id}
                 let hashResourcesByFullUrl = {}   //a hash of nodes by {id}
 
@@ -268,9 +421,6 @@ angular.module("sampleApp")
                 }
 */
                 return document
-
-
-
 
 
 

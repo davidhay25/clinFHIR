@@ -2,6 +2,14 @@ angular.module("sampleApp")
     .controller('terminologyExplorerCtrl',
         function ($scope) {
 
+
+            $scope.$on('processBundle',function (evt) {
+                delete $scope.selectedTermResource
+                delete $scope.selectedTerminologySummary
+                delete $scope.selectedItem
+                delete $scope.input.selectedSystem
+            })
+
             $scope.selectSystem = function(system) {
                 $scope.selectedTerminologySummary =$scope.terminologySummary[system]
                     let resources = $scope.terminologySummary[system]
@@ -28,6 +36,7 @@ angular.module("sampleApp")
 
             $scope.canShowItem = function(item) {
                 //console.log(item)
+
                 if (! $scope.input.selectedSystem || $scope.input.selectedSystem == 'All') {return true}
 
                 let canShow = false

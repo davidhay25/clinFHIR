@@ -231,6 +231,7 @@ angular.module("sampleApp")
 
                                 },
                                 function(err){
+                                    console.log(err)
                                     alert(angular.toJson(err))
 
                                 }

@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2026-07-18';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2026-07-25';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};    //todo - pretty sur eno longer used - was logical model
         defaultConfig.standardSystem = {};
@@ -125,7 +125,7 @@ angular.module("sampleApp")
        //temp. doesn't resolve through browser defaultConfig.allKnownServers.push({name:"clinFHIR R4",url:"http://localhost:9090/fhir/",version:4,everythingOperation:true,isTerminology:true});
         defaultConfig.allKnownServers.push({name:"Public HAPI R4 server",url:"https://hapi.fhir.org/baseR4/",version:4,everythingOperation:true,isTerminology:true});
 
-        defaultConfig.allKnownServers.push({name:"Grahames R4 server",url:"http://test.fhir.org/r4/",version:4,everythingOperation:true,isTerminology:true});
+        //defaultConfig.allKnownServers.push({name:"Grahames R4 server",url:"http://test.fhir.org/r4/",version:4,everythingOperation:true,isTerminology:true});
 
 
 
@@ -133,10 +133,9 @@ angular.module("sampleApp")
         defaultConfig.allKnownServers.push({name:"Firely R4 server",url:" https://server.fire.ly/",version:4,everythingOperation:true});
 
 
-        defaultConfig.allKnownServers.push({name:'TermiNZ R4',version:4,url:"https://terminz.azurewebsites.net/fhir/"});
-        defaultConfig.allKnownServers.push({name:'OntoserverR4 (terminology)',version:4,url:"https://r4.ontoserver.csiro.au/fhir/",isTerminology:true});
-
-        defaultConfig.allKnownServers.push({name:'Ontoserver-PC',version:3,url:"https://primarycare.ontoserver.csiro.au/fhir/"});
+       // defaultConfig.allKnownServers.push({name:'TermiNZ R4',version:4,url:"https://terminz.azurewebsites.net/fhir/"});
+       // defaultConfig.allKnownServers.push({name:'OntoserverR4 (terminology)',version:4,url:"https://r4.ontoserver.csiro.au/fhir/",isTerminology:true});
+       // defaultConfig.allKnownServers.push({name:'Ontoserver-PC',version:3,url:"https://primarycare.ontoserver.csiro.au/fhir/"});
         //defaultConfig.allKnownServers.push({name:'HSPC Tutorial',version:3,url:"https://api-v8-stu3.hspconsortium.org/ClinFHIRTutorial/open/",everythingOperation:false});
 
         //defaultConfig.allKnownServers.push({name:'HSPC-COF-R4',version:4,url:"https://api.logicahealth.org/CoFsandboxR4/open/",everythingOperation:true});
@@ -385,6 +384,8 @@ angular.module("sampleApp")
 
                 //need to get the definition for the data server. This is not pretty...
                 //note that the $localstorage will always be populated by a call to config above...
+
+
                 for (var i=0; i < $localStorage.config.allKnownServers.length; i++){
                     var svr = $localStorage.config.allKnownServers[i];
                     if (svr.url == $localStorage.config.servers.data) {
@@ -394,7 +395,9 @@ angular.module("sampleApp")
                 }
 
                 //if the server url is not one of the named ones...
-                return {url:$localStorage.config.servers.data,name:$localStorage.config.servers.data}
+                return $localStorage.config.allKnownServers[0]
+
+            //    return {url:$localStorage.config.servers.data,name:$localStorage.config.servers.data}
 
 
             },

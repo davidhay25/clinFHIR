@@ -1,7 +1,10 @@
 <uib-tabset>
-  <uib-tab heading="Rendering">
+  <uib-tab heading="Rendering from narrative">
     <div class="alert alert-info">
-      This tab shows the content of the .text element for the resources in the document
+      A rendering of the document using the Patient.text, Composition.text and Composition.section.text
+      elements as defined in the spec - ie what the author created.
+
+      See the 'rendering from resources' tab for a display that is derived from the resource contents and is the same across all documents.
     </div>
     <h4>Subject</h4>
     <p  style="margin-left: 10px" ng-bind-html="to_trusted(document.subject.text.div)"></p>
@@ -81,7 +84,69 @@
 
   </uib-tab>
 
+  <uib-tab heading="Rendering from resources">
+    <div class="alert alert-info">
+      A fixed rendering of the document sections using the contents of the resources within
+      each section. The layout is independent of what the author created (see the Narrative rendering for that) and the same
+      for every document.
+    </div>
+
+
+    <div class="row">
+      <div class="col-md-8">
+
+        <div ng-repeat="v in renderObject.vo">
+          <h4>{{v.title}}</h4>
+
+          <table class="table-bordered table">
+            <tr>
+              <th ng-repeat="hdr in v.section.header track by $index">{{hdr}}</th>
+            </tr>
+
+            <tr ng-repeat="row in v.section.rows"
+                style="cursor: pointer"
+                ng-class="{listItemSelected:v.section.resources[$index] == input.resourceFromRender }"
+                ng-click="input.resourceFromRender = v.section.resources[$index]">
+              <td ng-repeat="value in row">
+                {{value.display}}
+              </td>
+            </tr>
+          </table>
+          <hr/>
+        </div>
+
+        <table>
+          <tr ng-repeat="issue in renderObject.log">
+            <td>{{issue.msg}}</td>
+          </tr>
+        </table>
+
+      </div>
+
+
+      <div class="col-md-4">
+        <div ng-show="input.resourceFromRender" class="pull-right">
+          <button class="btn btn-link"
+                  ng-click="selectFromMainGraph(input.resourceFromRender)">Details</button>
+        </div>
+        <div class="clearfix"></div>
+
+        <pre ng-show="input.resourceFromRender">{{input.resourceFromRender | json}}</pre>
+        <!--
+        <pre>{{renderObject.vo | json}}</pre>
+-->
+      </div>
+    </div>
+
+
+
+
+  </uib-tab>
+
   <uib-tab heading="Sections">
+    <div class="alert alert-info">
+      Iterates over the sections in the Composition showing the text and resources in each section.
+    </div>
     <div class="row">
       <div class="col-md-3">
         <div class="list-group">

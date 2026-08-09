@@ -37,7 +37,7 @@
     <script src="js/libs/jstree.min.js"></script>
     <script src="js/libs/vkbeautify.0.99.00.beta.js"></script>
 
-    <script src="js/libs/fhirpath.min.js"></script>
+
 
     <!-- I don't think this is needed in BV - who cares how many tabs are open
     <script>
@@ -101,9 +101,6 @@
             background: #fcfcfc;
         }
 
-        .list-group-itemXX {
-            background-color: white;
-        }
 
         table {
             background: white;
@@ -188,6 +185,10 @@
 
     </script>
 
+    <script src="directive/fhirpath/fhirpath.js"></script>
+    <script src="js/libs/fhirpath.min.js"></script>
+    <script src="js/libs/fhirpath.r4.min.js"></script>
+
     <script src="js/libs/firebase.js"></script>
     <script src="js/libs/angularfire.min.js"></script>
 
@@ -202,7 +203,10 @@
     <script src="js/bundleVisualizerSvc.js"></script>
     <script src="js/serverInteractionSvc.js"></script>
     <script src="js/apiService.js"></script>
+    <script src="js/terminologyExplorerCtrl.js"></script>
+    <script src="js/terminologySvc.js"></script>
 
+    <script src="js/extensionExplorerCtrl.js"></script>
     <style>
         .myForm {
             padding: 8px;
@@ -339,10 +343,28 @@
             </div>
 
             <div class="col-md-1">
-                <div class="navbar-text pull-right">
+                <div class="navbar-text ">
                     <a style="font-size: 24px;padding-top: 8px"
                        href="https://docs.google.com/document/d/1Hra56reIh3pxDOtDqS7NC2epyyBZlb-bqpnUga1y_p0/edit?tab=t.0#heading=h.p77qav9sz3tf"
-                       target="_blank" class="glyphicon glyphicon-info-sign"></a>
+                       target="_blank" class="glyphicon glyphicon-info-sign">
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <div class="navbar-text">
+
+                    <div class="clickable" ng-show="fhir"
+                         ng-click="copyToClipboard()">Copy bundle to Clipboard</div>
+
+                    <div style="padding-top: 8px" class="clickable" ng-show="fhir && ! loadedFromLibrary"
+                            ng-click="addBundleToLibrary()">Save bundle in Library</div>
+
+
+
+                    <div ng-show="false" style="padding: 8px">
+                        <checkbox ng-model="showHelp"></checkbox> Show help
+                    </div>
                 </div>
             </div>
 
@@ -372,18 +394,6 @@
                 </div>
             </div>
 
-
-            <div class="col-md-2">
-                <div class="pull-right">
-                    <a href="https://www.intersystems.com/" target="_blank">
-                        <!--
-                        <img style="padding-top: 8px;padding-bottom: 8px" src="/icons/sb-intersystems.png"/>
-                        -->
-                    </a>
-
-                </div>
-
-            </div>
 
         </div>
     </nav>
@@ -444,6 +454,51 @@
                             </div>
                         </div>
                     </div>
+
+
+
+
+
+                    <div ng-show="input.selectedSelector.code == 'singleresource'">
+                        <div class="alert alert-info">
+                            Paste the json Resource into the text box. A 'view Resource' button will appear
+                            that when clicked will create a Bundle containing the resource and display the contents as usual.
+                            <strong>Don't use this with real Patient data! It's for testing and learning only.</strong>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-8">
+                                <textarea class="form-control" rows = '20' ng-model="input.singleResource"></textarea>
+                            </div>
+                            <div class="col-md-4">
+
+<!--
+                                <div ng-hide="input.singleResource">
+                                    <input type="file"
+                                           onchange="angular.element(this).scope().fileSelected(this)"
+                                           id="fileUploadFileRefSingle"
+                                           accept="application/json" />
+
+
+                                </div>
+                                -->
+
+
+
+                                <button ng-show = "input.singleResource" class="btn btn-success"
+                                        ng-click="viewSingleResource(input.singleResource)">View Resource</button>
+
+
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+
+
+
 
                     <!-- Add a url-->
                     <div ng-show="input.selectedSelector.code == 'query'">
@@ -513,77 +568,201 @@
                     <!-- make an IPS query-->
                     <div ng-show="input.selectedSelector.code == 'ips'">
                         <div class="alert alert-info">
-                            Retrieve an <a href="https://hl7.org/fhir/uv/ips/en/" target="_blank">IPS </a> document from a server that supports the
+                            Document bundles. You can select from saved bundles that have a Composition resources in them,
+                            saved links that have been tagged with 'ips'
+                            or retrieve an <a href="https://hl7.org/fhir/uv/ips/en/" target="_blank">IPS </a> document from a server that supports the
                              <a href="https://build.fhir.org/ig/HL7/fhir-ips/en/OperationDefinition-summary.html" target="_blank">$summary </a>
                             operation and returns an IPS document. To add a server to the list, use the 'Servers' link.
 
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-4">
-                                <select class="form-control" ng-model="input.selectedIPSServer"
-                                        placeholder="Select server"
-                                        ng-options="svr.url for svr in ipsServers">{{svr}}</select>
-                                <div ng-hide="input.ipsName"><em>Only 50 patients returned if no name specified.</em></div>
-                            </div>
-                            <div class="col-md-2">
-                                <input type="text" class="form-control"
-                                       placeholder="Patient name"
-                                       ng-model="input.ipsName"/>
-                            </div>
-                            <div class="col-md-2">
-                                <button class="btn btn-link"
-                                        ng-show="input.selectedIPSServer"
-                                        ng-click="getIPSPatients(input.selectedIPSServer,input.ipsName)">Search</button>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="pull-right">
 
-
-                                    <span class="iconSpacing clickable" ng-click="updateServers()">Servers</span>
-
-
-                                    <a class="iconSpacing" href="https://build.fhir.org/ig/HL7/fhir-ips/en/index.html" target="_blank"> IPS Spec</a>
-                                    <a class="iconSpacing"  href="https://international-patient-summary.net/" target="_blank"> IPS Web Page</a>
-                                </div>
-
-
-
-                            </div>
+                        <div class="pull-right">
+                            <a class="iconSpacing" href="https://build.fhir.org/ig/HL7/fhir-ips/en/index.html" target="_blank"> IPS Spec</a>
+                            <a class="iconSpacing"  href="https://international-patient-summary.net/" target="_blank"> IPS Web Page</a>
                         </div>
 
-                        <br/>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="myScroll1">
-                                    <ul class="list-group">
-                                        <li ng-class="{'list-group-item':true, listItemSelected:entry.resource == selectedIPSPatient}"
-                                            ng-repeat="entry in ipsPatientsBundle.entry"
-                                            style="cursor: pointer"
+                        <uib-tabset>
+                            <uib-tab heading="Stored document bundles">
+                                <em class="pull-right">Bundles that have been saved in the Library</em>
+                                <div class="row">
 
-                                            ng-click="selectIPSPatient(entry.resource)">
-                                            {{getIPSPatientName(entry.resource)}}
-                                        </li>
-                                    </ul>
+                                    <div class="col-md-10">
+                                        <div class="myScroll1">
+                                            <div class="myScroll1">
+                                                <table class="table table-bordered">
+                                                    <tr><th>Name</th><th>Description</th><th>Author</th><th>Show in Patient Viewer</th><th>Resource</th><th>Date</th></tr>
+                                                    <tr ng-click="input.libraryBundle=bundle"
+                                                        ng-dblclick = "getBundleFromLibrary(input.libraryBundle,'tabDocument')"
+                                                        ng-repeat="bundle in libraryAllDocumentBundles"
+                                                        ng-class="{listItemSelected: input.libraryBundle==bundle}"
+                                                        style="cursor: pointer">
+                                                        <td>{{bundle.name}}</td>
+                                                        <td>{{bundle.description}}</td>
+                                                        <td>{{bundle.author}}</td>
+                                                        <td>
+                                                            {{bundle.showInPV ? 'Yes' : 'No'}}
+                                                        </td>
+                                                        <td>{{bundle.entryCount}}</td>
+                                                        <td>{{bundle.date | date}}</td>
+                                                        <td ng-show="user.email">
+                                                            <i class="glyphicon glyphicon-remove-sign clickable"
+                                                               ng-click="deleteBundleFromLibrary(input.libraryBundle)"></i>
+                                                        </td>
+
+                                                    </tr>
+                                                </table>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                    <div class="col-md-2">
+
+                                        <div class="alert alert-warning" ng-show="input.libraryBundle.entryCount > 200">
+                                            There are over 200 resources in this Graph. The full graph won't be shown,
+                                            though the rest of the functionality is fine. Validation will likely be slow as well.
+                                        </div>
+
+
+                                        <button ng-show = "input.libraryBundle" class="btn btn-primary"
+                                                ng-click="getBundleFromLibrary(input.libraryBundle,'tabDocument')">Retrieve Bundle</button>
+
+
+                                        <div ng-show="input.libraryBundle">
+                                            <br/><br/>
+                                            <button class="btn btn-link" ng-click="linkToClipboard(input.libraryBundle)">Copy link to this Bundle</button>
+                                        </div>
+
+
+
+                                    </div>
+
+                                </div>
+                            </uib-tab>
+                            <uib-tab heading="Stored document links">
+                                <em class="pull-right">Saved links which have a tag containing 'ips'</em>
+
+                                <div class="row">
+                                    <div class="col-md-10">
+                                        <div class="myScroll1">
+                                            <table class="table table-bordered">
+                                                <tr><th>Name</th><th>Description</th><th>Query</th><th>Tags</th></tr>
+                                                <tr ng-click="input.libraryQuery=item"
+                                                    style="cursor: pointer"
+                                                    ng-class="{listItemSelected:input.libraryQuery == item}"
+                                                    ng-show="showDocumentLibraryEntry(item)"
+                                                    ng-dblclick = "executeLibraryQuery(item,'tabDocument')"
+                                                    ng-repeat = "item in library">
+                                                    <td>
+                                                        {{item.name}}
+                                                    </td>
+                                                    <td>
+                                                        {{item.description}}
+                                                    </td>
+                                                    <td>{{item.qry}}</td>
+                                                    <td style="width: 10%">
+                                                        <div ng-repeat="tag in item.tags">{{tag}}</div>
+                                                    </td>
+                                                    <td ng-show="user.email"><i class="glyphicon glyphicon-remove-sign clickable"
+                                                                                ng-click="deleteLibraryQuery(item)"></i>
+                                                    </td>
+
+                                                </tr>
+                                            </table>
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="col-md-2">
+                                        <div ng-show="input.libraryQuery.name"><strong>Name:</strong></div>
+                                        {{input.libraryQuery.name}}
+                                        <br/><br/>
+                                        <div ng-show="input.libraryQuery.description"><strong>Description:</strong></div>
+                                        {{input.libraryQuery.description}}
+                                        <br/> <br/>
+
+                                        <button ng-show = "input.libraryQuery" class="btn btn-primary"
+                                                ng-click="executeLibraryQuery(input.libraryQuery,'tabDocument')">Run query</button>
+
+
+                                    </div>
                                 </div>
 
 
-                            </div>
-                            <div class="col-md-6">
-                                <div class="myScroll1">
-                                    <pre ng-show="selectedIPSPatient">{{selectedIPSPatient | json}}</pre>
+
+                            </uib-tab>
+
+                            <uib-tab heading="Query server">
+                                <em class="pull-right">Query servers that expose a $summary endpoint</em>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <select class="form-control" ng-model="input.selectedIPSServer"
+                                                placeholder="Select server"
+                                                ng-options="svr.url for svr in ipsServers">{{svr}}</select>
+                                        <div ng-hide="input.ipsName"><em>Only 50 patients returned if no name specified.</em></div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input type="text" class="form-control"
+                                               placeholder="Patient name"
+                                               ng-model="input.ipsName"/>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-link"
+                                                ng-show="input.selectedIPSServer"
+                                                ng-click="getIPSPatients(input.selectedIPSServer,input.ipsName)">Search</button>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="pull-right">
+
+
+                                            <span class="iconSpacing clickable" ng-click="updateServers()">Servers</span>
+
+
+
+                                        </div>
+
+
+
+                                    </div>
+                                </div>
+
+                                <br/>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="myScroll1">
+                                            <ul class="list-group">
+                                                <li ng-class="{'list-group-item':true, listItemSelected:entry.resource == selectedIPSPatient}"
+                                                    ng-repeat="entry in ipsPatientsBundle.entry"
+                                                    style="cursor: pointer"
+
+                                                    ng-click="selectIPSPatient(entry.resource)">
+                                                    {{getIPSPatientName(entry.resource)}}
+                                                </li>
+                                            </ul>
+                                        </div>
+
+
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="myScroll1">
+                                            <pre ng-show="selectedIPSPatient">{{selectedIPSPatient | json}}</pre>
+                                        </div>
+
+
+
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button ng-show="selectedIPSPatient" ng-model="selectedIPSPatient" class="btn btn-primary"
+                                                ng-click="loadIPSPatient(input.selectedIPSServer,selectedIPSPatient)">Load IPS</button>
+                                    </div>
                                 </div>
 
 
+                            </uib-tab>
 
-                            </div>
-                            <div class="col-md-2">
-                                <button ng-show="selectedIPSPatient" ng-model="selectedIPSPatient" class="btn btn-primary"
-                                        ng-click="loadIPSPatient(input.selectedIPSServer,selectedIPSPatient)">Load IPS</button>
-                            </div>
-                        </div>
-
-
+                        </uib-tabset>
 
                     </div>
 
@@ -761,18 +940,11 @@
 
                                 </div>
                                 <div class="col-md-2">
-<!--
-                                    {{input.libraryBundle.date | date}}
 
-
--->
                                     <div class="alert alert-warning" ng-show="input.libraryBundle.entryCount > 200">
                                         There are over 200 resources in this Graph. The full graph won't be shown,
                                         though the rest of the functionality is fine. Validation will likely be slow as well.
                                     </div>
-
-
-
 
 
                                     <button ng-show = "input.libraryBundle" class="btn btn-primary"
@@ -781,7 +953,12 @@
 
                                     <div ng-show="input.libraryBundle">
                                         <br/><br/>
-                                        <button class="btn btn-link" ng-click="linkToClipboard(input.libraryBundle)">Copy link to this Bundle</button>
+                                        <button class="btn btn-link" ng-click="linkToClipboard(input.libraryBundle,'view')">
+                                            View link to this Bundle</button>
+
+                                        <br/><br/>
+                                        <button class="btn btn-link" ng-click="linkToClipboard(input.libraryBundle,'api')">
+                                            API link to this Bundle</button>
                                     </div>
 
 
@@ -809,7 +986,7 @@
 
      <!--   <div ng-class="rightPaneClass">-->
 
-        <div>
+        <div ng-show="false">
 
 
             <button class="btn btn-link pull-right" ng-show="fhir"
@@ -913,13 +1090,17 @@
 
                     <div class="col-md-9">
 
+                        <div class="alert alert-info" ng-hide="selectedBundleEntry">
+                            Select a resource in the panel to the left to view it in different ways.
+                        </div>
+
                         <div class="pull-right">
                             <a target="_blank"
                                ng-show="selectedBundleEntry"
                                ng-href="http://hl7.org/fhir/R4B/{{selectedBundleEntry.resource.resourceType}}.html">{{selectedBundleEntry.resource.resourceType}} in the Spec</a>
                         </div>
 
-                        <uib-tabset>
+                        <uib-tabset ng-show="selectedBundleEntry">
                             <uib-tab heading="Json">
                                 <div class="myScroll1">
                                     <pre>{{selectedBundleEntry.resource | json}}</pre>
@@ -955,6 +1136,8 @@
                                         </div>
 
                                     </uib-tab>
+
+
 
 
                                 </uib-tabset>
@@ -1067,7 +1250,7 @@
 
                             <uib-tab ng-show="selectedBundleEntryErrors.length > 0">
                                 <uib-tab-heading>
-                                    Errors <span class="badge">{{selectedBundleEntryErrors.length}}</span>
+                                    Issues <span class="badge">{{selectedBundleEntryErrors.length}}</span>
                                 </uib-tab-heading>
                                 <br/>
 
@@ -1075,8 +1258,9 @@
                                 <div uib-alert class="alert-warning">
                                     <table class="table">
                                         <tr ng-repeat="err in selectedBundleEntryErrors">
-                                            <td>{{err.severity}}</td>
+
                                             <td>
+                                                <div><strong>{{err.severity}}</strong></div>
                                                 {{err.diagnostics}}
                                                 {{err.details.text}}
                                                 <div ng-repeat = "ex in err.expression">
@@ -1118,6 +1302,18 @@
                             </uib-tab>
 
 
+                            <uib-tab heading="FHIRPath">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <pre>{{selectedBundleEntry.resource | json}}</pre>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <fhirpath resource="selectedBundleEntry.resource"></fhirpath>
+                                    </div>
+                                </div>
+
+
+                            </uib-tab>
 
                             <uib-tab ng-show="fales && selectedBundleEntry.resource.resourceType == 'Composition'"
                                      heading="Sections">
@@ -1182,7 +1378,6 @@
 
 
             </uib-tab>
-
 
             <uib-tab heading = "References Graph" select="fitGraph()">
 
@@ -1750,8 +1945,6 @@
                 </uib-tabset>
             </uib-tab>
 
-
-
             <uib-tab ng-show = "isDocument" heading="Document">
                 <br/>
                 <ng-include src = "'includes/bvDocument.html'"></ng-include>
@@ -1759,11 +1952,65 @@
             </uib-tab>
 
 
+            <uib-tab heading="Terminology explorer" >
+                <br/>
+
+                <div ng-controller="terminologyExplorerCtrl">
+                    <ng-include src="'includes/terminologyExplorer.html'"></ng-include>
+                </div>
+
+            </uib-tab>
 
 
-            <uib-tab heading="Json">
-                <div>
-                    <pre ng-show="fhir">  {{fhir | json}} </pre>
+            <uib-tab ng-show="bundleHasExtensions" heading="Extension explorer" >
+                <br/>
+
+                <div ng-controller="extensionExplorerCtrl">
+                    <ng-include src="'includes/extensionExplorer.html'"></ng-include>
+                </div>
+            </uib-tab>
+
+
+
+            <uib-tab heading="FHIRPath">
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <br/>
+                        <div>
+
+                            Execute FHIRPath expressions
+                            <div class="pull-right">
+                                <a href="https://docs.google.com/document/d/1Hra56reIh3pxDOtDqS7NC2epyyBZlb-bqpnUga1y_p0/edit?tab=t.lc0wj94yvuba"
+                                   target="_blank" class="glyphicon glyphicon-info-sign"></a>
+                            </div>
+
+                        </div>
+                        <br/>
+                        <pre><div class="myScroll1">{{fhir | json}}</div> </pre>
+                    </div>
+                    <div class="col-md-6">
+                        <fhirpath resource="fhir"></fhirpath>
+                    </div>
+                </div>
+
+
+            </uib-tab>
+
+
+            <uib-tab heading="Bundle json">
+                <div class="row">
+
+                    <div class="col-md-6">
+                        <div class="myScroll1">
+                            <pre ng-show="fhir">  {{fhir | json}} </pre>
+                        </div>
+
+                    </div>
+                    <div class="col-md-6">
+                        <fhirpath resource="fhir"></fhirpath>
+                    </div>
+
 
                 </div>
             </uib-tab>

@@ -34,7 +34,7 @@
                          ng-show = "canShowItem(item)"
                          ng-click = "selectItem(item)" >
 
-                        <div ng-bind-html="item.resource.text.div"></div>
+                    <!--    <div ng-bind-html="item.resource.text.div"></div> -->
                         {{item.resource.resourceType}}
                     </div>
                 </div>
@@ -51,18 +51,21 @@
 
         <div class="col-md-4">
             <div class="banner">Coded elements</div>
-            <div ng-repeat="v in selectedItem.coded"
-                ng-show = "canShowConcept(v)">
-                <div><strong>Path: {{v.path}}</strong></div>
-                <div style="padding-left: 12px">System: {{v.system}}</div>
-                <div style="padding-left: 12px">Code: {{v.code}}</div>
-                <div style="padding-left: 12px">Display: {{v.display}}</div>
-                <br/>
+            <div class="myScroll1">
+                <div ng-repeat="v in selectedItem.coded"
+                     ng-show = "canShowConcept(v)">
+                    <div><strong>Path: {{v.path}}</strong></div>
+                    <div style="padding-left: 12px">System: {{v.system}}</div>
+                    <div style="padding-left: 12px">Code: {{v.code}}</div>
+                    <div style="padding-left: 12px">Display: {{v.display}}</div>
+                    <br/>
+                </div>
+
+                <div ng-show = "(selectedItem.resource) && input.selectedSystem && (input.selectedSystem !== 'All')">
+                    <em>Only showing the coded elements from the terminology with the url {{input.selectedSystem}}</em>
+                </div>
             </div>
 
-            <div ng-show = "(selectedItem.resource) && input.selectedSystem && (input.selectedSystem !== 'All')">
-                <em>Only showing the coded elements from the terminology with the url {{input.selectedSystem}}</em>
-            </div>
 
         </div>
     </div>

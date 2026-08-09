@@ -6,8 +6,6 @@ angular.module("sampleApp")
                   Utilities,terminologySvc,bundleVisualizerSvc) {
 
 
-
-
         //https://github.com/vasturiano/3d-force-graph
             //https://bl.ocks.org/vasturiano/02affe306ce445e423f992faeea13521
 
@@ -662,7 +660,6 @@ angular.module("sampleApp")
 
                 //$scope.terminologySummary = terminologySvc.makeTerminologySummary(data)
                 let vo = terminologySvc.makeTerminologySummary(resourceHash)
-
                 $scope.lstCodedResources = vo.codedResources;
                 $scope.input.arAllSystems = vo.arAllSystems       //all systems found
 

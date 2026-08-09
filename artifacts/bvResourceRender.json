@@ -1,0 +1,70 @@
+[
+  {
+    "title":"Problem List",
+    "key":"11450-4|http://loinc.org",
+    "cols":
+    [
+      {
+        "header": "Condition",
+        "contents": [{
+          "type":"Condition",
+          "element": "code",
+          "dt": "CodeableConcept"}]
+      },
+      {
+        "header": "Category",
+        "contents":[{
+          "type":"Condition",
+          "element": "category",
+          "dt":"CodeableConcept"}]
+      },
+      {
+        "header": "Recorded on",
+        "contents":[{
+          "type":"Condition",
+          "element": "recordedDate",
+          "dt":"date"}]
+      },
+      {
+        "header": "Clinical status",
+        "contents":[{
+          "type":"Condition",
+          "element": "clinicalStatus",
+          "dt":"CodeableConcept"}]
+      },
+      {
+        "header": "Verification status",
+        "contents":[{
+          "type":"Condition",
+          "element": "verificationStatus",
+          "dt":"CodeableConcept"}]
+      }
+    ]
+  },{"title":"Immunizations",
+  "key":"11369-6|http://loinc.org",
+  "cols":
+  [
+    {
+      "header": "Vaccine",
+      "contents": [{"type":"Immunization","element": "vaccineCode","dt": "CodeableConcept"}]
+    },
+    {
+      "header": "Status",
+      "contents": [{"type":"Immunization","element": "status","dt": "code"}]
+    },
+    {
+      "header": "Given",
+      "contents": [
+        {"type":"Immunization","element": "occurrenceDateTime","dt": "date"},
+        {"type":"Immunization","element": "occurrenceString","dt": "string"}
+      ]
+    },
+    {
+      "header": "Route",
+      "contents": [{"type":"Immunization","element": "route","dt": "CodeableConcept"}]
+    }
+
+  ]
+}
+
+]

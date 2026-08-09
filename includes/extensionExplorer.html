@@ -1,0 +1,95 @@
+
+<style>
+  .hasModifier {
+    background-colorX: #f2dede;
+    color: red;
+  }
+</style>
+
+
+
+<div>
+
+  <div class="row">
+    <div class="col-md-2">
+      Select Extension Url to view
+    </div>
+    <div class="col-md-6">
+      <select class="form-control" ng-model="input.selectedExtUrl"
+              ng-change = "selectExtUrl(url)"
+              ng-options="url for url in extensionUrlList"></select>
+    </div>
+    <div class="col-md-4">
+      <div ng-show="bundleHasModifier">
+        <em><span class="hasModifier">Red</span> resources are
+          <a target="_blank" href="https://hl7.org/fhir/R4/extensibility.html#modifierExtension">modifier extensions</a> </em>
+      </div>
+
+    </div>
+  </div>
+
+  <hr/>
+
+
+  <div class="row">
+    <div class="col-md-2">
+      <div class="banner">Resources</div>
+      <div class="myScroll1">
+        <div class="list-group">
+          <div ng-class="{'list-group-item':true,listItemSelected:selectedExtResource == v,
+            hasModifier:v.hasModifier}"
+               ng-repeat="(k,v) in extensionSummary"
+               ng-show="canShow(v)"
+               ng-click = "selectExtResource(v)">
+            {{v.resource.resourceType}}
+            <span class="badge pull-right">{{v.extensions.length}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="banner">Json</div>
+      <pre ng-show="selectedExtResource.resource" >{{selectedExtResource.resource | json}}</pre>
+    </div>
+    <div class="col-md-2">
+      <div class="banner">Extensions</div>
+
+      <div class="list-group">
+        <div ng-class="{clickable:true, 'list-group-item':true,
+          listItemSelected:selectedExtExtension == ext,
+          hasModifier:ext.kind=='modifierExtension'}"
+             ng-repeat="ext in selectedExtResource.extensions"
+             ng-click = "selectExtension(ext)" >
+
+
+          {{ext.path}}
+        </div>
+      </div>
+
+    </div>
+
+    <div class="col-md-4">
+      <div class="banner">Details</div>
+
+      <div ng-show="selectedExtExtension">
+        <div>Path: {{selectedExtExtension.path}}</div>
+        <div>Url: {{selectedExtExtension.url}}</div>
+        <div>Kind: {{selectedExtExtension.kind}}</div>
+
+        <pre>{{selectedExtExtension.value | json}}</pre>
+      </div>
+
+
+
+
+
+    </div>
+
+  </div>
+
+
+  <pre>{{extensionSummary | json}}</pre>
+
+</div>
+
+

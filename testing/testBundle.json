@@ -1,0 +1,79 @@
+
+
+{
+  "resource": {
+    "resourceType": "Bundle",
+    "type": "transaction",
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:patient-1",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "patient-1",
+          "name": [{ "family": "Taylor", "given": ["James"] }],
+          "gender": "male",
+          "birthDate": "1956-02-10"
+        },
+        "request": { "method": "POST", "url": "Patient" }
+      },
+      {
+        "fullUrl": "urn:uuid:condition-1",
+        "resource": {
+          "resourceType": "Condition",
+          "id": "condition-1",
+          "clinicalStatus": {
+            "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active" }]
+          },
+          "verificationStatus": {
+            "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status", "code": "confirmed" }]
+          },
+          "code": {
+            "coding": [{ "system": "http://snomed.info/sct", "code": "84114007", "display": "Congestive heart failure" }]
+          },
+          "subject": { "reference": "urn:uuid:patient-1" },
+          "onsetDateTime": "2025-12-01"
+        },
+        "request": { "method": "POST", "url": "Condition" }
+      },
+      {
+        "fullUrl": "urn:uuid:observation-1",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "observation-1",
+          "status": "final",
+          "code": {
+            "coding": [{ "system": "http://loinc.org", "code": "8480-6", "display": "Systolic blood pressure" }]
+          },
+          "subject": { "reference": "urn:uuid:patient-1" },
+          "effectiveDateTime": "2026-06-01T10:00:00Z",
+          "valueQuantity": { "value": 150, "unit": "mmHg", "system": "http://unitsofmeasure.org", "code": "mm[Hg]" }
+        },
+        "request": { "method": "POST", "url": "Observation" }
+      },
+      {
+        "fullUrl": "urn:uuid:medicationrequest-1",
+        "resource": {
+          "resourceType": "MedicationRequest",
+          "id": "medicationrequest-1",
+          "status": "active",
+          "intent": "order",
+          "medicationCodeableConcept": {
+            "coding": [{ "system": "http://ns.electronichealth.net.au/id/amt", "code": "23106011000036104", "display": "furosemide 40 mg tablet" }]
+          },
+          "subject": { "reference": "urn:uuid:patient-1" },
+          "authoredOn": "2026-06-20",
+          "dosageInstruction": [
+            {
+              "text": "Take one tablet orally once daily",
+              "timing": { "repeat": { "frequency": 1, "period": 1, "periodUnit": "d" } },
+              "doseAndRate": [{ "doseQuantity": { "value": 40, "unit": "mg", "system": "http://unitsofmeasure.org", "code": "mg" } }]
+            }
+          ]
+        },
+        "request": { "method": "POST", "url": "MedicationRequest" }
+      }
+    ]
+  }
+}
+
+

@@ -1,7 +1,15 @@
 angular.module("sampleApp")
     .controller('bundleVisualizerCtrl',
         function ($scope,$uibModal,$http,v2ToFhirSvc,$timeout,modalService,apiService, umamiSvc,
-                  GetDataFromServer,$window,appConfigSvc,$localStorage,$q,moment,bundleVisualizerSvc,$sce) {
+                  GetDataFromServer,$window,appConfigSvc,$localStorage,$q,moment,bundleVisualizerSvc,
+                  terminologySvc,$sce) {
+
+
+
+
+
+
+            $scope.showHelp = $localStorage
 
 
             $scope.input = {};
@@ -71,25 +79,6 @@ angular.module("sampleApp")
 
             }
 
-            /*
-            $localStorage.validationServers = $localStorage.validationServers || []
-
-            $localStorage.ipsServers = $localStorage.ipsServers || []
-
-            $scope.validationServers = $localStorage.validationServers
-            $scope.input.selectedVS = $scope.validationServers[0]
-
-
-            if ($localStorage.ipsServers.length == 0){
-                $localStorage.ipsServers.push("https://hl7-ips-server.hl7.org/fhir")
-            }
-            $scope.ipsServers = $localStorage.ipsServers
-            $scope.input.selectedIPSServer = $scope.ipsServers[0]
-
-            */
-            //let terminologyServer = "https://smile.sparked-fhir.com/aucore/fhir/DEFAULT"
-            //let terminologyServer = " https://tx.dev.hl7.org.au/fhir" only used at $scope.viewVSDEP
-
 
 
             $scope.input.issError = true
@@ -100,6 +89,7 @@ angular.module("sampleApp")
 
             $scope.selectors = []
             $scope.selectors.push({display:"Paste Bundle",code:'paste'})
+            $scope.selectors.push({display:"Paste Single resource",code:'singleresource'})
             $scope.selectors.push({display:"Query for Bundle",code:'query'})
             $scope.selectors.push({display:"IPS Bundles",code:'ips'})
             $scope.selectors.push({display:"Locally saved queries",code:'saved'})
@@ -118,6 +108,7 @@ angular.module("sampleApp")
 
             $scope.ui = {}
             $scope.ui.tabEntries = 0
+            $scope.ui.tabDocument = 5
             $scope.setTab = {}          //for setting the tab from code
 
             $scope.moment = moment
@@ -390,6 +381,22 @@ angular.module("sampleApp")
                 }
             }
 
+            //show where the tag contains 'ips'
+            $scope.showDocumentLibraryEntry = function (item) {
+                if (item.tags?.length > 0) {
+                    for (const tag of item.tags) {
+
+                        if (tag.toLowerCase().indexOf('ips') > -1) {
+                            return true
+                            break
+                        }
+                    }
+
+                }
+
+            }
+
+
 
             //this is a list of bundles saved to the library
             function getListAllBundles() {
@@ -403,7 +410,22 @@ angular.module("sampleApp")
             }
             getListAllBundles()
 
-            $scope.viewResource = function (resource) {
+            function getListAllDocumentBundles() {
+                $http.get('bv/documentBundles').then(
+                    function (data) {
+                        $scope.libraryAllDocumentBundles = data.data
+                    }, function (err) {
+                        alert(angular.toJson(err))
+                    }
+                )
+            }
+            getListAllDocumentBundles()
+
+
+
+
+
+            $scope.viewResourceDEP = function (resource) {
                 $uibModal.open({
                     templateUrl: 'modalTemplates/viewResource.html',
                     size: 'lg',
@@ -489,13 +511,22 @@ angular.module("sampleApp")
             }
 
 
-            $scope.getBundleFromLibrary = function (item) {
+            $scope.getBundleFromLibrary = function (item,initialTab) {
                 $http.get(`bv/getBundle/${item.id}`).then(
                     function (data) {
                         umamiSvc.track('bvBundle:libraryBundle:retrieve', {value:item.qry});
                         $scope.bundleDisplayName = item.name
                         console.log(data.data)
+
+                        if (initialTab) {
+                            $scope.setTab.mainTabActive = $scope.ui[initialTab]
+                        }
+
+
+
+
                         processBundle(data.data.bundle)
+                        $scope.loadedFromLibrary = true     //so we don't show the 'save to library' link again
                     }, function () {
 
                         alert("Sorry, I cannot retrieve that Bundle")
@@ -714,7 +745,7 @@ angular.module("sampleApp")
 
             }
 
-            $scope.executeLibraryQuery = function (item) {
+            $scope.executeLibraryQuery = function (item,initialTab) {
                 //todo - keep separate from executeSavedQuery as we want to support 'snapshotted' bundles in the future
                 let newQry = `proxyRequest?qry=${encodeURIComponent(item.qry)}`
                 umamiSvc.track('bvBundle:libraryQuery:execute', {value:item.qry});
@@ -729,6 +760,10 @@ angular.module("sampleApp")
 
                         } else {
                             $scope.bundleDisplayName = item.name
+
+                            if (initialTab) {
+                                $scope.setTab.mainTabActive = $scope.ui[initialTab]
+                            }
 
                             processBundle(data.data)
 
@@ -846,30 +881,27 @@ angular.module("sampleApp")
                 delete $scope.errorsByResource
                 delete $scope.input.selectedIssueByResource
 
-
                 //remmeber for next time
                 $localStorage.bvSelectedVS = $scope.input.selectedVS
                 if ($scope.input.selectedVS.url) {
                     validate($scope.fhir,$scope.input.selectedVS.url)
                 }
 
-
-
             }
 
             //validate the resources in the bundle, then draw the graph (which needs the errors to display)
             let processBundle = function(oBundle) {
 
+                $scope.$broadcast('processBundle');     //so child controllers can reset
 
                 $scope.selectBundleEntry(null)  //clears all the variables associated with displaying a resource
 
                 delete $scope.hashErrors
-                // $scope.CarePlans = []       //a list of all Careplans in the bundle (
 
                 $scope.DR = []          //list of DiagnosticReports
                 $scope.encounters = []
-                //delete $scope.selectedDeepValidationEntry
-                //delete $scope.deepValidationResult
+
+                delete $scope.loadedFromLibrary
                 delete $scope.resourceFromSection
 
                 delete $scope.selectedRef
@@ -887,9 +919,9 @@ angular.module("sampleApp")
                 delete $scope.input.selectedIssueByResource
                 delete $scope.errorsByResource
                 delete $scope.selectedImmResourceReference
-                //input.selectedIssueByResource
 
-                //$scope.showSelector = false     //hide the selector
+                delete $scope.selectedNode
+
 
                 delete $scope.serverRoot;
                 $scope.fhir = oBundle;
@@ -1076,11 +1108,37 @@ angular.module("sampleApp")
                 delete $scope.document;     //contains the document specific resources suitable for layout
 
 
+                //used in bvDocument include
                 if (bundle.type == 'document' || $scope.isDocument) {
                     $scope.document = bundleVisualizerSvc.makeDocument(bundle, $sce)
                 }
 
+                //a view object for rendering a document from the resources in the section
+                //there's a config file in the service that defines the table columns for each resource type
+                $scope.renderObject = bundleVisualizerSvc.makeRenderObject(bundle)
+
+
                 $scope.showSelector = false     //hide the selector
+
+                //stuff for terminology explorer - copied from patient viewer
+                let vo1 = terminologySvc.makeTerminologySummary($scope.hashEntries)
+                $scope.lstCodedResources = vo1.codedResources;
+                $scope.input.arAllSystems = vo1.arAllSystems       //all systems found
+                $scope.input.selectedSystem = $scope.input.arAllSystems[0]
+
+                //stuff for extension explorer
+
+                let vo2 = terminologySvc.makeExtensionSummary($scope.hashEntries)
+                $scope.extensionSummary = vo2.hashResults  //hash by resource id
+                $scope.extensionUrlList = vo2.lstExtensionUrls
+                $scope.bundleHasModifier = vo2.bundleHasModifier
+                $scope.bundleHasExtensions = vo2.bundleHasExtensions
+
+                $scope.input.selectedExtUrl =  $scope.extensionUrlList[0]
+
+                //console.log($scope.extensionSummary)
+
+
 
 
             };
@@ -1234,6 +1292,35 @@ angular.module("sampleApp")
             $scope.displaySavedBundle = function(item) {
                 processBundle(item.bundle)
             }
+
+
+            //pass in a single resource. assume json
+            $scope.viewSingleResource = function (resource) {
+                umamiSvc.track('bvBundle:adhocSingle:view');
+
+                try {
+                    let json = angular.fromJson(resource)
+
+                    //create a bundle and put this resourc ein it
+                    let bundle = {resourceType:'Bundle',type:'batch',entry : []}
+
+                    bundle.entry.push({resource:json})
+
+                    try {
+                        process(bundle)
+                    } catch (ex) {
+                        console.log(ex)
+                        alert(`Error during processing: ${angular.toJson(ex)}. Is this a valid Resource?`)
+                    }
+
+                } catch (ex) {
+                    alert("Must be a valid Json resource")
+                    return;
+                }
+
+
+            }
+
 
             //------- passed a bundle in json or xml ------
 
@@ -1971,23 +2058,35 @@ angular.module("sampleApp")
 
             }
 
-            $scope.linkToClipboard = function (item) {
+            $scope.linkToClipboard = function (item,type) {
 
+                //default to direct loading link
                 let link = `${$window.location.protocol}//${$window.location.host}/clinfhir/bundleViewer.html?bundleid=${item.id}`
+                let msg = `The link to this Bundle (${link}) has been copied to the clipboard. It will directly load the Bundle.`
 
                 if ($window.location.host.indexOf('localhost') > -1) {
                     link = `${$window.location.protocol}//${$window.location.host}/bundleViewer.html?bundleid=${item.id}`
                 }
 
+                if (type == 'api') {
+
+                    link = `${$window.location.protocol}//${$window.location.host}/clinfhir/api/Bundle/${item.id}`
+                    msg = `The API link to this Bundle (${link}) has been copied to the clipboard. When called it will return the Bundle.`
+
+                    if ($window.location.host.indexOf('localhost') > -1) {
+                        link = `${$window.location.protocol}//${$window.location.host}/api/Bundle/${item.id}`
+                    }
+
+                }
 
                 //alert(link)
                 navigator.clipboard.writeText(link)
                     .then(function () {
-                        alert(`The link to this Bundle (${link}) has been copied to the clipboard. It will directly load the Bundle.`);
+                        alert(msg);
                     })
                     .catch(function (err) {
                         console.error("Clipboard copy failed", err);
-                        alert("Unable to copy the link ${link}. It should still work though.");
+                        alert("Unable to copy the link ${link} to the clipboard. It should still work though, so you can copy it from this dialog.");
                     });
 
 
@@ -2049,10 +2148,17 @@ angular.module("sampleApp")
                                     //if the first entry in the bundle is a Bundle, then this must be a bundle of bundles from a FHIR server. Select it
 
                                     //find the entry in the list of all bundles so we can get the name for display
-                                    let ar2 = $scope.libraryAllBundles.filter(b => b.id == bundleid)
-                                    $scope.bundleDisplayName = ar2?.[0]?.name || ""
+                                    $timeout(function () {
 
-                                    processBundle(vo.bundle)
+                                        $scope.bundleDisplayName = ""
+                                        if ($scope.libraryAllBundles) {
+                                            let ar2 = $scope.libraryAllBundles.filter(b => b.id == bundleid)
+                                            $scope.bundleDisplayName = ar2?.[0]?.name || ""
+                                        }
+                                        processBundle(vo.bundle)
+                                    },1000)
+
+
                                 }
 
                             }, function (err) {

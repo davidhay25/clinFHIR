@@ -152,14 +152,9 @@ function setup(app,indb) {
         let resourceType = resource.resourceType
 
         let userValidationServer = obj.validationServer //what VS the user supplied
-
         let serverToUse = userValidationServer || validationServer
-
         serverToUse = serverToUse.endsWith('/') ? serverToUse : serverToUse + '/'
-
         let qry = `${serverToUse}${resourceType}/$validate`
-
-        //console.log(qry)
 
         try {
             let response = await axios.post(qry,resource)
@@ -171,9 +166,7 @@ function setup(app,indb) {
             } else {
                 res.status(500).json({msg:ex.message})
             }
-
         }
-
     })
 
 }

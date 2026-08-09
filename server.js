@@ -3,8 +3,10 @@ require("./instrument.js");
 
 let fs = require('fs')
 
+let path = require('path');
+
 let http = require('http');
-const https = require('https');
+// const https = require('https');
 const bodyParser = require('body-parser')
 
 let cors = require('cors'); //https://www.npmjs.com/package/cors
@@ -14,6 +16,9 @@ let cors = require('cors'); //https://www.npmjs.com/package/cors
 var express = require('express');
 var app = express();
 app.use(cors());
+
+//make the artifacts directly accessible
+app.use('/artifacts', express.static(path.join(__dirname, 'artifacts')));
 
 
 const Sentry = require("@sentry/node");

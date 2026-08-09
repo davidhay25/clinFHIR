@@ -12,6 +12,65 @@ function setup(app,client) {
     database = client.db("clinfhir");
 
 
+    //a route to return patients with IPS bundles in the stored bundles
+    app.get('/IPS/Patient', async function(req,res){
+
+    })
+
+    //get an IPS bundle
+    app.get('/IPS/:patientId/\$summary', async function(req,res){
+
+    })
+
+    app.get('/bv/documentBundles', async function(req,res){
+
+
+        try {
+
+            let filter = {
+                "bundle.entry": {
+                    "$elemMatch": {
+                        "resource.resourceType": "Composition"
+                    }
+                }
+            }
+
+           // const results = await database.collection("bvBundles").find(
+            const result = await database.collection("bvBundles")
+                .aggregate([
+                    { $match: filter },
+                    {
+                        $project: {
+                            id: 1,
+                            description: 1,
+                            date: 1,
+                            name: 1,
+                            author: 1,
+                            showInPV: 1,
+                            entryCount: {
+                                $size: {
+                                    $ifNull: ["$bundle.entry", []]
+                                }
+                            }
+                        }
+                    }
+                ])
+                .toArray();
+
+            res.json(result);
+
+        } catch (err) {
+            console.error(err);
+            res.status(500).send(err);
+        }
+
+
+
+
+
+    })
+
+
 
     //create a list of all tags currently defined in the library
     app.get("/bv/getAllTags",async function (req,res){
@@ -120,6 +179,32 @@ function setup(app,client) {
             res.status(500).send(err);
         }
     })
+
+    //a version for external access that only returns the bindle
+    app.get("/api/Bundle/:id",async function (req,res){
+
+        let id = req.params.id;
+        let query = {"id":id}
+
+
+        try {
+            const result = await database.collection("bvBundles").findOne(query)
+            if (result) {
+                let bundle = result.bundle
+                bundle.id = id
+
+                res.json(bundle);
+            } else {
+                res.status(404).send()
+            }
+
+        } catch (err) {
+            console.error(err);
+            res.status(500).send(err);
+        }
+    })
+
+
 
     //add a bundle to the bundle library (bvBundles)
     app.post('/bv/saveBundle',async function(req,res){
