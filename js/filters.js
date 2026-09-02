@@ -230,6 +230,8 @@ angular.module("sampleApp")
                     disp = diff + " days";
                 } else if (diff < 32) {
                     disp = Math.floor( diff/7) + " weeks";
+                } else if (diff < 720) {
+                    disp = Math.floor( diff/31) + " months";
                 } else {
                     disp = Math.floor( diff/365) + " years";
                     //todo logic for better age
@@ -326,18 +328,7 @@ angular.module("sampleApp")
                 if (angular.isArray(profile)){
                     profile = ref[0]
                 }
-/*
-                //this is a cop-out. Somethign in the IG viewer is passing a reference rather than a string...
-                if (angular.isObject(profile)){
-                    if (profile.reference) {
-                        profile = profile.reference;
-                    }
 
-                }
-*/
-
-
-                //DSTU-2 - this is an array - just grab the first
                 var ar = profile.split('/');
                 //console.log(ar)
                 return(ar[ar.length-1]);

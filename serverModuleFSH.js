@@ -1,80 +1,62 @@
-
-
-const gofshClient = require('gofsh').gofshClient;
-
+const { fork } = require('child_process');
+const path = require('path');
 
 function setup(app) {
 
-//transform json -> fsh using goFsh - single resource only. very slow...
-    app.post('/fsh/transformJsonToFsh',async function(req,res) {
-
-        //console.log(req.body)
-        let body = req.body
-        if (body) {
-            try {
-                let resourceId = body.id
-                let json = JSON.stringify(body)
-
-                let config = {logLevel:'silent'}
-
-                gofshClient
-                    .fhirToFsh([json],config)
-                    .then((result) => {
-                        // handle results
-
-                        result.resourceId = resourceId
-                        res.json(result)
-                    })
-                    .catch((ex) => {
-                        // handle thrown errors
-                        res.status(400).json({msg:ex.message})
-                    });
-
-/*
-                console.time("goFsh");
-                let result = await gofshClient.fhirToFsh([json],{style:'map',dependencies: ['hl7.fhir.r4.core#4.0.1'],logLevel:'error'})
-                console.timeEnd("goFsh");
-                //console.log(result)
-                result.resourceId = resourceId
-                res.json(result)
-
-                */
-
-            } catch (ex) {
-                res.status(400).json({msg:ex.message})
-            }
-
-        } else {
-            res.json({})
+    app.post('/fsh/transformJsonToFsh', async function(req, res) {
+        let body = req.body;
+        if (!body) {
+            return res.json({});
         }
 
-        
+        let resourceId = body.id;
+        let json = JSON.stringify(body);
 
-        return
+        const before = process.memoryUsage();
+        const fmt = (n) => (n / 1024 / 1024).toFixed(1) + 'MB';
 
+        const child = fork(path.join(__dirname, 'serverModuleFshWorker.js'));
 
-       // let body = '';
-        req.on('data', function (data) {
-            body += data;
+        // failsafe: kill the child if it hangs, so requests can't pile up forever
+        const timeout = setTimeout(() => {
+            child.kill('SIGKILL');
+            if (!res.headersSent) {
+                res.status(504).json({ msg: 'FSH conversion timed out' });
+            }
+        }, 30000);
+
+        child.once('message', (msg) => {
+            clearTimeout(timeout);
+            if (!res.headersSent) {
+                if (msg.ok) {
+                    res.json(msg.result);
+                } else {
+                    res.status(400).json({ msg: msg.error });
+                }
+            }
+            child.kill(); // make sure it's gone even though it should self-exit
         });
 
-        req.on('end', function () {
+        child.once('error', (err) => {
+            clearTimeout(timeout);
+            if (!res.headersSent) {
+                res.status(500).json({ msg: 'Worker process error: ' + err.message });
+            }
+        });
 
-            void async function() {
-                let results;
+        child.once('exit', (code) => {
+            clearTimeout(timeout);
+            const after = process.memoryUsage();
+           // console.log(`[MEM fsh-parent] rss ${fmt(before.rss)} -> ${fmt(after.rss)} | heap ${fmt(before.heapUsed)} -> ${fmt(after.heapUsed)} | external ${fmt(before.external)} -> ${fmt(after.external)} | worker exit code ${code}`);
 
-                let result = await gofshClient.fhirToFsh([body],{style:'map',dependencies: ['hl7.fhir.r4.core#4.0.1'],logLevel:'error'})
 
-                //result.dhInstances = Object.fromEntries(result.fsh.instances);
+            if (!res.headersSent) {
+                res.status(500).json({ msg: `Worker exited unexpectedly (code ${code})` });
+            }
+        });
 
-                res.json(result)
-            }()
-
-        })
-    })
+        child.send({ json, resourceId });
+    });
 }
 
-
-module.exports= {
-    setup : setup
-}
+module.exports = { setup };

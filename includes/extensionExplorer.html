@@ -16,10 +16,11 @@
     </div>
     <div class="col-md-6">
       <select class="form-control" ng-model="input.selectedExtUrl"
-              ng-change = "selectExtUrl(url)"
+              ng-change = "selectExtUrl(input.selectedExtUrl)"
               ng-options="url for url in extensionUrlList"></select>
     </div>
     <div class="col-md-4">
+      <em>Selecting an extension url shows only resources with that extension type.</em>
       <div ng-show="bundleHasModifier">
         <em><span class="hasModifier">Red</span> resources are
           <a target="_blank" href="https://hl7.org/fhir/R4/extensibility.html#modifierExtension">modifier extensions</a> </em>
@@ -55,16 +56,24 @@
       <div class="banner">Extensions</div>
 
       <div class="list-group">
-        <div ng-class="{clickable:true, 'list-group-item':true,
+        <div ng-class="{'list-group-item':true,
           listItemSelected:selectedExtExtension == ext,
           hasModifier:ext.kind=='modifierExtension'}"
              ng-repeat="ext in selectedExtResource.extensions"
+             ng-show="canShowExtension(ext)"
              ng-click = "selectExtension(ext)" >
 
 
-          {{ext.path}}
+          <div><strong>{{ext.url | referenceType}}</strong></div>
+          <em>{{ext.path}}</em>
         </div>
       </div>
+
+      <div ng-hide="input.selectedExtUrl == 'All'">
+        <checkbox
+                ng-model="input.showAllExtensions"></checkbox> Show all extensions
+      </div>
+
 
     </div>
 
@@ -72,9 +81,28 @@
       <div class="banner">Details</div>
 
       <div ng-show="selectedExtExtension">
-        <div>Path: {{selectedExtExtension.path}}</div>
-        <div>Url: {{selectedExtExtension.url}}</div>
-        <div>Kind: {{selectedExtExtension.kind}}</div>
+
+        <table class="table table-bordered">
+          <tr>
+            <td  style="width: 20%">Path</td>
+            <td>{{selectedExtExtension.path}}</td>
+          </tr>
+          <tr>
+            <td>Url</td>
+            <td>{{selectedExtExtension.url}}</td>
+          </tr>
+          <tr>
+            <td>Kind</td>
+            <td>
+              <div ng-class="{hasModifier : selectedExtExtension.kind == 'modifierExtension'}">
+                {{selectedExtExtension.kind}}
+              </div>
+
+            </td>
+          </tr>
+        </table>
+
+        <br/>
 
         <pre>{{selectedExtExtension.value | json}}</pre>
       </div>

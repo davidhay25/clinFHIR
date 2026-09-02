@@ -19,6 +19,24 @@ angular.module("sampleApp").service('supportSvc', function(
 
     //load the json file with all the optional values for creating samples...
 
+    //if there are any OO in the bundle display an alert. Used for queries where there can be paging errors
+    function checkForOO(bundle) {
+        const outcomes = bundle.entry
+            ?.filter(e => e.resource?.resourceType === 'OperationOutcome')
+            .map(e => e.resource) || []
+        if (outcomes.length > 0) {
+            let msg = ""
+            for (const oo of outcomes) {
+                for (const iss of oo?.issue) {
+                    msg += iss.diagnostics + "\n\n"
+                }
+
+
+            }
+            alert(msg)
+        }
+    }
+
     var optionalValues;
     $http.get("artifacts/options.json").then(
         function(data) {
@@ -832,8 +850,83 @@ angular.module("sampleApp").service('supportSvc', function(
 
             return deferred.promise;
 
+        },getAllData : function(patientId) {
+            let deferred = $q.defer();
+
+            let allResources = {};
+            let resourceHash = {};      //this is used to avoid duplications that $everything can return...
+
+            let dataServer = appConfigSvc.getCurrentDataServer();
+            let qry = dataServer.url + "Patient/"+patientId + '/$everything';
+
+            if (window.umami) {
+                window.umami.track('pvSelect:patient', {value:url});
+            }
+
+            let newQry = `proxyRequest?qry=${encodeURIComponent(qry)}`
+
+            $http.get(newQry).then(
+                function (data) {
+                    checkForOO(data.data)      //todo - need to handle if there were issues with the query the reson is in the OO
+                   let bundle = data.data
+
+                    bundle?.entry.forEach(function (entry) {
+                        let resource = entry.resource
+                        let type = resource.resourceType
+                        let location = `${type}/${resource.id}`
+
+                        if (!resourceHash[location] ) {
+                            resourceHash[location] = 'x';
+                            if (! allResources[type]) {
+                                allResources[type] = {entry:[],total:0};        //this is also supposed to be a bundle
+                            }
+
+                            allResources[type].entry.push({resource:resource});
+                            allResources[type].total ++;
+                        }
+
+                    })
+
+                    //sort medications for Marks course...
+                    let meds = allResources['MedicationStatement']
+                    if (meds) {
+                        meds.entry.sort(function(m1,m2){
+                            let m1Name = getMedName(m1);
+                            let m2Name = getMedName(m2);
+
+                            console.log(m1Name,m2Name)
+                            if (m1Name > m2Name) {
+                                return 1
+                            } else {
+                                return -1
+                            }
+                        })
+                    }
+
+
+                    deferred.resolve(allResources);
+
+                    function getMedName(m) {
+
+                        return ResourceUtilsSvc.getOneLineSummaryOfResource(m.resource);
+
+                    }
+
+
+
+                },
+                function (err) {
+                    deferred.reject(angular.toJson(err))
+
+                }
+            )
+
+            return deferred.promise;
+
         },
-        getAllData : function(patientId) {
+
+
+        getAllDataDEP : function(patientId) {
             //get all the data for a patient. Follow paging to get them all...
 
             var deferred = $q.defer();

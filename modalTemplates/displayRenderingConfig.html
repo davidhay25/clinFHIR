@@ -1,0 +1,61 @@
+<div>
+    <style>
+        table th {background-color: lightgrey}
+    </style>
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+
+                <h3>Rendering configuration</h3>
+
+            </div>
+
+
+            <div class="col-md-4 col-sm-4">
+
+                <div class="pull-right">
+                    <button class="btn btn-link" ng-click="$dismiss()">Close</button>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="modal-body">
+
+
+        <div ng-repeat="section in config">
+            <div ng-show="section.key==key">
+
+
+                <h3>{{section.title}} <span style="font-weight: normal" class="pull-right">Section code:{{section.key}}</span> </h3>
+
+
+                <table class="table table-bordered" >
+                    <tr><th>Column</th><th>Contents source</th></tr>
+                    <tr ng-repeat="col in section.cols" >
+                        <td style="width: 20%">{{col.header}}</td>
+                        <td>
+                            <div ng-repeat="content in col.contents">
+                                {{content.type}}.{{content.element}}
+                            </div>
+
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+
+
+
+<!--
+        <pre>{{config | json}}</pre>
+        -->
+
+    </div>
+    <div class="modal-header">
+        <em>Shows where in a resource the contents for each column come from.</em>
+    </div>
+</div>

@@ -17,6 +17,18 @@ let validationServer = "https://tx.ontoserver.csiro.au/fhir"
 
 //docker run -p 9090:8080 hapiproject/hapi:latest
 
+
+function makeOperationOutcome(message) {
+    return {
+        resourceType: 'OperationOutcome',
+        issue: [{
+            severity: 'warning',
+            code: 'timeout',
+            diagnostics: `${message}. Results may be incomplete.`
+        }]
+    };
+}
+
 function setup(app,indb) {
 
     //proxy a GET call - returns whatever is returned in the query.
@@ -49,8 +61,6 @@ function setup(app,indb) {
         let query =  req.query.qry
         if (query) {
 
-            //console.log(query)
-
             let firstRun = true
             let returnBundle
 
@@ -59,10 +69,11 @@ function setup(app,indb) {
                 //let allEntries = [];
                 let nextUrl = query
                 while (nextUrl) {
-                    const response = await axios.get(nextUrl);
 
-
-
+                        //const start = Date.now();
+                        //console.log(`Fetching (offset in URL above) at ${new Date().toISOString()}`);
+                        const response = await axios.get(nextUrl, { timeout: 5000 });
+                        //console.log(`Got response in ${Date.now() - start}ms`);
 
                     if (firstRun) {
                         //get the bundle level data - everything but the entry. Needed for bundles like document...
@@ -70,6 +81,10 @@ function setup(app,indb) {
                         firstRun = false
                         const nextLink = returnBundle.link?.find(link => link.relation === 'next');
                         nextUrl = nextLink ? nextLink.url : null;
+
+                            //console.log('next URL:', nextUrl);
+
+
                     } else {
                         //this is a subsequent run (after paging). We just add the new entries to the returnBundle
                         let bundle = response.data
@@ -78,6 +93,7 @@ function setup(app,indb) {
                         }
                         const nextLink = bundle.link?.find(link => link.relation === 'next');
                         nextUrl = nextLink ? nextLink.url : null;
+                        //console.log('next URL:', nextUrl);
                     }
 
                 }
@@ -87,14 +103,34 @@ function setup(app,indb) {
                 //res.json( {resourceType:'Bundle',type:bundleType, entry:allEntries})
 
             } catch (ex) {
-                console.log(ex.response?.data)
-                let resp = ex.response?.data
-                if (resp) {
-                    res.status(400).json(resp)
-                } else {
-                    res.status(400).json({msg:ex.message})
-                }
 
+                if (returnBundle?.entry?.length) {
+                    console.warn('Pagination failed partway through, returning partial bundle');
+                    returnBundle.link = returnBundle.link?.filter(l => l.relation !== 'next');
+
+                    returnBundle.entry.push({
+                        resource: makeOperationOutcome(
+                            'A page of results timed out and was not retrieved.')
+                    });
+
+                    returnBundle.meta = {tag:[{
+                            "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationValue",
+                            "code": "SUBSETTED"
+                        }]}
+
+
+                    return res.json(returnBundle); // partial but usable
+                } else {
+                    console.log(ex)
+                    console.log(ex.response?.data)
+
+                    let resp = ex.response?.data
+                    if (resp) {
+                        res.status(400).json(resp)
+                    } else {
+                        res.status(400).json({msg:ex.message})
+                    }
+                }
             }
         } else {
             res.status(400).json({msg:"Must include a 'qry' parameter"})

@@ -1,4 +1,95 @@
 [
+
+
+
+  {
+    "title":"Allergies",
+    "key":"48765-2|http://loinc.org",
+    "cols":
+    [
+      {
+        "header": "Allergy",
+        "contents": [{
+          "type":"AllergyIntolerance",
+          "element": "code",
+          "dt": "CodeableConcept"}]
+      },
+      {
+        "header": "Clinical status",
+        "contents":[{
+          "type":"AllergyIntolerance",
+          "element": "clinicalStatus",
+          "dt":"CodeableConcept"}]
+      }
+    ]
+  },
+
+  {
+    "title":"Medications",
+    "key":"10160-0|http://loinc.org",
+    "cols":
+    [
+      {
+        "header": "Drug",
+        "contents": [{
+          "type":"MedicationStatement",
+          "element": "medicationCodeableConcept",
+          "dt": "CodeableConcept"},
+
+          {
+            "type":"MedicationStatement",
+            "element": "medicationCodeableConcept.text",
+            "dt": "string"},
+          {
+            "type":"MedicationRequest",
+            "element": "medicationCodeableConcept",
+            "dt": "CodeableConcept"},
+
+          {
+            "type":"MedicationStatement",
+            "element": "medicationCodeableConcept.text",
+            "dt": "string"}
+        ]
+      },
+      {
+        "header": "Status",
+        "contents":[{
+          "type":"MedicationRequest",
+          "element": "status",
+          "dt":"string"},
+          {
+            "type":"MedicationStatement",
+            "element": "status",
+            "dt":"string"}]
+      },
+
+      {
+        "header": "Effective from",
+        "contents":[{
+          "type":"MedicationRequest",
+          "element": "effectiveDateTime",
+          "dt":"string"},
+          {
+            "type":"MedicationStatement",
+            "element": "effectiveDateTime",
+            "dt":"string"}]
+      },
+      {
+        "header": "Recorded on",
+        "contents":[{
+          "type":"MedicationRequest",
+          "element": "authoredOn",
+          "dt":"string"},
+          {
+            "type":"MedicationStatement",
+            "element": "dateAsserted",
+            "dt":"string"}]
+      }
+    ]
+  },
+
+
+
   {
     "title":"Problem List",
     "key":"11450-4|http://loinc.org",
@@ -40,31 +131,102 @@
           "dt":"CodeableConcept"}]
       }
     ]
-  },{"title":"Immunizations",
-  "key":"11369-6|http://loinc.org",
-  "cols":
-  [
-    {
-      "header": "Vaccine",
-      "contents": [{"type":"Immunization","element": "vaccineCode","dt": "CodeableConcept"}]
-    },
-    {
-      "header": "Status",
-      "contents": [{"type":"Immunization","element": "status","dt": "code"}]
-    },
-    {
-      "header": "Given",
-      "contents": [
-        {"type":"Immunization","element": "occurrenceDateTime","dt": "date"},
-        {"type":"Immunization","element": "occurrenceString","dt": "string"}
-      ]
-    },
-    {
-      "header": "Route",
-      "contents": [{"type":"Immunization","element": "route","dt": "CodeableConcept"}]
-    }
+  },
 
-  ]
-}
+  {"title":"Immunizations",
+    "key":"11369-6|http://loinc.org",
+    "cols":
+    [
+      {
+        "header": "Vaccine",
+        "contents": [{"type":"Immunization","element": "vaccineCode","dt": "CodeableConcept"}]
+      },
+      {
+        "header": "Status",
+        "contents": [{"type":"Immunization","element": "status","dt": "code"}]
+      },
+      {
+        "header": "Given",
+        "contents": [
+          {"type":"Immunization","element": "occurrenceDateTime","dt": "date"},
+          {"type":"Immunization","element": "occurrenceString","dt": "string"}
+        ]
+      },
+      {
+        "header": "Route",
+        "contents": [{"type":"Immunization","element": "route","dt": "CodeableConcept"}]
+      }
+
+    ]
+  },
+
+  {"title":"Procedures",
+    "key":"47519-4|http://loinc.org",
+    "cols":
+    [
+      {
+        "header": "Procedure",
+        "contents": [{"type":"Procedure","element": "code","dt": "CodeableConcept"}]
+      }
+
+    ]
+  },
+
+  {"title":"Results",
+    "key":"30954-2|http://loinc.org",
+    "cols":
+    [
+      {
+        "header": "Type",
+        "contents": [{"type":"Observation","element": "code","dt": "CodeableConcept"}]
+      },
+      {
+        "header": "Result",
+        "contents": [{"type":"Observation","element": "valueString","dt": "string"}]
+      },
+      {
+        "header": "Date",
+        "contents": [{"type":"Observation","element": "effectiveDateTime","dt": "string"}]
+      }
+
+    ]
+  },
+
+  {"title":"Social History",
+    "key":"29762-2|http://loinc.org",
+    "cols":
+    [
+      {
+        "header": "Type",
+        "contents": [{"type":"Procedure","element": "code","dt": "CodeableConcept"}]
+      }
+
+    ]
+  },
+
+  {"title":"Alerts",
+    "key":"104605-1|http://loinc.org",
+    "cols":
+    [
+      {
+        "header": "Type",
+        "contents": [{"type":"Procedure","element": "code","dt": "CodeableConcept"}]
+      }
+
+    ]
+  },
+
+  {"title":"Patient story",
+    "key":"81338-6|http://loinc.org",
+    "cols":
+    [
+      {
+        "header": "Type",
+        "contents": [{"type":"Procedure","element": "code","dt": "CodeableConcept"}]
+      }
+
+    ]
+  }
+
 
 ]

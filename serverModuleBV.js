@@ -11,7 +11,7 @@ function setup(app,client) {
 
     database = client.db("clinfhir");
 
-
+/*
     //a route to return patients with IPS bundles in the stored bundles
     app.get('/IPS/Patient', async function(req,res){
 
@@ -21,6 +21,8 @@ function setup(app,client) {
     app.get('/IPS/:patientId/\$summary', async function(req,res){
 
     })
+
+    */
 
     app.get('/bv/documentBundles', async function(req,res){
 
@@ -248,21 +250,22 @@ function setup(app,client) {
         }
     });
 
-    app.delete('/bvLibrary/:id',async function(req,res){
+    app.delete('/bvLibrary/:id', async function(req,res){
         const id = req.params.id;
-
-        const result = await database.collection('bvLibrary').updateOne(
-            { _id: new ObjectId(id) },
-            { $set: { status: "hide", setAt: new Date() } }
-        );
-
-        if (result.matchedCount === 0) {
-            return res.status(404).send({ error: 'Item not found' });
+        try {
+            const result = await database.collection('bvLibrary').updateOne(
+                { _id: new ObjectId(id) },
+                { $set: { status: "hide", setAt: new Date() } }
+            );
+            if (result.matchedCount === 0) {
+                return res.status(404).send({ error: 'Item not found' });
+            }
+            res.sendStatus(204);
+        } catch (err) {
+            console.error(err);
+            res.status(400).send({ error: 'Invalid id' });
         }
-
-        res.sendStatus(204);
-
-    })
+    });
 
 }
 

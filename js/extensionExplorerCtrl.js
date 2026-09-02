@@ -25,7 +25,10 @@ angular.module("sampleApp")
 
             $scope.selectExtUrl = function (url) {
                 if (url) {
+                    delete $scope.selectedExtExtension
+                    delete $scope.selectedExtResource
                     $scope.input.selectedExtUrl = url
+
                 }
             }
 
@@ -41,6 +44,13 @@ angular.module("sampleApp")
                 }
             }
 
+            $scope.canShowExtension = function (ext) {
+                if ($scope.input.showAllExtensions || $scope.input.selectedExtUrl == 'All') { return true}
+
+                if (ext.url == $scope.input.selectedExtUrl) {
+                    return true
+                }
+            }
 
 
         })

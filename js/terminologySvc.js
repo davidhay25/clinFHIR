@@ -129,7 +129,7 @@ angular.module("sampleApp").service('terminologySvc', function() {
 
                         //returns an array of {path,value}
                         let codedPaths = findAllCodings(resource)
-                        console.log(codedPaths)
+                        //console.log(codedPaths)
 
                         let arCodedElements = []   //all the coded elements in this resource
 
@@ -246,7 +246,7 @@ angular.module("sampleApp").service('terminologySvc', function() {
                     ar.forEach(function (entry) {
                         let resource = entry.resource
                         let results = findTopLevelExtensions(resource)
-                        console.log(results)
+                        //console.log(results)
 
                         if (results.length > 0) {
                             let hasModifier = false

@@ -456,9 +456,6 @@
                     </div>
 
 
-
-
-
                     <div ng-show="input.selectedSelector.code == 'singleresource'">
                         <div class="alert alert-info">
                             Paste the json Resource into the text box. A 'view Resource' button will appear
@@ -492,13 +489,6 @@
                             </div>
                         </div>
                     </div>
-
-
-
-
-
-
-
 
                     <!-- Add a url-->
                     <div ng-show="input.selectedSelector.code == 'query'">
@@ -827,7 +817,7 @@
                         </div>
                     </div>
 
-                    <!-- Library-->
+                    <!-- Library queries-->
                     <div ng-show="input.selectedSelector.code == 'library'">
                         <div class="alert alert-info">
                             These are queries that others have saved to the Library so that they are available to anyone.
@@ -906,17 +896,43 @@
                             Select the Bundle to view then click the 'Retrieve bundle' button that appears to the right.
                         </div>
 
+<!--
+                        <div class="row">
+                            <div class="col-md-2">
+                                Filters
+                            </div>
+                            <div class="col-md-2">
+                                <input class="form-control" ng-model="input.sbFiltername" placeholder="Name">
+                            </div>
+                            <div class="col-md-2">
 
-                            <div class="row">
+                            </div>
+                            <div class="col-md-2">
+
+                            </div>
+                        </div>
+                        -->
+
+                        <div class="row">
 
                                 <div class="col-md-10">
                                     <div class="myScroll1">
                                         <div class="myScroll1">
                                             <table class="table table-bordered">
-                                                <tr><th>Name</th><th>Description</th><th>Author</th><th>Show in Patient Viewer</th><th>Resource</th><th>Date</th></tr>
+                                                <tr><th>Name</th><th>Description</th><th>Author</th><th>Show in Patient Viewer</th><th>Resources</th><th>Date</th></tr>
+
+                                                <tr>
+                                                    <td><input class="form-control" ng-model="input.sbFiltername" placeholder="Filter by Name"></td>
+                                                    <td><input class="form-control" ng-model="input.sbFilterdescription" placeholder="Filter by Description"></td>
+                                                    <td><input class="form-control" ng-model="input.sbFilterauthor" placeholder="Filter by Author"></td>
+                                                    <td></td> <td></td> <td></td>
+                                                </tr>
+
+
                                                 <tr ng-click="input.libraryBundle=bundle"
                                                     ng-dblclick = "getBundleFromLibrary(input.libraryBundle)"
                                                     ng-repeat="bundle in libraryAllBundles"
+                                                    ng-show="canShowStoredBundle(bundle)"
                                                     ng-class="{listItemSelected: input.libraryBundle==bundle}"
                                                     style="cursor: pointer">
                                                     <td>{{bundle.name}}</td>
@@ -1287,18 +1303,32 @@
                             </uib-tab>
 
                             <uib-tab ng-show="xmlText"  heading="XML">
+                                <em class="pull-right">This is transformed from the resource using the <a href="https://github.com/lantanagroup/FHIR.js" target="_blank">Lantana</a>  library</em>
+                                <div class="clearfix"></div>
                                 <div class="myScroll1">
                                     <pre>{{xmlText}}</pre>
                                 </div>
 
-                                <em>This is transformed from the resource using the <a href="https://github.com/lantanagroup/FHIR.js" target="_blank">Lantana</a>  library</em>
-                            </uib-tab>
+                                 </uib-tab>
 
-                            <uib-tab ng-show="fshText" heading="FSH">
-                                <div class="myScroll1">
-                                    <pre>{{fshText}}</pre>
+
+
+                            <uib-tab heading="FSH">
+                                <em class="pull-right">This is transformed from the resource using the Mitre <a href="https://github.com/FHIR/GoFSH" target="_blank">GoFsh</a>  library</em>
+                                <div class="clearfix"></div>
+                                <div ng-hide="fshText">
+                                    <div style="margin: 8px" class="alert-warning alert">
+                                        Waiting for FSH to be created - this can take a few seconds...
+                                    </div>
                                 </div>
-                                <em>This is transformed from the resource using the Mitre <a href="https://github.com/FHIR/GoFSH" target="_blank">GoFsh</a>  library</em>
+
+                                <div ng-show="fshText">
+                                    <div class="myScroll1">
+                                        <pre>{{fshText}}</pre>
+                                    </div>
+                                </div>
+
+
                             </uib-tab>
 
 
@@ -1315,7 +1345,7 @@
 
                             </uib-tab>
 
-                            <uib-tab ng-show="fales && selectedBundleEntry.resource.resourceType == 'Composition'"
+                            <uib-tab ng-show="false && selectedBundleEntry.resource.resourceType == 'Composition'"
                                      heading="Sections">
 
 
@@ -1517,8 +1547,6 @@
                 <uib-tab-heading>
                     Validation <span class="badge">{{validationResult.issue.length}}</span>
                 </uib-tab-heading>
-
-
 
                 <br/>
 
@@ -1970,6 +1998,9 @@
                 </div>
             </uib-tab>
 
+            <uib-tab heading="Temporal view">
+                <ng-include src="'includes/bvTemporal.html'"></ng-include>
+            </uib-tab>
 
 
             <uib-tab heading="FHIRPath">

@@ -1,0 +1,88 @@
+<div>
+
+
+  <div class="alert alert-info">
+    A set of resources that have a date, ordered by the date.
+  </div>
+  <br/>
+
+  <uib-tabset>
+    <uib-tab heading="Resources with a date">
+
+      <div class="row">
+        <div class="col-md-8">
+          <table class="table table-bordered">
+            <tr><th>Date</th><th>Age</th><th>Resource type</th><th>Display</th></tr>
+            <tr ng-repeat="tem in temporal.data"
+                style="cursor: pointer"
+                ng-class="{listItemSelected:input.selectedTemporal == tem.resource}"
+                ng-click="input.selectedTemporal = tem.resource">
+              <td>{{tem.date | date}}</td>
+              <td>{{tem.date | getAge}}</td>
+              <td>{{tem.resource.resourceType}}</td>
+              <td>{{tem.display}}</td>
+            </tr>
+          </table>
+
+        </div>
+
+        <div class="col-md-4" ng-show="input.selectedTemporal">
+
+          <div class="pull-right">
+            <button class="btn btn-link"
+
+                    ng-click="selectFromMainGraph(input.selectedTemporal)">Details</button>
+          </div>
+
+          <div class="clearfix"></div>
+
+          <pre>{{input.selectedTemporal | json}}</pre>
+
+        </div>
+      </div>
+
+    </uib-tab>
+
+    <uib-tab heading="Resources missing a date">
+
+      <div class="row">
+        <div class="col-md-8">
+          <table class="table table-bordered">
+            <tr><th>Resource type</th><th>Display</th></tr>
+            <tr ng-repeat="tem in temporal.log"
+                style="cursor: pointer"
+                ng-class="{listItemSelected:input.selectedTemporal == tem.resource}"
+                ng-click="input.selectedTemporal = tem.resource">
+
+              <td>{{tem.resource.resourceType}}</td>
+              <td>{{tem.display}}</td>
+            </tr>
+          </table>
+
+        </div>
+
+        <div class="col-md-4" ng-show="input.selectedTemporal">
+
+          <div class="pull-right">
+            <button class="btn btn-link"
+
+                    ng-click="selectFromMainGraph(input.selectedTemporal)">Details</button>
+          </div>
+
+          <div class="clearfix"></div>
+
+          <pre>{{input.selectedTemporal | json}}</pre>
+
+        </div>
+      </div>
+
+    </uib-tab>
+
+
+  </uib-tabset>
+
+
+
+
+
+</div>

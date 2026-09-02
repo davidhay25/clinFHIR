@@ -36,7 +36,7 @@ angular.module("sampleApp")
 
                 $scope.input.createSamples = true;
                 //when the 'Add new patient' is selected...
-                $scope.seletNewPatientOption = function(){
+                $scope.seletNewPatientOptionDEP = function(){
 
                     $scope.input.mode='new';
                     $scope.waiting = true;
@@ -158,7 +158,7 @@ angular.module("sampleApp")
                 //note that Grahames server can't handle multiple concurrent requests - which is why theres
                 //a rather inelegant 'pyramid of doom' sync calls....
                 //not any more! Now we can just use a single transaction...
-                $scope.addNewPatient = function() {
+                $scope.addNewPatientDEP = function() {
                     $scope.showLog = true;
                     $scope.allowClose = false;
                     $scope.waiting = true;

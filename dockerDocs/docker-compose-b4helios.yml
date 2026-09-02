@@ -1,0 +1,93 @@
+# docker-compose.yml for clinfhir
+# start with   docker compose up -d
+
+services:
+
+  portal:
+    image: davidhay25/portal
+    container_name: portal
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+      - /opt/certbot-webroot:/opt/certbot-webroot
+    networks:
+      - clinfhir-network
+    depends_on:
+      - forms
+      - clinfhir
+    mem_limit: 256m
+
+  mongodb:
+    image: mongo
+    container_name: mongodbCS1
+    restart: unless-stopped
+    networks:
+      - clinfhir-network
+    volumes:
+      - ./mongodb_data:/data/db
+    mem_limit: 768m
+
+  forms:
+    image: davidhay25/forms
+    container_name: forms
+    depends_on:
+      - mongodb
+    environment:
+      MONGOHOSTNAME: mongodb
+      ENVIRONMENT: clinfhir
+      QURLPREFIX: http://clinfhir.com/questionnaire
+      CONFIG_PATH: /app/secrets/nzhtsconfig.config
+      NODE_OPTIONS: "--max-old-space-size=256"
+    volumes:
+      - /opt/clinfhir/secrets:/app/secrets
+    networks:
+      - clinfhir-network
+    mem_limit: 512m
+
+  clinfhir:
+    image: davidhay25/cf
+    container_name: clinfhir
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+    environment:
+      MONGO_URL: mongodb://mongodb:27017/clinfhir
+      NODE_OPTIONS: "--max-old-space-size=384"
+    networks:
+      - clinfhir-network
+    mem_limit: 768m
+
+  gb2:
+    image: davidhay25/gb2
+    container_name: gb2
+    depends_on:
+      - mongodb
+    environment:
+      MONGOHOSTNAME: mongodb
+      NODE_OPTIONS: "--max-old-space-size=256"
+    networks:
+      - clinfhir-network
+    mem_limit: 512m
+
+  hfs:
+    image: ghcr.io/heliossoftware/hfs:latest
+    container_name: hfs
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+    environment:
+      HFS_STORAGE_BACKEND: mongodb
+      HFS_MONGODB_URL: mongodb://mongodb:27017
+      HFS_MONGODB_DATABASE: hfs
+    ports:
+      - "3000:8080"
+    networks:
+      - clinfhir-network
+    mem_limit: 512m
+
+networks:
+  clinfhir-network:
+    driver: bridge
+

@@ -1,0 +1,44 @@
+[
+    {
+        "type":"Condition",
+        "fpDisplay": [
+            "code.coding.display",
+            "code.text"
+        ],
+        "dateFields":[
+            {"field": "effectiveDateTime","dt":"string"},
+            {"field": "recordedDate","dt":"string"}
+        ]
+    },
+    {
+        "type":"MedicationStatement",
+        "fpDisplay":[
+            "medicationCodeableConcept.coding.display",
+            "medicationCodeableConcept.text"
+        ],
+        "dateFields":[
+            {"field": "effectiveDateTime","dt":"string"},
+            {"field": "dateAsserted","dt":"string"}
+        ]
+    },
+    {
+        "type":"Immunization",
+        "fpDisplay":[
+            "vaccineCode.coding.display",
+            "vaccineCode.text"
+        ],
+        "dateFields":[
+            {"field": "occurrenceDateTime","dt":"string"}
+        ]
+    },
+    {
+        "type":"Observation",
+        "fpDisplay":[
+            "code.coding.display & ' ' & code.text & '   ' &  valueQuantity.value.toString() & '  ' &  valueQuantity.unit",
+            "valueString"
+        ],
+        "dateFields":[
+            {"field": "effectiveDateTime","dt":"string"}
+        ]
+    }
+]

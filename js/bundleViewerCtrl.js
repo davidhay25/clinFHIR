@@ -4,11 +4,6 @@ angular.module("sampleApp")
                   GetDataFromServer,$window,appConfigSvc,$localStorage,$q,moment,bundleVisualizerSvc,
                   terminologySvc,$sce) {
 
-
-
-
-
-
             $scope.showHelp = $localStorage
 
 
@@ -114,6 +109,99 @@ angular.module("sampleApp")
             $scope.moment = moment
 
 
+            $scope.displayRenderingConfig = function (vo) {
+                $http.get('artifacts/bvResourceRender.json').then(
+                    function (data) {
+
+                        $uibModal.open({
+                            templateUrl: 'modalTemplates/displayRenderingConfig.html',
+                            backdrop: 'static',
+                            size : 'lg',
+                            controller: function($scope,config,key){
+                                $scope.config = config
+                                $scope.key = key
+
+                            },
+
+                            resolve: {
+                                config: function () {
+                                    return data.data
+                                },key : function () {
+                                    return vo?.section.key
+
+
+                                }
+                            }
+
+                        })
+
+
+
+                       // renderConfig = data.data
+                    },function (err) {
+                        alert("Unable to display configuration")
+                    })
+
+
+
+
+            }
+
+            //if there are any OO in the bundle display an alert. Used for queries where there can be paging errors
+            function checkForOO(bundle) {
+                const outcomes = bundle.entry
+                    ?.filter(e => e.resource?.resourceType === 'OperationOutcome')
+                    .map(e => e.resource) || []
+                if (outcomes.length > 0) {
+                    let msg = ""
+                    for (const oo of outcomes) {
+                        for (const iss of oo?.issue) {
+                            msg += iss.diagnostics + "\n\n"
+                        }
+
+
+                    }
+                    alert(msg)
+                }
+            }
+
+            //filter the stored bundle list.
+            $scope.canShowStoredBundle = function (bundleItem) {
+                let canShow = true
+                for (let filter of ['sbFiltername','sbFilterdescription','sbFilterauthor']) {
+                    //console.log($scope.input[filter])
+
+                    if ($scope.input[filter]) {
+                        let field = filter.substring(8)     //filed name in bundleItem remove 'sbFilter'
+                        //console.log(field)
+                        if (! doesMatch(field,$scope.input[filter],bundleItem)) {
+                            canShow = false
+                        }
+                    }
+
+                }
+                return canShow
+
+                function doesMatch(field,value,item) {
+
+                    //console.log(field,value,item)
+                    let v = item[field]?.toLowerCase()  //value in item
+                    if (!v) {
+                        return false     //a no value will not match
+                    }
+                    let srch = value?.toLowerCase()
+
+                    if (v.indexOf(srch) > -1) {
+                        return true
+                    }
+
+
+                }
+
+
+                
+            }
+            
            // $scope.dataServer = $localStorage.dataServer || {url:"http://hapi.fhir.org/baseR4/"}
            // $scope.validationServer = $localStorage.validationServer || appConfigSvc.getCurrentConformanceServer();
 
@@ -151,6 +239,7 @@ angular.module("sampleApp")
                 $scope.waiting = true
                 $http.get(newQry).then(
                     function (data) {
+                        checkForOO(data.data)      //if there were issues with the query the reson is in the OO
                         $scope.ipsPatientsBundle = data.data
                     },
                     function (err) {
@@ -208,7 +297,7 @@ angular.module("sampleApp")
                             }
                         }
 
-
+                        checkForOO(data.data)      //if there were issues with the query the reson is in the OO
                         processBundle(data.data)
 
                     },
@@ -755,6 +844,7 @@ angular.module("sampleApp")
                     function (data) {
 
                         let bundle = data.data
+                        checkForOO(bundle)      //if there were issues with the query the reson is in the OO
                         if (bundle.resourceType !== 'Bundle' || ! bundle.entry || bundle.entry.length < 1 ) {
                             alert("Must return a Bundle with at least one entry")
 
@@ -1103,7 +1193,6 @@ angular.module("sampleApp")
 
                 let bundle = angular.copy(oBundle)
 
-
                 //------ make the document summary object for display
                 delete $scope.document;     //contains the document specific resources suitable for layout
 
@@ -1111,12 +1200,12 @@ angular.module("sampleApp")
                 //used in bvDocument include
                 if (bundle.type == 'document' || $scope.isDocument) {
                     $scope.document = bundleVisualizerSvc.makeDocument(bundle, $sce)
+                    //a view object for rendering a document from the resources in the section
+                    //there's a config file in the service that defines the table columns for each resource type
+                    $scope.renderObject = bundleVisualizerSvc.makeRenderObject(bundle)
                 }
 
-                //a view object for rendering a document from the resources in the section
-                //there's a config file in the service that defines the table columns for each resource type
-                $scope.renderObject = bundleVisualizerSvc.makeRenderObject(bundle)
-
+                $scope.temporal = bundleVisualizerSvc.makeTemporalObject(bundle) // {data: log:}
 
                 $scope.showSelector = false     //hide the selector
 
@@ -1215,6 +1304,7 @@ angular.module("sampleApp")
 
                         $scope.waiting = false
                         let bundle = data.data
+                        checkForOO(bundle)      //if there were issues with the query the reson is in the OO
                         if (bundle.resourceType !== 'Bundle' || ! bundle.entry || bundle.entry.length < 1 ) {
                             alert("Must return a Bundle with at least one entry")
                         } else {
@@ -1267,6 +1357,8 @@ angular.module("sampleApp")
 
                         $scope.waiting = false
                         let bundle = data.data
+                        checkForOO(bundle)      //if there were issues with the query the reson is in the OO
+
                         if (bundle.resourceType !== 'Bundle' || ! bundle.entry || bundle.entry.length < 1 ) {
                             alert("Must return a Bundle with at least one entry")
                         } else {

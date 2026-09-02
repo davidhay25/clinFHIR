@@ -6,7 +6,7 @@
 		"dockerfile": "Dockerfile",
 		// Update 'VARIANT' to pick a Node version
 		"args": {
-			"VARIANT": "22-bullseye"
+			"VARIANT": "24-bookworm"
 		}
 	},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.

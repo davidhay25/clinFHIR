@@ -16,6 +16,16 @@ angular.module("sampleApp")
                 renderConfig = data.data
         })
 
+        //config for temporal view
+        let hashTemporal = {}
+        $http.get('artifacts/bvTemporal.json').then(
+            function (data) {
+                for (let def of data.data) {
+                    hashTemporal[def.type] = def
+                }
+
+            })
+
 
         extObligation = "http://hl7.org/fhir/StructureDefinition/obligation"
 
@@ -23,6 +33,90 @@ angular.module("sampleApp")
         gHashResourcesByFullUrl = {}   //a hash of nodes by {id}
 
         return {
+
+            makeTemporalObject:function (bundle) {
+                let arLog = []
+                let arData = []
+                for (let entry of bundle.entry) {
+                    let resource = entry.resource
+                    let def = hashTemporal[resource.resourceType]
+                    if (def) {
+                        //this is a reources to appear in the temporal view
+
+
+                        let value
+                        for (let df of def.dateFields) {
+                            value = resource[df.field]
+                            if (value) {break}
+                        }
+
+                        if (value) {
+                            // a date value was found
+                            let lne = {date:value,resource:resource}
+
+                            lne.display = getDisplay(def,resource)
+                            /*
+
+                            let display = ""
+                            for (const fp of def.fpDisplay) {
+                                let ar = fhirpath.evaluate(resource, fp,null,fhirpath_r4_model)
+                                console.log(ar)
+                                ar.forEach(function (disp) {
+                                    display += disp + " "
+                                })
+                                if (ar.length > 0) { break}     //stop at the first matching
+                            }
+                            */
+                            //lne.display = display
+
+
+
+                            //$scope.FHIRPathResult = fhirpath.evaluate($scope.resource, path,null,fhirpath_r4_model);
+
+
+                            arData.push(lne)
+                        } else {
+                            //no datevalue was found
+                            arLog.push({msg:`Resource ${resource.id} has no date field to use`,resource:resource,display:getDisplay(def,resource)})
+                        }
+
+
+                    }
+                }
+
+                console.log(angular.copy(arData))
+
+                arData.sort(function (a,b) {
+                    if (a.date > b.date) {
+                        return -1
+                    } else {
+                        return 1
+                    }
+
+                })
+
+                console.log(angular.copy(arData))
+
+                console.log(arLog)
+
+                return {data: arData, log:arLog}
+
+                function getDisplay(def,resource) {
+                    let display = ""
+                    for (const fp of def.fpDisplay) {
+                        let ar = fhirpath.evaluate(resource, fp,null,fhirpath_r4_model)
+                        console.log(ar)
+                        ar.forEach(function (disp) {
+                            display += disp + " "
+                        })
+                        if (ar.length > 0) { break}     //stop at the first matching
+                    }
+                    return display
+                }
+
+
+            },
+
 
             makeRenderObject :function (bundle) {
                 //create the data object used when rendering the clinical view of a document from section resources
@@ -35,7 +129,10 @@ angular.module("sampleApp")
                 let ar = bundle.entry.filter(entry => entry.resource.resourceType == 'Composition')
                 if (ar.length > 0) {
                     composition = ar[0].resource
-                } else {return}
+                } else {
+                    alert("No composition found")
+                    return
+                }
 
                 console.log(composition)
                 if (! composition) {
@@ -76,33 +173,13 @@ angular.module("sampleApp")
 
                 console.log(hashSections)
                 let vo = []
-/*
 
-                let section = {title:"Conditions",header:[],rows:[]}
-                section.header.push('col1')
-                section.header.push('col2')
-                section.header.push('col2')
-
-                let cols = []
-                cols.push({display:'col1'})
-                cols.push({display:'col2'})
-                cols.push({display:'col3'})
-                section.rows.push(cols)
-
-                cols=[]
-                cols.push({display:'r2, col1'})
-                cols.push({display:'r2, col2'})
-                cols.push({display:'r2 col3'})
-                section.rows.push(cols)
-
-                vo.push({title:"Conditions",section:section})
-*/
 
                 for (let cSection of renderConfig) {
 
                     let docSection = hashSections[cSection.key] //the section from the composition
                     if (docSection) {
-                        let section = {title:cSection.title,header:[],rows:[],resources:[]}
+                        let section = {title:cSection.title,header:[],rows:[],resources:[],key:cSection.key}
                         //construct the headers array from the column definitions
                         for (let col of cSection.cols) {
                             section.header.push(col.header)
@@ -135,10 +212,19 @@ angular.module("sampleApp")
                                                         display += detail
 
                                                 }
-
                                             }
 
                                             //display += value    //todo need better separatot
+                                        } else {
+                                            //check for a data absent reason
+                                            let extensionElementName = `_${content.element}`
+                                            let value = resource[extensionElementName]
+                                            for (let ext of value?.extension || []) {
+                                                if (ext.url == "http://hl7.org/fhir/StructureDefinition/data-absent-reason") {
+                                                    display += ext.valueCode
+                                                }
+                                            }
+
                                         }
                                     }
                                 }
@@ -154,15 +240,16 @@ angular.module("sampleApp")
                         log.push({msg:`Section in config file (${cSection.key}) not found in Composition section`})
                     }
 
-                    //let oSection = {title:section.title,header:[],rows:[]}
-
-                    //
 
                 }
 
 console.log(vo,log)
 
                 return {vo:vo,log:log}
+
+                function getValue() {
+
+                }
 
 
 

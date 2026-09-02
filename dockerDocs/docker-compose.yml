@@ -1,11 +1,8 @@
-# docker-compose.yml for inte
-# start with   docker-compose up -d
-# needs to align with the nginx from portal image
+# docker-compose.yml for clinfhir
+# start with   docker compose up -d
 
 services:
 
-  # main portal app with Portal page. built on nginx with the nginx config in the image
-  # don't need a separate nginx here
   portal:
     image: davidhay25/portal
     container_name: portal
@@ -13,10 +10,6 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      # Certificates managed by Certbot
-    # may20  - /opt/letsencrypt:/etc/letsencrypt
-      # ACME challenge webroot for Certbot
-   # may20  - /opt/certbot-webroot:/opt/certbot-webroot
       - /etc/letsencrypt:/etc/letsencrypt
       - /opt/certbot-webroot:/opt/certbot-webroot
     networks:
@@ -24,96 +17,123 @@ services:
     depends_on:
       - forms
       - clinfhir
-
-
-  netshoot: # handy network troubleshooting container
-    image: nicolaka/netshoot
-    container_name: netshoot
-    command: sleep infinity   # Keeps the container running
-    networks:
-      - clinfhir-network
-    tty: true
-    stdin_open: true
+    mem_limit: 256m
 
   mongodb:
-    image: mongo                 # the most current MongoDB version
+    image: mongo:8.2.7
     container_name: mongodbCS1
     restart: unless-stopped
     networks:
       - clinfhir-network
-    # ports:
-    #  - "27017:27017"               # expose MongoDB to host
     volumes:
-      - ./mongodb_data:/data/db       # bind to a path - won't get deleted with docker compose down -v
+      - ./mongodb_data:/data/db
+    mem_limit: 768m
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
-  hapi-fhir:
-      image: hapiproject/hapi:latest
-      container_name: hapi-fhir
-      ports:            # expose HAPI FHIR server to host - for testing only
-        - "9090:8080"          # Host port : Container port
-      volumes:
-        - ./hapi_data:/data      # optional: persist data (if using embedded DB)
-      environment:
-        SPRING_DATASOURCE_URL: jdbc:h2:file:/data/hapi;DB_CLOSE_ON_EXIT=FALSE
-        SPRING_DATASOURCE_DRIVERCLASSNAME: org.h2.Driver
-        SPRING_DATASOURCE_USERNAME: sa
-        SPRING_DATASOURCE_PASSWORD: null
-      restart: unless-stopped  
-
-      networks:
-      - clinfhir-network    
+  mongo-backup:
+    image: mongo:8.2.7
+    container_name: mongo-backup
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - clinfhir-network
+    volumes:
+      - ./mongodb_backups:/backups
+    entrypoint: >
+      bash -c "
+      echo '0 3 * * * mongodump --host mongodb --port 27017 --out /backups/$$(date +\%Y-\%m-\%d) && find /backups -maxdepth 1 -mtime +14 -type d -exec rm -rf {} +' > /etc/cron.d/mongo-backup &&
+      chmod 0644 /etc/cron.d/mongo-backup &&
+      crontab /etc/cron.d/mongo-backup &&
+      cron -f
+      "
+    restart: unless-stopped
+    mem_limit: 128m
 
   forms:
     image: davidhay25/forms
     container_name: forms
     depends_on:
-      - mongodb                      # ensures MongoDB starts first
+      mongodb:
+        condition: service_healthy
     environment:
       MONGOHOSTNAME: mongodb
-      ENVIRONMENT: clinfhir         # if canshare (default) then specific UI changes
+      ENVIRONMENT: clinfhir
       QURLPREFIX: http://clinfhir.com/questionnaire
-      CONFIG_PATH: /app/secrets/nzhtsconfig.config  
-  # ports:
-    #  - "9500:9500"                  # hostPort:containerPort for web access
+      CONFIG_PATH: /app/secrets/nzhtsconfig.config
+      NODE_OPTIONS: "--max-old-space-size=256"
     volumes:
       - /opt/clinfhir/secrets:/app/secrets
-         # bind to a path - won't get deleted with docker compose down -v
     networks:
       - clinfhir-network
+    mem_limit: 512m
 
   clinfhir:
     image: davidhay25/cf
     container_name: clinfhir
     restart: unless-stopped
     depends_on:
-      - mongodb                      # ensures MongoDB starts first
+      mongodb:
+        condition: service_healthy
     environment:
-      #MONGOHOSTNAME: mongodb
       MONGO_URL: mongodb://mongodb:27017/clinfhir
-      HAPISERVER: http://hapi-fhir:8080/fhir # internal URL for HAPI server - used by serverModuleProxy in clinfhir
-    # ports:
-    #   - "8080:8080"                  # hostPort:containerPort for web access
+      NODE_OPTIONS: "--max-old-space-size=384"
     networks:
       - clinfhir-network
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    mem_limit: 1024m
 
   gb2:
     image: davidhay25/gb2
     container_name: gb2
     depends_on:
-      - mongodb                      # ensures MongoDB starts first
+      mongodb:
+        condition: service_healthy
     environment:
       MONGOHOSTNAME: mongodb
-      HAPISERVER: http://hapi-fhir:8080/fhir # internal URL for HAPI server - used by serverModuleProxy in clinfhir
-    # :
-    #   - "8090:8090"                  # hostPort:containerPort for web access
+      NODE_OPTIONS: "--max-old-space-size=256"
     networks:
       - clinfhir-network
+    mem_limit: 512m
 
+  hfs:
+    image: ghcr.io/heliossoftware/hfs:latest
+    container_name: hfs
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      HFS_STORAGE_BACKEND: mongodb
+      HFS_MONGODB_URL: mongodb://mongodb:27017
+      HFS_MONGODB_DATABASE: hfs
+      HFS_BASE_URL: https://clinfhir.com/fhir
+
+      # --- Enable In-Memory / Embedded SQL-on-FHIR Engine ---
+      HFS_ENABLE_SOF: "true"
+      HFS_SOF_DEFAULT_FORMAT: "ndjson" # Options: ndjson, csv, parquet
+
+      # Explicitly set all export sink paths to writable /tmp
+      HFS_SOF_OUTPUT_DIR: "/tmp/sof-output"
+      HFS_BULK_EXPORT_DIR: "/tmp/sof-output"
+      HFS_BULK_OUTPUT_DIR: "/tmp/sof-output"
+      HFS_EXPORT_DIR: "/tmp/sof-output"
+
+    ports:
+      - "3000:8080"
+    networks:
+      - clinfhir-network
+    mem_limit: 512m
 
 networks:
   clinfhir-network:
     driver: bridge
-
-volumes:
-  mongodb_data:                      # named volume definition
-  # hapi_data:

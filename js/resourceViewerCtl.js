@@ -492,7 +492,7 @@ angular.module("sampleApp")
                 //console.log(reference);
                 //create and draw the timeline. The service will display the number of encounters for each condition
                 //todo - this code is (mostly) a copy from the function above - refactor..
-                var timelineData =resourceCreatorSvc.createTimeLine($scope.allResourcesAsList,$scope.allResources['Condition'],reference);
+                var timelineData = resourceCreatorSvc.createTimeLine($scope.allResourcesAsList,$scope.allResources['Condition'],reference);
 
                 // console.log(timelineData)
 

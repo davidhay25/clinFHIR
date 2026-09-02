@@ -87,15 +87,23 @@
   <uib-tab heading="Rendering from resources">
     <div class="alert alert-info">
       A fixed rendering of the document sections using the contents of the resources within
-      each section. The layout is independent of what the author created (see the Narrative rendering for that) and the same
-      for every document.
+      each section. It's generated from a configuration file so that the layout is independent of what the author created
+      (see the Narrative rendering for that) and will be the same for every document.
+
+      <br/>
+      <strong>This display is incomplete - working on it.</strong>
     </div>
+
 
 
     <div class="row">
       <div class="col-md-8">
 
+
+
+
         <div ng-repeat="v in renderObject.vo">
+          <div class="clickable pull-right" ng-click="displayRenderingConfig(v)">View configuration file</div>
           <h4>{{v.title}}</h4>
 
           <table class="table-bordered table">
@@ -131,7 +139,12 @@
         </div>
         <div class="clearfix"></div>
 
-        <pre ng-show="input.resourceFromRender">{{input.resourceFromRender | json}}</pre>
+
+          <div class="myScroll1">
+            <pre ng-show="input.resourceFromRender">{{input.resourceFromRender | json}} </pre>
+          </div>
+
+
         <!--
         <pre>{{renderObject.vo | json}}</pre>
 -->

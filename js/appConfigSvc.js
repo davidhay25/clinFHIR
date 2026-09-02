@@ -16,7 +16,7 @@ angular.module("sampleApp")
 
         //the default config for a new browser...
         var defaultConfig = {servers : {}};
-        defaultConfig.lastUpdated='2026-07-25';     //will trigger a reload when this changes
+        defaultConfig.lastUpdated='2026-08-16';     //will trigger a reload when this changes
 
         defaultConfig.standardExtensionUrl = {};    //todo - pretty sur eno longer used - was logical model
         defaultConfig.standardSystem = {};
@@ -123,7 +123,9 @@ angular.module("sampleApp")
 
 
        //temp. doesn't resolve through browser defaultConfig.allKnownServers.push({name:"clinFHIR R4",url:"http://localhost:9090/fhir/",version:4,everythingOperation:true,isTerminology:true});
+
         defaultConfig.allKnownServers.push({name:"Public HAPI R4 server",url:"https://hapi.fhir.org/baseR4/",version:4,everythingOperation:true,isTerminology:true});
+        defaultConfig.allKnownServers.push({name:"clinFHIR R4 server",url:"https://clinfhir.com/fhir/",version:4,everythingOperation:true,isTerminology:false});
 
         //defaultConfig.allKnownServers.push({name:"Grahames R4 server",url:"http://test.fhir.org/r4/",version:4,everythingOperation:true,isTerminology:true});
 
