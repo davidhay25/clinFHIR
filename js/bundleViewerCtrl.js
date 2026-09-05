@@ -86,6 +86,7 @@ angular.module("sampleApp")
             $scope.selectors.push({display:"Paste Bundle",code:'paste'})
             $scope.selectors.push({display:"Paste Single resource",code:'singleresource'})
             $scope.selectors.push({display:"Query for Bundle",code:'query'})
+            $scope.selectors.push({display:"Generate from form",code:'form'})
             $scope.selectors.push({display:"IPS Bundles",code:'ips'})
             $scope.selectors.push({display:"Locally saved queries",code:'saved'})
             $scope.selectors.push({display:"Shared Library Queries",code:'library'})
@@ -1012,6 +1013,8 @@ angular.module("sampleApp")
 
                 delete $scope.selectedNode
 
+                delete  $scope.temporal
+                delete  $scope.temporalFilter
 
                 delete $scope.serverRoot;
                 $scope.fhir = oBundle;
@@ -1207,6 +1210,77 @@ angular.module("sampleApp")
 
                 $scope.temporal = bundleVisualizerSvc.makeTemporalObject(bundle) // {data: log:}
 
+                //temp todo where to put this function-
+                $scope.setTimeLineFilter = function (type) {
+                    $scope.temporal = bundleVisualizerSvc.makeTemporalObject(bundle,type)
+
+
+                    plotTimeline($scope.temporal.arTL, 'timeline');
+                    $scope.temporalFilter = type
+                }
+
+
+                //temp todo where to put this function-
+                function plotTimeline(data, containerId) {
+                    const container = document.getElementById(containerId);
+                    $(`#${containerId}`).empty();
+
+                    const items = new vis.DataSet(
+                        data.map((item, index) => ({
+                            id: index,
+                            rType: item.type,
+                            content: item.display,
+                            resourceItems: item.resourceItems,
+                            style: `background-color: ${item.colour}`,
+                            start: new Date(item.date)
+                        }))
+                    );
+
+
+                    try {
+                        const timeline = new vis.Timeline(container, items, {
+                            stack: true,
+                            orientation: 'top'
+                        });
+
+                        timeline.on('click', function (properties) {
+                            delete $scope.input.selectedTLResource
+
+                            if (properties.item !== null) {
+
+                                console.log(properties.item)
+
+                                const item = items.get(properties.item);
+
+                                $scope.selectedTlItem = item
+                                $scope.tlResourceDefinition = bundleVisualizerSvc.getTemporalDefinition(item.rType)
+
+                                console.log(item)
+
+                                //if there's only a single resource then select it
+                                if (item.resourceItems.length == 1) {
+                                    $scope.input.selectedTLResource = item.resourceItems[0].resource
+                                }
+
+                                $scope.$digest()
+
+                                //alert('Clicked:', item);
+                            }
+                        });
+                    } catch (ex) {
+                        alert("There was an error constructing the timeline. Is the date valid?")
+                        delete $scope.temporalFilter
+                    }
+
+
+
+
+                    //return timeline;
+                }
+                //plotTimeline($scope.temporal.data, 'timeline');
+                plotTimeline($scope.temporal.arTL, 'timeline');
+
+
                 $scope.showSelector = false     //hide the selector
 
                 //stuff for terminology explorer - copied from patient viewer
@@ -1234,6 +1308,9 @@ angular.module("sampleApp")
 
 
 
+            $scope.selectTLResource = function (resourceItem) {
+                $scope.input.selectedTLResource = resourceItem.resource
+            }
 
             $scope.selectDRObs = function(obs) {
                 delete $scope.selectedDR
@@ -1414,6 +1491,17 @@ angular.module("sampleApp")
             }
 
 
+            //load the modelreview with this Q
+            $scope.loadModelReview = function() {
+                let cacheName = 'cache-Q'       //just use a single name
+                $localStorage[cacheName] = $scope.activeQ
+
+                const url = `modelReview.html?${cacheName}`
+                const features = 'noopener,noreferrer'
+                window.open(url, '_blank', features)
+
+            }
+
             //------- passed a bundle in json or xml ------
 
             $scope.viewNewBundle = function(bundle) {
@@ -1472,6 +1560,7 @@ angular.module("sampleApp")
             }
 
 
+            $scope.process = process    //place it on $scope so that bvForm controller can call it
 
 
             //show or hide the patient in the main graph

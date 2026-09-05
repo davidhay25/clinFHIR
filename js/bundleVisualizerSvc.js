@@ -5,8 +5,31 @@ angular.module("sampleApp")
     //also holds the current patient and all their resources...
     //note that the current profile is maintained by resourceCreatorSvc
 
-    .service('bundleVisualizerSvc', function($http,$q,$filter) {
+    .service('bundleVisualizerSvc', function($http,$q,$filter,v2ToFhirSvc) {
 
+
+            let timelineDatePaths = [
+                // Clinical event / occurrence
+                'occurrence',
+                'effective',
+                'performed',
+                'onset',
+                'abatement',
+                'period',
+                'event',
+
+                // Other useful dates
+                'date',
+                'authoredOn',
+                'created',
+                'recorded',
+                'issued',
+                'sent',
+                'received',
+
+                // Last resort
+                'meta.lastUpdated'
+            ];
 
 
         //configuration instructions for rendering a document from the referenced resources in the section
@@ -34,47 +57,76 @@ angular.module("sampleApp")
 
         return {
 
-            makeTemporalObject:function (bundle) {
+
+            makeTemporalObject:function (bundle,filterType) {
+                let colours = v2ToFhirSvc.definedColours()
                 let arLog = []
                 let arData = []
+                let hashResourceDate = {} //keyed by type+date - used to create the timeline view
                 for (let entry of bundle.entry) {
                     let resource = entry.resource
-                    let def = hashTemporal[resource.resourceType]
+                    if (filterType) {       //only show resources of this type
+                        if (resource.resourceType !== filterType) {
+                            continue
+                        }
+                    }
+
+                    let def = hashTemporal[resource.resourceType] //temporal definition from the config file
                     if (def) {
                         //this is a reources to appear in the temporal view
 
-
                         let value
+
                         for (let df of def.dateFields) {
-                            value = resource[df.field]
-                            if (value) {break}
+                            //value = resource[df.field]
+                            try {
+                                let ar = fhirpath.evaluate(resource, df.field,null,fhirpath_r4_model)
+                                if (ar.length > 0) {
+                                    value = ar[0]
+                                    break
+                                }
+                            } catch(ex) {
+                                value = `Error with FhirPath: ${df.field}`
+                            }
+
+                            //if (value) {break}
                         }
 
+
+
                         if (value) {
-                            // a date value was found
+                            // a date value was found. it may be a period...
+
+                            //console.log(resource,value)
                             let lne = {date:value,resource:resource}
 
                             lne.display = getDisplay(def,resource)
-                            /*
+                            lne.colour = colours[resource.resourceType] || 'lightgreen'   // todo make resource type
 
-                            let display = ""
-                            for (const fp of def.fpDisplay) {
-                                let ar = fhirpath.evaluate(resource, fp,null,fhirpath_r4_model)
-                                console.log(ar)
-                                ar.forEach(function (disp) {
-                                    display += disp + " "
-                                })
-                                if (ar.length > 0) { break}     //stop at the first matching
+                            let keyDate
+                            if (value.start) {
+                                //period
+                                keyDate = value.start.substring(0,10)  //group by date not time
+                            } else if (value.low) {
+                                //Range & age
+                                keyDate = value.low.substring(0,10)  //group by date not time
+                            } else if (typeof value == 'string') {
+                                //string
+                                keyDate = value.substring(0,10)  //group by date not time
                             }
-                            */
-                            //lne.display = display
 
 
+                            //console.log(value)
 
-                            //$scope.FHIRPathResult = fhirpath.evaluate($scope.resource, path,null,fhirpath_r4_model);
 
+                            if (keyDate) {
+                                let key = `${resource.resourceType}#${keyDate}`  //type-date
+                                hashResourceDate[key] = hashResourceDate[key] || []
+                                hashResourceDate[key].push({resource:resource,display:lne.display})
 
-                            arData.push(lne)
+                                arData.push(lne)
+                            }
+
                         } else {
                             //no datevalue was found
                             arLog.push({msg:`Resource ${resource.id} has no date field to use`,resource:resource,display:getDisplay(def,resource)})
@@ -84,7 +136,7 @@ angular.module("sampleApp")
                     }
                 }
 
-                console.log(angular.copy(arData))
+                //console.log(angular.copy(arData))
 
                 arData.sort(function (a,b) {
                     if (a.date > b.date) {
@@ -95,21 +147,50 @@ angular.module("sampleApp")
 
                 })
 
-                console.log(angular.copy(arData))
+                //convert the hash to an array for the timeline
+                let arTL = []
+                for (const key of Object.keys(hashResourceDate)) {
+                    let ar = key.split("#")
+                    let type=ar[0]
+                    let date = ar[1]
+                    let arItem = hashResourceDate[key]
+                    let tlDisplay = type
+                    if (arItem.length > 1) {
+                        tlDisplay += ` (${arItem.length})`
+                    }
+                    let tlItem = {date:date,type:type,resourceItems:[],display:tlDisplay}
+                    tlItem.colour = colours[type] || 'lightgreen'   // todo make resource type
 
-                console.log(arLog)
+                    for (let thing of  arItem) {
+                        tlItem.resourceItems.push({display: thing.display,resource:thing.resource,date:date})
+                    }
+                    arTL.push(tlItem)
+                }
 
-                return {data: arData, log:arLog}
+
+               // console.log(hashResourceDate)
+               // console.log(angular.copy(arTL))
+
+               // console.log(arLog)
+
+                return {data: arData, log:arLog,arTL:arTL}
 
                 function getDisplay(def,resource) {
                     let display = ""
                     for (const fp of def.fpDisplay) {
-                        let ar = fhirpath.evaluate(resource, fp,null,fhirpath_r4_model)
-                        console.log(ar)
-                        ar.forEach(function (disp) {
-                            display += disp + " "
-                        })
-                        if (ar.length > 0) { break}     //stop at the first matching
+                        try {
+                            let ar = fhirpath.evaluate(resource, fp, null, fhirpath_r4_model)
+                            console.log(ar)
+                            ar.forEach(function (disp) {
+                                display += disp + " "
+                            })
+                            if (ar.length > 0) {
+                                break
+                            }     //stop at the first matching
+                        } catch (ex) {
+                            display = `Error with FhirPath ${fp}`
+                            break
+                        }
                     }
                     return display
                 }
@@ -117,6 +198,9 @@ angular.module("sampleApp")
 
             },
 
+            getTemporalDefinition : function (type) {
+                return hashTemporal[type]
+            },
 
             makeRenderObject :function (bundle) {
                 //create the data object used when rendering the clinical view of a document from section resources

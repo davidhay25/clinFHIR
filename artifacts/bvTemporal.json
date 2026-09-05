@@ -1,44 +1,1289 @@
 [
     {
-        "type":"Condition",
+        "type": "Account",
+        "fpDisplay": ["name", "description"],
+        "dateFields": [
+            {"field": "servicePeriod", "dt": "Period"}
+        ]
+    },
+    {
+        "type": "ActivityDefinition",
+        "fpDisplay": ["title", "description"],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "AdverseEvent",
+        "fpDisplay": [
+            "event.coding.display",
+            "event.text"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "AllergyIntolerance",
         "fpDisplay": [
             "code.coding.display",
             "code.text"
         ],
-        "dateFields":[
-            {"field": "effectiveDateTime","dt":"string"},
-            {"field": "recordedDate","dt":"string"}
+        "dateFields": [
+            {"field": "onset", "dt": "auto"},
+            {"field": "recordedDate", "dt": "dateTime"}
         ]
     },
     {
-        "type":"MedicationStatement",
-        "fpDisplay":[
-            "medicationCodeableConcept.coding.display",
-            "medicationCodeableConcept.text"
+        "type": "Appointment",
+        "fpDisplay": [
+            "appointmentType.coding.display",
+            "appointmentType.text",
+            "description"
         ],
-        "dateFields":[
-            {"field": "effectiveDateTime","dt":"string"},
-            {"field": "dateAsserted","dt":"string"}
+        "dateFields": [
+            {"field": "start", "dt": "dateTime"},
+            {"field": "end", "dt": "dateTime"}
         ]
     },
     {
-        "type":"Immunization",
-        "fpDisplay":[
+        "type": "AppointmentResponse",
+        "fpDisplay": [
+            "actor.display",
+            "actor.reference"
+        ],
+        "dateFields": []
+    },
+    {
+        "type": "AuditEvent",
+        "fpDisplay": [
+            "type.display",
+            "action",
+            "subtype.display"
+        ],
+        "dateFields": [
+            {"field": "period", "dt": "Period"},
+            {"field": "recorded", "dt": "instant"}
+        ]
+    },
+    {
+        "type": "Basic",
+        "fpDisplay": [
+            "code.coding.display",
+            "code.text"
+        ],
+        "dateFields": [
+            {"field": "created", "dt": "date"}
+        ]
+    },
+    {
+        "type": "Binary",
+        "fpDisplay": ["contentType"],
+        "dateFields": []
+    },
+    {
+        "type": "BiologicallyDerivedProduct",
+        "fpDisplay": [
+            "productCode.coding.display",
+            "productCode.text"
+        ],
+        "dateFields": [
+            {"field": "collection.collected", "dt": "auto"},
+            {"field": "expirationDate", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "BodyStructure",
+        "fpDisplay": [
+            "location.coding.display",
+            "location.text",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "created", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "Bundle",
+        "fpDisplay": [
+            "type",
+            "id"
+        ],
+        "dateFields": [
+            {"field": "timestamp", "dt": "instant"}
+        ]
+    },
+    {
+        "type": "CapabilityStatement",
+        "fpDisplay": [
+            "title",
+            "name",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "CarePlan",
+        "fpDisplay": [
+            "title",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "period", "dt": "Period"},
+            {"field": "created", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "CareTeam",
+        "fpDisplay": [
+            "name",
+            "category.coding.display",
+            "category.text"
+        ],
+        "dateFields": [
+            {"field": "period", "dt": "Period"}
+        ]
+    },
+    {
+        "type": "CatalogEntry",
+        "fpDisplay": [
+            "additionalCharacteristic.coding.display",
+            "classification.coding.display"
+        ],
+        "dateFields": [
+            {"field": "effectivePeriod", "dt": "Period"}
+        ]
+    },
+    {
+        "type": "ChargeItem",
+        "fpDisplay": [
+            "code.coding.display",
+            "code.text"
+        ],
+        "dateFields": [
+            {"field": "occurrence", "dt": "auto"},
+            {"field": "enteredDate", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "ChargeItemDefinition",
+        "fpDisplay": [
+            "title",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "Claim",
+        "fpDisplay": [
+            "type.coding.display",
+            "type.text"
+        ],
+        "dateFields": [
+            {"field": "billablePeriod", "dt": "Period"},
+            {"field": "created", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "ClaimResponse",
+        "fpDisplay": [
+            "type.coding.display",
+            "type.text"
+        ],
+        "dateFields": [
+            {"field": "created", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "ClinicalImpression",
+        "fpDisplay": [
+            "code.coding.display",
+            "code.text",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "CodeSystem",
+        "fpDisplay": [
+            "title",
+            "name",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "Communication",
+        "fpDisplay": [
+            "category.coding.display",
+            "category.text",
+            "reasonCode.coding.display"
+        ],
+        "dateFields": [
+            {"field": "sent", "dt": "dateTime"},
+            {"field": "received", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "CommunicationRequest",
+        "fpDisplay": [
+            "category.coding.display",
+            "category.text",
+            "reasonCode.coding.display"
+        ],
+        "dateFields": [
+            {"field": "occurrence", "dt": "auto"},
+            {"field": "authoredOn", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "CompartmentDefinition",
+        "fpDisplay": [
+            "title",
+            "name",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "Composition",
+        "fpDisplay": [
+            "type.coding.display",
+            "type.text",
+            "title"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "ConceptMap",
+        "fpDisplay": [
+            "title",
+            "name",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "Condition",
+        "fpDisplay": [
+            "code.coding.display",
+            "code.text"
+        ],
+        "dateFields": [
+            {"field": "onset", "dt": "auto"},
+            {"field": "recordedDate", "dt": "dateTime"},
+            {"field": "abatement", "dt": "auto"}
+        ]
+    },
+    {
+        "type": "Consent",
+        "fpDisplay": [
+            "category.coding.display",
+            "category.text",
+            "scope.coding.display"
+        ],
+        "dateFields": [
+            {"field": "dateTime", "dt": "dateTime"},
+            {"field": "provision.period", "dt": "Period"}
+        ]
+    },
+    {
+        "type": "Contract",
+        "fpDisplay": [
+            "title",
+            "subject.display",
+            "subject.reference"
+        ],
+        "dateFields": [
+            {"field": "issued", "dt": "dateTime"},
+            {"field": "applies", "dt": "Period"}
+        ]
+    },
+    {
+        "type": "Coverage",
+        "fpDisplay": [
+            "type.coding.display",
+            "type.text",
+            "subscriber.display"
+        ],
+        "dateFields": [
+            {"field": "period", "dt": "Period"}
+        ]
+    },
+    {
+        "type": "CoverageEligibilityRequest",
+        "fpDisplay": [
+            "purpose",
+            "insurer.display",
+            "insurer.reference"
+        ],
+        "dateFields": [
+            {"field": "created", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "CoverageEligibilityResponse",
+        "fpDisplay": [
+            "outcome",
+            "disposition"
+        ],
+        "dateFields": [
+            {"field": "created", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "DetectedIssue",
+        "fpDisplay": [
+            "code.coding.display",
+            "code.text",
+            "detail"
+        ],
+        "dateFields": [
+            {"field": "identified", "dt": "auto"}
+        ]
+    },
+    {
+        "type": "Device",
+        "fpDisplay": [
+            "type.coding.display",
+            "type.text",
+            "deviceName.name"
+        ],
+        "dateFields": [
+            {"field": "manufactureDate", "dt": "dateTime"},
+            {"field": "expirationDate", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "DeviceDefinition",
+        "fpDisplay": [
+            "manufacturerString",
+            "deviceName.name",
+            "modelNumber"
+        ],
+        "dateFields": []
+    },
+    {
+        "type": "DeviceMetric",
+        "fpDisplay": [
+            "type.coding.display",
+            "type.text"
+        ],
+        "dateFields": []
+    },
+    {
+        "type": "DeviceRequest",
+        "fpDisplay": [
+            "codeCodeableConcept.coding.display",
+            "codeCodeableConcept.text"
+        ],
+        "dateFields": [
+            {"field": "occurrence", "dt": "auto"},
+            {"field": "authoredOn", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "DeviceUseStatement",
+        "fpDisplay": [
+            "device.display",
+            "device.reference"
+        ],
+        "dateFields": [
+            {"field": "timing", "dt": "auto"}
+        ]
+    },
+    {
+        "type": "DiagnosticReport",
+        "fpDisplay": [
+            "code.coding.display",
+            "code.text",
+            "conclusion"
+        ],
+        "dateFields": [
+            {"field": "effective", "dt": "auto"},
+            {"field": "issued", "dt": "instant"}
+        ]
+    },
+    {
+        "type": "DocumentManifest",
+        "fpDisplay": [
+            "description",
+            "content.reference"
+        ],
+        "dateFields": [
+            {"field": "created", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "DocumentReference",
+        "fpDisplay": [
+            "type.coding.display",
+            "type.text",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "instant"}
+        ]
+    },
+    {
+        "type": "DomainResource",
+        "fpDisplay": ["id"],
+        "dateFields": []
+    },
+    {
+        "type": "EffectEvidenceSynthesis",
+        "fpDisplay": [
+            "title",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "Endpoint",
+        "fpDisplay": [
+            "name",
+            "address"
+        ],
+        "dateFields": []
+    },
+    {
+        "type": "EnrollmentRequest",
+        "fpDisplay": [
+            "candidate.display",
+            "candidate.reference"
+        ],
+        "dateFields": [
+            {"field": "created", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "EnrollmentResponse",
+        "fpDisplay": [
+            "outcome",
+            "disposition"
+        ],
+        "dateFields": [
+            {"field": "created", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "EpisodeOfCare",
+        "fpDisplay": [
+            "type.coding.display",
+            "type.text"
+        ],
+        "dateFields": [
+            {"field": "period", "dt": "Period"}
+        ]
+    },
+    {
+        "type": "EventDefinition",
+        "fpDisplay": [
+            "title",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "Evidence",
+        "fpDisplay": [
+            "title",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "EvidenceVariable",
+        "fpDisplay": [
+            "title",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "ExampleScenario",
+        "fpDisplay": [
+            "title",
+            "name",
+            "purpose"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "ExplanationOfBenefit",
+        "fpDisplay": [
+            "type.coding.display",
+            "type.text"
+        ],
+        "dateFields": [
+            {"field": "billablePeriod", "dt": "Period"},
+            {"field": "created", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "FamilyMemberHistory",
+        "fpDisplay": [
+            "condition.code.coding.display",
+            "condition.code.text",
+            "relationship.coding.display"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "Flag",
+        "fpDisplay": [
+            "code.coding.display",
+            "code.text"
+        ],
+        "dateFields": [
+            {"field": "period", "dt": "Period"}
+        ]
+    },
+    {
+        "type": "Goal",
+        "fpDisplay": [
+            "description.coding.display",
+            "description.text"
+        ],
+        "dateFields": [
+            {"field": "start", "dt": "date"},
+            {"field": "target.due", "dt": "auto"}
+        ]
+    },
+    {
+        "type": "GraphDefinition",
+        "fpDisplay": [
+            "name",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "Group",
+        "fpDisplay": [
+            "type",
+            "actual",
+            "name"
+        ],
+        "dateFields": []
+    },
+    {
+        "type": "GuidanceResponse",
+        "fpDisplay": [
+            "moduleUri",
+            "moduleCanonical"
+        ],
+        "dateFields": [
+            {"field": "occurrenceDateTime", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "HealthcareService",
+        "fpDisplay": [
+            "name",
+            "type.coding.display",
+            "type.text"
+        ],
+        "dateFields": []
+    },
+    {
+        "type": "ImagingStudy",
+        "fpDisplay": [
+            "description",
+            "procedureCode.coding.display",
+            "procedureCode.text"
+        ],
+        "dateFields": [
+            {"field": "started", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "Immunization",
+        "fpDisplay": [
             "vaccineCode.coding.display",
             "vaccineCode.text"
         ],
-        "dateFields":[
-            {"field": "occurrenceDateTime","dt":"string"}
+        "dateFields": [
+            {"field": "occurrence", "dt": "auto"},
+            {"field": "recorded", "dt": "dateTime"}
         ]
     },
     {
-        "type":"Observation",
-        "fpDisplay":[
-            "code.coding.display & ' ' & code.text & '   ' &  valueQuantity.value.toString() & '  ' &  valueQuantity.unit",
-            "valueString"
+        "type": "ImmunizationEvaluation",
+        "fpDisplay": [
+            "vaccineCode.coding.display",
+            "vaccineCode.text",
+            "doseStatus.coding.display"
         ],
-        "dateFields":[
-            {"field": "effectiveDateTime","dt":"string"}
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "ImmunizationRecommendation",
+        "fpDisplay": [
+            "recommendation.vaccineCode.coding.display",
+            "recommendation.vaccineCode.text"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "ImplementationGuide",
+        "fpDisplay": [
+            "title",
+            "name",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "InsurancePlan",
+        "fpDisplay": [
+            "name",
+            "alias"
+        ],
+        "dateFields": [
+            {"field": "period", "dt": "Period"}
+        ]
+    },
+    {
+        "type": "Invoice",
+        "fpDisplay": [
+            "type.coding.display",
+            "type.text"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "Library",
+        "fpDisplay": [
+            "title",
+            "name",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "Linkage",
+        "fpDisplay": [
+            "item.resource.display",
+            "item.resource.reference"
+        ],
+        "dateFields": []
+    },
+    {
+        "type": "List",
+        "fpDisplay": [
+            "title",
+            "code.coding.display",
+            "code.text"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "Location",
+        "fpDisplay": [
+            "name",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "operationalStatus.display", "dt": "code"}
+        ]
+    },
+    {
+        "type": "Measure",
+        "fpDisplay": [
+            "title",
+            "name",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "MeasureReport",
+        "fpDisplay": [
+            "measure",
+            "status",
+            "type"
+        ],
+        "dateFields": [
+            {"field": "period", "dt": "Period"}
+        ]
+    },
+    {
+        "type": "Media",
+        "fpDisplay": [
+            "type.coding.display",
+            "type.text",
+            "comment"
+        ],
+        "dateFields": [
+            {"field": "created", "dt": "auto"},
+            {"field": "issued", "dt": "instant"}
+        ]
+    },
+    {
+        "type": "Medication",
+        "fpDisplay": [
+            "code.coding.display",
+            "code.text"
+        ],
+        "dateFields": []
+    },
+    {
+        "type": "MedicationAdministration",
+        "fpDisplay": [
+            "medicationCodeableConcept.coding.display",
+            "medicationCodeableConcept.text"
+        ],
+        "dateFields": [
+            {"field": "effective", "dt": "auto"}
+        ]
+    },
+    {
+        "type": "MedicationDispense",
+        "fpDisplay": [
+            "medicationCodeableConcept.coding.display",
+            "medicationCodeableConcept.text"
+        ],
+        "dateFields": [
+            {"field": "whenHandedOver", "dt": "dateTime"},
+            {"field": "whenPrepared", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "MedicationKnowledge",
+        "fpDisplay": [
+            "code.coding.display",
+            "code.text"
+        ],
+        "dateFields": []
+    },
+    {
+        "type": "MedicationRequest",
+        "fpDisplay": [
+            "medicationCodeableConcept.coding.display",
+            "medicationCodeableConcept.text"
+        ],
+        "dateFields": [
+            {"field": "authoredOn", "dt": "dateTime"},
+            {"field": "dispenseRequest.validityPeriod", "dt": "Period"}
+        ]
+    },
+    {
+        "type": "MedicationStatement",
+        "fpDisplay": [
+            "medicationCodeableConcept.coding.display",
+            "medicationCodeableConcept.text"
+        ],
+        "dateFields": [
+            {"field": "effective", "dt": "auto"},
+            {"field": "dateAsserted", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "MessageDefinition",
+        "fpDisplay": [
+            "title",
+            "name",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "MessageHeader",
+        "fpDisplay": [
+            "eventCoding.display",
+            "eventCoding.code",
+            "eventUri"
+        ],
+        "dateFields": [
+            {"field": "timestamp", "dt": "instant"}
+        ]
+    },
+    {
+        "type": "MolecularSequence",
+        "fpDisplay": [
+            "type",
+            "coordinateSystem"
+        ],
+        "dateFields": [
+            {"field": "patient", "dt": "Reference"}
+        ]
+    },
+    {
+        "type": "NamingSystem",
+        "fpDisplay": [
+            "name",
+            "title",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "NutritionOrder",
+        "fpDisplay": [
+            "oralDiet.type.coding.display",
+            "oralDiet.type.text"
+        ],
+        "dateFields": [
+            {"field": "dateTime", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "Observation",
+        "fpDisplay": [
+            "code.coding.display.first() & ' ' & code.text & '   ' & value.ofType(Quantity).value.toString() & '  ' & value.ofType(Quantity).unit",
+            "value.ofType(string)",
+            "code.coding.display.first()",
+            "code.text"
+        ],
+        "dateFields": [
+            {"field": "effective", "dt": "auto"},
+            {"field": "issued", "dt": "instant"}
+        ]
+    },
+    {
+        "type": "OperationDefinition",
+        "fpDisplay": [
+            "title",
+            "name",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "OperationOutcome",
+        "fpDisplay": [
+            "issue.severity",
+            "issue.code",
+            "issue.diagnostics"
+        ],
+        "dateFields": []
+    },
+    {
+        "type": "Organization",
+        "fpDisplay": [
+            "name",
+            "type.coding.display",
+            "type.text"
+        ],
+        "dateFields": []
+    },
+    {
+        "type": "PatientDEP",
+        "fpDisplay": [
+            "name.given.join(' ') & ' ' & name.family",
+            "name.text",
+            "id"
+        ],
+        "dateFields": [
+            {"field": "birthDate", "dt": "date"}
+        ]
+    },
+    {
+        "type": "PaymentNotice",
+        "fpDisplay": [
+            "type.coding.display",
+            "type.text"
+        ],
+        "dateFields": [
+            {"field": "created", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "PaymentReconciliation",
+        "fpDisplay": [
+            "detail.type.coding.display",
+            "detail.type.text"
+        ],
+        "dateFields": [
+            {"field": "created", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "Person",
+        "fpDisplay": [
+            "name.given.join(' ') & ' ' & name.family",
+            "name.text"
+        ],
+        "dateFields": []
+    },
+    {
+        "type": "PlanDefinition",
+        "fpDisplay": [
+            "title",
+            "name",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "Practitioner",
+        "fpDisplay": [
+            "name.given.join(' ') & ' ' & name.family",
+            "name.text"
+        ],
+        "dateFields": []
+    },
+    {
+        "type": "PractitionerRole",
+        "fpDisplay": [
+            "practitioner.display",
+            "practitioner.reference",
+            "code.coding.display"
+        ],
+        "dateFields": []
+    },
+    {
+        "type": "Procedure",
+        "fpDisplay": [
+            "code.coding.display",
+            "code.text"
+        ],
+        "dateFields": [
+            {"field": "performed", "dt": "auto"}
+        ]
+    },
+    {
+        "type": "Provenance",
+        "fpDisplay": [
+            "activity.coding.display",
+            "activity.text"
+        ],
+        "dateFields": [
+            {"field": "occurred", "dt": "auto"},
+            {"field": "recorded", "dt": "instant"}
+        ]
+    },
+    {
+        "type": "Questionnaire",
+        "fpDisplay": [
+            "title",
+            "name",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "QuestionnaireResponse",
+        "fpDisplay": [
+            "questionnaire",
+            "status"
+        ],
+        "dateFields": [
+            {"field": "authored", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "RelatedPerson",
+        "fpDisplay": [
+            "name.given.join(' ') & ' ' & name.family",
+            "name.text"
+        ],
+        "dateFields": []
+    },
+    {
+        "type": "RequestGroup",
+        "fpDisplay": [
+            "description",
+            "action.title"
+        ],
+        "dateFields": [
+            {"field": "authoredOn", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "ResearchDefinition",
+        "fpDisplay": [
+            "title",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "ResearchElementDefinition",
+        "fpDisplay": [
+            "title",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "ResearchStudy",
+        "fpDisplay": [
+            "title",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "period", "dt": "Period"}
+        ]
+    },
+    {
+        "type": "ResearchSubject",
+        "fpDisplay": [
+            "status",
+            "study.display",
+            "study.reference"
+        ],
+        "dateFields": [
+            {"field": "period", "dt": "Period"}
+        ]
+    },
+    {
+        "type": "RiskAssessment",
+        "fpDisplay": [
+            "code.coding.display",
+            "code.text",
+            "prediction.outcome.text"
+        ],
+        "dateFields": [
+            {"field": "occurrence", "dt": "auto"}
+        ]
+    },
+    {
+        "type": "Schedule",
+        "fpDisplay": [
+            "actor.display",
+            "actor.reference"
+        ],
+        "dateFields": []
+    },
+    {
+        "type": "SearchParameter",
+        "fpDisplay": [
+            "name",
+            "description",
+            "code"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "ServiceRequest",
+        "fpDisplay": [
+            "code.coding.display",
+            "code.text"
+        ],
+        "dateFields": [
+            {"field": "occurrence", "dt": "auto"},
+            {"field": "authoredOn", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "Slot",
+        "fpDisplay": [
+            "serviceType.coding.display",
+            "serviceType.text"
+        ],
+        "dateFields": [
+            {"field": "start", "dt": "dateTime"},
+            {"field": "end", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "Specimen",
+        "fpDisplay": [
+            "type.coding.display",
+            "type.text"
+        ],
+        "dateFields": [
+            {"field": "collection.collected", "dt": "auto"},
+            {"field": "receivedTime", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "StructureDefinition",
+        "fpDisplay": [
+            "title",
+            "name",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "StructureMap",
+        "fpDisplay": [
+            "title",
+            "name",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "Subscription",
+        "fpDisplay": [
+            "reason",
+            "channel.type",
+            "channel.endpoint"
+        ],
+        "dateFields": []
+    },
+    {
+        "type": "Substance",
+        "fpDisplay": [
+            "code.coding.display",
+            "code.text"
+        ],
+        "dateFields": []
+    },
+    {
+        "type": "SupplyDelivery",
+        "fpDisplay": [
+            "type.coding.display",
+            "type.text"
+        ],
+        "dateFields": [
+            {"field": "occurrence", "dt": "auto"}
+        ]
+    },
+    {
+        "type": "SupplyRequest",
+        "fpDisplay": [
+            "itemCodeableConcept.coding.display",
+            "itemCodeableConcept.text"
+        ],
+        "dateFields": [
+            {"field": "occurrence", "dt": "auto"},
+            {"field": "authoredOn", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "Task",
+        "fpDisplay": [
+            "description",
+            "code.coding.display",
+            "code.text"
+        ],
+        "dateFields": [
+            {"field": "executionPeriod", "dt": "Period"},
+            {"field": "authoredOn", "dt": "dateTime"},
+            {"field": "lastModified", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "TerminologyCapabilities",
+        "fpDisplay": [
+            "title",
+            "name",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "TestReport",
+        "fpDisplay": [
+            "name",
+            "description",
+            "result"
+        ],
+        "dateFields": [
+            {"field": "issued", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "TestScript",
+        "fpDisplay": [
+            "name",
+            "description",
+            "title"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "ValueSet",
+        "fpDisplay": [
+            "title",
+            "name",
+            "description"
+        ],
+        "dateFields": [
+            {"field": "date", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "VerificationResult",
+        "fpDisplay": [
+            "target.display",
+            "target.reference",
+            "validationType.coding.display"
+        ],
+        "dateFields": [
+            {"field": "lastPerformed", "dt": "dateTime"},
+            {"field": "nextScheduled", "dt": "dateTime"}
+        ]
+    },
+    {
+        "type": "VisionPrescription",
+        "fpDisplay": [
+            "reasonCode.coding.display",
+            "reasonCode.text"
+        ],
+        "dateFields": [
+            {"field": "dateWritten", "dt": "dateTime"}
         ]
     }
 ]

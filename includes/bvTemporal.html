@@ -6,8 +6,100 @@
   </div>
   <br/>
 
+
+
+
+
   <uib-tabset>
-    <uib-tab heading="Resources with a date">
+    <uib-tab>
+      <uib-tab-heading>Timeline <span ng-show="temporalFilter"> ({{temporalFilter}})</span> </uib-tab-heading>
+      <div id="timeline"></div>
+
+      <div class="row">
+        <div class="col-md-8">
+          <div class="pull-right">
+
+            <div ng-show="selectedTlItem.resourceItems[0].resource.resourceType && ! temporalFilter"
+                 ng-click="setTimeLineFilter(selectedTlItem.resourceItems[0].resource.resourceType)"
+                 class="clickable" style="margin: 12px">
+              Only show {{selectedTlItem.resourceItems[0].resource.resourceType}} resources
+            </div>
+
+            <div ng-show="temporalFilter">
+              <div class="clickable" style="margin: 12px" ng-click="setTimeLineFilter()">Show all resources</div>
+            </div>
+
+
+          </div>
+
+          <div ng-show="selectedTlItem.resourceItems">
+
+            <h4>Resources at this date</h4>
+            <table class="table table-bordered">
+              <tr><th>Resource type</th><th>Date</th><th>Summary</th></tr>
+              <tr  style="cursor: pointer"
+                   ng-class="{listItemSelected:input.selectedTLResource == resourceItem.resource}"
+                   ng-click="selectTLResource(resourceItem,selectedTlItem)"
+                   ng-repeat="resourceItem in selectedTlItem.resourceItems">
+                <td>{{resourceItem.resource.resourceType}}</td>
+                <td>{{resourceItem.date}}</td>
+                <td>
+                  {{resourceItem.display}}
+
+                </td>
+              </tr>
+            </table>
+
+            <h4>Configuration for {{selectedTlItem.rType}}</h4>
+
+            <div><strong>Date fields (first match): </strong></div>
+            <ul>
+              <li ng-repeat="d in tlResourceDefinition.dateFields">{{d.field}}</li>
+            </ul>
+
+            <div><strong>Display fields (all matches): </strong></div>
+            <ul>
+              <li ng-repeat="d in tlResourceDefinition.fpDisplay">{{d}}</li>
+            </ul>
+
+<!--
+            <div><strong>Date fields: </strong><span ng-repeat="d in tlResourceDefinition.dateFields">{{d.field}} </span></div>
+
+
+            <div><strong>Display fields: </strong><span ng-repeat="d in tlResourceDefinition.fpDisplay">{{d}} </span></div>
+
+            <pre>{{tlResourceDefinition | json}}</pre>
+            <pre>{{selectedTlItem | json}}</pre>
+            -->
+
+          </div>
+
+
+
+<!--
+          <pre>{{selectedTlItem | json}}</pre>
+          -->
+
+        </div>
+        <div class="col-md-4">
+
+          <div class="pull-right">
+            <button class="btn btn-link"
+
+                    ng-click="selectFromMainGraph(input.selectedTLResource)">Details</button>
+          </div>
+
+          <div class="clearfix"></div>
+
+          <pre>{{input.selectedTLResource | json}}</pre>
+
+        </div>
+      </div>
+
+    </uib-tab>
+
+    <uib-tab>
+      <uib-tab-heading>Table <span ng-show="temporalFilter"> ({{temporalFilter}})</span> </uib-tab-heading>
 
       <div class="row">
         <div class="col-md-8">
@@ -43,7 +135,9 @@
 
     </uib-tab>
 
-    <uib-tab heading="Resources missing a date">
+    <uib-tab>
+      <uib-tab-heading>Resources missing a date
+        <span class="badge"> {{temporal.log.length}}</span> </uib-tab-heading>
 
       <div class="row">
         <div class="col-md-8">

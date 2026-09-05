@@ -1,0 +1,123 @@
+<div>
+
+  <div class="alert alert-info">
+    This option allow you to create a bundle generated from a questionnaire that implements
+    <a href="https://www.hl7.org/fhir/uv/sdc/en/extraction.html" target="_blank"> SDC based resource extraction</a>. You
+    can also invoke <a href="https://www.hl7.org/fhir/uv/sdc/en/populate.html" target="_blank"> SDC based pre-population</a>.
+    <br/>
+    The Questionnaire Json can be  pasted into the text box or selected from a server.
+    <br/>The Form rendering, SDC population and extraction is performed using APIs provided by the
+    <a href="https://dev.fhirpath-lab.com/" target="_blank">Fhirpath lab</a>
+  </div>
+
+  <div ng-show="formInput.state == 'getQ'">
+
+
+    <div class="row">
+      <div class="col-md-6">
+        <div><strong>Select Questionnaire from server</strong></div>
+        <table class="table-bordered table">
+          <tr><th>Name</th><th>Description</th></tr>
+          <tr ng-repeat="entry in bundleQSummary.entry"
+              style="cursor: pointer"
+              ng-click="loadQFromServer(entry.resource.id)">
+
+            <td>{{entry.resource.name}}</td>
+            <td class="nowrap-words">{{entry.resource.description}}</td>
+
+          </tr>
+        </table>
+      </div>
+      <div class="col-md-6">
+        <div><strong>Or paste Questionnaire Json</strong>
+
+          <button class="btn-success btn pull-right"
+                  ng-show="formInput.json"
+                  ng-click="loadQ(formInput.json)">Render Questionnaire</button>
+
+        </div>
+        <br/>
+        <textarea rows="20"
+
+                  class="form-control" ng-model="formInput.json"></textarea>
+
+        <div ng-show="loadedFromCache">
+          <em>This is the previous adHoc Questionnaire</em>
+        </div>
+<!--
+        <button class="btn-success btn pull-right" ng-click="loadQ(formInput.json)">Load</button>
+        -->
+      </div>
+    </div>
+
+
+
+
+  </div>
+
+  <div ng-show="formInput.state == 'renderQ'">
+    <div class="row" style="margin: 20px" >
+      <div class="col-md-3">
+        <button class="btn-primary btn" ng-click="loadQ(formInput.json)">1. Reload (if needed)</button>
+      </div>
+
+      <div class="col-md-3">
+        <button class="btn-primary btn" ng-click="setPrepop()">2. Prepop</button>
+      </div>
+
+      <div class="col-md-3">
+        <button class="btn-primary btn"
+                ng-show="extractBundle.entry.length > 0"
+                ng-click="selectBundle()">3. Load Bundle ({{extractBundle.entry.length}}) resources</button>
+      </div>
+
+      <div class="col-md-3">
+        <button class="btn-danger btn pull-right"
+
+                ng-click="formInput.state = 'getQ'">Select a new Questionnaire</button>
+
+      </div>
+
+
+
+
+
+    </div>
+
+    <div class="row">
+      <div class="col-md-10">
+        <div class="alert alert-warning" ng-show="noExtract">
+          There don't seem to be any SDC extract operations so extraction might not do anything.
+        </div>
+        <iframe id="formPreview" width="100%" height="600"></iframe>
+
+        <div class="clickable pull-left" ng-click="formInput.state = 'getQ'">Select another Questionnaire</div>
+
+        <div ng-show="formInput.json" class="clickable pull-right"
+          ng-click="loadModelReview(formInput.json)">
+            Examine Questionnaire in Questionnaire Viewer</div>
+      </div>
+
+
+
+      <div class="col-md-2">
+
+        <h4 ng-show="extractBundle.entry.length > 0">Extracted Resources </h4>
+
+        <div ng-repeat="entry in extractBundle.entry">
+          <div style="width: 200px;margin-bottom: 10px"
+               ng-click="formInput.selectedResource = entry.resource"
+               class="btn btn-default">{{entry.resource.resourceType}}</div>
+        </div>
+
+        <pre ng-show="formInput.selectedResource">{{formInput.selectedResource | json}}</pre>
+
+      </div>
+    </div>
+
+
+
+  </div>
+
+
+</div>

@@ -32,6 +32,9 @@ angular.module("sampleApp")
 
 
         return {
+            definedColours : function () {
+                return objColours
+            },
             makeObservationsHash : function(bundle){
                 let hash = {}
                 if (bundle.entry){

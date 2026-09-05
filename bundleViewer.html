@@ -146,7 +146,11 @@
             background: #f3f3f3;
         }
 
-
+        .nowrap-words {
+            white-space: normal;
+            word-break: normal;
+            overflow-wrap: normal;
+        }
 
 
     </style>
@@ -163,7 +167,7 @@
 
             $provide.decorator('$exceptionHandler', function ($delegate) {
                 return function (exception, cause) {
-                    console.log("Untrapped exception",exception.stack)
+                    console.log("Untrapped exception",exception)
 
                     let obj = {type:'err',module:'model',msg:exception.stack}
                     $.ajax({
@@ -173,8 +177,7 @@
                         data: JSON.stringify(obj)
                     });
 
-                    let msg = "There was an unexpected error. Details have been saved to the server, " +
-                        "but your last action may have failed. You should restart the browser and check."
+                    let msg = "There was an unexpected error. Functionality may be impaired. "
 
                     alert(msg);
                 };
@@ -207,6 +210,9 @@
     <script src="js/terminologySvc.js"></script>
 
     <script src="js/extensionExplorerCtrl.js"></script>
+
+    <!-- Note that there is also a script at the bottom of the page to ensure the iframe
+    is loaded for bvForm-->
     <style>
         .myForm {
             padding: 8px;
@@ -284,6 +290,7 @@
     <script src="js/viewVSCtrl.js"></script>
 
     <script src="js/profileCtrl.js"></script>
+
 
     <script>
         const firebaseConfig = {
@@ -553,6 +560,15 @@
                             </div>
                         </div>
                     </div>
+
+                    <div ng-show="input.selectedSelector.code == 'form'">
+
+                        <div ng-controller="bvFormCtrl">
+                            <ng-include src = "'includes/bvForm.html'"></ng-include>
+                        </div>
+
+                    </div>
+
 
 
                     <!-- make an IPS query-->
@@ -2028,6 +2044,10 @@
 
             </uib-tab>
 
+            <uib-tab ng-show="false" heading="FML">
+                FHIR mapping language
+                <a target="_blank" href="https://build.fhir.org/ig/HL7/mapping-language-ig/en/fml.html">Spec</a>
+            </uib-tab>
 
             <uib-tab heading="Bundle json">
                 <div class="row">
@@ -2063,5 +2083,10 @@
 
 
 </div>
+
+
+
+<script src="js/bvFormCtrl.js"></script>
 </body>
+
 </html>
