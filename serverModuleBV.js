@@ -24,6 +24,64 @@ function setup(app,client) {
 
     */
 
+    //use a transaction to add the contents of the supplied bundle to the local FHIR server
+    //
+    app.post('/bv/applyBundleToServer',async function(req,res){
+        let fhirServerBase = "https://clinfhir.com/fhir/"
+        let bundle = req.body
+
+        if (!bundle || ! bundle.entry || bundle.entry.length ==0) {
+            res.status(400).json("Empty or missing bundle")
+            return
+        }
+
+        //convert to a transaction bundle
+        //use a post for now. does mean that if a bundle is applied > once there will be duplication
+        //could use a put - but could get duplicate Id's across bundles
+        let err = []
+        bundle.type = 'transaction'
+        for (let entry of bundle.entry) {
+            let resource = entry.resource
+            delete resource.id
+            delete entry.id
+            entry.request = {method:"POST",url:resource.resourceType}
+        }
+
+        console.log(JSON.stringify(bundle,null,2))
+
+        try {
+            //let qry = fhirServerBase
+
+            const response = await fetch(`${fhirServerBase}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/fhir+json'
+                },
+                body: JSON.stringify(bundle)
+            });
+
+
+            const text = await response.text();
+
+            console.log("FHIR server status:", response.status);
+            console.log("FHIR server response:", text);
+
+            if (!response.ok) {
+                res.status(response.status).send(text);
+                return;
+            }
+
+            if (text) {
+                res.json(JSON.parse(text));
+            } else {
+                res.status(response.status).send();
+            }
+        } catch(ex) {
+            console.error(ex)
+            res.status(400).json(ex.message)
+        }
+    });
+
     app.get('/bv/documentBundles', async function(req,res){
 
 
@@ -65,10 +123,6 @@ function setup(app,client) {
             console.error(err);
             res.status(500).send(err);
         }
-
-
-
-
 
     })
 

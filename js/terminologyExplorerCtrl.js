@@ -2,6 +2,8 @@ angular.module("sampleApp")
     .controller('terminologyExplorerCtrl',
         function ($scope) {
 
+            $scope.termInput = {}
+
 
             $scope.$on('processBundle',function (evt) {
                 delete $scope.selectedTermResource
@@ -9,6 +11,17 @@ angular.module("sampleApp")
                 delete $scope.selectedItem
                 delete $scope.input.selectedSystem
             })
+
+            $scope.canShowSummaryLine = function (lne) {
+                if (! $scope.input.selectedSystem || $scope.input.selectedSystem == 'All') {return true}
+
+                if (lne.system == $scope.input.selectedSystem) {
+                    return true
+                } else {
+                    return false
+                }
+
+            }
 
             $scope.selectSystem = function(system) {
                 $scope.selectedTerminologySummary =$scope.terminologySummary[system]

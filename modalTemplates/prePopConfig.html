@@ -1,0 +1,180 @@
+<div>
+  <!--<div ng-controller="newResourceCtrl">-->
+
+  <div class="modal-header">
+    <div class="row">
+      <div class="col-md-8 col-sm-8">
+        <h3 class="modal-title">
+          Context (Prepopulation config)
+        </h3>
+      </div>
+
+
+      <div class="col-md-4 col-sm-4">
+        <button class="btn btn-primary pull-right" ng-click="save()">Save config</button>
+        <button class="btn btn-link pull-right" ng-click="$dismiss()">Close</button>
+
+      </div>
+    </div>
+
+  </div>
+  <div class="modal-body">
+
+    <uib-tabset>
+      <uib-tab heading="Config">
+        <div class="row">
+          <div class="col-md-8">
+            <table class="table-bordered table">
+              <tr>
+                <td>Data Server</td>
+                <td>
+                  <div class="row">
+                    <div class="col-md-10">
+                      <input class="form-control" ng-model="prePopConfig.dataServer">
+                    </div>
+                    <div class="col-md-2">
+                      <div class="clickable" ng-click="testDataServer(prePopConfig.dataServer)">Test</div>
+                    </div>
+                  </div>
+
+                </td>
+              </tr>
+
+              <tr>
+                <td>Patient</td>
+                <td>
+                  <input class="form-control" ng-model="prePopConfig.patient.reference">
+                  <div><input type="text" class="form-control"
+                              ng-model="prePopConfig.patient.display"/></div>
+
+                </td>
+              </tr>
+
+              <tr>
+                <td>Practitioner reference</td>
+                <td>
+                  <input class="form-control" ng-model="prePopConfig.practitioner.reference">
+                  <div><input type="text" class="form-control"
+                              ng-model="prePopConfig.practitioner.display"/></div>
+                </td>
+              </tr>
+
+            </table>
+          </div>
+          <div class="col-md-4">
+            <pre ng-show="selectedResource">{{selectedResource | json}}</pre>
+          </div>
+        </div>
+
+
+
+
+      </uib-tab>
+
+      <uib-tab heading="Query server">
+        <strong>Server: {{prePopConfig.dataServer}}</strong>
+        <br/> <br/>
+        <div class="row">
+          <div class="col-md-6">
+            <input class="form-control" ng-model="input.query"
+                   placeholder="Query - eg Patient/sample"/>
+          </div>
+          <div class="col-md-2">
+            <button class="btn-link btn"  ng-click="doQuery(input.query)">Execute</button>
+          </div>
+        </div>
+        <br/>
+        <div ng-show = "responseJson.resourceType == 'Bundle'" class="row">
+          <div class="col-md-6">
+
+            <table class="table table-bordered">
+              <tr ng-class="{listItemSelected:entry==input.selectedEntry}"
+                   style="cursor: pointer"
+                   ng-click="input.selectedEntry = entry"
+                   ng-repeat="entry in responseJson.entry">
+
+                  <td>
+                    {{entry.resource.resourceType}}/{{entry.resource.id}}
+                  </td>
+
+                <td>
+                  make
+                </td>
+
+              </tr>
+            </table>
+
+            <!--
+            <div class="list-group">
+              <div ng-class="{'list-group-item':true,listItemSelected:entry==input.selectedEntry}"
+                   style="cursor: pointer"
+                   ng-click="input.selectedEntry = entry"
+                   ng-repeat="entry in responseJson.entry">
+                <div class="row">
+                  <div class="col-md-8">
+                    {{entry.resource.resourceType}}/{{entry.resource.id}}
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  make
+                </div>
+
+              </div>
+            </div>
+            -->
+
+          </div>
+
+          <div class="col-md-6">
+
+            <pre ng-show="input.selectedEntry">{{input.selectedEntry | json}}</pre>
+
+            <pre ng-show="qryError">{{qryError | json}}</pre>
+          </div>
+        </div>
+
+
+
+        <div ng-show = "responseJson.resourceType !== 'Bundle'" class="row">
+
+          <div>
+            <pre ng-show="responseJson">{{responseJson | json}}</pre>
+            <pre ng-show="qryError">{{qryError | json}}</pre>
+          </div>
+        </div>
+
+
+
+      </uib-tab>
+
+      <uib-tab heading="Upload resource">
+        <strong>Server: {{prePopConfig.dataServer}}</strong>
+        <br/>
+        <textarea class="form-control" rows="10" ng-model="input.resource">
+
+        </textarea>
+
+        <div>
+          <div class="pull-right btn btn-link" ng-click="upload()">Upload</div>
+        </div>
+
+      </uib-tab>
+
+
+      <uib-tab heading="Config Json">
+        <pre>{{prePopConfig | json}}</pre>
+      </uib-tab>
+    </uib-tabset>
+
+
+
+
+
+
+
+  </div>
+  <div class="modal-header">
+
+    {{displayQuery}}
+  </div>
+</div>

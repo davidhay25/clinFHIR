@@ -23,20 +23,37 @@ services:
     image: mongo:8.2.7
     container_name: mongodbCS1
     restart: unless-stopped
-    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
     networks:
       - clinfhir-network
     volumes:
       - ./mongodb_data:/data/db
     mem_limit: 768m
     healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.hello().isWritablePrimary"]
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 20s
 
-
+  mongo-backup:
+    image: mongo:8.2.7
+    container_name: mongo-backup
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - clinfhir-network
+    volumes:
+      - ./mongodb_backups:/backups
+    entrypoint: >
+      bash -c "
+      echo '0 3 * * * mongodump --host mongodb --port 27017 --out /backups/$$(date +\%Y-\%m-\%d) && find /backups -maxdepth 1 -mtime +14 -type d -exec rm -rf {} +' > /etc/cron.d/mongo-backup &&
+      chmod 0644 /etc/cron.d/mongo-backup &&
+      crontab /etc/cron.d/mongo-backup &&
+      cron -f
+      "
+    restart: unless-stopped
+    mem_limit: 128m
 
   forms:
     image: davidhay25/forms
@@ -97,7 +114,7 @@ services:
         condition: service_healthy
     environment:
       HFS_STORAGE_BACKEND: mongodb
-      HFS_MONGODB_URL: mongodb://mongodb:27017/?replicaSet=rs0
+      HFS_MONGODB_URL: mongodb://mongodb:27017
       HFS_MONGODB_DATABASE: hfs
       HFS_BASE_URL: https://clinfhir.com/fhir
 

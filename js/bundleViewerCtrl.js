@@ -16,6 +16,9 @@ angular.module("sampleApp")
                 return $sce.trustAsHtml(html_code);
             }
 
+
+
+
             //todo - get these from config
             let localhapiserver = "http://localhost:9090/fhir"
 
@@ -1287,6 +1290,10 @@ angular.module("sampleApp")
                 let vo1 = terminologySvc.makeTerminologySummary($scope.hashEntries)
                 $scope.lstCodedResources = vo1.codedResources;
                 $scope.input.arAllSystems = vo1.arAllSystems       //all systems found
+                $scope.input.arTerminologySummary = vo1.arSummary
+
+                console.log($scope.input.hashTerminologyAllSystems)
+
                 $scope.input.selectedSystem = $scope.input.arAllSystems[0]
 
                 //stuff for extension explorer
@@ -1491,16 +1498,7 @@ angular.module("sampleApp")
             }
 
 
-            //load the modelreview with this Q
-            $scope.loadModelReview = function() {
-                let cacheName = 'cache-Q'       //just use a single name
-                $localStorage[cacheName] = $scope.activeQ
 
-                const url = `modelReview.html?${cacheName}`
-                const features = 'noopener,noreferrer'
-                window.open(url, '_blank', features)
-
-            }
 
             //------- passed a bundle in json or xml ------
 

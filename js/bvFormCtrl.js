@@ -1,6 +1,6 @@
 angular.module("sampleApp")
     .controller('bvFormCtrl',
-        function ($scope,$http,$timeout,$localStorage) {
+        function ($scope,$http,$timeout,$localStorage,$uibModal) {
 
             $scope.formInput = {}
 
@@ -15,6 +15,21 @@ angular.module("sampleApp")
                 )
             }
             loadAllQ()
+
+            //load the modelreview with this Q
+            $scope.loadModelReview = function() {
+                let cacheName = 'cache-Q'       //just use a single name
+                $localStorage[cacheName] = $scope.activeQ
+
+                //console.log(window)
+
+
+                const url = `${window.location.origin}/forms/modelReview.html?${cacheName}`
+
+                const features = 'noopener,noreferrer'
+                window.open(url, '_blank', features)
+
+            }
 
             $scope.loadQFromServer = function (id) {
                 delete $scope.extractBundle
@@ -38,19 +53,41 @@ angular.module("sampleApp")
             }
 
 
-            let prePopConfig = $localStorage['ppConfig']
-            if (! prePopConfig) {
+            $scope.prePopConfig = $localStorage['ppConfig']
+            if (! $scope.prePopConfig) {
                 //prePopConfig = {dataServer:"https://hapi.fhir.org/baseR4"}
-                prePopConfig = {dataServer:"https://clinfhir.com/fhir"}
-                prePopConfig.termServer = "https://tx.fhir.org/r4"
-                prePopConfig.formServer = "https://hapi.fhir.org/baseR4"
+                $scope.prePopConfig = {dataServer:"https://clinfhir.com/fhir"}
+                $scope.prePopConfig.termServer = "https://tx.fhir.org/r4"
+                $scope.prePopConfig.formServer = "https://hapi.fhir.org/baseR4"
 
-                prePopConfig.patient = {reference: 'Patient/sample1', display: 'Example Patient'}
-                prePopConfig.practitioner = { reference: 'Practitioner/sample1', display: 'Example Practitioner' }
+                $scope.prePopConfig.patient = {reference: 'Patient/sample1', display: 'Example Patient'}
+                $scope.prePopConfig.practitioner = { reference: 'Practitioner/sample1', display: 'Example Practitioner' }
 
             }
 
-            console.log(prePopConfig)
+            console.log($scope.prePopConfig)
+
+            //display the configuration screen for prepop
+
+            $scope.loadPPConfig = function () {
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/prePopConfig.html',
+                    size: 'lg',
+                    controller: 'prePopConfigCtrl',
+                    resolve : {
+                        prePopConfig : function(){
+                            return angular.copy($scope.prePopConfig)
+                        }
+                    }
+                }).result.then(function (pp) {
+                    $scope.prePopConfig = pp
+                    //todo - update localstorage as well
+                    $localStorage['ppConfig'] = $scope.prePopConfig
+                })
+
+            }
+
+
 
             $scope.formInput.state = "getQ"         //other state = renderQ
 
@@ -196,9 +233,10 @@ angular.module("sampleApp")
             }
 
 
+            //allow enough time for iframe to be set up. must be a better way, but it doesn't really affect the app
             $timeout(function () {
                     formViewerSetup()
-            },100)
+            },1000)
 
             let contextCreated = false
             let setContext = function () {
@@ -233,13 +271,13 @@ angular.module("sampleApp")
                 //the testObservation must be present for prepop to work. todo ask Brian
                 $scope.sendMessage('sdc.configureContext', {
                     context: {
-                        subject: prePopConfig.patient,
-                        author: prePopConfig.practitioner,
+                        subject: $scope.prePopConfig.patient,
+                        author: $scope.prePopConfig.practitioner,
 
                         launchContext: [
                             {
                                 name: 'source',
-                                contentReference: prePopConfig.practitioner
+                                contentReference: $scope.prePopConfig.practitioner
                             },{
                                 name: 'testObservation',
                                 contentResource: testResource
@@ -250,9 +288,9 @@ angular.module("sampleApp")
                 })
 
                 $scope.sendMessage('sdc.configure', {
-                    terminologyServer: prePopConfig.termServer,// 'https://tx.fhir.org/r4',
-                    dataServer: prePopConfig.dataServer, //'https://hapi.fhir.org/baseR4',
-                    formsServer: prePopConfig.formServer //'https://hapi.fhir.org/baseR4'
+                    terminologyServer: $scope.prePopConfig.termServer,// 'https://tx.fhir.org/r4',
+                    dataServer: $scope.prePopConfig.dataServer, //'https://hapi.fhir.org/baseR4',
+                    formsServer: $scope.prePopConfig.formServer //'https://hapi.fhir.org/baseR4'
                 });
             }
 

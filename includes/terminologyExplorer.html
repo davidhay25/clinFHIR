@@ -8,7 +8,6 @@
         }
     </style>
 
-
     <div class="row">
         <div class="col-md-2">
             Select terminology to view
@@ -20,55 +19,95 @@
         </div>
     </div>
 
-    <hr/>
+    <uib-tabset>
+        <uib-tab heading="Details">
+            <br/>
 
-    <div class="row">
-        <div class="col-md-2">
-            <div class="banner">Resources</div>
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="banner">Resources</div>
 
 
-            <div class="termScroll">
-                <div class="list-group">
-                    <div ng-class="{clickable:true, 'list-group-item':true,listItemSelected:item == selectedItem}"
-                         ng-repeat="item in lstCodedResources"
-                         ng-show = "canShowItem(item)"
-                         ng-click = "selectItem(item)" >
+                    <div class="termScroll">
+                        <div class="list-group">
+                            <div ng-class="{clickable:true, 'list-group-item':true,listItemSelected:item == selectedItem}"
+                                 ng-repeat="item in lstCodedResources"
+                                 ng-show = "canShowItem(item)"
+                                 ng-click = "selectItem(item)" >
 
-                    <!--    <div ng-bind-html="item.resource.text.div"></div> -->
-                        {{item.resource.resourceType}}
+                                <!--    <div ng-bind-html="item.resource.text.div"></div> -->
+                                {{item.resource.resourceType}}
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="col-md-6">
+                    <div class="banner">Json</div>
+                    <div class="termScroll">
+                        <pre ng-show="selectedItem.resource">{{selectedItem.resource | json}}</pre>
                     </div>
                 </div>
-            </div>
+
+                <div class="col-md-4">
+                    <div class="banner">Coded elements</div>
+                    <div class="myScroll1">
+                        <div ng-repeat="v in selectedItem.coded"
+                             ng-show = "canShowConcept(v)">
+                            <div><strong>Path: {{v.path}}</strong></div>
+                            <div style="padding-left: 12px">System: {{v.system}}</div>
+                            <div style="padding-left: 12px">Code: {{v.code}}</div>
+                            <div style="padding-left: 12px">Display: {{v.display}}</div>
+                            <br/>
+                        </div>
+
+                        <div ng-show = "(selectedItem.resource) && input.selectedSystem && (input.selectedSystem !== 'All')">
+                            <em>Only showing the coded elements from the terminology with the url {{input.selectedSystem}}</em>
+                        </div>
+                    </div>
 
 
-        </div>
-        <div class="col-md-6">
-            <div class="banner">Json</div>
-            <div class="termScroll">
-                <pre ng-show="selectedItem.resource">{{selectedItem.resource | json}}</pre>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="banner">Coded elements</div>
-            <div class="myScroll1">
-                <div ng-repeat="v in selectedItem.coded"
-                     ng-show = "canShowConcept(v)">
-                    <div><strong>Path: {{v.path}}</strong></div>
-                    <div style="padding-left: 12px">System: {{v.system}}</div>
-                    <div style="padding-left: 12px">Code: {{v.code}}</div>
-                    <div style="padding-left: 12px">Display: {{v.display}}</div>
-                    <br/>
-                </div>
-
-                <div ng-show = "(selectedItem.resource) && input.selectedSystem && (input.selectedSystem !== 'All')">
-                    <em>Only showing the coded elements from the terminology with the url {{input.selectedSystem}}</em>
                 </div>
             </div>
+        </uib-tab>
+        <uib-tab heading="Summary">
+            <br/>
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="myScroll1">
+                        <table class="table table-bordered">
+                            <tr><th>Resource type</th><th>Path</th><th>Code</th><th>System</th><th>Display</th></tr>
+                            <tr ng-repeat="v in input.arTerminologySummary"
+                                ng-show = "canShowSummaryLine(v)">
+                                <td>
+                                    <div class="clickable" ng-click="termInput.selectedResource = v.resource">
+                                        {{v.resource.resourceType}}
+                                    </div>
+                                </td>
+                                <td>{{v.path}}</td>
+                                <td>{{v.code}}</td>
+                                <td>{{v.system}}</td>
+                                <td>{{v.display}}</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-link pull-right" ng-show="termInput.selectedResource"
+                            ng-click="selectFromMainGraph(termInput.selectedResource)">Details</button>
+                    <div class="clearfix"></div>
+                    <pre>{{termInput.selectedResource | json}}</pre>
+
+                </div>
+            </div>
 
 
-        </div>
-    </div>
+        </uib-tab>
+    </uib-tabset>
+
+
 
 
 

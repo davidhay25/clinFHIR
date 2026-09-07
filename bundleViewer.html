@@ -39,54 +39,6 @@
 
 
 
-    <!-- I don't think this is needed in BV - who cares how many tabs are open
-    <script>
-        (function() {
-            const key = "bundleVisualizerTabs";
-            const tabId = Math.random().toString(36).slice(2);
-            const HEARTBEAT_INTERVAL = 2000;     // 2 seconds
-            const HEARTBEAT_EXPIRE = 5000;       // 5 seconds
-
-            function getTabs() {
-                return JSON.parse(localStorage.getItem(key) || "{}");
-            }
-
-            function setTabs(tabs) {
-                localStorage.setItem(key, JSON.stringify(tabs));
-            }
-
-            // Register this tab with a timestamp
-            let tabs = getTabs();
-            tabs[tabId] = Date.now();
-            setTabs(tabs);
-
-            // Check for other *active* tabs
-            const now = Date.now();
-            const activeOtherTabs = Object.entries(tabs)
-                .filter(([id, ts]) => id !== tabId && (now - ts) < HEARTBEAT_EXPIRE);
-
-            if (activeOtherTabs.length > 0) {
-                alert('This page is already open in another tab, which may cause issues. You should close this page and use the other one.');
-            }
-
-            // Heartbeat updater
-            setInterval(() => {
-                let t = getTabs();
-                t[tabId] = Date.now();
-                setTabs(t);
-            }, HEARTBEAT_INTERVAL);
-
-            // Clean up when this tab closes
-            window.addEventListener("beforeunload", () => {
-                let t = getTabs();
-                delete t[tabId];
-                setTabs(t);
-            });
-        })();
-
-    </script>
--->
-
 
     <style>
 
@@ -210,7 +162,8 @@
     <script src="js/terminologySvc.js"></script>
 
     <script src="js/extensionExplorerCtrl.js"></script>
-
+    <script src="js/prePopConfig.js"></script>
+    <script src="js/bvManagement.js"></script>
     <!-- Note that there is also a script at the bottom of the page to ensure the iframe
     is loaded for bvForm-->
     <style>
@@ -1989,7 +1942,7 @@
                 </uib-tabset>
             </uib-tab>
 
-            <uib-tab ng-show = "isDocument" heading="Document">
+            <uib-tab ng-show = "isDocument" heading="Document view">
                 <br/>
                 <ng-include src = "'includes/bvDocument.html'"></ng-include>
 
@@ -2047,6 +2000,13 @@
             <uib-tab ng-show="false" heading="FML">
                 FHIR mapping language
                 <a target="_blank" href="https://build.fhir.org/ig/HL7/mapping-language-ig/en/fml.html">Spec</a>
+            </uib-tab>
+
+            <uib-tab heading="Management" ng-show="user.email == 'david.hay25@gmail.com'">
+                <div ng-controller="bvManangementCtrl">
+                    <ng-include src="'includes/bvManagement.html'"></ng-include>
+                </div>
+
             </uib-tab>
 
             <uib-tab heading="Bundle json">

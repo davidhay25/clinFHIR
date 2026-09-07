@@ -9,7 +9,12 @@
     display: block;
 }
 
-
+.rounded-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 8px;
+    overflow: hidden;
+}
 
 .nb-modal-window .modal-dialog {
     width: 1200px;

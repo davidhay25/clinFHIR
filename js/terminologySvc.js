@@ -137,58 +137,16 @@ angular.module("sampleApp").service('terminologySvc', function() {
                             for (let concept of item.value) {
                                 let clone = angular.copy(concept)
                                 clone.path = item.path.substring(2)     //strip off the leading '$.'
+                                //clone.resourceType = resource.resourceType
+                                //clone.resourceId = resource.id
+                                clone.resource = resource
                                 arCodedElements.push(clone)
-                                hashAllSystems[clone.system] = true
+                                //hashAllSystems[clone.system] = true
+                                hashAllSystems[clone.system] =  hashAllSystems[clone.system] || []
+                                hashAllSystems[clone.system].push(clone)
                             }
-
-
                         }
 
-
-
-
-
-
-                        //let arCodedElements = []   //all the coded elements in this resource
-
-                        // console.log(resource)
-                        //look for coded elements off the root
-/*
-
-                        Object.keys(resource).forEach(function (key) {
-                            let element = resource[key]
-                            //console.log(element)
-                            if (typeof element == 'object') {
-                                //console.log(element,'obj')
-                                if (Array.isArray(element)) {
-                                    element.forEach(function (el) {
-                                        if (el.coding) {
-                                            el.coding.forEach(function (concept) {
-                                                let clone = angular.copy(concept)
-                                                clone.path = key
-                                                arCodedElements.push(clone)
-                                                hashAllSystems[clone.system] = true
-                                            })
-                                        } else {
-                                            //todo - look for child elements that may be coding..
-                                            //eg condition.evidence.code
-                                        }
-                                    })
-                                } else {
-                                    if (element.coding) {
-                                        element.coding.forEach(function (concept) {
-                                            let clone = angular.copy(concept)
-                                            clone.path = key
-                                            arCodedElements.push(clone)
-                                            hashAllSystems[clone.system] = true
-                                        })
-
-                                    }
-                                }
-                            }
-                        })
-
-                        */
 
                         if (arCodedElements.length > 0) {
                             lstCodedResources.push({resource:resource,coded:arCodedElements})
@@ -200,11 +158,19 @@ angular.module("sampleApp").service('terminologySvc', function() {
             })
 
             // console.log(hashBySystem)
+            let arSummary = []
             let arAllSystems = ["All"]
             Object.keys(hashAllSystems).forEach(function (key) {
                 arAllSystems.push(key)
+                let thing = hashAllSystems[key]
+                for (item of thing) {
+                    arSummary.push(item)
+                }
+
+
+
             })
-            return {codedResources:lstCodedResources,arAllSystems:arAllSystems}
+            return {codedResources:lstCodedResources,arAllSystems:arAllSystems,arSummary : arSummary}
             //return hashBySystem
 
 
