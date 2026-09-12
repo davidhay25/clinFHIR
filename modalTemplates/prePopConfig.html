@@ -20,7 +20,7 @@
   </div>
   <div class="modal-body">
 
-    <uib-tabset>
+    <uib-tabset active="input.mainTabActive">
       <uib-tab heading="Config">
         <div class="row">
           <div class="col-md-8">
@@ -41,35 +41,54 @@
               </tr>
 
               <tr>
-                <td>Patient</td>
+                <td><div class="clickable" ng-click="showResource(prePopConfig.patient.reference)">Patient</div></td>
                 <td>
-                  <input class="form-control" ng-model="prePopConfig.patient.reference">
                   <div><input type="text" class="form-control"
                               ng-model="prePopConfig.patient.display"/></div>
+                  <input class="form-control" disabled ng-model="prePopConfig.patient.reference">
+
 
                 </td>
               </tr>
 
               <tr>
-                <td>Practitioner reference</td>
+                <td><div class="clickable" ng-click="showResource(prePopConfig.practitioner.reference)">Practitioner</div></td>
                 <td>
-                  <input class="form-control" ng-model="prePopConfig.practitioner.reference">
                   <div><input type="text" class="form-control"
                               ng-model="prePopConfig.practitioner.display"/></div>
+                  <input class="form-control" disabled ng-model="prePopConfig.practitioner.reference">
+
                 </td>
               </tr>
 
             </table>
+            <em>To change the Patient or Practitioner, use the 'Query Server' tab to search for Patient or
+            Practitioner, then select the one you want as the context for the form.</em>
           </div>
           <div class="col-md-4">
-            <pre ng-show="selectedResource">{{selectedResource | json}}</pre>
+            <pre ng-show="input.selectedResource">{{input.selectedResource | json}}</pre>
+          </div>
+        </div>
+      </uib-tab>
+
+      <uib-tab heading="Patient data">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="list-group">
+              <div ng-class="{'list-group-item':true}" ng-repeat="item in resourceTypes">{{item.type}}</div>
+            </div>
+
+          </div>
+          <div class="col-md-4">
+
+          </div>
+          <div class="col-md-5">
+
           </div>
         </div>
 
-
-
-
       </uib-tab>
+
 
       <uib-tab heading="Query server">
         <strong>Server: {{prePopConfig.dataServer}}</strong>
@@ -78,6 +97,11 @@
           <div class="col-md-6">
             <input class="form-control" ng-model="input.query"
                    placeholder="Query - eg Patient/sample"/>
+            <br/>
+            <em>Enter a FHIR query (without the Server - that will be
+            {{prePopConfig.dataServer}}).
+
+              Any Patients or Practitioners can be set as the context.</em>
           </div>
           <div class="col-md-2">
             <button class="btn-link btn"  ng-click="doQuery(input.query)">Execute</button>
@@ -97,8 +121,14 @@
                     {{entry.resource.resourceType}}/{{entry.resource.id}}
                   </td>
 
-                <td>
-                  make
+                <td class="nowrap-words">
+                  <div ng-show="entry.resource.resourceType == 'Patient'" class="clickable" ng-click="makeContextPatient(entry.resource)">
+                    Make context patient
+                  </div>
+                  <div ng-show="entry.resource.resourceType == 'Practitioner'" class="clickable" ng-click="makeContextPractitioner(entry.resource)">
+                    Make context practitioner
+                  </div>
+
                 </td>
 
               </tr>

@@ -11,6 +11,8 @@ angular.module("sampleApp")
             //the window.search parameter is checked at the bottom of this controller. That ensures
             //all functions have been loaded...
 
+            $scope.input.selectedType = {}
+
             //used to display the HTML when displaying a document
             $scope.to_trusted = function(html_code) {
                 return $sce.trustAsHtml(html_code);
@@ -1025,6 +1027,24 @@ angular.module("sampleApp")
                 //set up the hashes used when finding a resource from a reference.
                 bundleVisualizerSvc.initResourceLookup(oBundle)
 
+                //---------- temp - while testing
+                    /*
+                let b = bundleVisualizerSvc.makeTransactionBundle(oBundle)
+
+                const text = angular.toJson(b, true);
+
+                navigator.clipboard.writeText(text)
+                    .then(function () {
+                        alert("The bundle has been copied to the clipboard.");
+                    })
+                    .catch(function (err) {
+                        console.error("Clipboard copy failed", err);
+                        alert("Unable to copy the bundle.");
+                    });
+
+*/
+              //------------
+
                 //validate using the default server
                 $scope.performValidation()
 
@@ -1213,6 +1233,15 @@ angular.module("sampleApp")
 
                 $scope.temporal = bundleVisualizerSvc.makeTemporalObject(bundle) // {data: log:}
 
+                $scope.hashTypes = bundleVisualizerSvc.makeResourceTypeList(bundle)
+
+                //select all types initially
+                $scope.input.selectedType = Object.fromEntries(
+                    Object.keys($scope.hashTypes).map(key => [key, true])
+                );
+
+
+
                 //temp todo where to put this function-
                 $scope.setTimeLineFilter = function (type) {
                     $scope.temporal = bundleVisualizerSvc.makeTemporalObject(bundle,type)
@@ -1330,11 +1359,84 @@ angular.module("sampleApp")
             }
 
 
+            //called form bvDocument when a section is selected
             $scope.selectSection = function(section) {
                // delete $scope.selectedEntryFromSection
                 delete $scope.resourceFromSection
                 $scope.selectedSection = section
 
+                //get the section graph
+                let filteredBundle = bundleVisualizerSvc.getSectionBundle($scope.fhir,section.code?.coding?.[0]?.code)
+
+                let options = {bundle:filteredBundle,
+                    hashErrors:$scope.hashErrors,
+                    serverRoot:$scope.serverRoot}
+
+                let vo = v2ToFhirSvc.makeGraph1(options);
+
+                //$scope.graphErrors = vo.lstErrors
+
+
+                let container = document.getElementById('sectionResourceGraph');
+                let graphOptions = {
+                    physics: {
+                        enabled: true,
+                        barnesHut: {
+                            gravitationalConstant: -10000,
+                            centralGravity: 0.3,
+                            springLength: 120,
+                            springConstant: 0.04,
+                            damping: 0.09,
+                            avoidOverlap: 0.2
+                        },
+                        stabilization: {
+                            iterations: 200,   // try lowering from default (1000)
+                            updateInterval: 25
+                        }
+
+                    }
+                }
+
+                $scope.sectionResourceChart = new vis.Network(container, vo.graphData, graphOptions);
+
+                // 🚀 Turn off physics after initial layout
+                $scope.sectionResourceChart.once('stabilizationIterationsDone', function () {
+                    $scope.sectionResourceChart.setOptions({ physics: false });
+                });
+
+
+                $scope.sectionResourceChart.on("click", function (obj) {
+                    // delete $scope.selectedFshFromSingleGraph
+                    var nodeId = obj.nodes[0];  //get the first node
+                    var node = vo.graphData.nodes.get(nodeId);
+                    $scope.selectedResourceFromSection = node?.entry?.resource
+                    $scope.$digest()
+
+
+                })
+
+                $scope.sectionResourceChart.on("doubleClick", function (obj) {
+                    // delete $scope.selectedFshFromSingleGraph
+                    var nodeId = obj.nodes[0];  //get the first node
+                    var node = vo.graphData.nodes.get(nodeId);
+                    if (node) {
+                        $scope.selectFromSingleGraph()
+                    }
+                })
+
+                $scope.fitSectionGraph = function(){
+                    $timeout(function(){
+                        if ($scope.sectionResourceChart) {
+                            $scope.sectionResourceChart.fit();
+
+                        }
+                    },1000)
+
+                };
+
+
+
+                //--------------
 
                 //prettify the html
                 let rawHTML = section.text?.div
@@ -1561,6 +1663,17 @@ angular.module("sampleApp")
             $scope.process = process    //place it on $scope so that bvForm controller can call it
 
 
+            //called when the list of selected types changes
+
+            $scope.updateGraph = function () {
+                let options = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:$scope.serverRoot}
+                //options.hidePatient = toggle;4
+                options.selectedResources = $scope.input.selectedType
+                drawGraph(options)
+                console.warn("Updating graph")
+             //   alert('x')
+            }
+
             //show or hide the patient in the main graph
             $scope.showHidePatient = function(toggle) {
 
@@ -1576,6 +1689,26 @@ angular.module("sampleApp")
                 alert('The config was updated. You can continue.')
             }
 
+            $scope.updateSelectedType = function (show) {
+
+
+
+                for (let k of Object.keys($scope.input.selectedType)) {
+                    if (show !== 'patient') {
+                        $scope.input.selectedType[k] = show
+                    } else {
+                        $scope.input.selectedType[k] = false
+                    }
+
+                }
+
+                if (show == 'patient') {
+                    $scope.input.selectedType['Patient'] = true
+                }
+
+                $scope.updateGraph()
+
+            }
 
 
             //pre-defined queries
@@ -1766,6 +1899,7 @@ angular.module("sampleApp")
 
                 //This is a bit tricky a there as the reference in the bundle could be to the fullUrl or
                 //to the resource id
+                //+++++ actually, is this true? Bundle references always use the fullUrl I believe...
 
                 //the fullUrl is a default ?if it exists should we onlt use that???
                 let url = $scope.selectedBundleEntry.fullUrl; // || resource.resourceType + "/" + resource.id;
@@ -1798,6 +1932,7 @@ angular.module("sampleApp")
                 options.hidePatient = $scope.input.showHidePatient;
 
                 let vo = v2ToFhirSvc.makeGraph1(options);
+
                 $scope.graphErrors = vo.lstErrors
 
 
@@ -1828,7 +1963,20 @@ angular.module("sampleApp")
                     $scope.singleResourceChart.setOptions({ physics: false });
                 });
 
+/*
 
+                $scope.singleResourceChart.on("click", function (obj) {
+                    // delete $scope.selectedFshFromSingleGraph
+                    var nodeId = obj.nodes[0];  //get the first node
+                    var node = vo.graphData.nodes.get(nodeId);
+                    selectedResourceFromSection = node.entry.resource
+                    if (node) {
+                        $scope.selectFromSingleGraph()
+                    }
+
+
+                })
+*/
                 $scope.singleResourceChart.on("doubleClick", function (obj) {
                    // delete $scope.selectedFshFromSingleGraph
                     var nodeId = obj.nodes[0];  //get the first node
@@ -1861,7 +2009,7 @@ angular.module("sampleApp")
                     }
 
                     $scope.selectedFromSingleGraph = node.resource;
-                    fshResourceId = $scope.selectedFromSingleGraph.id
+                    fshResourceId = $scope.selectedFromSingleGraph?.id
 
 
 /*
@@ -1974,6 +2122,8 @@ angular.module("sampleApp")
 
             };
 
+
+
             $scope.fitCanonicalGraph = function(){
                 $timeout(function(){
                     if ($scope.canonicalGraph) {
@@ -2065,6 +2215,10 @@ angular.module("sampleApp")
 
 
             function drawGraph(options) {
+
+                //a hash of selected resource types
+                //options.selectedResources = $scope.input.selectedType
+
 
                 //>>>>>>>>>>>> this i sthe new graph routine....
                 let vo = v2ToFhirSvc.makeGraph1(options)

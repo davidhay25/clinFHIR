@@ -98,6 +98,14 @@
             background: #f3f3f3;
         }
 
+
+        td {
+            white-space: normal;
+            word-break: normal;
+            overflow-wrap: normal;
+        }
+
+        /* should be superfluous*/
         .nowrap-words {
             white-space: normal;
             word-break: normal;
@@ -156,6 +164,7 @@
     <script src="js/libs/angular-bootstrap-checkbox.js"></script>
 
     <script src="js/bundleVisualizerSvc.js"></script>
+
     <script src="js/serverInteractionSvc.js"></script>
     <script src="js/apiService.js"></script>
     <script src="js/terminologyExplorerCtrl.js"></script>
@@ -164,6 +173,9 @@
     <script src="js/extensionExplorerCtrl.js"></script>
     <script src="js/prePopConfig.js"></script>
     <script src="js/bvManagement.js"></script>
+    <script src="js/fhirBundleFilterSvc.js"></script>
+
+
     <!-- Note that there is also a script at the bottom of the page to ensure the iframe
     is loaded for bvForm-->
     <style>
@@ -197,6 +209,12 @@
             border: 1px solid lightgray;
         }
 
+        #sectionResourceGraph {
+            width: 100%;
+            height: 550px;
+            border: 1px solid lightgray;
+        }
+
         .scroll-wrapper {
             max-width: 100%;
             overflow-x: auto;
@@ -215,7 +233,7 @@
 
 
 
-        td {
+        tdDEP {
             white-space: normal;      /* allow wrapping */
             word-break: break-all;    /* ✅ forces breaking anywhere if needed */
             overflow-wrap: anywhere;  /* ✅ modern & preferred version */
@@ -235,9 +253,9 @@
     <script src="js/appConfigSvc.js"></script>
     <script src="js/libs/ngStorage.min.js"></script>
     <script src="js/filters.js"></script>
-    <!--
+<!--
     <script src="js/bundleVisualizerCtrl.js"></script>
-    -->
+-->
     <script src="js/viewResourceCtrl.js"></script>
     <script src="js/umamiSvc.js"></script>
     <script src="js/viewVSCtrl.js"></script>
@@ -543,12 +561,12 @@
 
                         <uib-tabset>
                             <uib-tab heading="Stored document bundles">
-                                <em class="pull-right">Bundles that have been saved in the Library</em>
+                                <em class="pull-right">Bundles with Composition resources that have been saved in the Library</em>
                                 <div class="row">
 
                                     <div class="col-md-10">
                                         <div class="myScroll1">
-                                            <div class="myScroll1">
+
                                                 <table class="table table-bordered">
                                                     <tr><th>Name</th><th>Description</th><th>Author</th><th>Show in Patient Viewer</th><th>Resource</th><th>Date</th></tr>
                                                     <tr ng-click="input.libraryBundle=bundle"
@@ -564,14 +582,16 @@
                                                         </td>
                                                         <td>{{bundle.entryCount}}</td>
                                                         <td>{{bundle.date | date}}</td>
+                                                        <!--
                                                         <td ng-show="user.email">
                                                             <i class="glyphicon glyphicon-remove-sign clickable"
                                                                ng-click="deleteBundleFromLibrary(input.libraryBundle)"></i>
                                                         </td>
+                                                        -->
 
                                                     </tr>
                                                 </table>
-                                            </div>
+
 
                                         </div>
 
@@ -1393,16 +1413,41 @@
                 </div>
 
                 <div class="row" ng-hide="noFullGraph">
-                    <div class="col-md-8">
+
+                    <div class="col-md-2">
+                        <br/>
+                        <h4>Types in graph</h4>
+
+                        <div ng-repeat="(k,v) in hashTypes ">
+                             <checkbox ng-model="input.selectedType[k]"
+                                ng-change="updateGraph()">
+
+                             </checkbox> {{k}} ({{hashTypes[k]}})
+                        </div>
+
+                        <br/>
+                        <div class="clickable" ng-click="updateSelectedType(false)">Hide all</div>
+                        <div class="clickable" ng-click="updateSelectedType('patient')">Hide all except Patient</div>
+
+                        <div class="clickable" ng-click="updateSelectedType(true)">Show all</div>
+
+                    </div>
+
+                    <div class="col-md-7">
+
+                        <!--
                         <div>
                             <div class="pull-right">
                                 <input ng-model="input.showHidePatient" type="checkbox"
                                        ng-click="showHidePatient(input.showHidePatient)"/> Hide Patient
                             </div>
                         </div>
+                        <div class="clearfix"></div>
+                        -->
+
                         <div id="resourceGraph"></div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="pull-right">
                             <button class="btn btn-link"
                                     ng-click="selectFromMainGraph(selectedNode.entry.resource)">Details</button>
@@ -1944,6 +1989,7 @@
 
             <uib-tab ng-show = "isDocument" heading="Document view">
                 <br/>
+
                 <ng-include src = "'includes/bvDocument.html'"></ng-include>
 
             </uib-tab>

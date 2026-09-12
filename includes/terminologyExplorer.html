@@ -79,9 +79,12 @@
                         <table class="table table-bordered">
                             <tr><th>Resource type</th><th>Path</th><th>Code</th><th>System</th><th>Display</th></tr>
                             <tr ng-repeat="v in input.arTerminologySummary"
+                                ng-class="{listItemSelected:termInput.selectedResource == v.resource}"
+                                style="cursor: pointer"
+                                ng-click="termInput.selectedResource = v.resource"
                                 ng-show = "canShowSummaryLine(v)">
                                 <td>
-                                    <div class="clickable" ng-click="termInput.selectedResource = v.resource">
+                                    <div class="clickable" >
                                         {{v.resource.resourceType}}
                                     </div>
                                 </td>
@@ -98,7 +101,7 @@
                     <button class="btn btn-link pull-right" ng-show="termInput.selectedResource"
                             ng-click="selectFromMainGraph(termInput.selectedResource)">Details</button>
                     <div class="clearfix"></div>
-                    <pre>{{termInput.selectedResource | json}}</pre>
+                    <pre ng-show="termInput.selectedResource">{{termInput.selectedResource | json}}</pre>
 
                 </div>
             </div>

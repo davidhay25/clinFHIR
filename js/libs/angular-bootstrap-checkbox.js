@@ -49,6 +49,7 @@ angular.module("ui.checkbox", []).directive("checkbox", function() {
 				elem.name = scope.name;
 			}
 
+			/* changed Sep14 2026 to avoid calling $setViewValue on init
 			// Update element when model changes
 			scope.$watch(function() {
 				if(modelCtrl.$modelValue === trueValue || modelCtrl.$modelValue === true) {
@@ -60,6 +61,15 @@ angular.module("ui.checkbox", []).directive("checkbox", function() {
 			}, function(newVal, oldVal) {
 				scope.checked = modelCtrl.$modelValue === trueValue;
 			}, true);
+
+*/
+			// Update element when model changes
+			scope.$watch(function() {
+				return modelCtrl.$modelValue;
+			}, function(newVal) {
+				scope.checked = (newVal === trueValue) || newVal === true;
+			});
+
 
 			// On click swap value and trigger onChange function
 			elem.bind("click", function() {

@@ -41,6 +41,7 @@
             hasModifier:v.hasModifier}"
                ng-repeat="(k,v) in extensionSummary"
                ng-show="canShow(v)"
+               style="cursor: pointer"
                ng-click = "selectExtResource(v)">
             {{v.resource.resourceType}}
             <span class="badge pull-right">{{v.extensions.length}}</span>
@@ -61,6 +62,7 @@
           hasModifier:ext.kind=='modifierExtension'}"
              ng-repeat="ext in selectedExtResource.extensions"
              ng-show="canShowExtension(ext)"
+             style="cursor: pointer"
              ng-click = "selectExtension(ext)" >
 
 

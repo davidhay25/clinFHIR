@@ -24,8 +24,12 @@ angular.module("sampleApp")
             }
 
             $scope.selectSystem = function(system) {
-                $scope.selectedTerminologySummary =$scope.terminologySummary[system]
-                    let resources = $scope.terminologySummary[system]
+
+                delete $scope.termInput.selectedResource
+                delete $scope.selectedItem
+
+            //    $scope.selectedTerminologySummary = $scope.terminologySummary[system]
+              //      let resources = $scope.terminologySummary[system]
 
             }
 
@@ -33,7 +37,7 @@ angular.module("sampleApp")
                 $scope.selectedTermResource = resource
             }
 
-            $scope.selectSystem = function() {
+            $scope.selectSystemDEP = function() {
                 delete $scope.selectedItem
             }
 

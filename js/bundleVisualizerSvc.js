@@ -5,7 +5,7 @@ angular.module("sampleApp")
     //also holds the current patient and all their resources...
     //note that the current profile is maintained by resourceCreatorSvc
 
-    .service('bundleVisualizerSvc', function($http,$q,$filter,v2ToFhirSvc) {
+    .service('bundleVisualizerSvc', function($http,$q,$filter,v2ToFhirSvc,fhirBundleFilterSvc) {
 
 
             let timelineDatePaths = [
@@ -57,9 +57,92 @@ angular.module("sampleApp")
 
         return {
 
+            getSectionBundle : function (bundle,sectionCode) {
+                //return a bundle containing only those resources referenced by a section
+
+                const composition = bundle.entry
+                    .find(x => x.resource?.resourceType === 'Composition')?.resource;
+                if (! composition) {
+                    return {}
+                }
+
+                const resources = composition.section
+                    .filter(section => section.code?.coding?.some(c => c.code === sectionCode))
+                    .flatMap(section => section.entry || [])
+                    .map(entry => entry.reference);
+
+                //console.log(resources)
+
+                let filteredBundle = fhirBundleFilterSvc.filter(bundle, resources, { transitive: false })
+
+
+
+                //console.log(filteredBundle)
+
+                return filteredBundle
+
+
+            },
+
+            makeResourceTypeList : function (bundle) {
+                //all the types in the bundle
+                let hashTypes = {}
+                for (const entry of bundle.entry) {
+                    let resource = entry.resource
+                    hashTypes[resource.resourceType] = hashTypes[resource.resourceType] || 0
+                    hashTypes[resource.resourceType] ++
+                }
+
+                //order by key
+                let hash = {}
+                let ar = Object.keys(hashTypes).sort()
+                for (const typ of ar) {
+                    hash[typ] = hashTypes[typ]
+                }
+
+                return hash
+            },
+
+            makeTransactionBundle : function (inBundle) {
+                let bundle = angular.copy(inBundle)
+                bundle.type = 'transaction'
+                for (let entry of bundle.entry) {
+                    let resource = entry.resource
+                    delete resource.id
+                    delete entry.id
+                    entry.request = {method:"POST",url:resource.resourceType}
+                }
+                console.log(bundle)
+                return bundle
+            },
+
+            getResourceSummary : function (resource) {
+                //get a one line summary of a resource depending on type
+                let def = hashTemporal[resource.resourceType] //temporal definition from the config file
+                let value
+
+                if (def) {
+                     for (let df of def.dateFields) {
+                        try {
+                            let ar = fhirpath.evaluate(resource, df.field, null, fhirpath_r4_model)
+                            if (ar.length > 0) {
+                                value = ar[0]
+                                break
+                            }
+                        } catch (ex) {
+                            value = `Error with FhirPath: ${df.field}`
+                        }
+                    }
+                }
+
+                return value
+
+            },
+
 
             makeTemporalObject:function (bundle,filterType) {
                 let colours = v2ToFhirSvc.definedColours()
+                //let colours = {}
                 let arLog = []
                 let arData = []
                 let hashResourceDate = {} //keyed by type+date - used to create the timeline view
@@ -114,6 +197,7 @@ angular.module("sampleApp")
                                 //string
                                 keyDate = value.substring(0,10)  //group by date not time
                             }
+                            lne.dateDisplay = keyDate //for display, the .date is the original dataType
 
 
                             //console.log(value)
@@ -180,7 +264,7 @@ angular.module("sampleApp")
                     for (const fp of def.fpDisplay) {
                         try {
                             let ar = fhirpath.evaluate(resource, fp, null, fhirpath_r4_model)
-                            console.log(ar)
+                            //console.log(ar)
                             ar.forEach(function (disp) {
                                 display += disp + " "
                             })

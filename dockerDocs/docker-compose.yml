@@ -86,7 +86,7 @@ services:
       NODE_OPTIONS: "--max-old-space-size=256"
     networks:
       - clinfhir-network
-    mem_limit: 512m
+    mem_limit: 768m
 
   hfs:
     image: ghcr.io/heliossoftware/hfs:latest

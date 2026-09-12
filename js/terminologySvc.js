@@ -166,10 +166,29 @@ angular.module("sampleApp").service('terminologySvc', function() {
                 for (item of thing) {
                     arSummary.push(item)
                 }
-
-
-
             })
+
+            //sort arSummary by resource ID (so they are displayed together in the UI)
+            arSummary.sort(function (a,b) {
+                let v1 = a.resource?.resourceType + a.resource?.id
+                let v2 = b.resource?.resourceType + b.resource?.id
+                if (v1>v2) {
+                    return 1
+                } else {
+                    return -1
+                }
+            })
+
+            lstCodedResources.sort(function (a,b) {
+                let v1 = a.resource?.resourceType + a.resource?.id
+                let v2 = b.resource?.resourceType + b.resource?.id
+                if (v1>v2) {
+                    return 1
+                } else {
+                    return -1
+                }
+            })
+
             return {codedResources:lstCodedResources,arAllSystems:arAllSystems,arSummary : arSummary}
             //return hashBySystem
 

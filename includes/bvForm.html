@@ -20,9 +20,12 @@
 
         <div>
           <table class="table table-bordered  rounded-table">
-            <tr><td>Data Server</td><td>{{prePopConfig.dataServer}}</td></tr>
-            <tr><td>Patient</td><td>{{prePopConfig.patient.display}} ({{prePopConfig.patient.reference}})</td></tr>
-            <tr><td>Practitioner</td><td>{{prePopConfig.practitioner.display}} ({{prePopConfig.practitioner.reference}})</td></tr>
+            <tr><td class="nowrap-words">Data Server</td><td>{{prePopConfig.dataServer}}</td></tr>
+            <tr><td>Patient</td><td>
+              {{prePopConfig.patient.display}}
+              <div><em>{{prePopConfig.patient.reference}}</em></div></td></tr>
+            <tr><td>Practitioner</td><td>{{prePopConfig.practitioner.display}}
+              <div><em>{{prePopConfig.practitioner.reference}}</em></div></td></tr>
           </table>
         </div>
 
@@ -43,21 +46,36 @@
 
       </div>
       <div class="col-md-6">
-        <div><strong>Or paste Questionnaire Json</strong>
 
-          <button class="btn-success btn pull-right"
-                  ng-show="formInput.json"
-                  ng-click="loadQ(formInput.json)">Render pasted Questionnaire</button>
+        <div class="row">
+          <div class="col-md-4">
+            <strong>Or paste Questionnaire Json</strong>
+          </div>
 
+          <div class="col-md-4">
+            <div ng-show="previousQ">
+              <div class="clickable" ng-click="formInput.json = previousQ">Load previous Q</div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <button class="btn-success btn pull-right"
+                    ng-show="formInput.json"
+                    ng-click="loadQ(formInput.json)">Render pasted Questionnaire</button>
+
+
+          </div>
         </div>
+
         <br/>
         <textarea rows="20"
 
                   class="form-control" ng-model="formInput.json"></textarea>
-
+<!--
         <div ng-show="loadedFromCache">
           <em>This is the previous adHoc Questionnaire</em>
         </div>
+        -->
 <!--
         <button class="btn-success btn pull-right" ng-click="loadQ(formInput.json)">Load</button>
         -->

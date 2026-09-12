@@ -6,11 +6,43 @@ angular.module("sampleApp")
 
             $scope.input = {}
 
+            $scope.resourceTypes = [
+                {type:'Condition',patient:'patient'},
+                {type:'AllergyIntolerance',patient:'patient'}
+            ]
+
+            $scope.showResource = function (ref) {
+                let qry = `${prePopConfig.dataServer}/${ref}`
+                $http.get(qry).then(
+                    function (data) {
+                        $scope.input.selectedResource = data.data
+
+                    }
+                )
+
+            }
             
             
             $scope.save = function () {
                 $scope.$close($scope.prePopConfig)
             }
+
+            $scope.makeContextPatient = function (patient) {
+                $scope.prePopConfig.patient = {reference:`Patient/${patient.id}`}
+                let display = patient.name?.[0].text ||
+                    (patient.name?.[0].given?.[0] +" " + patient.name?.[0].family) || 'No name'
+                $scope.prePopConfig.patient.display = display
+                $scope.input.mainTabActive = 0
+            }
+
+            $scope.makeContextPractitioner = function (practitioner) {
+                $scope.prePopConfig.practitioner = {reference:`Practitioner/${practitioner.id}`}
+                let display = practitioner.name?.[0].text ||
+                    (practitioner.name?.[0].given?.[0] +" " + practitioner.name?.[0].family) || 'No name'
+                $scope.prePopConfig.practitioner.display = display
+                $scope.input.mainTabActive = 0
+            }
+
 
             $scope.testDataServer = function (url) {
                 let url1 = url.endsWith('#') ? url : url + '/';
@@ -32,11 +64,8 @@ angular.module("sampleApp")
                     function (data) {
                         let response = data.data
                         $scope.responseJson = response
-                        if (response.resourceType == 'Bundle') {
 
-                        } else {
 
-                        }
 
                     }, function (err) {
                         $scope.qryError = err.data

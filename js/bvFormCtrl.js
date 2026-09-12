@@ -90,11 +90,16 @@ angular.module("sampleApp")
 
 
             $scope.formInput.state = "getQ"         //other state = renderQ
-
+/*
             if ($localStorage.bvQ) {
                 $scope.loadedFromCache = true
+
             }
-            $scope.formInput.json = $localStorage.bvQ || ""
+*/
+            $scope.previousQ = $localStorage.bvQ
+            //$scope.formInput.json = $localStorage.bvQ || ""
+
+
 
             $scope.selectBundle = function () {
 

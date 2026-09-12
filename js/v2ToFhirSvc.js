@@ -1,6 +1,10 @@
 angular.module("sampleApp")
     .service('v2ToFhirSvc', function($filter,$q,$http) {
 
+
+
+
+
         var objColours ={};
         objColours.Patient = '#93FF1A';
         objColours.Composition = '#E89D0C';
@@ -32,6 +36,7 @@ angular.module("sampleApp")
 
 
         return {
+
             definedColours : function () {
                 return objColours
             },
@@ -324,6 +329,8 @@ angular.module("sampleApp")
             makeGraph1: function (options) {
                 //updated 2025-11-12
 
+                //an optional hash of resource types to include. If absent, all types are included
+                let selectedResources = options.selectedResources
 
                 let bundle = options.bundle;
                 //let centralResourceId = options.primaryResourceId;
@@ -371,6 +378,17 @@ angular.module("sampleApp")
                     if (hidePatient && resource.resourceType == 'Patient') {
                         canAdd = false
                     }
+
+
+                    //a hash of types to display was passed in
+                    if (selectedResources) {
+                        canAdd = false
+                        if (selectedResources[resource.resourceType]) {
+                            canAdd = true
+                        }
+                    }
+
+
 
                     if (canAdd) {
                         arNodes.push(node)

@@ -62,23 +62,12 @@
               <li ng-repeat="d in tlResourceDefinition.fpDisplay">{{d}}</li>
             </ul>
 
-<!--
-            <div><strong>Date fields: </strong><span ng-repeat="d in tlResourceDefinition.dateFields">{{d.field}} </span></div>
 
-
-            <div><strong>Display fields: </strong><span ng-repeat="d in tlResourceDefinition.fpDisplay">{{d}} </span></div>
-
-            <pre>{{tlResourceDefinition | json}}</pre>
-            <pre>{{selectedTlItem | json}}</pre>
-            -->
 
           </div>
 
 
 
-<!--
-          <pre>{{selectedTlItem | json}}</pre>
-          -->
 
         </div>
         <div class="col-md-4">
@@ -109,8 +98,10 @@
                 style="cursor: pointer"
                 ng-class="{listItemSelected:input.selectedTemporal == tem.resource}"
                 ng-click="input.selectedTemporal = tem.resource">
-              <td>{{tem.date | date}}</td>
-              <td>{{tem.date | getAge}}</td>
+              <td>
+                {{tem.dateDisplay | date}}
+              </td>
+              <td>{{tem.dateDisplay | getAge}}</td>
               <td>{{tem.resource.resourceType}}</td>
               <td>{{tem.display}}</td>
             </tr>
