@@ -20,6 +20,34 @@ angular.module("sampleApp")
 
 
 
+            //add the current query/bundle to the current users list
+            $scope.addToList = function () {
+
+
+
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/bvAddToList.html',
+                    backdrop: 'static',
+                    //size : 'lg',
+                    controller: "bvAddToListCtrl",
+
+                    resolve: {
+                        source: function () {
+                            return $scope.source
+                        },
+                        user: function () {
+                            return $scope.user
+                        }
+                    }
+
+                }).result.then(function () {
+                   // alert('model closed')
+                    $scope.$broadcast('listChanged')
+                })
+
+
+            }
+
 
             //todo - get these from config
             let localhapiserver = "http://localhost:9090/fhir"
@@ -85,13 +113,15 @@ angular.module("sampleApp")
             $scope.input.issWarning = true
             $scope.input.issInfo = true
 
-            $scope.maxForGraph = 200 //the maximum resources for which the full graph is generated.
+            //$scope.maxForGraph = 200 //the maximum resources for which the full graph is generated.
+            $scope.maxForGraph = 300
 
             $scope.selectors = []
             $scope.selectors.push({display:"Paste Bundle",code:'paste'})
             $scope.selectors.push({display:"Paste Single resource",code:'singleresource'})
             $scope.selectors.push({display:"Query for Bundle",code:'query'})
             $scope.selectors.push({display:"Generate from form",code:'form'})
+            $scope.selectors.push({display:"Curated lists",code:'lists'})
             $scope.selectors.push({display:"IPS Bundles",code:'ips'})
             $scope.selectors.push({display:"Locally saved queries",code:'saved'})
             $scope.selectors.push({display:"Shared Library Queries",code:'library'})
@@ -113,6 +143,7 @@ angular.module("sampleApp")
             $scope.setTab = {}          //for setting the tab from code
 
             $scope.moment = moment
+
 
 
             $scope.displayRenderingConfig = function (vo) {
@@ -611,6 +642,7 @@ angular.module("sampleApp")
                     function (data) {
                         umamiSvc.track('bvBundle:libraryBundle:retrieve', {value:item.qry});
                         $scope.bundleDisplayName = item.name
+                        //$scope.bundleDisplayName = item.name
                         console.log(data.data)
 
                         if (initialTab) {
@@ -618,8 +650,9 @@ angular.module("sampleApp")
                         }
 
 
-
-
+                        $scope.source = {type:'bundle',bundleId:item.id,name:item.name,
+                            fromLibrary : true,
+                            description:item.description}
                         processBundle(data.data.bundle)
                         $scope.loadedFromLibrary = true     //so we don't show the 'save to library' link again
                     }, function () {
@@ -860,6 +893,7 @@ angular.module("sampleApp")
                             if (initialTab) {
                                 $scope.setTab.mainTabActive = $scope.ui[initialTab]
                             }
+                            $scope.source = {type:'query',query:item.qry,name:item.name,description:item.description}
 
                             processBundle(data.data)
 
@@ -1518,6 +1552,8 @@ angular.module("sampleApp")
 
             $scope.addNewQuery = function(qry,name,description) {
 
+                $scope.source = {type:'query',query:qry,name:name,description:description}
+
                 $localStorage.bvQueries = $localStorage.bvQueries || []
                 let newQuery = {name: name,qry: qry ,description:description}
 
@@ -1531,6 +1567,7 @@ angular.module("sampleApp")
 
             $scope.viewNewQueryBundle = function(bundle) {
                 $scope.bundleDisplayName = "New query"
+                $scope.source = {type:'paste'}
                 processBundle(bundle);
             }
 
@@ -1549,6 +1586,7 @@ angular.module("sampleApp")
                             alert("Must return a Bundle with at least one entry")
                         } else {
                             $scope.bundleDisplayName = item.name
+                            $scope.source = {type:'query',query:item.qry,name:item.name,description:item.description}
                             processBundle(data.data)
 
                         }
@@ -1585,6 +1623,7 @@ angular.module("sampleApp")
                     bundle.entry.push({resource:json})
 
                     try {
+                        $scope.source = {type:'paste'}
                         process(bundle)
                     } catch (ex) {
                         console.log(ex)
@@ -1633,6 +1672,7 @@ angular.module("sampleApp")
                     }
 
                     try {
+                        $scope.source = {type:'paste'}
                         process(json)
                     } catch (ex) {
 
@@ -1648,13 +1688,13 @@ angular.module("sampleApp")
                 }
 
                 //called to process a pasted or uploaded bundle
-                function process(json) {
+            function process(json) {
 
-                //$scope.selectedFileName set if an uplaoded bundle
-                    $scope.bundleDisplayName = $scope.selectedFileName || "Pasted bundle"
+            //$scope.selectedFileName set if an uplaoded bundle
+                $scope.bundleDisplayName = $scope.selectedFileName || "Pasted bundle"
 
-                    // $scope.showSelector = false
-                    processBundle(json);
+                // $scope.showSelector = false
+                processBundle(json);
 
 
             }

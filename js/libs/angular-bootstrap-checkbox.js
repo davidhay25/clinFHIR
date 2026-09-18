@@ -49,7 +49,7 @@ angular.module("ui.checkbox", []).directive("checkbox", function() {
 				elem.name = scope.name;
 			}
 
-			/* changed Sep14 2026 to avoid calling $setViewValue on init
+			/* changed by me Sep14 2026 to avoid calling $setViewValue on init
 			// Update element when model changes
 			scope.$watch(function() {
 				if(modelCtrl.$modelValue === trueValue || modelCtrl.$modelValue === true) {

@@ -172,7 +172,7 @@
 
     <script src="js/extensionExplorerCtrl.js"></script>
     <script src="js/prePopConfig.js"></script>
-    <script src="js/bvManagement.js"></script>
+    <script src="js/bvManagementCtrl.js"></script>
     <script src="js/fhirBundleFilterSvc.js"></script>
 
 
@@ -261,7 +261,8 @@
     <script src="js/viewVSCtrl.js"></script>
 
     <script src="js/profileCtrl.js"></script>
-
+    <script src="js/bvListsCtrl.js"></script>
+    <script src="js/bvAddToListCtrl.js"></script>
 
     <script>
         const firebaseConfig = {
@@ -291,20 +292,24 @@
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
 
         <div class="container-fluid">
-            <div class="col-md-2 ">
+            <div class="col-md-4">
                 <span>
                     <a class="navbar-brand" href="https://clinfhir.com" >
                         Bundle Viewer
+                         <div><em> {{bundleDisplayName}}</em></div>
                     </a>
+
                 </span>
 
-            </div>
 
-            <div class="col-md-3">
+            </div>
+<!--
+            <div class="col-md-2">
                 <div class="navbar-text">
                     {{bundleDisplayName}}
                 </div>
             </div>
+            -->
 
             <div class="col-md-1">
                 <form class="navbar-form navbar-left">
@@ -331,19 +336,26 @@
 
             <div class="col-md-2">
                 <div class="navbar-text">
+                    <div ng-hide="showSelector">
+                        <div class="clickable" ng-show="fhir"
+                             ng-click="copyToClipboard()">Copy bundle to Clipboard</div>
 
-                    <div class="clickable" ng-show="fhir"
-                         ng-click="copyToClipboard()">Copy bundle to Clipboard</div>
-
-                    <div style="padding-top: 8px" class="clickable" ng-show="fhir && ! loadedFromLibrary"
-                            ng-click="addBundleToLibrary()">Save bundle in Library</div>
+                        <div style="padding-top: 8px" class="clickable" ng-show="fhir && ! loadedFromLibrary"
+                             ng-click="addBundleToLibrary()">Save bundle in Library</div>
 
 
-
-                    <div ng-show="false" style="padding: 8px">
-                        <checkbox ng-model="showHelp"></checkbox> Show help
                     </div>
+
+
                 </div>
+            </div>
+
+            <div class="col-md-1">
+                <div class="navbar-text">
+                    <div class="clickable" ng-show="source && fhir && ! showSelector"
+                         ng-click="addToList()">Add to list</div>
+                </div>
+
             </div>
 
             <div class="col-md-1">
@@ -370,6 +382,7 @@
                         </span>
                     </div>
                 </div>
+
             </div>
 
 
@@ -415,12 +428,6 @@
                                            onchange="angular.element(this).scope().fileSelected(this)"
                                            id="fileUploadFileRef"
                                            accept="application/json" />
-<!--
-                                    <br/>
-                                    <button
-                                            ng-show="jsonFileSelected"
-                                            class="btn btn-primary" ng-click="uploadJson()">Upload Json file</button>
-                                    -->
 
                                 </div>
 
@@ -446,19 +453,6 @@
                                 <textarea class="form-control" rows = '20' ng-model="input.singleResource"></textarea>
                             </div>
                             <div class="col-md-4">
-
-<!--
-                                <div ng-hide="input.singleResource">
-                                    <input type="file"
-                                           onchange="angular.element(this).scope().fileSelected(this)"
-                                           id="fileUploadFileRefSingle"
-                                           accept="application/json" />
-
-
-                                </div>
-                                -->
-
-
 
                                 <button ng-show = "input.singleResource" class="btn btn-success"
                                         ng-click="viewSingleResource(input.singleResource)">View Resource</button>
@@ -540,6 +534,14 @@
 
                     </div>
 
+                    <div ng-show="input.selectedSelector.code == 'lists'">
+
+                        <div ng-controller="bvListsCtrl">
+                            <ng-include src = "'includes/bvLists.html'"></ng-include>
+                        </div>
+
+                    </div>
+
 
 
                     <!-- make an IPS query-->
@@ -598,10 +600,11 @@
                                     </div>
                                     <div class="col-md-2">
 
-                                        <div class="alert alert-warning" ng-show="input.libraryBundle.entryCount > 200">
-                                            There are over 200 resources in this Graph. The full graph won't be shown,
+                                        <div class="alert alert-warning" ng-show="input.libraryBundle.entryCount > maxForGraph">
+                                            There are over {{maxForGraph}} resources in this Graph. The full graph won't be shown,
                                             though the rest of the functionality is fine. Validation will likely be slow as well.
                                         </div>
+
 
 
                                         <button ng-show = "input.libraryBundle" class="btn btn-primary"
@@ -675,6 +678,7 @@
 
                             <uib-tab heading="Query server">
                                 <em class="pull-right">Query servers that expose a $summary endpoint</em>
+                                <br/>
                                 <div class="row">
                                     <div class="col-md-4">
                                         <select class="form-control" ng-model="input.selectedIPSServer"
@@ -885,22 +889,7 @@
                             Select the Bundle to view then click the 'Retrieve bundle' button that appears to the right.
                         </div>
 
-<!--
-                        <div class="row">
-                            <div class="col-md-2">
-                                Filters
-                            </div>
-                            <div class="col-md-2">
-                                <input class="form-control" ng-model="input.sbFiltername" placeholder="Name">
-                            </div>
-                            <div class="col-md-2">
 
-                            </div>
-                            <div class="col-md-2">
-
-                            </div>
-                        </div>
-                        -->
 
                         <div class="row">
 
@@ -946,8 +935,8 @@
                                 </div>
                                 <div class="col-md-2">
 
-                                    <div class="alert alert-warning" ng-show="input.libraryBundle.entryCount > 200">
-                                        There are over 200 resources in this Graph. The full graph won't be shown,
+                                    <div class="alert alert-warning" ng-show="input.libraryBundle.entryCount > maxForGraph">
+                                        There are over {{maxForGraph}} resources in this Graph. The full graph won't be shown,
                                         though the rest of the functionality is fine. Validation will likely be slow as well.
                                     </div>
 
@@ -989,18 +978,7 @@
     <div ng-hide = "showSelector">
 
 
-     <!--   <div ng-class="rightPaneClass">-->
 
-        <div ng-show="false">
-
-
-            <button class="btn btn-link pull-right" ng-show="fhir"
-                    ng-click="addBundleToLibrary()">Save bundle in Library</button>
-
-            <button class="btn btn-link pull-right" ng-show="fhir"
-                    ng-click="copyToClipboard()">Copy bundle to Clipboard</button>
-
-        </div>
 
         <uib-tabset active="setTab.mainTabActive" ng-show="fhir" >
 
@@ -1435,15 +1413,6 @@
 
                     <div class="col-md-7">
 
-                        <!--
-                        <div>
-                            <div class="pull-right">
-                                <input ng-model="input.showHidePatient" type="checkbox"
-                                       ng-click="showHidePatient(input.showHidePatient)"/> Hide Patient
-                            </div>
-                        </div>
-                        <div class="clearfix"></div>
-                        -->
 
                         <div id="resourceGraph"></div>
                     </div>

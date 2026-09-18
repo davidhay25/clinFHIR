@@ -140,37 +140,14 @@ angular.module("sampleApp")
                 $scope.messagingHandle = 'cf-forms-' + Date.now() // Unique handle for this session
                 $scope.messagingOrigin = window.location.origin // Origin for message validation
 
-                //need to pass the messaging handle & origin when initializing the iFrame
-                iframe.src = `${url}?messaging_handle=${encodeURIComponent($scope.messagingHandle)}&messaging_origin=${encodeURIComponent($scope.messagingOrigin)}`
+                $timeout(function () {
+                    //need to pass the messaging handle & origin when initializing the iFrame
+                    iframe.src = `${url}?messaging_handle=${encodeURIComponent($scope.messagingHandle)}&messaging_origin=${encodeURIComponent($scope.messagingOrigin)}`
 
-                /*
-                                //set the context
-                                $timeout(function () {
-                                    $scope.sendMessage('sdc.configureContext', {
-                                        context: {
-                                            subject: { reference: 'Patient/45086382', display: 'Example Patient' },
-                                            author: { reference: 'Practitioner/10652933', display: 'Example Practitioner' },
-                                            launchContext: [
-                                                {
-                                                    name: 'source',
-                                                    contentReference: { reference: 'Practitioner/10652933',
-                                                        display: 'Example Practitioner' }
-                                                }
-                                            ]
-                                        }
-                                    })
-
-                                    $scope.sendMessage('sdc.configure', {
-                                        terminologyServer: 'https://tx.fhir.org/r4',
-                                        dataServer: 'https://hapi.fhir.org/baseR4',
-                                        formsServer: 'https://hapi.fhir.org/baseR4'
-                                    });
+                },500)
 
 
-                                },1000)
 
-
-                                */
                 window.addEventListener('message',function (data) {
                     let msg = data.data
                     let msgType = msg.messageType

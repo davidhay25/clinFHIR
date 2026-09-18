@@ -1,0 +1,107 @@
+<div>
+
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+                <h3>Add {{source.type}} to list</h3>
+
+            </div>
+
+            <div class="col-md-4 col-sm-4">
+                <div class="pull-right">
+
+
+                    <button class="btn btn-link pull-right" ng-click="$dismiss()">Cancel</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal-body">
+
+        <h4>Item to add</h4>
+        <div class="row">
+            <div class="col-md-3">
+                Item type: {{source.type}}
+            </div>
+            <div class="col-md-9">
+                <textarea class="form-control"
+                          placeholder="Description of item (required)"
+                          ng-model="input.description"></textarea>
+            </div>
+        </div>
+
+        <div ng-show="source.type=='bundle' && ! source.fromLibrary">
+            This bundle is not in the Library and needs to be added there to appear in a list.
+        </div>
+
+
+        <br/>
+
+        <div ng-show="input.state=='select'">
+            <div class="row">
+                <div class="col-md-9">
+                    <h4>Select list to add item to</h4>
+                </div>
+                <div class="col-md-3">
+                    <button ng-show="input.state=='select'" class="btn btn-link pull-right" ng-click="input.state='add'">Create new list</button>
+
+                </div>
+            </div>
+
+            <table class="table-bordered table">
+                <tr><th>Name</th><th>Description</th><th>Queries</th><th>Bundles</th></tr>
+                <tr ng-repeat="list in lists"
+                    style="cursor: pointer"
+                    ng-class="{listItemSelected:bvAddselectedList == list}"
+                    ng-click="selectList(list)">
+                    <td>{{list.name}}</td>
+                    <td>{{list.description}}</td>
+                    <td>{{list.queryCount}}</td>
+                    <td>{{list.bundleCount}}</td>
+                </tr>
+            </table>
+            <div style="color: red" ng-show="issue">{{issue}}</div>
+            <div ng-show="bvAddselectedList && input.description && ! issue" class="clickable pull-right" ng-click="addToList()">Add to list</div>
+
+        </div>
+
+
+        <div ng-show="input.state=='add'" >
+            <div class="row">
+                <div class="col-md-9">
+                    <h4>Create a new List</h4>
+                </div>
+                <div class="col-md-3">
+                    <button ng-show="input.state=='add'" class="btn btn-link pull-right" ng-click="input.state='select'">Select existing list</button>
+
+                </div>
+            </div>
+
+
+            <table class="table-bordered table">
+                <tr><td>Name</td><td><input class="form-control" type="text" ng-model="input.listName"/></td></tr>
+                <tr><td>Description</td><td><textarea class="form-control" ng-model="input.listDescription"></textarea> </td></tr>
+            </table>
+
+            <button class="btn btn-link pull-right" ng-click="createList(input.listName,input.listDescription)">Create list</button>
+        </div>
+
+
+
+
+
+
+
+
+    </div>
+
+    <div class="modal-header">
+
+
+
+    </div>
+</div>

@@ -1,0 +1,90 @@
+<div>
+  <div class="alert alert-info">
+    These are lists that are manually created for a particular purpose.
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+
+      <table class="table-bordered table">
+        <tr><th>Name</th><th>Description</th><th>Queries</th><th>Bundles</th></tr>
+        <tr ng-repeat="list in lists"
+            style="cursor: pointer"
+            ng-class="{listItemSelected:selectedList == list}"
+            ng-click="selectList(list)">
+          <td>{{list.name}}</td>
+          <td>{{list.description}}</td>
+          <td>{{list.queryCount}}</td>
+          <td>{{list.bundleCount}}</td>
+        </tr>
+      </table>
+
+      <div class="clickable" ng-click="addNewList()">New List</div>
+
+    </div>
+    <div class="col-md-6">
+
+      <div class="rounded-box" ng-show="selectedList">
+        <div class="row">
+          <div class="col-md-2">
+            <strong>Name</strong>
+          </div>
+          <div class="col-md-9">
+            {{selectedList.name}}
+          </div>
+          <div class="col-md-1">
+            <i ng-click="editList(selectedList.id)" class="glyphicon glyphicon-edit clickable pull-right"></i>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-2">
+            <strong>Description</strong>
+          </div>
+          <div class="col-md-10">
+            {{selectedList.description}}
+          </div>
+        </div>
+
+
+        <br/>
+
+        <div ng-show="selectedList.userOnlyEdit">
+          <strong><em>Only the user can add items to this list</em></strong>
+        </div>
+
+      </div>
+
+      <div ng-show="selectedList.entries.length > 0">
+        <strong>Entries</strong>
+
+
+        <table class="table table-bordered">
+        <tr><th>Type</th><th>Name / Description</th><th></th></tr>
+        <tr ng-repeat = "item in selectedList.entries">
+          <td>{{item.type}}</td>
+          <td>
+            {{item.name}}
+            <div><em>{{item.description}}</em></div>
+          </td>
+          <td>
+            <div ng-click="loadBundle(item.bundleId,item.name,item.description)"
+                 class="clickable"
+                 ng-show="item.type == 'bundle'">Load</div>
+            <div ng-click="executeLibraryQuery({qry:item.query,name:item.name,description:item.description})"
+                 class="clickable"
+                 ng-show="item.type == 'query'">Execute</div>
+          </td>
+
+        </tr>
+      </table>
+      </div>
+
+      <em>To add items to the list, load them into the Viewer then click the 'Add to list' at the upper right.
+      Any link can be added, but Bundles need to be in the library.</em>
+
+    </div>
+
+  </div>
+
+
+</div>

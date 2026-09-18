@@ -1,0 +1,101 @@
+<div>
+
+
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+                <h3 ng-show = 'isNew' class="modal-title">Add a new List</h3>
+                <h3 ng-show = '! isNew' class="modal-title">Edit list</h3>
+            </div>
+
+            <div class="col-md-4 col-sm-4">
+                <div class="pull-right">
+
+                    <button ng-show = 'input.isDirty' class="btn btn-success pull-right" ng-click="save()">Save</button>
+                    <button class="btn btn-link pull-right" ng-click="$dismiss()">Cancel</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal-body">
+
+        <div class="row">
+            <div class="col-md-1">
+                List Name
+
+            </div>
+            <div class="col-md-4">
+                <input class="form-control"
+                       ng-change="input.isDirty = true"
+                       type="text" ng-model="list.name">
+
+            </div>
+            <div class="col-md-2">
+                Description
+            </div>
+            <div class="col-md-5">
+                <textarea class="form-control"  ng-change="input.isDirty = true" ng-model="list.description"></textarea>
+
+            </div>
+        </div>
+
+
+
+        <div>
+            <br/>
+            <div ng-show="canEdit()">
+                <checkbox
+                        ng-model="list.userOnlyEdit"></checkbox>
+            </div>
+            <div ng-show="list.userOnlyEdit">
+                Only the list creator ({{user.email}}) can edit the list.
+            </div>
+
+        </div>
+
+
+
+
+        <div ng-show="list.entries.length > 0">
+            <hr/>
+            <h4>Items in list</h4>
+            <table class="table table-bordered">
+                <tr><th>Type</th><th>Description</th><th>Url</th></tr>
+                <tr ng-repeat = "item in list.entries">
+                    <td>{{item.type}}</td>
+                    <td>{{item.name}}</td>
+                    <td>
+                        {{item.query}}
+                    </td>
+                    <td>
+                        <i class="clickable glyphicon glyphicon-remove" ng-click="removeItem($index)"></i>
+                    </td>
+
+                </tr>
+            </table>
+            <br/>
+        </div>
+
+
+        <br/>
+
+        <em>To add items to the list, load them into the Viewer then click the 'Add to list' at the upper right.
+            Any link can be added, but Bundles need to be in the library.</em>
+
+
+
+
+
+
+
+    </div>
+
+    <div class="modal-header">
+
+
+
+    </div>
+</div>

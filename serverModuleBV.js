@@ -11,18 +11,92 @@ function setup(app,client) {
 
     database = client.db("clinfhir");
 
+
+    //------------ Lists ---------------
+    //get all lists. Retuens the entire list as it's unlikely to be large.
+    app.get('/bv/lists', async function(req, res) {
+        let filter = { status: { $ne: "hide" }}
+
+        try {
+            const result = await database.collection("bvList").aggregate([
+                { $match: filter },
+
+                {
+                    $addFields: {
+                        queryCount: {
+                            $size: {
+                                $filter: {
+                                    input: {$ifNull: ["$entries", []]},
+                                    as: "entry",
+                                    cond: {$eq: ["$$entry.type", "query"]}
+                                }
+                            }
+                        },
+
+                        bundleCount: {
+                            $size: {
+                                $filter: {
+                                    input: {$ifNull: ["$entries", []]},
+                                    as: "entry",
+                                    cond: {$eq: ["$$entry.type", "bundle"]}
+                                }
+                            }
+                        }
+                    }
+                }
 /*
-    //a route to return patients with IPS bundles in the stored bundles
-    app.get('/IPS/Patient', async function(req,res){
+                // Don't return the entries array
+                {
+                    $project: {
+                        entries: 0
+                    }
+                }
+*/
+            ]).toArray();
 
+            res.json(result);
+
+        } catch (err) {
+            console.error(err);
+            res.status(500).send(err);
+        }
+    });
+
+    // add a new list
+    app.post('/bv/list',async function(req,res){
+        let list =  req.body
+        list.id = new Date().getTime()
+        try {
+            await database.collection("bvList").insertOne(list)
+            res.json(list)
+        } catch(ex) {
+            console.error(ex)
+            res.status(500).json(ex.message)
+        }
     })
 
-    //get an IPS bundle
-    app.get('/IPS/:patientId/\$summary', async function(req,res){
+    //update a list
+    app.put('/bv/list',async function(req,res){
+        let list =  req.body
+        delete list['_id']
+        delete list.queryCount
+        delete list.bundleCount
 
+        try {
+            await database.collection("bvList").replaceOne(
+                { id: list.id },
+                list,
+                { upsert: true }
+            )
+            res.json(list)
+        } catch(ex) {
+            console.error(ex)
+            res.status(500).json(ex.message)
+        }
     })
 
-    */
+
+
 
     //use a transaction to add the contents of the supplied bundle to the local FHIR server
     //
@@ -48,6 +122,9 @@ function setup(app,client) {
         }
 
         console.log(JSON.stringify(bundle,null,2))
+
+
+
 
         try {
             //let qry = fhirServerBase
@@ -125,8 +202,6 @@ function setup(app,client) {
         }
 
     })
-
-
 
     //create a list of all tags currently defined in the library
     app.get("/bv/getAllTags",async function (req,res){
