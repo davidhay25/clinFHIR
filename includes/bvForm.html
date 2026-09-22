@@ -13,12 +13,62 @@
   <div ng-show="formInput.state == 'getQ'">
 
     <div class="row">
-      <div class="col-md-6">
+      <div class="col-md-8">
 
-        <i ng-click="loadPPConfig()" class="glyphicon glyphicon-edit clickable pull-right"></i>
-        <div><strong>Context (for pre-population)</strong></div>
+        <div class="rounded-box">
 
-        <div>
+        <div class="banner"><strong>Context (for pre-population)</strong></div>
+        <br/>
+
+        Context type: {{contextType}}  <span class="clickable" ng-click="changeContextType()">Change context type</span>
+
+        <div ng-show="contextType == 'bundle'">
+          <br/>
+          <em>The context for the Form comes from a bundle in the Library.</em>
+          </br/></br/>
+
+          <div ng-hide="contextBundleItem.bundle">
+            There is no bundle selected yet. Click the link below to select it.one
+          </div>
+
+          <div ng-show="contextBundleItem">
+
+            <table class="table table-bordered">
+              <tr><td>Bundle name</td><td>{{contextBundleItem.name}}</td></tr>
+              <tr><td>Description</td><td>{{contextBundleItem.description}}</td></tr>
+              <tr><td>Number of resources</td><td>{{contextBundleItem.bundle.entry.length}}</td></tr>
+            </table>
+          </div>
+
+
+          <!-- Use the handler for pasting a bundle as we already have it -->
+          <button ng-show = "contextBundleItem" class="btn-link btn pull-right"
+                  ng-click="viewBundleFromFormContextSelect(contextBundleItem.bundle,contextBundleItem.name)">Load this bundle in the viewer</button>
+
+
+
+
+          <button class="btn-link btn" ng-click="selectContextBundle()">Select another bundle</button>
+
+
+        </div>
+        <div ng-show="contextType == 'query'">
+          <!--
+          <i ng-click="loadPPConfig()" class="glyphicon glyphicon-edit clickable pull-right"></i>
+          -->
+          <br/>
+
+          <div class="row">
+            <div class="col-md-8">
+              <em>The context for the Form comes from a FHIR server</em>
+            </div>
+            <div class="col-md-4">
+              <button class="btn-link btn pull-right" ng-click="loadPPConfig()">Change Server parameters</button>
+            </div>
+          </div>
+
+          <br/>
+
           <table class="table table-bordered  rounded-table">
             <tr><td class="nowrap-words">Data Server</td><td>{{prePopConfig.dataServer}}</td></tr>
             <tr><td>Patient</td><td>
@@ -27,63 +77,174 @@
             <tr><td>Practitioner</td><td>{{prePopConfig.practitioner.display}}
               <div><em>{{prePopConfig.practitioner.reference}}</em></div></td></tr>
           </table>
+
         </div>
 
-        <div><strong>Select Questionnaire from Library</strong></div>
-        <div class="myScroll600">
-          <table class="table-bordered table">
-            <tr><th>Name</th><th>Description</th></tr>
-            <tr ng-repeat="entry in bundleQSummary.entry"
-                style="cursor: pointer"
-                ng-click="loadQFromServer(entry.resource.id)">
 
-              <td>{{entry.resource.name}}</td>
-              <td class="nowrap-words">{{entry.resource.description}}</td>
-
-            </tr>
-          </table>
         </div>
+
+
+        <hr/>
+
+        <div class="rounded-box">
+        <div class="banner"><strong>Select Questionnaire</strong></div>
+        <br/>
+        <uib-tabset>
+          <uib-tab heading="Library Questionnaires">
+
+            <div class="myScroll600">
+              <table class="table-bordered table">
+                <tr><th>Name</th><th>Description</th><th></th></tr>
+                <tr ng-repeat="entry in bundleQSummary.entry"
+                    ng-class="{listItemSelected: selectedQ.id == entry.resource.id}"
+                    ng-dblclick="loadQFromServer(entry.resource.id)"
+                    ng-click="selectQFromList(entry)"
+                    style="cursor: pointer">
+
+                  <td>{{entry.resource.name}}</td>
+                  <td class="nowrap-words">{{entry.resource.description}}</td>
+                  <td><div class="clickable" ng-click="loadQFromServer(entry.resource.id)">Load</div> </td>
+
+                </tr>
+              </table>
+            </div>
+          </uib-tab>
+          <uib-tab heading="Paste Adhoc Questionnaires">
+            <br/>
+            <div class="row">
+              <div class="col-md-5">
+                <strong>Or paste Questionnaire Json</strong>
+              </div>
+
+              <div class="col-md-3">
+                <div ng-show="previousQ">
+                  <div class="clickable" ng-click="formInput.json = previousQ">Load previous Q</div>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <button class="btn-success btn pull-right"
+                        ng-show="formInput.json"
+                        ng-click="loadQ(formInput.json)">Render pasted Questionnaire</button>
+
+
+              </div>
+            </div>
+
+            <br/>
+            <textarea rows="20"
+
+                      class="form-control" ng-model="formInput.json"></textarea>
+
+          </uib-tab>
+        </uib-tabset>
+
+        </div>
+
 
       </div>
-      <div class="col-md-6">
+      <div class="col-md-4">
 
-        <div class="row">
-          <div class="col-md-4">
-            <strong>Or paste Questionnaire Json</strong>
+        <!--
+
+        <div><strong>Context (for pre-population)</strong></div>
+        <br/>
+
+        Context type: {{contextType}}  <span class="clickable" ng-click="changeContextType()">Change context type</span>
+
+
+        <div ng-show="contextType == 'bundle'">
+          <br/>
+          <em>The context for the Form comes from a bundle in the Library.</em>
+          </br/></br/>
+
+          <div ng-hide="contextBundleItem.bundle">
+            There is no bundle selected yet. Click the link below to select it.
           </div>
 
-          <div class="col-md-4">
-            <div ng-show="previousQ">
-              <div class="clickable" ng-click="formInput.json = previousQ">Load previous Q</div>
+          <div ng-show="contextBundleItem">
+            Bundle details:
+
+            <table class="table table-bordered">
+              <tr><td>BundleEntry Id</td><td>{{contextBundleItem.bundleId}}</td></tr>
+              <tr><td>Name</td><td>{{contextBundleItem.name}}</td></tr>
+              <tr><td>Description</td><td>{{contextBundleItem.description}}</td></tr>
+              <tr><td>Number of resources</td><td>{{contextBundleItem.bundle.entry.length}}</td></tr>
+            </table>
+          </div>
+
+
+
+
+          <button ng-show = "contextBundleItem" class="btn-link btn pull-right"
+                  ng-click="viewBundleFromFormContextSelect(contextBundleItem.bundle,contextBundleItem.name)">Load this bundle in the viewer</button>
+
+
+
+
+          <button class="btn-link btn" ng-click="selectContextBundle()">Select another bundle</button>
+
+
+        </div>
+        <div ng-show="contextType == 'query'">
+
+          <br/>
+
+          <div class="row">
+            <div class="col-md-8">
+              <em>The context for the Form comes from a FHIR server</em>
+            </div>
+            <div class="col-md-4">
+              <button class="btn-link btn pull-right" ng-click="loadPPConfig()">Change Server parameters</button>
             </div>
           </div>
 
-          <div class="col-md-4">
-            <button class="btn-success btn pull-right"
-                    ng-show="formInput.json"
-                    ng-click="loadQ(formInput.json)">Render pasted Questionnaire</button>
+          <br/>
 
+            <table class="table table-bordered  rounded-table">
+              <tr><td class="nowrap-words">Data Server</td><td>{{prePopConfig.dataServer}}</td></tr>
+              <tr><td>Patient</td><td>
+                {{prePopConfig.patient.display}}
+                <div><em>{{prePopConfig.patient.reference}}</em></div></td></tr>
+              <tr><td>Practitioner</td><td>{{prePopConfig.practitioner.display}}
+                <div><em>{{prePopConfig.practitioner.reference}}</em></div></td></tr>
+            </table>
+
+          <br/> <br/>
+
+
+
+
+        </div>
+
+-->
+
+        <div class="rounded-box" ng-show="selectedQ">
+          <div class="banner">Selected Questionnaire</div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <button class="btn btn-success">Show Q in Viewer</button>
+            </div>
+            <div class="col-md-6">
+              <button ng-click="viewBundleFromFormContextSelect(contextBundleItem.bundle,contextBundleItem.name)"
+                      class="btn btn-primary pull-right">Load Form</button>
+            </div>
 
           </div>
+          <br/>
+          <div id="bvQTree"></div>
         </div>
 
-        <br/>
-        <textarea rows="20"
 
-                  class="form-control" ng-model="formInput.json"></textarea>
-<!--
-        <div ng-show="loadedFromCache">
-          <em>This is the previous adHoc Questionnaire</em>
-        </div>
-        -->
-<!--
-        <button class="btn-success btn pull-right" ng-click="loadQ(formInput.json)">Load</button>
-        -->
+
+
+
+
+
       </div>
+
     </div>
-
-
-
 
   </div>
 

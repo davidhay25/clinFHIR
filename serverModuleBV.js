@@ -12,8 +12,101 @@ function setup(app,client) {
     database = client.db("clinfhir");
 
 
+    //------------- REST queries against bundle
+
+    //search for a single resource based on id = Patient/NNJ9186
+    ///bqry/bv1763408586846/Patient/NNJ9186 -
+    app.get('/bqry/:bundleId/:type/:id', async (req, res) => {
+        const bundleId = req.params.bundleId;
+        const type = req.params.type;
+        const id = req.params.id;
+
+        console.log(bundleId,type,id)
+
+        let bundleEntry = await getBundleEntry(bundleId)
+
+        if (! bundleEntry) {
+            res.status(404).json(makeOO("not-found",`The bundle id ${bundleId} was not found`))
+            return
+        }
+
+        //now we have the bundle we can do a simple query on it
+        let ar = bundleEntry.bundle?.entry?.filter(entry => entry.resource.id == id && entry.resource.resourceType == type)
+        switch (ar.length) {
+            case 0 :
+                res.status(404).json(makeOO("not-found",`The resource ${type}/${id} was not found`))
+                break
+            case 1 :
+                res.json(ar[0].resource)
+                break
+            default :
+                res.status(500).json(makeOO("duplicate",`There were ${ar.length} instances of ${type}/${bundleId}.`))    //todo - check correct response code
+                break
+
+        }
+
+    })
+
+
+    // bqry/{bundleId}/{type}?patient={patientReference}
+    //example bundleid bv1763408586846  - bqry/bv1763408586846/Condition?patient=Patient/NNJ9186
+//https://clinfhir.com/bqry/bv1784253925024/Condition?patient=ZKT9319
+    //todo only works where there reference is in the format Patient/xx  - need to be enhanced for other reference types - eg to fullUrl
+
+    app.get('/bqry/:bundleId/:type', async (req, res) => {
+        const bundleId = req.params.bundleId;
+        const type = req.params.type;
+        let patientReference = req.query.patient;
+        //todo ? return if no patient???
+
+        console.log(bundleId);
+        console.log(type);
+        console.log(patientReference);
+
+        patientReference = `Patient/${patientReference}`    //leading type needed
+
+        let bundleEntry = await getBundleEntry(bundleId)
+        if (! bundleEntry) {
+            res.status(404).json({})
+            return
+        }
+
+        //now we have the bundle we can do a simple query on it
+
+        let responseBundle = {resourceType:'Bundle',type:'searchset',entry:[]}
+        for (const entry of bundleEntry.bundle?.entry || []) {
+            let resource = entry.resource
+            if (resource.resourceType == type) {
+                let patRef = resource.subject || resource.patient   //eg Patient/xxx
+                if (patRef) {
+                    let ref = patRef.reference
+                    if (ref == patientReference) {
+                        responseBundle.entry.push({resource:resource})
+                    }
+                }
+            }
+        }
+
+        res.json(responseBundle)
+    });
+
+    async function getBundleEntry(bundleId) {
+        let query = {id:bundleId}
+        console.log(query)
+        let result = await database.collection("bvBundles").findOne(query)
+        //console.log(JSON.stringify(result),null,2)
+        return result
+    }
+
+    function makeOO(code,msg) {
+        let OO = {resourceType:"OperationOutcome",issue:[]}
+        OO.issue.push( {severity:'error',code:code,diagnostics:msg})
+        return OO
+
+    }
+
     //------------ Lists ---------------
-    //get all lists. Retuens the entire list as it's unlikely to be large.
+    //get all lists. Returns the entire list as it's unlikely to be large.
     app.get('/bv/lists', async function(req, res) {
         let filter = { status: { $ne: "hide" }}
 
@@ -95,7 +188,7 @@ function setup(app,client) {
         }
     })
 
-
+    // ----------------------------
 
 
     //use a transaction to add the contents of the supplied bundle to the local FHIR server
@@ -227,19 +320,7 @@ function setup(app,client) {
         if (req.query['showInPV']) {
             filter.showInPV = true      //note that the actual value of the query is ignored
         }
-/* original
-//console.log(filter)
-        try {
-            const result = await database.collection("bvBundles")
-                .find(filter, { projection: { id: 1, description: 1, date: 1, name:1,author:1,showInPV:1 } })
-                .toArray()
-            res.json(result);
-        } catch (err) {
-            console.error(err);
-            res.status(500).send(err);
-        }
 
-*/
         try {
             const result = await database.collection("bvBundles")
                 .aggregate([

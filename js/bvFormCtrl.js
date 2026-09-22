@@ -1,10 +1,22 @@
 angular.module("sampleApp")
     .controller('bvFormCtrl',
-        function ($scope,$http,$timeout,$localStorage,$uibModal) {
+        function ($scope,$http,$timeout,$localStorage,$uibModal,bundleVisualizerSvc) {
 
             $scope.formInput = {}
 
-            //get all the Q from the local fhir server
+            $scope.formInput.state = "getQ"         //other state = renderQ
+
+            $scope.previousQ = $localStorage.bvQ
+
+            //remember the context type (query a fhir server ot use a bundle from the library)
+            $scope.contextType = $localStorage.contextType || 'query' //default to query
+
+            if ($scope.contextType == 'bundle') {
+                $scope.contextBundleItem =  $localStorage.contextBundleItem
+            }
+
+
+            //get all the Q from the local fhir server. Todo - is some kind of filtering needed
             function loadAllQ() {
                 let qry = "https://clinfhir.com/fhir/Questionnaire?_elements=id,name,description,url"
                 $http.get(qry).then(
@@ -16,18 +28,138 @@ angular.module("sampleApp")
             }
             loadAllQ()
 
-            //load the modelreview with this Q
+            $scope.changeContextType = function () {
+                if ($scope.contextType == 'query') {
+                    $scope.contextType = 'bundle'
+                } else {
+                    $scope.contextType = 'query'
+                    delete $scope.contextBundleItem
+                }
+                $localStorage.contextType = $scope.contextType
+
+            }
+
+
+            //select the bundle to act as the form data source (if not a REST query against a FHIR server)
+            $scope.selectContextBundle = function () {
+                delete $scope.contextBundleItem
+
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/selectBundle.html',
+                    size: 'lg',
+                    controller: function ($scope) {
+                        $scope.input = {}
+
+                        //Load the lists. Needed to set Context on forms if context set to a list
+                        $http.get('bv/lists').then(
+                            function (data) {
+                                $scope.lists = data.data
+
+                            },function () {
+                                $scope.lists = []
+                                console.log("Error retrieving lists")
+                            }
+                        )
+
+                        //when an item in the list is selected...
+                        $scope.selectListEntry = function (bundleItem) {
+                            console.log(bundleItem)
+                            if (bundleItem.type == 'query') {
+                                alert("Only stored bundles can be used")
+                                return
+                            }
+
+                            $http.get(`bv/getBundle/${bundleItem.bundleId}`).then(
+                                function (data) {
+                                    let newBundleItem = angular.copy(bundleItem)
+                                    newBundleItem.bundle = data.data?.bundle
+                                    newBundleItem.source='bundle'
+                                    $scope.$close(newBundleItem)
+                                    //$scope.$close(data.data)
+                                }, function () {
+                                    alert("Error retrieving bundle")
+                                }
+                            )
+
+                            /*
+                            if (bundleItem.type == 'query') {
+                                //execute the query returning the bundle
+                                $http.get(bundleItem.query).then(
+                                    function (data) {
+
+                                        //$scope.$close({type:'query',bundle:data.data,query:bundleItem.query})
+                                        let newBundleItem = angular.copy(bundleItem)
+                                        newBundleItem.bundle = data.data
+                                        newBundleItem.source='query'
+                                        $scope.$close(newBundleItem)
+                                    }, function () {
+                                        alert(`Unable to retrieve bundle from ${bundleItem.query}`)
+                                    }
+                                )
+                            } else {
+                                $http.get(`bv/getBundle/${bundleItem.bundleId}`).then(
+                                    function (data) {
+                                        let newBundleItem = angular.copy(bundleItem)
+                                        newBundleItem.bundle = data.data?.bundle
+                                        newBundleItem.source='bundle'
+                                        $scope.$close(newBundleItem)
+                                        //$scope.$close(data.data)
+                                    }, function () {
+                                        alert("Error retrieving bundle")
+                                    }
+                                )
+                            }
+                            */
+
+                        }
+                    }
+                }).result.then(function (bundleItem) {
+
+                    $scope.contextBundleItem = bundleItem // name, description enriched with source, bundle
+                    $localStorage.contextBundleItem = bundleItem
+
+                })
+            }
+
+            //load the Q viewer (modelReview) with this Q
             $scope.loadModelReview = function() {
                 let cacheName = 'cache-Q'       //just use a single name
                 $localStorage[cacheName] = $scope.activeQ
-
-                //console.log(window)
-
 
                 const url = `${window.location.origin}/forms/modelReview.html?${cacheName}`
 
                 const features = 'noopener,noreferrer'
                 window.open(url, '_blank', features)
+
+            }
+
+            $scope.selectQFromList = function (entry) {
+                console.log(entry)
+                let qry = `https://clinfhir.com/fhir/Questionnaire/${entry.resource.id}`
+                $http.get(qry).then(
+                    function (data) {
+                        let Q = data.data
+                        $scope.selectedQ = Q
+                        let vo = bundleVisualizerSvc.makeQTree(Q)
+
+                        let treeData = vo.treeData
+
+                        //show the tree structure of this resource (adapted from scenario builder)
+                        $('#bvQTree').jstree('destroy');
+                        $('#bvQTree').jstree(
+                            {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
+                        ).on('ready.jstree', function () {
+                            $('#bvQTree').jstree(true).open_all();
+                        })
+
+
+
+
+                    }, function (err) {
+                        alert("Q not found")
+                    })
+
+
 
             }
 
@@ -60,15 +192,14 @@ angular.module("sampleApp")
                 $scope.prePopConfig.termServer = "https://tx.fhir.org/r4"
                 $scope.prePopConfig.formServer = "https://hapi.fhir.org/baseR4"
 
-                $scope.prePopConfig.patient = {reference: 'Patient/sample1', display: 'Example Patient'}
+                $scope.prePopConfig.patient = {reference: 'Patient/NNJ9186', display: 'Peter Jordan'}
                 $scope.prePopConfig.practitioner = { reference: 'Practitioner/sample1', display: 'Example Practitioner' }
 
             }
 
-            console.log($scope.prePopConfig)
+
 
             //display the configuration screen for prepop
-
             $scope.loadPPConfig = function () {
                 $uibModal.open({
                     templateUrl: 'modalTemplates/prePopConfig.html',
@@ -88,19 +219,6 @@ angular.module("sampleApp")
             }
 
 
-
-            $scope.formInput.state = "getQ"         //other state = renderQ
-/*
-            if ($localStorage.bvQ) {
-                $scope.loadedFromCache = true
-
-            }
-*/
-            $scope.previousQ = $localStorage.bvQ
-            //$scope.formInput.json = $localStorage.bvQ || ""
-
-
-
             $scope.selectBundle = function () {
 
                 //add id's to all resources for tthe detail link. todo - should be able to use entry.fullUrl if known
@@ -111,21 +229,7 @@ angular.module("sampleApp")
                 $scope.process($scope.extractBundle)
                 $scope.setTab.mainTabActive = 1     //display the graph first
             }
-/*
-            $timeout(function () {
-                let url = "https://dev.fhirpath-lab.com/swm-csiro-smart-forms"
-                const iframe = document.getElementById('formPreview');
 
-                iframe.onload = function () {
-                    console.log('iframe loaded');
-                    formViewerSetup()
-                };
-                iframe.src = `${url}?messaging_handle=${encodeURIComponent($scope.messagingHandle)}&messaging_origin=${encodeURIComponent($scope.messagingOrigin)}`
-
-            },1000)
-
-
-*/
             function formViewerSetup() {
 
                 //if the messagingHandle exists, the setuo has already been done.
@@ -143,7 +247,6 @@ angular.module("sampleApp")
                 $timeout(function () {
                     //need to pass the messaging handle & origin when initializing the iFrame
                     iframe.src = `${url}?messaging_handle=${encodeURIComponent($scope.messagingHandle)}&messaging_origin=${encodeURIComponent($scope.messagingOrigin)}`
-
                 },500)
 
 
@@ -154,6 +257,8 @@ angular.module("sampleApp")
 
                    // console.log(msg,msgType)
 
+                    //If it's a response message, see if a handler was saved when the request message was invoked
+                    //and execute it. Clear the hash after
                     if (msg.responseToMessageId) {
                         if (hashResponse[msg.responseToMessageId]) {
                             hashResponse[msg.responseToMessageId](msg)
@@ -162,6 +267,8 @@ angular.module("sampleApp")
                         }
                     }
 
+                    //specific processingo for messages from the renderer - whether a response message or originating
+                    //from the renderer
                     switch (msgType) {
                         case "sdc.ui.changedFocus":
                             //console.log(msg.payload.linkId)
@@ -185,8 +292,6 @@ angular.module("sampleApp")
 
                                 $scope.$digest()
                             } else if (msg.payload?.questionnaireResponse) {
-                                //temp setQR(msg.payload.questionnaireResponse)
-                              //  console.log(msg.payload?.questionnaireResponse)
 
                                 //if a QR was returned then call extract
                                 $scope.sendMessage('sdc.requestExtract', {})
@@ -220,42 +325,34 @@ angular.module("sampleApp")
                     formViewerSetup()
             },1000)
 
-            let contextCreated = false
+
             let setContext = function () {
-                if (contextCreated) {
-                 //   return
-                } else {
-                    contextCreated = true
-                }
 
-                //return //<<< temp
-                /*$scope.sendMessage('sdc.configureContext', {
-                    context: {
-                        subject: prePopConfig.patient,
-                        author: prePopConfig.practitioner,
+                //return //<<<<<  temp
 
-                        launchContext: [
-                            {
-                                name: 'source',
-                                contentReference: prePopConfig.practitioner
-                            },{
-                                name: 'testObservation',
-                                contentResource: testResource
-                            }
-                        ]
-
-                    }
-                })*/
-
-                let testResource = {resourceType:'Observation',valueString:"test data"}
+              //  let testResource = {resourceType:'Observation',valueString:"test data"}
 
                 //tod can the context be a resource
                 //the testObservation must be present for prepop to work. todo ask Brian
+
+                $scope.sendMessage('sdc.configure', {
+                    terminologyServer: $scope.prePopConfig.termServer,// 'https://tx.fhir.org/r4',
+                    dataServer: $scope.prePopConfig.dataServer //'https://hapi.fhir.org/baseR4',
+                    //formsServer: $scope.prePopConfig.formServer //'https://hapi.fhir.org/baseR4'
+                });
+
+                $scope.sendMessage('sdc.configureContext', {
+                    context: {
+                        subject: $scope.prePopConfig.patient,
+                        author: $scope.prePopConfig.practitioner
+                    }
+                })
+
+/*  Leave this here just to remind me that I can send other context objects into the Q (needs further investigation)
                 $scope.sendMessage('sdc.configureContext', {
                     context: {
                         subject: $scope.prePopConfig.patient,
                         author: $scope.prePopConfig.practitioner,
-
                         launchContext: [
                             {
                                 name: 'source',
@@ -265,15 +362,12 @@ angular.module("sampleApp")
                                 contentResource: testResource
                             }
                         ]
-
                     }
                 })
+                */
 
-                $scope.sendMessage('sdc.configure', {
-                    terminologyServer: $scope.prePopConfig.termServer,// 'https://tx.fhir.org/r4',
-                    dataServer: $scope.prePopConfig.dataServer, //'https://hapi.fhir.org/baseR4',
-                    formsServer: $scope.prePopConfig.formServer //'https://hapi.fhir.org/baseR4'
-                });
+
+
             }
 
             //setContext()
@@ -294,6 +388,7 @@ angular.module("sampleApp")
 
                 const messageId = `msg-${++$scope.messageCounter}`;
 
+                //stash the callback for when the response is received. It will be called then
                 if (fnResponse) {
                     hashResponse[messageId] = fnResponse
                 }
@@ -320,8 +415,9 @@ angular.module("sampleApp")
                 $localStorage.bvQ = json
 
                 let Q = angular.fromJson(json)
+                //
                 $scope.activeQ = Q
-                isExtractEnabled(Q)
+                isExtractEnabled(Q)         //determine if there are SDC definition extraction extensions. To notify the user
 
                 //console.log(Q)
 
@@ -329,22 +425,99 @@ angular.module("sampleApp")
 
                 $timeout(function () {
                     setContext()
-                        $scope.sendMessage('sdc.displayQuestionnaire', {questionnaire:Q});
+
+                    $scope.sendMessage('sdc.displayQuestionnaire', {questionnaire:Q});
                 },1000)
-
-
-
-
-                }
+            }
 
             //instruct the renderer to pre-pop
             //parameters are set in the sdc.configureContext() and sdc.configure() calls
+
             $scope.setPrepop = function () {
                 let responseFn = function () {
                     $scope.sendMessage('sdc.requestCurrentQuestionnaireResponse',{})
                 }
 
-                $scope.sendMessage('sdc.requestPrepopulate',{},responseFn)
+                //If the context has been set to a bundle, then set the data server to point
+                //to the clinFHIR API that provides REST access to bundle contents. By default the
+                //data server will have been set to the fhie server query url from pre-pop
+                //also extract the patient from the bundle and set that.
+                //todo I think I need to re-load the Q after the context has been changed. Otherwise it's using the old context
+
+                if ($scope.contextBundleItem?.source == 'bundle') {
+
+                    let serverRoot = `https://clinfhir.com/bqry/${$scope.contextBundleItem.bundleId}`
+//alert(serverRoot)
+
+
+                    //todo - need to experiment to see if they all need to be included in the setcontext call
+                    //and if the testResource is needed
+                    //let testResource = {resourceType:'Observation',valueString:"test data"}
+
+                    let patientId   //Patient/{}
+                    let ar = $scope.contextBundleItem.bundle.entry.filter(entry => entry.resource?.resourceType == 'Patient')
+                    switch (ar.length) {
+                        case 0:
+                            alert("There are no Patients in this bundle. Pre-pop cancelled")
+                            return
+                            break
+                        case 1:
+                            let patientEntry = ar[0]
+                            patientId = `Patient/${patientEntry.resource.id}`
+
+                    }
+
+                    //for now - find a Practitioner. todo - there must be a better way
+                    let authorId = $scope.prePopConfig.practitioner
+                    let ar1 = $scope.contextBundleItem.bundle.entry.filter(entry => entry.resource?.resourceType == 'Practitioner')
+                    if (ar1.length > 0) {
+                        authorId = `Practitioner/${ar1[0].resource.id}`
+                    }
+
+                    console.log(serverRoot, patientId, authorId)
+                    let configureObj = {
+                        terminologyServer: $scope.prePopConfig.termServer,
+                        formsServer: $scope.prePopConfig.formServer,
+                        dataServer:   serverRoot        //queries will be fulfilled by the bundle
+                    }
+
+
+                    let configureContextObj = {
+                        context: {
+                            subject: {reference:patientId},
+                            author: {reference:authorId}
+                        }
+                    }
+
+
+                    //set up the pyramid of doom
+                    $scope.sendMessage('sdc.configure',configureObj ,function () {
+                        $scope.sendMessage('sdc.configureContext', configureContextObj,function () {
+                            $scope.sendMessage('sdc.displayQuestionnaire', {questionnaire:$scope.activeQ},function () {
+                                $scope.sendMessage('sdc.requestPrepopulate',{},function () {
+                                    $scope.sendMessage('sdc.requestCurrentQuestionnaireResponse',{},function () {
+
+                                    })
+                                })
+                            })
+                        })
+                    })
+
+                } else {
+
+                    //if the pre-pop is REST queries against a FHIR server
+
+                    setContext()    //sets up the context from the prepop object...
+                    $timeout(function () {
+                        $scope.sendMessage('sdc.requestPrepopulate',{},responseFn)
+                    },500)
+
+                }
+
+
+
+
+               // $scope.sendMessage('sdc.requestPrepopulate',{},responseFn)
 
 
             }
@@ -352,19 +525,12 @@ angular.module("sampleApp")
             $scope.getExtractBundle = function () {
                 delete $scope.extractBundle
                 $scope.sendMessage('sdc.requestExtract', {},function (outcome) {
-/* - don't really need this callback
-                    if (outcome?.payload?.outcome) {
 
-                        $scope.extractOutcome = outcome?.payload?.outcome
-
-                    }
-                    $scope.$digest()
-                    */
-                  //  console.log("outcome of extraction",outcome)
                 });
             }
 
 
+            //are there any SDC extract extensions
             function isExtractEnabled(Q) {
                 $scope.noExtract = false
 

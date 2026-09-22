@@ -314,7 +314,7 @@
 	
 .rounded-box {
     border: 1px solid gainsboro;
-    padding : 3px;
+    padding : 8px;
     margin: 4px;
     -webkit-border-radius: 5px;
 	-moz-border-radius: 5px;

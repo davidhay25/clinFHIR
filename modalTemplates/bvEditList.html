@@ -46,10 +46,13 @@
 
         <div>
             <br/>
+
             <div ng-show="canEdit()">
+
                 <checkbox
-                        ng-model="list.userOnlyEdit"></checkbox>
+                        ng-model="list.userOnlyEdit"></checkbox> Is this Creator only edits
             </div>
+
             <div ng-show="list.userOnlyEdit">
                 Only the list creator ({{user.email}}) can edit the list.
             </div>

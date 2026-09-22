@@ -65,7 +65,15 @@
                 </tr>
             </table>
             <div style="color: red" ng-show="issue">{{issue}}</div>
-            <div ng-show="bvAddselectedList && input.description && ! issue" class="clickable pull-right" ng-click="addToList()">Add to list</div>
+
+
+
+            <div ng-show="bvAddselectedList && input.description && ! issue && canAddToList(bvAddselectedList)"
+                 class="clickable pull-right" ng-click="addToList()">Add to list</div>
+
+            <div ng-show=" bvAddselectedList && ! canAddToList(bvAddselectedList)">
+                Only the list creator can update this list
+            </div>
 
         </div>
 
@@ -85,9 +93,11 @@
             <table class="table-bordered table">
                 <tr><td>Name</td><td><input class="form-control" type="text" ng-model="input.listName"/></td></tr>
                 <tr><td>Description</td><td><textarea class="form-control" ng-model="input.listDescription"></textarea> </td></tr>
+                <tr><td>Only user can edit</td><td><checkbox ng-model="input.userOnlyEdit"></td></tr>
             </table>
 
-            <button class="btn btn-link pull-right" ng-click="createList(input.listName,input.listDescription)">Create list</button>
+            <button class="btn btn-link pull-right"
+                    ng-click="createList(input.listName,input.listDescription,input.userOnlyEdit)">Create list</button>
         </div>
 
 

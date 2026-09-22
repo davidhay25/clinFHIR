@@ -1,6 +1,8 @@
 <div>
   <div class="alert alert-info">
-    These are lists that are manually created for a particular purpose.
+    These are lists that are manually created by someone for some specified purpose. Items are added to a list using the
+    'add to list' option that appears to the upper right when a bundle is displayed. New lists can be created at the same
+    time, or from options on this page.
   </div>
   <div class="row">
     <div class="col-md-6">
@@ -45,14 +47,26 @@
           </div>
         </div>
 
+<!--
+        <div class="row">
+          <div class="col-md-2">
+
+          </div>
+          <div class="col-md-10">
+            <button class="btn btn-link" ng-click="addPageToList(selectedList)">Add web page to list</button>
+          </div>
+        </div>
+-->
 
         <br/>
 
         <div ng-show="selectedList.userOnlyEdit">
-          <strong><em>Only the user can add items to this list</em></strong>
+          <strong><em>Only the list creator can add items to this list</em></strong>
         </div>
 
       </div>
+
+
 
       <div ng-show="selectedList.entries.length > 0">
         <strong>Entries</strong>

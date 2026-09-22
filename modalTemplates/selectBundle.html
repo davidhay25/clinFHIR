@@ -1,0 +1,61 @@
+<div class="modal-header">
+  <div class="row">
+    <div class="col-md-8 col-sm-8">
+      <h3 class="modal-title">
+        Select Bundle
+      </h3>
+    </div>
+
+
+    <div class="col-md-4 col-sm-4">
+      <button class="btn btn-primary pull-right" ng-click="save()">Save config</button>
+      <button class="btn btn-link pull-right" ng-click="$dismiss()">Close</button>
+
+    </div>
+  </div>
+
+</div>
+
+<div class="modal-body">
+
+  <div class="row">
+    <div class="col-md-6">
+      Lists
+      <table class="table-bordered table">
+        <tr><th>Name</th><th>Description</th><th>Queries</th><th>Bundles</th></tr>
+        <tr ng-repeat="list in lists"
+            style="cursor: pointer"
+            ng-class="{listItemSelected:selectedList == list}"
+            ng-click="input.selectedList = list">
+          <td>{{list.name}}</td>
+          <td>{{list.description}}</td>
+          <td>{{list.queryCount}}</td>
+          <td>{{list.bundleCount}}</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="col-md-6">
+      <!--<pre>{{input.selectedList | json}}</pre>-->
+      <table class="table table-bordered">
+        <tr ng-repeat="entry in input.selectedList.entries">
+          <td>{{entry.type}}</td>
+          <td>{{entry.name}}</td>
+          <td>{{entry.description}}</td>
+          <td><button class="btn-link btn" ng-click="selectListEntry(entry)">Select</button> </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <br/>
+
+
+
+
+
+
+</div>
+
+<div class="header">
+</div>

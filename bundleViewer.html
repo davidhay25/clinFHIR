@@ -105,6 +105,10 @@
             overflow-wrap: normal;
         }
 
+        th {
+            background-color: lightgrey;
+        }
+
         /* should be superfluous*/
         .nowrap-words {
             white-space: normal;
@@ -408,6 +412,9 @@
                     </div>
                 </div>
                 <div class="col-md-10">
+                    <div class="alert alert-warning">Note that the order of the Bundle Selection options has changed. The option
+                    to paste in a Bundle is towards the bottom of the list. This notification will be removed in a
+                    couple of weeks.</div>
 
                     <!-- Paste a bundle directly into the app-->
                     <div ng-show="input.selectedSelector.code == 'paste'">

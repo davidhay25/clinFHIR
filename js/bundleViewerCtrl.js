@@ -117,15 +117,25 @@ angular.module("sampleApp")
             $scope.maxForGraph = 300
 
             $scope.selectors = []
-            $scope.selectors.push({display:"Paste Bundle",code:'paste'})
-            $scope.selectors.push({display:"Paste Single resource",code:'singleresource'})
-            $scope.selectors.push({display:"Query for Bundle",code:'query'})
-            $scope.selectors.push({display:"Generate from form",code:'form'})
+            $scope.selectors.push({display:"Stored Library Bundles",code:'stored'})
+            $scope.selectors.push({display:"Shared Library Queries",code:'library'})
+
             $scope.selectors.push({display:"Curated lists",code:'lists'})
             $scope.selectors.push({display:"IPS Bundles",code:'ips'})
+
             $scope.selectors.push({display:"Locally saved queries",code:'saved'})
-            $scope.selectors.push({display:"Shared Library Queries",code:'library'})
-            $scope.selectors.push({display:"Stored Library Bundles",code:'stored'})
+
+            $scope.selectors.push({display:"Paste Bundle",code:'paste'})
+            $scope.selectors.push({display:"Paste Single resource",code:'singleresource'})
+
+            $scope.selectors.push({display:"Query for Bundle",code:'query'})
+
+            $scope.selectors.push({display:"Generate from form",code:'form'})
+
+
+
+
+
             $scope.input.selectedSelector = $scope.selectors[0]
 
             //$scope.input.selectedMedication = {}
@@ -1565,6 +1575,12 @@ angular.module("sampleApp")
 
             }
 
+            $scope.viewBundleFromFormContextSelect = function (bundle,displayName) {
+                $scope.bundleDisplayName = displayName || "New query"
+                delete $scope.source    //means that the 'Add to List' won't be displayed
+                processBundle(bundle);
+            }
+
             $scope.viewNewQueryBundle = function(bundle) {
                 $scope.bundleDisplayName = "New query"
                 $scope.source = {type:'paste'}
@@ -1926,6 +1942,8 @@ angular.module("sampleApp")
                 $('#builderResourceTree').jstree(
                     {'core': {'multiple': false, 'data': treeData, 'themes': {name: 'proton', responsive: true}}}
                 )
+
+
 
             };
 

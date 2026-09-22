@@ -1,7 +1,7 @@
 /* used to display available lists in the selector*/
 angular.module("sampleApp")
     .controller('bvListsCtrl',
-        function ($scope,$http,$timeout,$localStorage,$uibModal) {
+        function ($scope,$http,$timeout,$localStorage,$uibModal,$sce) {
 
 
 
@@ -46,6 +46,83 @@ angular.module("sampleApp")
             })
 
 
+            $scope.addPageToList = function (list,user) {
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/bvAddPageToList.html',
+                    backdrop: 'static',
+                    //size : 'lg',
+                    controller: function($scope,list,$http) {
+
+                        $scope.list = angular.copy(list)    //make a copy so cancel works
+                        $scope.input = {isDirty : true}
+
+/*
+                        $scope.loadPage = function (url) {
+                            if (isValidUrl(url)) {
+                                $scope.trustedUrl = $sce.trustAsResourceUrl(url);
+                            }
+
+                            function isValidUrl(url) {
+                                try {
+                                    var parsed = new URL(url);
+                                    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+                                } catch (e) {
+                                    return false;
+                                }
+                            }
+
+                        }
+
+*/
+
+                        $scope.save = function() {
+                            let url = $scope.input.pageUrl
+                            $http.get(url).then(
+                                function () {
+
+                                    let item = {type:'page',name:'name',description:$scope.input.description}
+                                    item.url = url
+
+                                    item.dateAdded = new Date()
+                                    item.addedBy = user?.email
+                                    $scope.bvAddselectedList.entries.push(item)
+                                    $http.put('bv/list',$scope.bvAddselectedList).then(
+                                        function () {
+                                            alert("Item has been added to the list.")
+                                            $scope.$close()
+                                        }, function (err) {
+                                            alert(angular.toJson(err))
+                                        }
+                                    )
+                                    
+                                },function () {
+                                    alert(`I cannot load the page`)
+                                }
+                            )
+
+
+                            $scope.$close($scope.list)
+                        }
+
+                    },
+
+                    resolve: {
+                        list: function () {
+                            return list
+                        }
+                    }
+
+                }).result.then(function (list) {
+                    //returns the updated list (if not cancel)
+                    $http.put('bv/list',list).then(
+                        function () {
+                            $scope.lists.push(list)
+                            $scope.selectedList = list
+                            alert("List has been created.")
+                        })
+                })
+
+            }
 
             $scope.selectList = function (list) {
                 delete $scope.issue
@@ -77,7 +154,7 @@ angular.module("sampleApp")
                         list: function () {
                             let lst = {entries:[],userOnlyEdit : false}
                             if ($scope.user?.email) {
-                                lst.createBy = $scope.user.email
+                                lst.createdBy = $scope.user.email
                             }
                             return lst
                         },

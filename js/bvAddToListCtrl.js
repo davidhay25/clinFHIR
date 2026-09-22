@@ -18,10 +18,26 @@ angular.module("sampleApp")
                 }
             )
 
+            $scope.canAddToList = function (list) {
+                if (!list){ return}
+
+                if (! list.userOnlyEdit) {
+                    return true
+                }
+
+
+                if (!user || ! user.email || (user.email !== list.createdBy)) {
+                    return false
+                }
+
+                return true
+
+            }
+
             $scope.addToList = function () {
                 let item = source
                 item.dateAdded = new Date()
-                item.addedBy = user.email
+                item.addedBy = user?.email
                 $scope.bvAddselectedList.entries.push(item)
                 $http.put('bv/list',$scope.bvAddselectedList).then(
                     function () {
@@ -33,8 +49,8 @@ angular.module("sampleApp")
                 )
             }
 
-            $scope.createList = function (name,description) {
-                let list = {name:name,description:description, entries:[]}
+            $scope.createList = function (name,description,userOnlyEdit) {
+                let list = {name:name,description:description, userOnlyEdit:userOnlyEdit,entries:[]}
                 if (user?.email) {
                     list.createdBy = user.email
                 }
