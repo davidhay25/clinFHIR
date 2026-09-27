@@ -630,7 +630,7 @@ angular.module("sampleApp")
             //delete (hide) the bundle
             $scope.deleteBundleFromLibrary = function (item) {
                 if (confirm("This will remove the Bundle from the Library. Are you sure")) {
-                    $http.delete(`bv/getBundle/${item.id}`).then(
+                    $http.delete(`bv/bundle/${item.id}`).then(
                         function (data) {
                             umamiSvc.track('bvBundle:libraryBundle:delete', {value:item.qry});
                             getListAllBundles()
@@ -648,7 +648,7 @@ angular.module("sampleApp")
 
 
             $scope.getBundleFromLibrary = function (item,initialTab) {
-                $http.get(`bv/getBundle/${item.id}`).then(
+                $http.get(`bv/bundle/${item.id}`).then(
                     function (data) {
                         umamiSvc.track('bvBundle:libraryBundle:retrieve', {value:item.qry});
                         $scope.bundleDisplayName = item.name
@@ -1159,6 +1159,7 @@ angular.module("sampleApp")
                 $scope.lstAllergies = bundleVisualizerSvc.getAllergies(oBundle)
                 $scope.lstConditions = bundleVisualizerSvc.getConditions(oBundle)
                 $scope.lstProcedures = bundleVisualizerSvc.getProcedures(oBundle)
+
 
                 //create hash by type
                 $scope.hashEntries = {}
@@ -1811,6 +1812,7 @@ angular.module("sampleApp")
                 delete $scope.fshText
                 delete $scope.xmlText
                 delete $scope.selectedBundleEntry
+                delete $scope.QRSummary
 
 
 
@@ -1944,6 +1946,12 @@ angular.module("sampleApp")
                 )
 
 
+                //get the QR summary
+                if (entry.resource.resourceType == 'QuestionnaireResponse') {
+                    $scope.QRSummary = bundleVisualizerSvc.makeQRAnswerSummary(entry.resource)
+                    console.log($scope.QRSummary)
+
+                }
 
             };
 
@@ -2529,7 +2537,7 @@ angular.module("sampleApp")
                     let ar1 = p.split('=')
                     if (ar1[0] == 'bundleid') {
                         let bundleid = ar1[1]
-                        let qry = `bv/getBundle/${bundleid}`
+                        let qry = `bv/bundle/${bundleid}`
                         $http.get(qry).then(
                             function (data) {
                                 let vo = data.data

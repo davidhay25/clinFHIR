@@ -31,7 +31,7 @@ angular.module("sampleApp")
             $scope.loadFromLibrary = function (item) {
 
                 umamiSvc.track('pvSelect:library', {value:`${item.id} ${item.name}`});
-                $http.get(`bv/getBundle/${item.id}`).then(
+                $http.get(`bv/bundle/${item.id}`).then(
                     function (data) {
                         //$scope.bundleDisplayName = item.name
                         console.log(data.data)

@@ -14,14 +14,42 @@ function setup(app,client) {
 
     //------------- REST queries against bundle
 
-    //search for a single resource based on id = Patient/NNJ9186
-    ///bqry/bv1763408586846/Patient/NNJ9186 -
+    //the /bqry route is exposed by the clinfhir stack (nginx)
+    //only tested against bundle produced by $extract - and not sure if we want to support more generally anyway...
+    //assume that all resources have uuid as fullUrl and references are to the uuid
+    //assume that has a Patient and may have a QR as well as the extracted resourcs
+
+    // ---------  supported API
+    //{type}?patient={patientId}
+    //{type}?subject={patientId}
+    //{type}/{resourceid}
+
+
+    /*
+    * If the references aren't to the fullUrl (like PJ ones) could we adapt the bindle (during the search). ie
+    *   find the patient and store the id and full url
+    *   examine all other resource and update reference to the fullUrl of the patient
+    *   ? a pre-process step of some sort
+    *       actually is this about face? Should I convert an extract bundle into a format that better suits the rest query. ie
+    *           iterate over bundle
+    *               set id as fullUrl (assume to be uuid)
+    *               if theres a reference
+    *                   change to {type}/id
+
+    *
+    *           (need to check for references I create in the bundle - like IPS)
+    *           but how do i know when to apply? should I apply it when saving a bundle from $extract??
+    * */
+
+
+    //{type}/{resourceid}
     app.get('/bqry/:bundleId/:type/:id', async (req, res) => {
         const bundleId = req.params.bundleId;
         const type = req.params.type;
         const id = req.params.id;
 
-        console.log(bundleId,type,id)
+
+       // console.log(bundleId,type,id)
 
         let bundleEntry = await getBundleEntry(bundleId)
 
@@ -29,15 +57,31 @@ function setup(app,client) {
             res.status(404).json(makeOO("not-found",`The bundle id ${bundleId} was not found`))
             return
         }
-
         //now we have the bundle we can do a simple query on it
-        let ar = bundleEntry.bundle?.entry?.filter(entry => entry.resource.id == id && entry.resource.resourceType == type)
+        //the identity of a resource comes from the fullUrl. eg if the identity is a uuid (like from $extract)
+        //then the fullUrl will be something like urn:uuid:e6851f4f-10a2-4b11-98a2-c79cf355e3cf and a resource will be
+        //the same. So when we're looking for the resourceId we look in the fullUrl - not the .id on the resource
+
+
+
+        //let ar = bundleEntry.bundle?.entry?.filter(entry => entry.fullUrl == id && entry.resource?.resourceType == type)
+        //match either on fullUrl or id. Will work for $extract bundles as well as 'ordinary' ones
+        let ar = bundleEntry.bundle?.entry?.filter(entry => (entry.fullUrl == id || entry.fullUrl == `urn:uuid:${id}`
+            || entry.resource?.id == id)  && entry.resource?.resourceType == type)
+
+
+       // const ar = bundleEntry.bundle?.entry?.find(
+       //     entry => entry.fullUrl === id && entry.resource?.resourceType === type
+      //  );
+
         switch (ar.length) {
             case 0 :
                 res.status(404).json(makeOO("not-found",`The resource ${type}/${id} was not found`))
                 break
             case 1 :
-                res.json(ar[0].resource)
+                let resource = ar[0].resource
+                resource.id = resource.id || ar[0].fullUrl  //if no id then set it to the fullUrl
+                res.json(resource)
                 break
             default :
                 res.status(500).json(makeOO("duplicate",`There were ${ar.length} instances of ${type}/${bundleId}.`))    //todo - check correct response code
@@ -47,52 +91,49 @@ function setup(app,client) {
 
     })
 
-
-    // bqry/{bundleId}/{type}?patient={patientReference}
-    //example bundleid bv1763408586846  - bqry/bv1763408586846/Condition?patient=Patient/NNJ9186
-//https://clinfhir.com/bqry/bv1784253925024/Condition?patient=ZKT9319
-    //todo only works where there reference is in the format Patient/xx  - need to be enhanced for other reference types - eg to fullUrl
-
+    //{type}?patient={patientId}
+    //{type}
     app.get('/bqry/:bundleId/:type', async (req, res) => {
         const bundleId = req.params.bundleId;
         const type = req.params.type;
-        let patientReference = req.query.patient;
-        //todo ? return if no patient???
+        let patientId = req.query.patient;
+        let prefixedPatientId = `Patient/${patientId}`
+        let urnPrefixedPatientId = `urn:uuid:${patientId}`
 
-        console.log(bundleId);
-        console.log(type);
-        console.log(patientReference);
-
-        patientReference = `Patient/${patientReference}`    //leading type needed
+        //If no patient will return all resources of that type
 
         let bundleEntry = await getBundleEntry(bundleId)
         if (! bundleEntry) {
-            res.status(404).json({})
+            res.status(404).json((makeOO("not-found",`The bundle id ${bundleId} was not found`)))
             return
         }
 
         //now we have the bundle we can do a simple query on it
 
-        let responseBundle = {resourceType:'Bundle',type:'searchset',entry:[]}
+        let responseBundle = {resourceType:'Bundle',type:'searchset',total:0,entry:[]}
         for (const entry of bundleEntry.bundle?.entry || []) {
             let resource = entry.resource
+            let fullUrl = entry.fullUrl
             if (resource.resourceType == type) {
                 let patRef = resource.subject || resource.patient   //eg Patient/xxx
                 if (patRef) {
-                    let ref = patRef.reference
-                    if (ref == patientReference) {
+                    //could be {type}/id or uuid
+                    let ref = patRef.reference  //this will either be the fullUrl (uuid) of the patient or the Patient/patientid
+
+
+                    if (!patientId || ref == patientId || ref == prefixedPatientId || ref == urnPrefixedPatientId) {
                         responseBundle.entry.push({resource:resource})
                     }
                 }
             }
         }
-
+        responseBundle.total = responseBundle.entry.length
         res.json(responseBundle)
     });
 
     async function getBundleEntry(bundleId) {
         let query = {id:bundleId}
-        console.log(query)
+        //console.log(query)
         let result = await database.collection("bvBundles").findOne(query)
         //console.log(JSON.stringify(result),null,2)
         return result
@@ -107,8 +148,24 @@ function setup(app,client) {
 
     //------------ Lists ---------------
     //get all lists. Returns the entire list as it's unlikely to be large.
+
+    //this endpoint (bqry) is routed through NGINX externally.
+    //it returns a summary of lists
+    app.get('/bqry/lists', async (req, res) => {
+        let filter = { status: { $ne: "hide" }}     //I don't believe this is implemented yet!
+
+        try {
+            const result = await database.collection("bvList").find(filter).toArray()
+            res.json(result);
+        } catch (err) {
+            console.error(err);
+            res.status(500).send(err);
+        }
+
+    })
+
     app.get('/bv/lists', async function(req, res) {
-        let filter = { status: { $ne: "hide" }}
+        let filter = { status: { $ne: "hide" }}     //I don't believe this is implemented yet!
 
         try {
             const result = await database.collection("bvList").aggregate([
@@ -137,14 +194,6 @@ function setup(app,client) {
                         }
                     }
                 }
-/*
-                // Don't return the entries array
-                {
-                    $project: {
-                        entries: 0
-                    }
-                }
-*/
             ]).toArray();
 
             res.json(result);
@@ -312,6 +361,9 @@ function setup(app,client) {
         }
     })
 
+    //--------------- bundles
+
+    //Note that these are actually bundle entries - the actual bundle is one of the elements...
     //retrieve all the bundles saved in the library
     //todo - exclude those send in from other apps (eg GB)
     app.get("/bv/getAllBundles",async function (req,res){
@@ -354,9 +406,30 @@ function setup(app,client) {
     })
 
 
+    //update a bundle entry (which includes the bundle as an element
+    app.put('/bv/bundle/:id',async function(req,res){
+        let bundleEntry = req.body
+        let id = req.params.id;
+        let query = {id:id}
 
-    //delete (hide) a nundle
-    app.delete("/bv/getBundle/:id",async function (req,res){
+        try {
+            await database.collection("bvBundles").replaceOne(
+                query,
+                bundleEntry,
+                { upsert: true }
+            )
+            res.json(bundleEntry)
+        } catch(ex) {
+            console.error(ex)
+            res.status(500).json(ex.message)
+        }
+    })
+
+
+
+
+    //delete (hide) a bundle
+    app.delete("/bv/bundle/:id",async function (req,res){
 
         let id = req.params.id;
         let query = {id:id}
@@ -378,21 +451,26 @@ function setup(app,client) {
 
     //retrieve a single stored bundle by id. Bundles can be stored from within BV - and also saved
     //into the db by other apps (eg GtaphBuilder) when 'exporting' bundles to BV for viewing
-    app.get("/bv/getBundle/:id",async function (req,res){
+    app.get("/bv/bundle/:id",async function (req,res){
 
         let id = req.params.id;
         let query = {id:id}
         //console.log('bv',query)
         try {
             const result = await database.collection("bvBundles").findOne(query)
-            res.json(result);
+            if (! result) {
+                res.status(404).send({msg :`${id} not found`});
+            } else {
+                res.json(result);
+            }
+
         } catch (err) {
             console.error(err);
             res.status(500).send(err);
         }
     })
 
-    //a version for external access that only returns the bindle
+    //a version for external access that only returns the bundle
     app.get("/api/Bundle/:id",async function (req,res){
 
         let id = req.params.id;

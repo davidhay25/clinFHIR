@@ -57,16 +57,51 @@ angular.module("sampleApp")
 
         return {
 
+            makeQRAnswerSummary : function (QR) {
+                if ( !QR || ! QR.resourceType == 'QuestionnaireResponse') {
+                    return
+                }
+
+
+                const rows = [];
+
+                function walk(items, depth) {
+                    if (!items) return;
+                    for (const item of items) {
+                        rows.push({
+                            linkId: item.linkId,
+                            depth,
+                            text: item.text || '',
+                            answer: item.answer,
+                        });
+                        if (item.item) {
+                            walk(item.item, depth + 1);
+                        }
+                        // Repeating group items nest their children inside each answer instead
+                        if (item.answer) {
+                            for (const a of item.answer) {
+                                if (a.item) walk(a.item, depth + 1);
+                            }
+                        }
+                    }
+                }
+
+                walk(QR.item, 0);
+                console.log(">>>>>>>. QR rows")
+                return rows;
+
+
+
+            },
+
             makeQTree : function (Q) {
-                // make a tree version of a Q - used in the 'bundlefromQ function
+                // make a tree version of a Q - used in the 'bundlefromQ function when selecting a Q in the 'make form form' option
                 //todo - create list of pre-pop expressions
 
                 let that = this
 
                 let hashItem = {}
                 let treeData = []
-
-
 
 
 

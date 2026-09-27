@@ -69,7 +69,7 @@ angular.module("sampleApp")
                                 return
                             }
 
-                            $http.get(`bv/getBundle/${bundleItem.bundleId}`).then(
+                            $http.get(`bv/bundle/${bundleItem.bundleId}`).then(
                                 function (data) {
                                     let newBundleItem = angular.copy(bundleItem)
                                     newBundleItem.bundle = data.data?.bundle
@@ -122,9 +122,9 @@ angular.module("sampleApp")
             }
 
             //load the Q viewer (modelReview) with this Q
-            $scope.loadModelReview = function() {
+            $scope.loadModelReview = function(Q) {
                 let cacheName = 'cache-Q'       //just use a single name
-                $localStorage[cacheName] = $scope.activeQ
+                $localStorage[cacheName] = Q// $scope.activeQ
 
                 const url = `${window.location.origin}/forms/modelReview.html?${cacheName}`
 

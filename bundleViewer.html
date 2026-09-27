@@ -1231,6 +1231,29 @@
 
 
 
+
+                            <uib-tab ng-show="selectedBundleEntry.resource.resourceType == 'QuestionnaireResponse'"
+                                     heading="QR">
+                                <br/>
+
+                                <table class="table table-bordered">
+                                    <tr ng-repeat="row in QRSummary" ng-if="row.answer.length > 0">
+                                        <td>{{row.linkId}}</td>
+                                        <td>
+                                            <div ng-repeat="ans in row.answer"><pre>{{ans | json}}</pre></div>
+
+
+
+                                        </td>
+                                    </tr>
+                                </table>
+                                <pre>{{QRSummary | json}}</pre>
+
+
+                            </uib-tab>
+
+
+
                             <uib-tab ng-show="selectedBundleEntry.resource.resourceType == 'Binary'" heading="Binary Content">
                                 <br/>
                                 <pre>{{base64Decode(selectedBundleEntry.resource.data)}}</pre>
