@@ -1,0 +1,83 @@
+<div>
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+
+                <h3>AI assistant</h3>
+
+            </div>
+
+
+            <div class="col-md-4 col-sm-4">
+
+                <div class="pull-right">
+                    <button class="btn btn-link" ng-click="$dismiss()">Cancel</button>
+                    <button class="btn btn-primary"
+                        ng-show="response.bundle"
+                        ng-click="save()">Load bundle</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="modal-body">
+
+        <div class="alert-warning alert" ng-show="loading">
+            <div class="pull-right">{{count}}</div>
+            The AI is thinking about your request. This can take a little while depending on the size
+            of the bundle it needs to create so please be patient.
+        </div>
+
+        <textarea rows = 4 ng-model="input.message" class="form-control" ></textarea>
+
+        <button class="btn btn-primary" ng-click="sendMessage(input.message)">Invoke AI</button>
+
+        <div class="row">
+            <div class="col-md-6">
+
+
+                <div ng-show="response">
+                    <h4>Summary</h4>
+                    {{response.summary}}
+
+                    <h4>Assumptions</h4>
+                    <ul>
+                        <li ng-repeat="ass in response.assumptions">
+                            {{ass}}
+                        </li>
+                    </ul>
+
+                    <h4>Modelling notes</h4>
+                    <ul>
+                        <li ng-repeat="note in response['modelling_notes']">
+                            {{note}}
+                        </li>
+                    </ul>
+
+                    <h4>Warnings</h4>
+                    <ul>
+                        <li ng-repeat="warn in response.warnings">
+                            {{warn}}
+                        </li>
+                    </ul>
+
+                </div>
+
+            </div>
+            <div class="col-md-6">
+                <pre>{{response.bundle | json}}</pre>
+
+            </div>
+        </div>
+
+
+
+
+    </div>
+
+    <div class="modal-header">
+        <em>This functionality is experimental and not yet fully robust.</em>
+
+    </div>
+</div>

@@ -591,7 +591,7 @@ angular.module("sampleApp")
 
 
     //change the language
-    $scope.changeLanguage = function() {
+    $scope.changeLanguageDEP = function() {
         var modalInstance = $uibModal.open({
             templateUrl: "/modalTemplates/selectLanguage.html",
             size: 'sm',

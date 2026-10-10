@@ -33,6 +33,8 @@ app.post('/telemetry', async function(req,res) {
 })
 
 
+const aiModule = require("./serverModuleAI")
+aiModule.setup(app)
 
 let lantanaModule = require("./serverModuleLantana")
 const proxyModule = require("./serverModuleProxy.js")

@@ -4,7 +4,7 @@ angular.module("sampleApp")
                   GetDataFromServer,$window,appConfigSvc,$localStorage,$q,moment,bundleVisualizerSvc,
                   terminologySvc,$sce) {
 
-            $scope.showHelp = $localStorage
+            //$scope.showHelp = $localStorage
 
 
             $scope.input = {};
@@ -117,18 +117,18 @@ angular.module("sampleApp")
             $scope.maxForGraph = 300
 
             $scope.selectors = []
-            $scope.selectors.push({display:"Stored Library Bundles",code:'stored'})
-            $scope.selectors.push({display:"Shared Library Queries",code:'library'})
-
-            $scope.selectors.push({display:"Curated lists",code:'lists'})
-            $scope.selectors.push({display:"IPS Bundles",code:'ips'})
-
-            $scope.selectors.push({display:"Locally saved queries",code:'saved'})
 
             $scope.selectors.push({display:"Paste Bundle",code:'paste'})
             $scope.selectors.push({display:"Paste Single resource",code:'singleresource'})
 
             $scope.selectors.push({display:"Query for Bundle",code:'query'})
+            $scope.selectors.push({display:"Locally saved queries",code:'saved'})
+
+            $scope.selectors.push({display:"Curated lists",code:'lists'})
+            $scope.selectors.push({display:"IPS Bundles",code:'ips'})
+
+            $scope.selectors.push({display:"Stored Library Bundles",code:'stored'})
+            $scope.selectors.push({display:"Shared Library Queries",code:'library'})
 
             $scope.selectors.push({display:"Generate from form",code:'form'})
 
@@ -1404,7 +1404,7 @@ angular.module("sampleApp")
             }
 
 
-            //called form bvDocument when a section is selected
+            //called from bvDocument when a section is selected
             $scope.selectSection = function(section) {
                // delete $scope.selectedEntryFromSection
                 delete $scope.resourceFromSection
@@ -1989,7 +1989,7 @@ angular.module("sampleApp")
                 let options = {bundle:$scope.fhir,
                     hashErrors:$scope.hashErrors,
                     serverRoot:$scope.serverRoot,
-                    primaryResourceId : primaryResourceId,
+                    primaryResourceId : primaryResourceId,          //I din't think this is used now..
                     centralResourceId:url}
 
                 options.showInRef = $scope.input.showInRef;

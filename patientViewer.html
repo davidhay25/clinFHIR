@@ -143,7 +143,9 @@
     <script src="js/bundleVisualizerSvc.js"></script>
 
     <script src="js/fhirBundleFilterSvc.js"></script>
-
+    <script src="js/aiAssistantSvc.js"></script>
+    <script src="js/aiAssistantCtrl.js"></script>
+    <script src="js/libs/localforage.min.js"></script>
 
     <title>Patient Viewer</title>
 
@@ -162,17 +164,6 @@
                 <a class="navbar-brand" href="https://clinfhir.com" >
                     Patient Viewer
                 </a>
-<!--
-                <div>
-                    <a class="navbar-brand" href="#"
-                       uib-popover-html="displayServers"
-                       popover-trigger="'mouseenter'"
-                       popover-placement="right">
-                        Patient Viewer
-                    </a>
-                </div>
-                -->
-
             </div>
 
             <div class="col-md-3">
@@ -204,20 +195,23 @@
 
             <div class="col-md-1">
                 <div class="navbar-text pull-right">
-                    <a style="font-size: 24px;padding-top: 8px"
+                    <a style="font-size: 24px;padding-top: 0px"
                        href="https://docs.google.com/document/d/1h6ndmfH8BCdVikkCaw3FBx0XXcl255DWcOEr08Ph7mQ/edit?tab=t.0#heading=h.ehxi2tf61g8i"
                        target="_blank" class="glyphicon glyphicon-info-sign"></a>
                 </div>
             </div>
 
             <div class="col-md-2">
-                <div class="pull-right">
+                <form class="navbar-text pull-right">
+
+                    <button class="btn btn-success pull-right" ng-click="aiAssistant()">AI Assistant</button>
+
                     <!--
                     <a href="https://www.intersystems.com/" target="_blank">
                         <img style="padding-top: 8px;padding-bottom: 8px" src="/icons/sb-intersystems.png"/>
                     </a>
 -->
-                </div>
+                </form>
 
             </div>
         </div>

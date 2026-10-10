@@ -3,7 +3,7 @@ angular.module("sampleApp")
     .controller('resourceViewerCtrl',
         function ($scope,supportSvc,appConfigSvc,resourceCreatorSvc,resourceSvc,$sce,sessionSvc,umamiSvc,
                   $uibModal, $timeout,GetDataFromServer,modalService,ResourceUtilsSvc,builderSvc,$window,$http,$location,
-                  Utilities,terminologySvc,bundleVisualizerSvc) {
+                  Utilities,terminologySvc,bundleVisualizerSvc,v2ToFhirSvc) {
 
 
         //https://github.com/vasturiano/3d-force-graph
@@ -18,7 +18,7 @@ angular.module("sampleApp")
 
             console.log(appConfigSvc.getCurrentDataServer())
 
-            //get any sample bundles saved in the
+            //get any sample bundles saved in the Bundle Viewer
             $http.get(`bv/getAllBundles?showInPV=true`).then(
                 function (data) {
                     $scope.bundlesFromLibrary = data.data
@@ -28,6 +28,28 @@ angular.module("sampleApp")
                     console.log(err)
                 }
             )
+
+
+            //invoke the aiAssistant
+            $scope.aiAssistant = function () {
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/aiAssistant.html',
+                    backdrop: 'static',
+                    controller: 'aiAssistantCtrl',
+                    size: 'xlg'
+                }).result.then(
+                    function(bundle) {
+                        if (bundle) {
+                            $scope.bundle = bundle
+                            processBundle(bundle)
+                        }
+
+                        //processBundle to display the returned bundle
+                        // setServerType : function(type,url,name) {
+                    })
+
+            }
+
             $scope.loadFromLibrary = function (item) {
 
                 umamiSvc.track('pvSelect:library', {value:`${item.id} ${item.name}`});
@@ -224,6 +246,7 @@ angular.module("sampleApp")
             });
 
 
+            /*
             //when a document is selected in from the list of documents...
             $scope.selectDocumentDEP = function(docRef) {
 
@@ -259,6 +282,8 @@ angular.module("sampleApp")
                                     }
                                 }
                             });
+
+
                             var graphData = resourceCreatorSvc.createGraphOfInstances(lst,true);
 
 
@@ -369,6 +394,8 @@ angular.module("sampleApp")
 
             };
 
+            */
+
             $scope.selectResourceInDocTreeDEP = function(resource) {
                 $scope.docTreeResource = resource;
             };
@@ -401,90 +428,6 @@ angular.module("sampleApp")
             };
 
             //======== document functions
-
-            //display the docment graph. Only works for one document per patient
-            $scope.selectCCDADocumentDEP = function(composition) {
-                console.log(composition);
-
-                //work on copies
-                $scope.currentComposition = angular.copy(composition);
-                var localAllResourcesList = angular.copy($scope.allResourcesAsList)
-
-                //not currently used - was going to support a separate node for sections linked from the document
-                var sectionNodeMaster = {resourceType:"Section",id:'sectionNodeMaster'};
-                sectionNodeMaster.entry = [];
-                //temp disable $scope.currentComposition.sectionNodeMasterNode = {'reference':'Section/sectionNodeMaster'}
-                //temp disable localAllResourcesList.push(sectionNodeMaster)
-
-
-
-
-                //move through sections and create a node to represent that, moving the references from the composition to the node...
-                $scope.currentComposition.section.forEach(function(section,inx){
-                    var newNode = angular.copy(section);
-                    newNode.resourceType = "Section";
-                    newNode.id = 'sectionNode'+inx;
-
-                    delete section.entry
-                    delete section.text
-
-                    //the reference from the Composition to the section
-                    section.section = {'reference':'Section/sectionNode'+inx}
-                    sectionNodeMaster.entry.push({'reference':'Section/sectionNode'+inx})
-
-                    localAllResourcesList.push(newNode)
-                })
-
-                //move through the list of all resources, remove the current composition & insert the updated one
-                for (var i=0; i < localAllResourcesList.length; i++) {
-                    var resource = localAllResourcesList[i]
-
-                    if (resource.resourceType == 'Composition' && resource.id == $scope.currentComposition.id) {
-                        localAllResourcesList.splice(i,1,$scope.currentComposition);
-                        break;
-                    }
-                }
-
-
-
-                //create and draw the graph representation...
-                var graphData = resourceCreatorSvc.createGraphOfInstances(localAllResourcesList);
-                var container = document.getElementById('documentGraph');
-                var docGraph = new vis.Network(container, graphData, {});
-               // $scope.graph['mynetwork'] = network;
-                docGraph.on("click", function (obj) {
-                    // console.log(obj)
-                    var nodeId = obj.nodes[0];  //get the first node
-                    var node = graphData.nodes.get(nodeId);
-
-                    var selectedGraphNode = graphData.nodes.get(nodeId);
-
-                    console.log(selectedGraphNode)
-                    delete $scope.currentDocumentSectionText;
-                    delete $scope.currentDocumentSection
-                    if (selectedGraphNode.resource && selectedGraphNode.resource) {
-                        $scope.currentDocumentSection = selectedGraphNode.resource;
-                       // delete $scope.currentDocumentSection.text;
-                    }
-
-
-                    if (selectedGraphNode && selectedGraphNode.resource && selectedGraphNode.resource.text) {
-                        $scope.currentDocumentSectionText = selectedGraphNode.resource.text.div;
-
-
-                    }
-
-
-                    //drawResourceTree($scope.selectedGraphNode.resource)
-
-                    $scope.$digest();
-                });
-
-
-                //createGraphOneResource(composition,"documentGraph")
-
-
-            }
 
 
             $scope.filterTimeLineByCondition = function(reference) {
@@ -604,6 +547,8 @@ angular.module("sampleApp")
             //18Nov2015 with a bundle, create all the other objects
             function processBundle(bundle) {
                 console.log(bundle)
+                $scope.currentBundle = bundle
+
 
 
                 let hasComposition
@@ -624,7 +569,7 @@ angular.module("sampleApp")
 
 
                     resourceHash[type] = resourceHash[type] || {entry:[],total:0}
-                    resourceHash[type].entry.push({resource:resource});
+                    resourceHash[type].entry.push({resource:resource,entry:entry});
                     resourceHash[type].total ++
 
                 }
@@ -818,13 +763,7 @@ angular.module("sampleApp")
                         })
                     }
 
-                    /* comment out in madrid - do I need this???
-                    //also need to add the reference resources to the dictionary (so thay can be found in outgoing references)
-                    supportSvc.getReferenceResources().forEach(function (resource) {
-                        var hash = resource.resourceType + "/" + resource.id;
-                        $scope.allResourcesAsDict[hash] = resource;
-                    });
-*/
+
 
 
                 });
@@ -899,8 +838,25 @@ angular.module("sampleApp")
             var drawGraph = function()  {
 
 
+//selectedResources - the hash
+                //bundle
+                //hidePatient
 
-                var graphData = resourceCreatorSvc.createGraphOfInstances( $scope.allResourcesAsList,true,$scope.input.showType);
+                let options = {}
+                options.bundle = $scope.currentBundle
+                options.selectedResources = $scope.input.showType
+
+
+                let vo = v2ToFhirSvc.makeGraph1(options);
+                let graphData = vo.graphData
+
+
+
+
+
+               //replacing this   var graphData = resourceCreatorSvc.createGraphOfInstances( $scope.allResourcesAsList,true,$scope.input.showType);
+
+
                 $scope.graphData = graphData;
                 var container = document.getElementById('mynetwork');
 
@@ -1024,12 +980,27 @@ angular.module("sampleApp")
 
             }
 
-            function createGraphOneResource(resource,containerId) {
+            function createGraphOneResource(entry,containerId) {
+
+                let resource = entry.resource
 
                 //todo this is likely inefficient as may have already been done..
                 var resourceReferences = resourceSvc.getReference(resource, $scope.allResourcesAsList, $scope.allResourcesAsDict);
 
-                var graphData = resourceCreatorSvc.createGraphAroundSingleResourceInstance(resource,resourceReferences)
+
+
+                let options1 = {}
+                options1.bundle = $scope.currentBundle
+                options1.selectedResources = $scope.input.showType
+                options1.centralResourceId = entry?.entry?.fullUrl //`${resource.type}/${resource.id}`
+
+
+                let vo = v2ToFhirSvc.makeGraph1(options1);
+                let graphData = vo.graphData
+
+
+
+               // var graphData = resourceCreatorSvc.createGraphAroundSingleResourceInstance(resource,resourceReferences)
 
                 var container = document.getElementById(containerId);
 
@@ -1167,7 +1138,8 @@ angular.module("sampleApp")
                         $scope.loadVersions(resource);  //load all the versions for this resource...
                     }
 
-                    createGraphOneResource(resource,'resourcenetwork');
+                    //createGraphOneResource(resource,'resourcenetwork');
+                    createGraphOneResource(entry,'resourcenetwork');
 
                     $scope.downloadLinkJsonContent = window.URL.createObjectURL(new Blob([angular.toJson(resource, true)], {type: "text/text"}));
                     $scope.downloadLinkJsonName = resource.resourceType + "-" + resource.id;

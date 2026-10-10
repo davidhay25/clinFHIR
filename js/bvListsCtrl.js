@@ -153,6 +153,7 @@ angular.module("sampleApp")
                     resolve: {
                         list: function () {
                             let lst = {entries:[],userOnlyEdit : false}
+                            lst.id = `lid${new Date().getTime()}`
                             if ($scope.user?.email) {
                                 lst.createdBy = $scope.user.email
                             }

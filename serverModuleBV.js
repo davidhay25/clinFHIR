@@ -164,6 +164,68 @@ function setup(app,client) {
 
     })
 
+    //add to a list. Used by Q designer to add a new bundle to a list
+    //need to add the bundleentry first, then update the list. We assume the client has assigned an id to the bundleEntry
+    app.post('/bqry/addToList/:listId', async function(req,res){
+        let bundleEntry = req.body
+        let listId = req.params.listId
+
+        let id = bundleEntry.id
+
+        if (!id) {
+            res.status(404).json({msg:`Bundle entry must have an id`})
+            return
+        }
+
+        let query = {id:id}
+
+        try {
+            //first, add the bundleEntry (including bundle) into the bundles collection
+            //do an upsert on ID as the id should be unique
+            await database.collection("bvBundles").replaceOne(
+                query,
+                bundleEntry,
+                { upsert: true }
+            )
+
+            //create the list entry
+            let listEntry = {type:'bundle'}
+            listEntry.bundleId = bundleEntry.id
+            listEntry.name = bundleEntry.name
+            listEntry.description = bundleEntry.description
+            listEntry.dateAdded = bundleEntry.date
+            listEntry.addedBy = bundleEntry.author
+
+            //now retrieve the list
+            let listQuery = {id:listId}
+            let list = await database.collection("bvList").findOne(listQuery)
+            if (!list) {
+                res.status(404).json({msg:`List ${listId} not found`})
+                return
+            }
+
+            //add the bundleEntry to it
+            list.entries = list.entries || []
+            list.entries.push(listEntry)
+
+            //ad update the list
+            await database.collection("bvList").replaceOne(
+                listQuery,
+                list,
+                { upsert: true }
+            )
+
+
+            res.json(list)
+        } catch(ex) {
+            console.error(ex)
+            res.status(500).json(ex.message)
+        }
+
+
+    })
+
+
     app.get('/bv/lists', async function(req, res) {
         let filter = { status: { $ne: "hide" }}     //I don't believe this is implemented yet!
 
@@ -207,7 +269,7 @@ function setup(app,client) {
     // add a new list
     app.post('/bv/list',async function(req,res){
         let list =  req.body
-        list.id = new Date().getTime()
+        list.id = `lid${new Date().getTime()}`
         try {
             await database.collection("bvList").insertOne(list)
             res.json(list)
@@ -223,6 +285,7 @@ function setup(app,client) {
         delete list['_id']
         delete list.queryCount
         delete list.bundleCount
+        list.id = list.id ||  `lid${new Date().getTime()}`
 
         try {
             await database.collection("bvList").replaceOne(

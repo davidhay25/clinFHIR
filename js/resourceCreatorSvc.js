@@ -1,6 +1,6 @@
 angular.module("sampleApp").service('resourceCreatorSvc',
     function($q,$http,RenderProfileSvc,appConfigSvc,ResourceUtilsSvc,profileCreatorSvc,$filter,
-             GetDataFromServer,$localStorage,Utilities,$sce,resourceSvc,supportSvc,modalService) {
+             GetDataFromServer,$localStorage,Utilities,$sce,resourceSvc,supportSvc,modalService,v2ToFhirSvc) {
 
 
     var currentProfileEl;     //the profile being used...
@@ -2994,6 +2994,16 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
         },
         createGraphOfInstances: function (allResources,includePatient,hashShowResourceTypes) {
+
+
+
+            //invoke the graph creator used by bundle viewer
+         //   let options = {}
+
+
+
+
+
             var that = this;
             var deferred = $q.defer();
 
