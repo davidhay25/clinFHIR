@@ -3,6 +3,22 @@ angular.module("sampleApp").service('aiAssistantSvc', function($http) {
     let messageHistory = []
 
 
+    async function build(messages) {
+        const r = await fetch('ai/bundleBuilder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(messages)
+        });
+
+        if (!r.ok) throw new Error('Builder failed');
+
+        const { text } = await r.json();
+        return text;
+    }
+
+    return { build };
+
+/*
     // onChunk is called with each piece of text as it arrives
     async function build(messages, onChunk) {
         console.log(messages)
@@ -11,6 +27,7 @@ angular.module("sampleApp").service('aiAssistantSvc', function($http) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(messages)
         });
+
         if (!r.ok) throw new Error('Builder failed');
 
         const reader = r.body.getReader();
@@ -23,30 +40,8 @@ angular.module("sampleApp").service('aiAssistantSvc', function($http) {
     }
 
     return { build };
+*/
 
 
-    /*
-    return {
-        sendMessage : function (msg) {
-            //send a message to the ai
-
-
-
-            let message = {}
-            $http.post("ai/bundleBuilder",[{role:'user',content:msg}]).then(
-                function (data) {
-                    $scope.response = data.data
-                },function (err) {
-                    $scope.response = err
-                }
-            )
-            
-        },
-        getMessageHistory : function () {
-            
-        }
-    }
-
-    */
     
 })

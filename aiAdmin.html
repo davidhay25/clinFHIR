@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <base href="/" />
+    <meta charset="UTF-8">
+
+    <script src="js/libs/angular.min1-5.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-2.0.1.min.js"></script>
+
+    <script src="js/libs/moment.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+
+    <script src="js/libs/angular-sanitize.js"></script>
+
+    <script>
+        angular.module("sampleApp",['ui.bootstrap','ngStorage']).config(function($locationProvider) {
+
+            // enable html5Mode for pushstate ('#'-less URLs)
+            $locationProvider.html5Mode(true);
+            $locationProvider.hashPrefix('!');
+        });
+        angular.module("sampleApp").constant("moment", moment);
+
+    </script>
+
+    <script src="js/libs/ngStorage.min.js"></script>
+    <script src="js/aiAdminCtrl.js"></script>
+    <!--
+   <script src="js/workflowCtl.js"></script>
+   <script src="js/modalDialogSvc.js"></script>
+   <script src="js/appConfigSvc.js"></script>
+
+   <script src="resourceBuilder/rbServices.js"></script>
+   <script src="js/components/dataTypes.js"></script>
+
+   <script src="js/services.js"></script>
+   <script src="js/resourceCreatorSvc.js"></script>
+   <script src="js/filters.js"></script>
+   <script src="js/documentBuilder.js"></script>
+   <script src="resourceBuilder/rbServices.js"></script>
+   <script src="js/reporterCtrl.js"></script>
+
+   <script src="js/libs/ngStorage.min.js"></script>
+
+
+
+   <script src="js/profileCreatorSvc.js"></script>
+   -->
+
+    <title>AI Admin</title>
+
+</head>
+
+
+<body style="padding: 8px" >
+
+<div ng-app="sampleApp" ng-controller="aiAdminCtrl" class="container-fluid">
+
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="myScroll1">
+                <table class="table table-bordered">
+                    <tr ng-repeat="row in log" ng-click="getDetails(row)" style="cursor: pointer"
+                        ng-class="{listItemSelected:selectedRow == row}">
+                        <td>{{row.date | date : "medium"}}</td>
+                        <td>{{row.model}}</td>
+
+                        <td>{{row.stopReason}}</td>
+                        <td>{{row.usage['input_tokens'] + row.usage['output_tokens']}}</td>
+
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+        <div class="col-md-8">
+            <uib-tabset>
+                <uib-tab heading="Log">
+                    Prompt: {{forDisplay}}
+                </uib-tab>
+                <uib-tab heading="Conversation">
+                    <div ng-repeat="msg in details.parsedMessages">
+                        <div><strong>{{msg.role}}</strong></div>
+
+
+
+                        <div ng-if = "msg.role == 'assistantXX'">
+
+
+                            <div><strong>Summary</strong></div>
+                            <div style="padding-left: 8px"> {{msg.summary}}</div>
+
+                            <div><strong>Assumptions</strong></div>
+                            <ul>
+                                <li ng-repeat="ass in msg.assumptions">
+                                    {{ass}}
+                                </li>
+                            </ul>
+
+
+                            <div ng-show="msg.notes.length > 0"><strong>Modelling notes</strong></div>
+                            <ul>
+                                <li ng-repeat="note in msg.notes">
+                                    {{note}}
+                                </li>
+                            </ul>
+
+
+                            <div ng-show="msg.warnings.length > 0"><strong>Warnings</strong></div>
+                            <ul>
+                                <li ng-repeat="warn in msg.warnings">
+                                    {{warn}}
+                                </li>
+                            </ul>
+
+
+                        </div>
+
+                        <div ng-if = "msg.role == 'user'">
+                            <div>{{msg.text}}</div>
+<!--
+
+                            <h4>AI response</h4>
+                            <div><strong>Summary</strong></div>
+                            <div style="padding-left: 8px"> {{msg.summary}}</div>
+
+-->
+
+                        </div>
+
+
+                    </div>
+                </uib-tab>
+                <uib-tab heading="Json">
+                    <pre>{{details | json}}</pre>
+                </uib-tab>
+            </uib-tabset>
+
+
+        </div>
+    </div>
+
+
+
+</div>
+</body>
+</html>

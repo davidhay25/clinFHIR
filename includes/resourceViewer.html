@@ -30,14 +30,14 @@
                 </div>
 
 
-
+<!--
                 <span class="clickable" ng-click="copyToClipboard(downloadBundleText)">Copy Bundle to clipboard</span>
 
                 <div>
                     <a ng-show="downloadBundleJsonName" download="{{downloadBundleJsonName}}.json"
                        href="{{downloadBundleJsonContent}}">Download Bundle</a>
                 </div>
-
+-->
 
 
 
@@ -199,13 +199,14 @@
                                         </uib-tab>
 
 
-
+<!--
                                         <uib-tab heading="Task " ng-show="outcome.selectedResource.resourceType=='Task'">
                                             <br/>
                                             <div ng-controller="pvTaskCtrl">
                                                 <ng-include src="'includes/pvTask.html'"></ng-include>
                                             </div>
                                         </uib-tab>
+                                        -->
 
 
                                         <uib-tab heading="Sections" ng-show="outcome.selectedResource.resourceType=='Composition'">
@@ -610,12 +611,15 @@
 
     <uib-tab heading="Json">
         <br/>
+        <div class="pull-right clickable" ng-click="copyBundleToClipboard(bundle)">Copy to clipboard</div>
+        <div class="clearfix"></div>
         <div class="myScroll1">
             <pre>{{bundle | json}}</pre>
         </div>
 
     </uib-tab>
 
+    <!--
     <uib-tab ng-show="showGQL" heading="GraphQL">
         <br/>
         <div class="row">
@@ -624,7 +628,8 @@
             </div>
         </div>
     </uib-tab>
-
+    -->
+<!--
     <uib-tab  ng-show="false && documentReferenceList.length > 0" heading="Graphs">
 
         <div class="row">
@@ -639,9 +644,9 @@
                     </a>
                 </div>
             </div>
-<!--
 
-            -->
+
+
             <div class="col-md-10 col-sm-10">
                 <br/>
 
@@ -716,7 +721,7 @@
     </uib-tab>
 
 
-
+-->
 
 </uib-tabset>
 

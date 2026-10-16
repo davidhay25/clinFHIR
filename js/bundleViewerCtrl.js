@@ -2441,6 +2441,7 @@ angular.module("sampleApp")
                 $http.post("validate",obj).then(
                     function (data) {
 
+                        $scope.OO = data.data
                         processOOByResource(data.data,true)
                         processOOBySeverity(data.data)
 

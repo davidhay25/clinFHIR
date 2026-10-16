@@ -50,6 +50,8 @@ angular.module("sampleApp")
 
             }
 
+
+
             $scope.loadFromLibrary = function (item) {
 
                 umamiSvc.track('pvSelect:library', {value:`${item.id} ${item.name}`});
@@ -232,7 +234,7 @@ angular.module("sampleApp")
                 renderPatientDetails($scope.allResources,$scope.patientShown)
             };
 
-            $scope.showGQLDEP = appConfigSvc.getCurrentDataServer().name == 'Grahames STU3 server';
+           // $scope.showGQLDEP = appConfigSvc.getCurrentDataServer().name == 'Grahames STU3 server';
 
 
             $scope.displayServers = "<div>Data: " + appConfigSvc.getCurrentDataServer().name + "</div>"
@@ -1288,6 +1290,10 @@ angular.module("sampleApp")
                     }
                 )
             };
+
+            $scope.copyBundleToClipboard = function (bundle) {
+                $scope.copyToClipboard(angular.toJson(bundle,true))
+            }
 
             $scope.copyToClipboard = function(text) {
                 if (navigator.clipboard) {

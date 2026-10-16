@@ -3132,24 +3132,6 @@ angular.module("sampleApp").service('resourceCreatorSvc',
 
 
 
-                        //this is in STU2
-                        if (resource.indication) {
-                            resource.indication.forEach(function (ind) {
-                                if (ind.reference && objCondition[ind.reference]) {
-                                    objCondition[ind.reference].count++;
-                                    if (filterCondition) {
-                                        if (ind.reference == filterCondition) {
-                                            include = true;
-                                        }
-                                    }
-
-                                } else {
-                                    //generally a procedure...
-                                    //console.log('there is a reference to a condition not in the patients list: ' + ind.reference)
-                                }
-                            })
-                        }
-
                         //this is in R3
                         if (resource.diagnosis) {
                             resource.diagnosis.forEach(function (dx) {

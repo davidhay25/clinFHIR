@@ -66,6 +66,7 @@ services:
     environment:
       MONGO_URL: mongodb://mongodb:27017/clinfhir
       NODE_OPTIONS: "--max-old-space-size=384"
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
     networks:
       - clinfhir-network
     logging:

@@ -4,10 +4,9 @@
         <div class="row">
             <div class="col-md-8 col-sm-8">
 
-                <h3>AI assistant</h3>
+                <h3>AI assistant: Bundle creator</h3>
 
             </div>
-
 
             <div class="col-md-4 col-sm-4">
 
@@ -23,53 +22,243 @@
     </div>
     <div class="modal-body">
 
-        <div class="alert-warning alert" ng-show="loading">
-            <div class="pull-right">{{count}}</div>
-            The AI is thinking about your request. This can take a little while depending on the size
-            of the bundle it needs to create so please be patient.
-        </div>
 
-        <textarea rows = 4 ng-model="input.message" class="form-control" ></textarea>
+        <uib-tabset active="input.selectTabActive">
+            <uib-tab heading="Current conversation">
 
-        <button class="btn btn-primary" ng-click="sendMessage(input.message)">Invoke AI</button>
+                <div class="row" ng-show="currentConversation.messages.length > 0 && ! loading">
+                    <div class="col-md-6">
+                        <h3>This conversation</h3>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn-primary btn pull-right"
 
-        <div class="row">
-            <div class="col-md-6">
-
-
-                <div ng-show="response">
-                    <h4>Summary</h4>
-                    {{response.summary}}
-
-                    <h4>Assumptions</h4>
-                    <ul>
-                        <li ng-repeat="ass in response.assumptions">
-                            {{ass}}
-                        </li>
-                    </ul>
-
-                    <h4>Modelling notes</h4>
-                    <ul>
-                        <li ng-repeat="note in response['modelling_notes']">
-                            {{note}}
-                        </li>
-                    </ul>
-
-                    <h4>Warnings</h4>
-                    <ul>
-                        <li ng-repeat="warn in response.warnings">
-                            {{warn}}
-                        </li>
-                    </ul>
-
+                                ng-click="newConversation()">Start new conversation</button>
+                    </div>
                 </div>
 
-            </div>
-            <div class="col-md-6">
-                <pre>{{response.bundle | json}}</pre>
+                <div class="aiScroll">
 
-            </div>
-        </div>
+                    <table class="table-bordered table">
+                        <tr><th>Your prompt</th><th>The AI response</th></tr>
+                        <tr ng-repeat="message in currentConversation.messages track by $index">
+
+                            <td>
+                                {{message.prompt}}
+                            </td>
+                            <td>
+
+
+                                {{message.summary}}
+                                <br/>
+
+                                <div >
+                                    <span class=" clickable" ng-click="loadBundle(message.bundle)">Load this bundle</span>
+                                    <span class="pull-right clickable" ng-click="input.showDetailed[$index] = !input.showDetailed[$index]">Toggle details</span>
+                                </div>
+
+                                <div ng-show="input.showDetailed[$index]">
+                                    <h4>Assumptions</h4>
+                                    <ul>
+                                        <li ng-repeat="ass in message.assumptions">
+                                            {{ass}}
+                                        </li>
+                                    </ul>
+
+                                    <h4>Modelling notes</h4>
+                                    <ul>
+                                        <li ng-repeat="note in message['modelling_notes']">
+                                            {{note}}
+                                        </li>
+                                    </ul>
+
+                                    <h4>Warnings</h4>
+                                    <ul>
+                                        <li ng-repeat="warn in message.warnings">
+                                            {{warn}}
+                                        </li>
+                                    </ul>
+                                    <h4>Cost</h4>
+                                    <ul>
+                                        <li>Model: {{message.model}}</li>
+                                        <li>Thinking time: {{message.time}} seconds</li>
+                                        <li>Tokens used: {{message.tokens}}</li>
+
+                                    </ul>
+
+
+
+                                </div>
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 50%">
+
+                                <textarea rows = 4 ng-model="input.message" class="form-control" ></textarea>
+
+
+                                <div class="row" style="padding-top: 4px">
+                                    <div class="col-md-1">
+                                        <div style="padding-top: 8px">Model</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <select class="form-control" ng-model="input.selectedModel"
+                                                ng-options = "model.display for model in models"></select>
+                                    </div>
+                                    <div class="col-md-1">
+
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button ng-hide="loading || ! input.message"
+                                                class="btn btn-link pull-right" ng-click="sendMessage(input.message)">Invoke AI</button>
+
+
+
+
+                                        <div class="pull-right" ng-show="loading">
+                                            <img src="css/ajax_loader_blue_32.gif"/>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+
+                            </td>
+                            <td>
+
+                                <div class="alert-warning alert" ng-show="loading">
+
+                                    The AI is thinking about your request. This can take some time  (several minutes in more extreme cases)
+                                    depending on the model, size of the bundle it needs to create and the complexity of the prompt so please be patient.
+                                    <div class="pull-right"><span class="badge">{{count}}</span></div>
+                                </div>
+
+                            </td>
+                        </tr>
+                    </table>
+
+                </div>
+            </uib-tab>
+
+            <uib-tab heading="Previous Conversations">
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <h4>Previous conversations</h4>
+                    </div>
+                    <div class="col-md-3">
+                        <h4 ng-show="selectedPreviousConversation">Messages in this conversation</h4>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="pull-right clickable" ng-show="selectedPreviousConversation"
+                             style="padding-top: 8px"
+                             ng-click="makeCurrentConversation(selectedPreviousKey)">Make this the current conversation</div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+
+
+                        <table class="table table-bordered">
+                            <tr ng-click="getPreviousConversation(hx.key)"
+                                style="cursor: pointer"
+                                ng-class="{listItemSelected:selectedPreviousKey == hx.key}"
+                                    ng-repeat="hx in conversationHistory">
+                                <td>{{hx.date | date}}</td>
+                                <td>{{hx.display}}</td>
+                                <td>{{hx.count}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-8">
+
+
+<!--
+                        <div class="pull-right">
+                            <span class=" clickable" ng-click="makeCurrentConversation(selectedPreviousKey)">Make current</span>
+                        </div>
+                        <div class="clearfix"></div>
+
+                        -->
+
+                        <table class="table table-bordered">
+                            <tr ng-repeat="msg in selectedPreviousConversation.messages">
+                                <td>{{msg.prompt}}</td>
+                                <td>{{msg.summary}}
+
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <span class=" clickable" ng-click="loadBundle(msg.bundle)">Load this bundle</span>
+                                        </div>
+                                        <div class="col-md-4">
+
+                                        </div>
+                                        <div class="col-md-4">
+                                            <span class="pull-right clickable" ng-click="input.showDetailedHx[$index] = !input.showDetailedHx[$index]">Toggle details</span>
+                                        </div>
+
+
+                                    </div>
+
+
+
+
+                                    <div ng-show="input.showDetailedHx[$index]">
+                                        <h4>Assumptions</h4>
+                                        <ul>
+                                            <li ng-repeat="ass in msg.assumptions">
+                                                {{ass}}
+                                            </li>
+                                        </ul>
+
+                                        <h4>Modelling notes</h4>
+                                        <ul>
+                                            <li ng-repeat="note in msg['modelling_notes']">
+                                                {{note}}
+                                            </li>
+                                        </ul>
+
+                                        <h4>Warnings</h4>
+                                        <ul>
+                                            <li ng-repeat="warn in msg.warnings">
+                                                {{warn}}
+                                            </li>
+                                        </ul>
+                                        <h4>Cost</h4>
+                                        <ul>
+                                            <li>Model: {{msg.model}}</li>
+                                            <li>Thinking time: {{msg.time}} seconds</li>
+                                            <li>Tokens used: {{msg.tokens}}</li>
+
+                                        </ul>
+
+
+
+                                    </div>
+
+                                </td>
+                            </tr>
+                        </table>
+
+
+
+
+<!--
+                        <pre>{{selectedPreviousConversation | json}}</pre>
+-->
+                    </div>
+                </div>
+
+
+
+
+            </uib-tab>
+
+        </uib-tabset>
+
 
 
 
@@ -77,7 +266,22 @@
     </div>
 
     <div class="modal-header">
-        <em>This functionality is experimental and not yet fully robust.</em>
+
+        <em>
+            Uses an AI to generate FHIR Bundles to represent clinical scenarios.
+            You can select the model to use - haiku is fast but basic, sonnet is slower but more thorough and
+            opus is the most comprehensive, but can take minutes to complete for a complex instruction.
+            <br/>
+
+            Enter the
+            description of your scenario and the AI will build a representative bundle. You can view the bundle and
+            give additional instructions to refine the content in a conversational manner. Use the 'Start new conversation'
+            to start over. The current conversation is saved in the local browser cache so you can return to it later.
+            If you need to use the bundle elsewhere, there's a 'copy to clipboard' option in the Json tab.
+        </em>
+        <br/> <br/>
+        <em>This functionality is experimental and not yet fully robust. If you get an error you can just try again
+        or change the prompt</em>
 
     </div>
 </div>

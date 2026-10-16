@@ -108,6 +108,11 @@
     overflow-y: scroll;
 }
 
+.aiScroll {
+    height: 500px;
+    overflow-y: scroll;
+}
+
 .myScroll600 {
     height: 600px;
     overflow-y: scroll;
