@@ -3,9 +3,12 @@ angular.module("sampleApp")
         function ($scope,aiAssistantSvc,$interval,$http,$timeout) {
 
             $scope.input = {}
+            let validationServer = "https://hapi.fhir.org/baseR4"
+
 
             $scope.input.showDetailed = {}
             $scope.input.showDetailedHx = {}
+            $scope.input.showValidation = {}
 
             $scope.models = [] // ['Fast (Haiku 5.5)','Medium (Sonnet 5.5)','Slow (Opus 5.5)']
             $scope.models.push({display:"Light but fast (Haiku 5.5)",model:"claude-haiku-5-5"})
@@ -131,7 +134,38 @@ angular.module("sampleApp")
                 $scope.$close(bundle)
             }
 
+            $scope.makeValidationString = function(issues) {
+
+                if (! issues || issues.length == 0) {
+                    return ""
+                }
+
+                let warnings = 0
+                let errors = 0
+                for (const iss of issues || []) {
+                    if (iss.severity == 'error') {
+                        errors++
+                    } else if (iss.severity == 'warning') {
+                        warnings++
+                    }
+                }
+                let result = ""
+                if (errors > 0) {
+                    result = `${errors} errors`
+                }
+                if (warnings > 0) {
+                    result += `${warnings} warnings`
+                }
+                if (! result) {
+                    result = "No validation issues"
+                }
+
+                return result
+
+            }
+
             $scope.sendMessage = function (msg) {
+                delete $scope.validationSummary
                 $scope.loading = true  //we're going to add the current bundle to the message later so kee[ this for the hx
                 let userMessage = msg //
 
@@ -198,6 +232,58 @@ angular.module("sampleApp")
                             return
                         }
 
+                        if ($scope.response.bundle) {
+                            //validate bundle
+
+                            let obj = {resource:$scope.response.bundle,validationServer:validationServer}
+
+                           // $scope.waiting = true
+                            $scope.validating = true
+                            $http.post("validate",obj).then(
+                                function (data) {
+                                    $scope.OO = data.data
+                                    console.log($scope.OO)
+                                    let ar = []
+                                    for (let iss of $scope.OO.issue || []) {
+                                        if (iss.severity == 'warning' || iss.severity == 'warning') {
+                                            let iss1 = {severity:iss.severity,diagnostics:iss.diagnostics}
+
+                                            //Get the index in the bundle of the resource with the issue
+                                            let loc = iss.location[0]
+                                            const match = loc.match(/\[(\d+)\]/);
+                                            iss1.index = match ? parseInt(match[1], 10) : null;
+
+                                            if (iss1.index && iss1.index < $scope.response?.bundle?.entry.length -1) {
+                                                let entry = $scope.response?.bundle?.entry[iss1.index]
+                                                //const text = resource?.text?.div?.replace(/<[^>]*>/g, '');
+                                                iss1.resourceText = entry?.resource?.text?.div?.replace(/<[^>]*>/g, '');
+                                            }
+
+
+                                            ar.push(iss1)
+                                        }
+                                    }
+                                    if (ar.length > 0) {
+                                        //if there are error or warning issues then add them to the conversation hx
+                                        $scope.response.validationIssues = ar
+                                        localforage.setItem($scope.currentConversationKey, $scope.currentConversation)
+                                            .then(function() {
+                                                console.log(`${$scope.currentConversationKey} updated`)
+                                            }).catch(function(err) {
+                                                alert(angular.toJson(err))
+                                            }
+                                        )
+
+                                        $scope.validationSummary =  makeValidationString(ar)
+                                    }
+                                }
+                            ).finally(function () {
+                                $scope.validating = false
+                            })
+                        }
+
+
+
                         $scope.response.prompt = userMessage    //what the user said
                         $scope.response.usage = data.data.usage
                         $scope.response.tokens =data.data.usage["input_tokens"] + data.data.usage["output_tokens"]
@@ -212,11 +298,11 @@ angular.module("sampleApp")
                         //now save the updated conversation under the current key
                         localforage.setItem($scope.currentConversationKey, $scope.currentConversation)
                             .then(function() {
-
                                 console.log(`${$scope.currentConversationKey} updated`)
                             }).catch(function(err) {
-                            alert(angular.toJson(err))
-                        })
+                                alert(angular.toJson(err))
+                            }
+                        )
 
                         $scope.loading = false
                         delete $scope.input.message

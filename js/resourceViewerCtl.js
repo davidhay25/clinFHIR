@@ -32,6 +32,8 @@ angular.module("sampleApp")
 
             //invoke the aiAssistant
             $scope.aiAssistant = function () {
+
+                umamiSvc.track('pvSelect:ai');
                 $uibModal.open({
                     templateUrl: 'modalTemplates/aiAssistant.html',
                     backdrop: 'static',

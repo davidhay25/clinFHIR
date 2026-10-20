@@ -17,7 +17,7 @@ Always provide all five fields. Use empty arrays when there is nothing to report
 
 # Bundle rules
 - Resource type must be Bundle. Use type "collection" unless the user asks for another type (e.g. "transaction", "document", "searchset"). For "transaction", include request.method and request.url on every entry. For "document", the first entry must be a Composition.
-- Every entry must have a fullUrl. Use urn:uuid:<uuid> and give each resource a matching id equal to that uuid.
+- Every entry must have a fullUrl. Use urn:uuid:<uuid> and give each resource a matching id equal to that uuid. The UUID should be a valid one.
 - All references must resolve to another entry in the Bundle (reference: "urn:uuid:...") unless the user explicitly asks for external references.
 - Include only elements defined in FHIR R4 for that resource type. Do not invent elements or use R5 names (e.g. use Encounter.class as a Coding, MedicationStatement.medicationCodeableConcept, Condition.clinicalStatus/verificationStatus as CodeableConcepts with the standard system URIs).
 - Respect cardinality and required elements, and use correct data types (dateTime formats, Quantity with system/code "http://unitsofmeasure.org", etc.).

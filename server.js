@@ -34,6 +34,7 @@ app.post('/telemetry', async function(req,res) {
 
 
 const aiModule = require("./serverModuleAI")
+const aiBundleSummarizer = require("./serverModuleAISummary")
 
 
 let lantanaModule = require("./serverModuleLantana")
@@ -80,6 +81,7 @@ const { connect } = require("./serverModuleDb");
 
     bvModule.setup(app,client)
     aiModule.setup(app,client)
+    aiBundleSummarizer.setup(app)
     console.log('connected to mongoDb')
 })();
 

@@ -178,7 +178,7 @@
     <script src="js/prePopConfig.js"></script>
     <script src="js/bvManagementCtrl.js"></script>
     <script src="js/fhirBundleFilterSvc.js"></script>
-    <script src="js/aiCompressOOSvc.js"></script>
+
 
     <!-- Note that there is also a script at the bottom of the page to ensure the iframe
     is loaded for bvForm-->
@@ -269,6 +269,14 @@
     <script src="js/bvAddToListCtrl.js"></script>
 
     <script src="js/aiBundleCommenterCtrl.js"></script>
+
+
+    <script src="directive/aiBundleSummary/aiBundleSummaryCtl.js"></script>
+
+    <script src="directive/markdown/markdown.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
 
     <script>
         const firebaseConfig = {
@@ -2059,6 +2067,16 @@
                     <ng-include src="'includes/aiBundleCommenter.html'"></ng-include>
                 </div>
             </uib-tab>
+
+            <uib-tab  heading="AI summary">
+                <div ng-controller="aiBundleCommenterCtrl">
+                    <aibundlesummary bundle="fhir" oo="OO" on-select-resource="selectResource(entryIndex, resource,tab)"></aibundlesummary>
+                </div>
+
+
+
+            </uib-tab>
+
 
             <uib-tab heading="Bundle json">
                 <div class="row">

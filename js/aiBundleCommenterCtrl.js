@@ -1,45 +1,19 @@
 angular.module("sampleApp")
     .controller('aiBundleCommenterCtrl',
-        function ($scope,$http,$timeout,ooCompressService) {
+        function ($scope) {
 
-            $scope.input = {}
 
-            //$scope.fhir - the bundle
-            //$scope.OO - the latest OO
+                $scope.selectResource = function (entryIndex, resource,tab) {
+                        $scope.aiSelectedEntry = $scope.fhir.entry[entryIndex];   // the whole entry, found instantly
+                       // $scope.aiSelectedEntry = entry.resource;                    // the resource itself
+                        console.log(tab,$scope.aiSelectedEntry)
 
-            //roles get added to system prompt
-            $scope.role = []
-            $scope.role.push({role:'author', display:"Bundle Author"})
-            $scope.role.push({role:'consumer', display:"Bundle Consumer"})
-            $scope.selectedRole = $scope.role[0]
 
-            //
+                    $scope.selectBundleEntry ($scope.aiSelectedEntry,[])
 
-            $scope.getAdvice = function () {
-                let bundle = compressBundle(true)
-
-                let text = ooCompressService.compress($scope.validationOO);
-                let text2 = ooCompressService.compress(oo, {includeInformation: false});
-
-                console.log(text2)
-            }
+                    //$scope.selectFromMainGraph($scope.aiSelectedEntry.resource)
 
 
 
-
-            //remove unneeded (for AI) parts of bundle
-            function compressBundle(stripText) {
-                let aiBundle = angular.copy($scope.fhir)
-
-                for (let entry of aiBundle.entry || []) {
-                    delete entry.resource.meta
-                    if (stripText) {
-                        delete entry.text
-                    }
-                }
-
-                return angular.toJson(aiBundle)
-
-            }
-
+                };
         })

@@ -1,0 +1,209 @@
+<div class="ai-bundle-summary">
+
+    <div style="margin-bottom: 10px">
+
+        <button class="btn btn-link pull-right"
+                ng-click="getAdvice()"
+                ng-hide="loading || !bundle || !oo">
+            {{response ? 'Regenerate summary' : 'Summarise bundle'}}
+        </button>
+
+        <div class="alert-warning alert" ng-show="loading">
+
+            The AI is thinking about your request. This can take some time  (several minutes in more extreme cases)
+            depending on the size of the bundle it needs to examine so please be patient.
+            <div class="pull-right"><span class="badge">{{count}}</span></div>
+        </div>
+
+        <!--
+        <span ng-show="loading" class="text-muted" style="margin-left: 8px">
+
+
+            <i class="fa fa-spinner fa-spin"></i> Analysing bundle...
+
+
+        </span>
+        -->
+    </div>
+
+    <div class="alert alert-danger" ng-if="error">{{error}}</div>
+
+    <div class="alert alert-warning" ng-if="response.truncated">
+        The response was cut off, so this summary may be incomplete.
+    </div>
+
+    <!-- Fallback when the model's JSON could not be parsed -->
+    <div class="panel panel-default" ng-if="response && !response.report && response.rawText">
+        <div class="panel-body">
+            <p class="text-muted">The summary could not be structured. This is often just the AI getting confused - ypu can try again.</p>
+            <pre style="white-space: pre-wrap">{{response.rawText}}</pre>
+        </div>
+    </div>
+
+    <div ng-if="response.report">
+
+        <uib-tabset active="ui.tab">
+            <uib-tab index = "0" heading="Summary">
+                <!-- Overview -->
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <strong>{{response.report.overview.bundleType || 'Bundle'}}</strong>
+                        <span class="label"
+                              ng-class="{'label-success': response.report.overview.confidence == 'high',
+                                 'label-warning': response.report.overview.confidence == 'medium',
+                                 'label-danger':  response.report.overview.confidence == 'low'}">
+                    {{response.report.overview.confidence}} confidence</span>
+                        <span class="label label-default" ng-if="response.report.overview.fhirVersion">
+                    FHIR {{response.report.overview.fhirVersion}}</span>
+                    </div>
+                    <div class="panel-body">
+                        <p>{{response.report.overview.purpose}}</p>
+                        <p class="text-muted" ng-if="response.report.overview.evidence">
+                            {{response.report.overview.evidence}}</p>
+                    </div>
+                </div>
+
+                <!-- Clinical summary (markdown, with clickable resource links) -->
+                <div class="panel panel-default">
+                    <div class="panel-heading"><strong>Clinical summary</strong></div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="myScroll1">
+                                    <markdown style="display: block"
+                                              text="response.report.clinicalSummary"
+                                              on-resource="selectResource(resource)"></markdown>
+                                </div>
+
+                            </div>
+                            <div class="col-md-4">
+                                <div ng-show="selectedResourceTab0">
+                                    <em>This resource has been selected in the Bundle entries tab</em>
+                                    <pre>{{selectedResourceTab0 | json}}</pre>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </uib-tab>
+            <uib-tab index = "1" heading="Potential issues">
+                <!-- Issues -->
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="myScroll1">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <strong>Issues</strong>
+                                    <span class="label label-danger">{{issueCounts().error}} errors</span>
+                                    <span class="label label-warning">{{issueCounts().warning}} warnings</span>
+                                    <span class="label label-info">{{issueCounts().info}} info</span>
+                                </div>
+
+                                <div class="panel-body" ng-if="response.report.issues.length">
+                                    <span style="display: inline-block; width: 20px">Level:</span>
+                                    <label class="checkbox-inline"><input type="checkbox" ng-model="show.error"> Errors</label>
+                                    <label class="checkbox-inline"><input type="checkbox" ng-model="show.warning"> Warnings</label>
+                                    <label class="checkbox-inline"><input type="checkbox" ng-model="show.info"> Info</label>
+                                    <span style="display: inline-block; width: 50px">Source:</span>
+                                    <label class="checkbox-inline"><input type="checkbox" ng-model="show.validator"> Validator</label>
+                                    <label class="checkbox-inline"><input type="checkbox" ng-model="show.reviewer"> AI </label>
+                                </div>
+
+                                <div class="panel-body text-muted" ng-if="!response.report.issues.length">
+                                    No issues found on review.
+                                </div>
+
+                                <div class="list-group">
+                                    <div class="list-group-item"
+                                         ng-repeat="i in response.report.issues | filter:isVisible"
+                                         ng-class="{'list-group-item-danger':  i.severity == 'error',
+                                'list-group-item-warning': i.severity == 'warning',
+                                'list-group-item-info':    i.severity == 'info'}">
+
+                    <span class="label"
+                          ng-class="{'label-danger':  i.severity == 'error',
+                                     'label-warning': i.severity == 'warning',
+                                     'label-info':    i.severity == 'info'}">{{i.severity}}</span>
+
+
+                                        <span class="label label-default">
+                                            {{i.source == 'validator' ? 'Validator' : "AI"}}
+                                        </span>
+                                        <a href="" ng-if="i.entryIndex !== null" ng-click="selectIssue(i)"><code>{{i.resource}}</code></a>
+                                        <code ng-if="i.entryIndex === null">{{i.resource}}</code>
+                                        <strong>{{i.title}}</strong>
+
+                                        <p style="margin-top: 6px">{{i.description}}</p>
+                                        <p ng-if="i.path" class="text-muted"><code>{{i.path}}</code></p>
+                                        <p><strong>Suggested fix:</strong> {{i.suggestedFix}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="col-md-4">
+                        <div ng-show="selectedResourceTab1" class="myScroll1">
+                            <em>This resource has been selected in the Bundle entries tab</em>
+                            <pre>{{selectedResourceTab1 | json}}</pre>
+                        </div>
+
+
+                    </div>
+                </div>
+
+            </uib-tab>
+            <uib-tab index = "2" heading="Recommendations">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="myScroll1">
+                            <div class="panel panel-default" ng-if="response.report.improvements.length">
+                            <div class="panel-heading"><strong>Better ways to represent this data</strong></div>
+                            <ul class="list-group">
+                                <li class="list-group-item" ng-repeat="m in response.report.improvements">
+                                    <strong>{{m.suggestion}}</strong>
+                                    <div class="text-muted">{{m.rationale}}</div>
+                                    <div class="text-muted" ng-if="m.resourceLinks.length">Affects:
+                                        <span ng-repeat="r in m.resourceLinks"><a href="" ng-if="r.entryIndex !== null"
+                                                                                  ng-click="selectLink(r)"><code>{{r.resource}}</code></a><code
+                                                ng-if="r.entryIndex === null">{{r.resource}}</code>{{$last ? '' : ', '}}</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div ng-show="selectedResourceTab2" class="myScroll1">
+                            <em>This resource has been selected in the Bundle entries tab</em>
+                            <pre>{{selectedResourceTab2 | json}}</pre>
+                        </div>
+
+                    </div>
+                </div>
+                <!-- Improvements -->
+
+            </uib-tab>
+            <uib-tab index = "3" heading="Json">
+                <pre>{{response | json}}</pre>
+            </uib-tab>
+        </uib-tabset>
+
+
+
+
+
+
+
+
+        <p class="text-muted" ng-if="response.report.limitations">{{response.report.limitations}}</p>
+    </div>
+
+    <p class="text-muted small" ng-if="response">
+        AI-generated review of the bundle's data and structure. Check against the source
+        resources; it is not clinical advice.
+    </p>
+</div>

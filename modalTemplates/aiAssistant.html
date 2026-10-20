@@ -28,11 +28,11 @@
 
                 <div class="row" ng-show="currentConversation.messages.length > 0 && ! loading">
                     <div class="col-md-6">
-                        <h3>This conversation</h3>
+                        <h4>This conversation</h4>
                     </div>
                     <div class="col-md-6">
                         <button class="btn-primary btn pull-right"
-
+                            style="margin: 4px"
                                 ng-click="newConversation()">Start new conversation</button>
                     </div>
                 </div>
@@ -48,13 +48,24 @@
                             </td>
                             <td>
 
-
                                 {{message.summary}}
                                 <br/>
 
-                                <div >
-                                    <span class=" clickable" ng-click="loadBundle(message.bundle)">Load this bundle</span>
-                                    <span class="pull-right clickable" ng-click="input.showDetailed[$index] = !input.showDetailed[$index]">Toggle details</span>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <span class=" clickable" ng-click="loadBundle(message.bundle)">Load this bundle</span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div
+                                                style="text-align: center;"
+                                                ng-click="input.showValidation[$index] = !input.showValidation[$index]"
+                                                class="clickable">{{makeValidationString(message.validationIssues)}}</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <span class="pull-right clickable" ng-click="input.showDetailed[$index] = !input.showDetailed[$index]">Toggle details</span>
+
+                                    </div>
+
                                 </div>
 
                                 <div ng-show="input.showDetailed[$index]">
@@ -87,6 +98,18 @@
                                     </ul>
 
 
+
+                                </div>
+
+                                <div ng-show="input.showValidation[$index]">
+                                    <h4>Validation issues</h4>
+                                    <table class="table table-bordered">
+                                        <tr ng-repeat="iss in message.validationIssues">
+                                            <td>{{iss.severity}}</td>
+                                            <td>{{iss.diagnostics}}</td>
+                                            <td>{{iss.resourceText}}</td>
+                                        </tr>
+                                    </table>
 
                                 </div>
 
@@ -128,6 +151,12 @@
                             </td>
                             <td>
 
+
+                                <div class="alert-warning alert" ng-show="validating">
+                                    Now I'm validating the bundle...
+                                </div>
+
+
                                 <div class="alert-warning alert" ng-show="loading">
 
                                     The AI is thinking about your request. This can take some time  (several minutes in more extreme cases)
@@ -143,7 +172,6 @@
             </uib-tab>
 
             <uib-tab heading="Previous Conversations">
-
                 <div class="row">
                     <div class="col-md-4">
                         <h4>Previous conversations</h4>
@@ -152,28 +180,38 @@
                         <h4 ng-show="selectedPreviousConversation">Messages in this conversation</h4>
                     </div>
                     <div class="col-md-5">
-                        <div class="pull-right clickable" ng-show="selectedPreviousConversation"
-                             style="padding-top: 8px"
-                             ng-click="makeCurrentConversation(selectedPreviousKey)">Make this the current conversation</div>
+                        <button class="pull-right btn btn-primary" ng-show="selectedPreviousConversation"
+                            style="margin: 4px"
+                             ng-click="makeCurrentConversation(selectedPreviousKey)">Make this the current conversation</button>
                     </div>
                 </div>
 
+
+
+
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-5">
 
-
-                        <table class="table table-bordered">
-                            <tr ng-click="getPreviousConversation(hx.key)"
-                                style="cursor: pointer"
-                                ng-class="{listItemSelected:selectedPreviousKey == hx.key}"
+                        <div class="myScroll1">
+                            <table class="table table-bordered">
+                                <tr ng-click="getPreviousConversation(hx.key)"
+                                    style="cursor: pointer"
+                                    ng-class="{listItemSelected:selectedPreviousKey == hx.key}"
                                     ng-repeat="hx in conversationHistory">
-                                <td>{{hx.date | date}}</td>
-                                <td>{{hx.display}}</td>
-                                <td>{{hx.count}}</td>
-                            </tr>
-                        </table>
+                                    <td>{{hx.date | date}}</td>
+                                    <td>{{hx.display}}</td>
+                                    <td>{{hx.count}}</td>
+                                    <td>Share</td>
+                                </tr>
+                            </table>
+
+                        </div>
+
+
+
+
                     </div>
-                    <div class="col-md-8">
+                    <div class="col-md-7">
 
 
 <!--

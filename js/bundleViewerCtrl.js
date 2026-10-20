@@ -18,13 +18,8 @@ angular.module("sampleApp")
                 return $sce.trustAsHtml(html_code);
             }
 
-
-
             //add the current query/bundle to the current users list
             $scope.addToList = function () {
-
-
-
                 $uibModal.open({
                     templateUrl: 'modalTemplates/bvAddToList.html',
                     backdrop: 'static',
@@ -447,35 +442,6 @@ angular.module("sampleApp")
                 console.log(item)
             }
 
-            $scope.viewProfileVSDEP = function (item) {
-                let vs = item.valueSet
-                if (vs) {
-                    $scope.viewVS(vs)
-                } else {
-                    alert("There is no ValueSet bound to this element")
-                }
-
-            }
-
-            $scope.viewVSDEP = function (url) {
-
-                $uibModal.open({
-                    templateUrl: 'modalTemplates/viewVS.html',
-                    backdrop: 'static',
-                    size : 'lg',
-                    controller: 'viewVSCtrl',
-
-                    resolve: {
-                        url: function () {
-                            return url
-                        }, terminologyServer : function () {
-                            return terminologyServer
-                        }
-                    }
-
-                })
-            }
-
 
 
             //queries now stored in local browser cache
@@ -561,19 +527,6 @@ angular.module("sampleApp")
 
 
 
-            $scope.viewResourceDEP = function (resource) {
-                $uibModal.open({
-                    templateUrl: 'modalTemplates/viewResource.html',
-                    size: 'lg',
-                    controller: 'viewResourceCtrl',
-                    resolve : {
-                        resource : function(){
-                            return resource
-                        }
-                    }
-                })
-
-            }
 
             $scope.addBundleToLibrary = function () {
                 $uibModal.open({
@@ -673,21 +626,7 @@ angular.module("sampleApp")
 
             }
 
-            $scope.deleteVSDEP = function (vs) {
-                let g = $localStorage.validationServers.indexOf(vs)
-                if (g > -1) {
-                    if (confirm("Are you sure you wish to remove this Validation Server?")) {
-                        $localStorage.validationServers.splice(g,1)
-                        if ($localStorage.validationServers.length > 0) {
-                            $scope.input.selectedVS = $localStorage.validationServers[0]
-                        } else {
-                            delete $scope.input.selectedVS
-                        }
-                    }
 
-                }
-
-            }
 
 
             function getIssueTypeCount(OO) {
@@ -1732,7 +1671,7 @@ angular.module("sampleApp")
             }
 
             //show or hide the patient in the main graph
-            $scope.showHidePatient = function(toggle) {
+            $scope.showHidePatientDEP = function(toggle) {
 
                 let options = {bundle:$scope.fhir,hashErrors:$scope.hashErrors,serverRoot:$scope.serverRoot}
                 options.hidePatient = toggle;
@@ -1995,7 +1934,7 @@ angular.module("sampleApp")
                 options.showInRef = $scope.input.showInRef;
                 options.showOutRef = $scope.input.showOutRef;
                 options.recursiveRef = $scope.input.recursiveRef;
-                options.hidePatient = $scope.input.showHidePatient;
+                //options.hidePatient = $scope.input.showHidePatient;
 
                 let vo = v2ToFhirSvc.makeGraph1(options);
 
@@ -2571,7 +2510,7 @@ angular.module("sampleApp")
 
 
                 return
-
+/*
 
                 search = decodeURIComponent(search)
 
@@ -2619,8 +2558,7 @@ angular.module("sampleApp")
                     }
                 )
 
-            } else {
-                //nothing passed in when the app was started- read bundles from the defined server
+                */
 
             }
 
