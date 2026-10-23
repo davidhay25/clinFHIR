@@ -11,7 +11,7 @@ angular.module('sampleApp')
             },
 
             templateUrl: 'directive/aiBundleSummary/aiBundleSummary.html',
-            controller: function($scope,$http,$interval){
+            controller: function($scope,$http,$interval,umamiSvc){
 
 
                 $scope.ui = {tab: 0};
@@ -44,6 +44,7 @@ angular.module('sampleApp')
                 );
 
                 $scope.getAdvice = function () {
+                    umamiSvc.track('bvAISummary');
                     let thisRequest = ++requestId;
                     $scope.loading = true;
                     $scope.error = null;
@@ -71,7 +72,9 @@ angular.module('sampleApp')
                             $scope.error = (err.data && err.data.error) || 'The summary could not be generated.';
                             console.error(err)
                         }
-                    )
+                    ).finally(function () {
+                        $interval.cancel(timer);
+                    })
                 }
 
                 //---- report display helpers

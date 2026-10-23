@@ -2,16 +2,26 @@
     <div class="modal-header">
 
         <div class="row">
-            <div class="col-md-8 col-sm-8">
+            <div class="col-md-4">
 
                 <h3>AI assistant: Bundle creator</h3>
 
             </div>
+            <div class="col-md-4">
+                <div style="margin-top: 18px">
+                    Mode:
+                    <div class="btn-group" style="padding-left: 8px" ng-click="setMode(input.mode)">
+                        <label class="btn btn-default" ng-model="input.mode" uib-btn-radio="'single'">Single conversation</label>
+                        <label class="btn btn-default" ng-model="input.mode" uib-btn-radio="'workflow'">Workflow</label>
+                    </div>
+                </div>
+            </div>
+
 
             <div class="col-md-4 col-sm-4">
 
                 <div class="pull-right">
-                    <button class="btn btn-link" ng-click="$dismiss()">Cancel</button>
+                    <button class="btn btn-link" ng-click="$dismiss()">Close</button>
                     <button class="btn btn-primary"
                         ng-show="response.bundle"
                         ng-click="save()">Load bundle</button>
@@ -24,7 +34,7 @@
 
 
         <uib-tabset active="input.selectTabActive">
-            <uib-tab heading="Current conversation">
+            <uib-tab ng-show="input.mode == 'single'" heading="Current conversation">
 
                 <div class="row" ng-show="currentConversation.messages.length > 0 && ! loading">
                     <div class="col-md-6">
@@ -171,7 +181,7 @@
                 </div>
             </uib-tab>
 
-            <uib-tab heading="Previous Conversations">
+            <uib-tab ng-show="input.mode == 'single'"  heading="Previous Conversations">
                 <div class="row">
                     <div class="col-md-4">
                         <h4>Previous conversations</h4>
@@ -295,6 +305,15 @@
 
             </uib-tab>
 
+            <uib-tab ng-show="input.mode == 'workflow'"  heading="Workflow">
+                <div ng-controller="aiWorkflowCtrl">
+
+                    <ng-include src="'includes/aiWorkflow.html'"></ng-include>
+
+                </div>
+
+            </uib-tab>
+
         </uib-tabset>
 
 
@@ -304,7 +323,7 @@
     </div>
 
     <div class="modal-header">
-
+<!--
         <em>
             Uses an AI to generate FHIR Bundles to represent clinical scenarios.
             You can select the model to use - haiku is fast but basic, sonnet is slower but more thorough and
@@ -320,6 +339,7 @@
         <br/> <br/>
         <em>This functionality is experimental and not yet fully robust. If you get an error you can just try again
         or change the prompt</em>
+        -->
 
     </div>
 </div>

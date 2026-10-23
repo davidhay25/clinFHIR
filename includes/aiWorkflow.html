@@ -1,0 +1,146 @@
+
+
+<div>
+
+  <style>
+    #bundleGraph {
+      width: 100%;
+      height: 600px;
+      border: 1px solid lightgray;
+    }
+  </style>
+
+  <div class="row rounded-box-filled">
+    <div class="col-md-3">
+      <select class="form-control" ng-model="input.selectedWorkflow"
+              ng-change="selectWorkflow(input.selectedWorkflow)"
+              ng-options="wf.title for wf in allWorkflows"></select>
+    </div>
+    <div class="col-md-6">
+      <div ng-show = "input.selectedWorkflow">
+        {{input.selectedWorkflow.description}}
+        <!--
+        Title: {{input.selectedWorkflow.title}}
+        <div>Description: {{input.selectedWorkflow.description}}
+          -->
+
+      </div>
+    </div>
+    <div class="col-md-3">
+      <button class="pull-right btn-primary btn" ng-click="addWorkflow()">New workflow</button>
+    </div>
+  </div>
+
+<div class="row">
+  <div class="col-md-3">
+    <br/>
+
+
+
+    <div ng-show="input.selectedWorkflow">
+      <h4>Workflow steps</h4>
+
+      <div class="list-group">
+        <div ng-repeat="step in input.selectedWorkflow.steps"
+             drag-reorder="input.selectedWorkflow.steps"
+             drag-index="$index"
+             on-reorder="onStepsReordered()"
+             style="cursor: pointer"
+             ng-click="selectStep(step)"
+             ng-class="{'list-group-item':true, listItemSelected: step==input.selectedStep}">
+          {{step.title || step.description}}
+        </div>
+      </div>
+      <em>Drag to re-order</em>
+
+
+      <div ng-hide="input.state=='newStep'" class="btn btn-link" ng-click="input.state='newStep'">Add new step</div>
+
+    </div>
+
+  </div>
+  <div class="col-md-9">
+
+    <uib-tabset>
+      <uib-tab heading="Conversation">
+        <div class="rounded-box" ng-show="input.selectedStep">
+          {{input.selectedStep.title}}
+          {{input.selectedStep.description}}
+          {{input.selectedStep.baseBundle}}
+
+        </div>
+
+
+        <div ng-show="input.state == 'newWorkflow'">
+          <em>Enter the details of the new workflow</em>
+          <table class="table table-bordered">
+            <tr>
+              <td>Title</td>
+              <td><input type="text" class="form-control" ng-model="input.newWfTitle"/> </td>
+            </tr>
+            <tr>
+              <td>Description</td>
+              <td><textarea class="form-control" ng-model="input.newWfDescription"></textarea> </td>
+            </tr>
+
+          </table>
+
+          <div class="clickable pull-right" ng-click="saveWorkflow()">Add new Workflow</div>
+          <div class="clickable" ng-click="reset()">Cancel</div>
+
+        </div>
+
+
+
+        <div ng-show="input.state == 'newStep'">
+          Add a new step
+
+
+          <table class="table table-bordered">
+            <tr>
+              <td>Title</td>
+              <td style="width: 50%"><input type="text" class="form-control" ng-model="input.wfStepTitle"/> </td>
+              <td>Displayed in the list of steps</td>
+            </tr>
+            <tr>
+              <td>Description</td>
+              <td><textarea class="form-control" ng-model="input.wfStepDescription"></textarea> </td>
+              <td>The purpose and outcome of this step</td>
+            </tr>
+            <tr>
+              <td>Base bundle</td>
+              <td>
+                <select class="form-control" ng-model="input.wfStepBaseBundle"
+                        ng-options="step.title for step in input.selectedWorkflow.steps"></select>
+
+              </td>
+              <td>If specified here, the latest bundle from this step will be the input for the first prompt</td>
+            </tr>
+
+          </table>
+
+          <div class="clickable pull-right" ng-click="saveStep()">Save step</div>
+          <div class="clickable" ng-click="reset()">Cancel</div>
+        </div>
+
+        <div ng-show="input.state == 'showStep'">
+          <aiconversation conversation="selectedWfConversation"
+                          inputbundle="inputBundle"
+                          airesponse="onAIResponse(bundle)"
+                          bundleselected="bundleFromWF(bundle)"></aiconversation>
+        </div>
+
+      </uib-tab>
+      <uib-tab heading="Bundle" select="fitGraph()">
+
+        <div id="bundleGraph"></div>
+
+      </uib-tab>
+    </uib-tabset>
+
+
+
+  </div>
+</div>
+
+</div>

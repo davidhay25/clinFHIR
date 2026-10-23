@@ -3,6 +3,7 @@
     "@anthropic-ai/sdk": "^0.133.0",
     "@sentry/node": "^10.26.0",
     "adm-zip": "^0.5.16",
+    "angular-sortablejs": "^1.3.2",
     "axios": "^1.12.2",
     "cors": "^2.8.5",
     "download-tarball": "^2.0.0",
@@ -16,6 +17,7 @@
     "moment": "^2.30.1",
     "mongodb": "^6.20.0",
     "node-fetch": "^3.3.2",
-    "request": "^2.88.2"
+    "request": "^2.88.2",
+    "sortablejs": "^1.15.7"
   }
 }

@@ -1,0 +1,133 @@
+<div>
+
+    <div class="aiScroll" ng-show="conversation">
+        <table class="table-bordered table">
+            <tr><th>Your prompt</th><th>The AI response</th></tr>
+            <tr ng-repeat="message in conversation.messages track by $index">
+
+                <td>
+                    {{message.prompt}}
+                </td>
+                <td>
+
+                    {{message.summary}}
+                    <br/>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <span class=" clickable" ng-click="loadBundle(message.bundle)">Load this bundle</span>
+                        </div>
+                        <div class="col-md-4">
+                            <div
+                                    style="text-align: center;"
+                                    ng-click="input.showValidation[$index] = !input.showValidation[$index]"
+                                    class="clickable">{{makeValidationString(message.validationIssues)}}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <span class="pull-right clickable"
+                                  ng-click="input.showDetailed[$index] = !input.showDetailed[$index]">Toggle details</span>
+
+                        </div>
+
+                    </div>
+
+                    <div ng-show="input.showDetailed[$index]">
+                        <h4>Assumptions</h4>
+                        <ul>
+                            <li ng-repeat="ass in message.assumptions">
+                                {{ass}}
+                            </li>
+                        </ul>
+
+                        <h4>Modelling notes</h4>
+                        <ul>
+                            <li ng-repeat="note in message['modelling_notes']">
+                                {{note}}
+                            </li>
+                        </ul>
+
+                        <h4>Warnings</h4>
+                        <ul>
+                            <li ng-repeat="warn in message.warnings">
+                                {{warn}}
+                            </li>
+                        </ul>
+                        <h4>Cost</h4>
+                        <ul>
+                            <li>Model: {{message.model}}</li>
+                            <li>Thinking time: {{message.time}} seconds</li>
+                            <li>Tokens used: {{message.tokens}}</li>
+
+                        </ul>
+
+
+
+                    </div>
+
+                    <div ng-show="input.showValidation[$index]">
+                        <h4>Validation issues</h4>
+                        <table class="table table-bordered">
+                            <tr ng-repeat="iss in message.validationIssues">
+                                <td>{{iss.severity}}</td>
+                                <td>{{iss.diagnostics}}</td>
+                                <td>{{iss.resourceText}}</td>
+                            </tr>
+                        </table>
+
+                    </div>
+
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 50%">
+
+                    <textarea rows = 4 ng-model="input.message" class="form-control" ></textarea>
+
+
+                    <div class="row" style="padding-top: 4px">
+                        <div class="col-md-2">
+                            <div style="padding-top: 8px">Model</div>
+                        </div>
+                        <div class="col-md-6">
+                            <select class="form-control" ng-model="input.selectedModel"
+                                    ng-options = "model.display for model in models"></select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <button ng-hideX="loading || ! input.message"
+                                    class="btn btn-link pull-right" ng-click="sendMessage(input.message)">Invoke AI</button>
+
+
+
+
+                            <div class="pull-right" ng-show="loading">
+                                <img src="css/ajax_loader_blue_32.gif"/>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+                </td>
+                <td>
+
+
+                    <div class="alert-warning alert" ng-show="validating">
+                        Now I'm validating the bundle...
+                    </div>
+
+
+                    <div class="alert-warning alert" ng-show="loading">
+
+                        The AI is thinking about your request. This can take some time  (several minutes in more extreme cases)
+                        depending on the model, size of the bundle it needs to create and the complexity of the prompt so please be patient.
+                        <div class="pull-right"><span class="badge">{{count}}</span></div>
+                    </div>
+
+                </td>
+            </tr>
+        </table>
+
+    </div>
+</div>

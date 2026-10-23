@@ -17,11 +17,87 @@ angular.module("sampleApp")
 
             $scope.input.selectedModel = $scope.models[0]
 
+
+
+
+            //$scope.mode = "single"
+            localforage.getItem('aiMode').then(function(value) { //get the key for the current conversation
+                $scope.input.mode = value || "single"
+                if ($scope.input.mode == 'workflow') {
+                    $scope.input.selectTabActive = 2
+                } else {
+                    $scope.input.selectTabActive = 0
+                }
+            })
+
+            $scope.setMode = function (mode) {
+
+                if ($scope.input.mode == 'workflow') {
+                    $scope.input.selectTabActive = 2
+                } else {
+                    $scope.input.selectTabActive = 0
+                }
+
+
+                localforage.setItem('aiMode', mode).catch(function(err) {
+                    console.log(err)
+                });
+                console.log(mode)
+            }
+/*
+            //when a wf is selected, load the full workflow
+            $scope.selectWorkflow = function (wf) {
+                //$scope.selectedWorkflow has been set (it's the model of the dropdown). Load the steps and add to the object
+                //?? or just load the whole lot into memory - they won't be that large surely...
+            }
+
+
+            $scope.selectStep = function (step) {
+                $scope.selectedStep = step
+
+                $scope.selectedWfConversation = step.conversation //the conversation within this step
+
+                localforage.getItem('aiConversation-1792089373747').then(function(value) {
+                    $scope.selectedWfConversation = value
+                    $scope.$evalAsync()
+
+                })
+
+
+            }
+
+            //flag to add a new step
+            $scope.addStep = function () {
+                $scope.wfNewStep = true
+
+            }
+
+            //when the new step details have been entered add to the workflow
+            $scope.saveStep = function () {
+                $scope.wfNewStep = false
+                let step = {description:$scope.input.wfStepDescription,messages:[]}
+                $scope.input.selectedWorkflow.steps.push(step)
+
+
+                $scope.input.wfStepDescription = ""
+
+
+            }
+
+            $scope.bundleFromWF = function (bundle) {
+                console.log(bundle)
+                $scope.$close(bundle)
+                //alert('bindle!')
+            }
+
+            */
+
             //the localforage library must be loaded by the containing page
             //each conversation is a separate model in the db {messages:[]}
             //aiConversation-{key} A specific conversation keyed by a hash oh the first prompt.
             // - the key is the dateTime the conversation was started
             //currentConversationKey - the currently active conversation
+            //retrieve the current conversation regardless of mode. The UI will hide/show as needed
 
             localforage.getItem('aiCurrentConversationKey').then(function(value) { //get the key for the current conversation
                 console.log(value)
