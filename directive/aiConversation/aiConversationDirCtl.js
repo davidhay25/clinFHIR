@@ -25,14 +25,22 @@ angular.module('sampleApp')
 
                 $scope.$watch(
                     function() {
-                       // console.log($scope.conversation)
                         return $scope.conversation},
+                    function() {
+
+                    }
+                );
+
+                $scope.$watch(
+                    function() {
+                        return $scope.inputbundle},
                     function() {
                         //when conversation changes, do stuff
                         console.log($scope.inputbundle)
 
                     }
                 );
+
 
                 $scope.sendMessage = function (msg) {
 
@@ -43,8 +51,6 @@ angular.module('sampleApp')
                             msg = "Create a bundle with a patient and asthma"
                         }
                     }
-
-
 
                     $scope.loading = true  //we're going to add the current bundle to the message later so kee[ this for the hx
                     let userMessage = msg //
@@ -58,7 +64,6 @@ angular.module('sampleApp')
                     let currentBundle
 
                     let messages = [] //this will be the list of messages to send to the AI
-
 
                     for (let msg of $scope.conversation.messages || []) {
 

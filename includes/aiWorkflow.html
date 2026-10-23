@@ -17,21 +17,53 @@
               ng-options="wf.title for wf in allWorkflows"></select>
     </div>
     <div class="col-md-6">
-      <div ng-show = "input.selectedWorkflow">
+      <div ng-show = "input.selectedWorkflow"  style="margin-top: 8px">
         {{input.selectedWorkflow.description}}
-        <!--
-        Title: {{input.selectedWorkflow.title}}
-        <div>Description: {{input.selectedWorkflow.description}}
-          -->
-
       </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
+      <i class=" clickable glyphicon glyphicon-edit iconSpacing"
+         style="margin-top: 12px"
+         uib-popover="Show the workflow editing page"
+         popover-placement="top"
+         popover-trigger="'mouseenter'"
+         ng-click = "input.state = 'editWorkflow'">
+
+      </i>
+
+      <i class=" clickable glyphicon glyphicon-tasks iconSpacing"
+         style="margin-top: 12px"
+         uib-popover="Show the resource history page"
+         popover-placement="top"
+         popover-trigger="'mouseenter'"
+         ng-click = "input.state = 'resourceHistory'">
+
+      </i>
+
+    </div>
+    <div class="col-md-1">
       <button class="pull-right btn-primary btn" ng-click="addWorkflow()">New workflow</button>
     </div>
   </div>
 
-<div class="row">
+  <div ng-show="input.state == 'editWorkflow'">
+    <h4>Edit workflow</h4>
+
+    <div class="pull-right">
+      <span class="clickable pull-right" ng-click="input.state = 'showWorkflow'">Cancel</span>
+    </div>
+  </div>
+
+  <div ng-show="input.state == 'resourceHistory'">
+    <h4>Resource history</h4>
+
+    <div class="pull-right">
+      <span class="clickable pull-right" ng-click="input.state = 'showWorkflow'">Close</span>
+    </div>
+  </div>
+
+
+<div class="row" ng-hide="input.state == 'editWorkflow' || (input.state == 'resourceHistory')">
   <div class="col-md-3">
     <br/>
 
@@ -51,7 +83,7 @@
           {{step.title || step.description}}
         </div>
       </div>
-      <em>Drag to re-order</em>
+      <div><em>Drag to re-order</em></div>
 
 
       <div ng-hide="input.state=='newStep'" class="btn btn-link" ng-click="input.state='newStep'">Add new step</div>
@@ -61,34 +93,49 @@
   </div>
   <div class="col-md-9">
 
-    <uib-tabset>
+    <button class="btn-link pull-right" ng-click="export()"
+
+            style="margin-top: 8px">Download workflow</button>
+
+
+    <div ng-show="input.state == 'newWorkflow'">
+
+
+      <div> <input type="file" id="jsonInput" accept=".json,application/json"></div>
+
+      <em>Enter the details of the new workflow</em>
+      <table class="table table-bordered">
+        <tr>
+          <td>Title</td>
+          <td><input type="text" class="form-control" ng-model="input.newWfTitle"/> </td>
+        </tr>
+        <tr>
+          <td>Description</td>
+          <td><textarea class="form-control" ng-model="input.newWfDescription"></textarea> </td>
+        </tr>
+
+      </table>
+
+      <div class="clickable pull-right" ng-click="saveWorkflow()">Add new Workflow</div>
+      <div class="clickable" ng-click="reset()">Cancel</div>
+
+    </div>
+
+
+    <br/>
+    <uib-tabset ng-hide="(input.state == 'newWorkflow')">
       <uib-tab heading="Conversation">
-        <div class="rounded-box" ng-show="input.selectedStep">
+        <br/>
+        <div class="rounded-box-filled" ng-show="input.selectedStep">
           {{input.selectedStep.title}}
           {{input.selectedStep.description}}
           {{input.selectedStep.baseBundle}}
 
-        </div>
-
-
-        <div ng-show="input.state == 'newWorkflow'">
-          <em>Enter the details of the new workflow</em>
-          <table class="table table-bordered">
-            <tr>
-              <td>Title</td>
-              <td><input type="text" class="form-control" ng-model="input.newWfTitle"/> </td>
-            </tr>
-            <tr>
-              <td>Description</td>
-              <td><textarea class="form-control" ng-model="input.newWfDescription"></textarea> </td>
-            </tr>
-
-          </table>
-
-          <div class="clickable pull-right" ng-click="saveWorkflow()">Add new Workflow</div>
-          <div class="clickable" ng-click="reset()">Cancel</div>
+          <div class="clickable pull-right">Delete step</div>
 
         </div>
+        <br/>
+
 
 
 
@@ -131,9 +178,30 @@
         </div>
 
       </uib-tab>
-      <uib-tab heading="Bundle" select="fitGraph()">
+      <uib-tab heading="Latest bundle in step" select="fitGraph()">
 
         <div id="bundleGraph"></div>
+
+      </uib-tab>
+      <uib-tab heading="Latest resource list">
+        <div class="row">
+          <div class="col-md-3">
+            <br/>
+            <div class="list-group">
+              <div ng-class="{'list-group-item':true,listItemSelected:entry == input.selectedEntry}"
+                   ng-click="input.selectedEntry = entry"
+                   style="cursor: pointer"
+                   ng-repeat="entry in latestBundle.entry">
+                {{entry.resource.resourceType}}
+              </div>
+            </div>
+
+          </div>
+          <div class="col-md-9">
+            <br/>
+            <pre ng-show="input.selectedEntry">{{input.selectedEntry | json}}</pre>
+          </div>
+        </div>
 
       </uib-tab>
     </uib-tabset>

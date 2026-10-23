@@ -396,4 +396,34 @@ angular.module("sampleApp")
             }
 
 
+            $scope.downloadJson = async function(obj, defaultName = "data.json") {
+                const json = JSON.stringify(obj, null, 2);
+
+                if (window.showSaveFilePicker) {
+                    try {
+                        const handle = await window.showSaveFilePicker({
+                            suggestedName: defaultName,
+                            types: [{ description: "JSON", accept: { "application/json": [".json"] } }],
+                        });
+                        const writable = await handle.createWritable();
+                        await writable.write(json);
+                        await writable.close();
+                        return;
+                    } catch (e) {
+                        if (e.name === "AbortError") return; // user cancelled
+                        // otherwise fall through to the normal download
+                    }
+                }
+
+                // Fallback for Firefox/Safari
+                const blob = new Blob([json], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = defaultName;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+
+
         })

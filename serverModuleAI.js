@@ -112,7 +112,6 @@ function setup(app,client) {
         }
     });
 
-
     app.post("/ai/oneline", async (req, res) => {
 
         let input = req.body
@@ -135,7 +134,6 @@ function setup(app,client) {
             else res.end();
         }
     });
-
 
     //an endpoint used to create a bundle
     app.post("/ai/bundleBuilderDEP", async (req, res) => {

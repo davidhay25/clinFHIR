@@ -163,7 +163,11 @@ angular.module("sampleApp")
             $scope.selectStep = function (step) {
 
                 delete $scope.selectedWfConversation
-                delete $scope.inputbundle
+                delete $scope.latestBundle
+                delete $scope.input.selectedEntry
+                $scope.inputBundle = ""
+
+                //delete $scope.inputbundle
                 $scope.input.selectedStep = step
                 $scope.input.state = 'showStep'
 
@@ -188,12 +192,18 @@ angular.module("sampleApp")
                         //in the bundle from that step to add to the AI call
                         //basebundle is the conversationkey of the bundle to act as the base for AI consideration
                         if (step.baseBundle) {
-                            
-                            let wf = $scope.allWorkflows.find(item => item.key == step.baseBundle)
-                            if (wf && wf.messages?.length > 0) {
-                                let msg = wf.messages[wf.messages.length-1]
-                                $scope.inputbundle = msg.bundle
-                            }
+                            localforage.getItem(step.baseBundle).then(function (value) {
+                                if (value) {
+                                    console.log(value)
+                                    let msg = value.messages[value.messages.length-1]
+                                    console.log(msg.bundle)
+                                    $timeout(function () {
+                                        $scope.inputBundle = msg.bundle
+                                    },1)
+
+                                }
+
+                            })
                         }
 
                         //now generate the graph of this bundle (if it exists)
@@ -201,6 +211,7 @@ angular.module("sampleApp")
                         for (const message of value?.messages || []) {
                             if (message.bundle) {
                                 bundle = message.bundle   //get the latest bundle - the last message might not have one
+                                $scope.latestBundle = bundle
                             }
                         }
 
@@ -273,7 +284,12 @@ angular.module("sampleApp")
                 $timeout(function () {
                     if (networkGraph) {
                         //networkGraph.redraw()
-                        networkGraph.fit()
+                        try {
+                            networkGraph.fit()
+                        } catch (e) {
+                            
+                        }
+                       
                     }
 
                 },1)
@@ -338,6 +354,61 @@ angular.module("sampleApp")
                 }
 
             }
+
+            $scope.export = function () {
+                exportWorkflow()
+            }
+
+            async function exportWorkflow() {
+                let key = $scope.input.selectedWorkflow.key
+                //let obj = angular.copy($scope.input.selectedWorkflow)
+
+                let obj = await localforage.getItem(key);
+                for (const step of obj.steps || []) {
+                    let cKey = step.conversationKey
+                    if (cKey) {
+                        const conversation = await localforage.getItem(cKey);
+                        step.conversation = conversation
+                        delete step.conversationKey
+
+                    }
+                }
+
+                let json = angular.toJson(obj)
+                console.log(key,json.length, obj)
+
+                $scope.downloadJson(obj, defaultName = "workflow.json")
+
+
+            }
+
+
+            $timeout(function () {
+                // ------------ import
+                const input = document.getElementById("jsonInput");
+
+                async function onChange(e) {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    try {
+                        const text = await file.text();
+                        const result = JSON.parse(text);
+                        $scope.$evalAsync(() => {
+                            console.log(result)
+                            //$scope.data = result;
+                            //$scope.error = null;
+                        });
+                    } catch (err) {
+                        $scope.$evalAsync(() => {
+                            alert("Invalid JSON file");
+                        });
+                    }
+                    e.target.value = ""; // allows re-selecting the same file
+                }
+
+                input.addEventListener("change", onChange);
+                $scope.$on("$destroy", () => input.removeEventListener("change", onChange));
+            },1000)
 
 
 

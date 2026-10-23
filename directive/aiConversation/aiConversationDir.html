@@ -83,17 +83,20 @@
 
                     <textarea rows = 4 ng-model="input.message" class="form-control" ></textarea>
 
+                    <div ng-show="inputbundle">
+                        <em>A bundle has been supplied which will be passed to the AI with appropriate instructions.</em>
+                    </div>
 
                     <div class="row" style="padding-top: 4px">
                         <div class="col-md-2">
                             <div style="padding-top: 8px">Model</div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-7">
                             <select class="form-control" ng-model="input.selectedModel"
                                     ng-options = "model.display for model in models"></select>
                         </div>
 
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <button ng-hideX="loading || ! input.message"
                                     class="btn btn-link pull-right" ng-click="sendMessage(input.message)">Invoke AI</button>
 
@@ -105,9 +108,6 @@
                             </div>
                         </div>
                     </div>
-
-
-
 
                 </td>
                 <td>
