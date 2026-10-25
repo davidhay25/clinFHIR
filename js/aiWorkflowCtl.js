@@ -1,8 +1,6 @@
 angular.module("sampleApp")
     .controller('aiWorkflowCtrl',
-        function ($scope,$http,$timeout, v2ToFhirSvc) {
-
-
+        function ($scope,$http,$timeout, v2ToFhirSvc,aiAssistantSvc) {
 
             let networkGraph        //a reference to the network graph so it can be destroyed
             //reset the state after a cancel
@@ -17,21 +15,19 @@ angular.module("sampleApp")
                 $scope.input.state = 'showWorkflow'
             }
 
-
-
-
             //load all the workflows. Note that the steps are stored in the workflow are part of the
             //object, but the conversations associated with them are separate entries
             function getWorkflowList() {
 
                 $scope.allWorkflows = []
+
                 localforage.iterate(function(value, key) {
+
+                    //console.log(key)
                     if (key.startsWith('aiWorkflow')) {
                         $scope.allWorkflows.push(value)
-
                     }
 
-                    //console.log($scope.allWorkflows);
                 }).then(function() {
                     //console.log('Workflow Iteration has completed');
 
@@ -39,7 +35,7 @@ angular.module("sampleApp")
                     //to view the bundle and return to the same place in the app
 
                     localforage.getItem('aiCurrentState').then(function(value) { //get the key for the current conversation
-                        console.log(value)
+                        //console.log(value)
                         if (value?.workflowKey) {
                             $scope.input.selectedWorkflow = $scope.allWorkflows.find(item => item.key == value.workflowKey)
                             for (let step of $scope.input.selectedWorkflow?.steps || []) {
@@ -56,6 +52,7 @@ angular.module("sampleApp")
                                 $scope.input.lastSelectedWorkflow = $scope.input.selectedWorkflow
                             }
                         }
+                        $scope.input.state = 'showWorkflow'
                        // $scope.input.selectedWorkflow = value.
                     })
 
@@ -158,6 +155,8 @@ angular.module("sampleApp")
                     alert(err)
                 });
 
+                $scope.input.state = 'showWorkflow'
+
             }
 
             $scope.selectStep = function (step) {
@@ -183,10 +182,8 @@ angular.module("sampleApp")
                         $scope.$evalAsync()
                         saveCurrentState()      //for when app is reloaded so that it returns to the same place
 
-                        console.log(value)
+                        //console.log(value)
 
-                        //if base
-                        //inputBundle
 
                         //if a basebundle has been selected, and there are no messages in this step so far, pass
                         //in the bundle from that step to add to the AI call
@@ -194,9 +191,9 @@ angular.module("sampleApp")
                         if (step.baseBundle) {
                             localforage.getItem(step.baseBundle).then(function (value) {
                                 if (value) {
-                                    console.log(value)
+                                    //console.log(value)
                                     let msg = value.messages[value.messages.length-1]
-                                    console.log(msg.bundle)
+                                    //console.log(msg.bundle)
                                     $timeout(function () {
                                         $scope.inputBundle = msg.bundle
                                     },1)
@@ -237,6 +234,11 @@ angular.module("sampleApp")
             }
 
 
+            $scope.addStep = function () {
+                $scope.input.state='newStep'
+                $scope.input.selectWfTabActive = 0 //ensure conversation tab is showing
+            }
+
             //when the new step details have been entered add to the workflow
             $scope.saveStep = function () {
                 //$scope.wfNewStep = false
@@ -244,12 +246,17 @@ angular.module("sampleApp")
                 //step to retrieve it
                 let conversationKey = `aiWfConversation-${new Date().getTime()}`
                 let step = {description:$scope.input.wfStepDescription,title:$scope.input.wfStepTitle,conversationKey:conversationKey}
-                step.baseBundle = $scope.input.wfStepBaseBundle.conversationKey
+
+                if ($scope.input.wfStepBaseBundle) {
+                    step.baseBundle = $scope.input.wfStepBaseBundle.conversationKey
+                }
+
 
 
                 $scope.input.selectedWorkflow.steps = $scope.input.selectedWorkflow.steps || []
                 $scope.input.selectedWorkflow.steps.push(step)
 
+                //update the workflow
                 localforage.setItem($scope.input.selectedWorkflow.key, $scope.input.selectedWorkflow).then(function () {
                     $scope.input.wfStepDescription = ""
                     $scope.input.wfStepTitle = ""
@@ -264,6 +271,8 @@ angular.module("sampleApp")
             //called from the al bundle after a response has been received from the server
             $scope.onAIResponse = function (bundle) {
                 drawGraph(bundle)
+                $scope.latestBundle = bundle    //used for the list of resources...
+
             }
 
             //after re-order of steps to save the updated workflow
@@ -275,10 +284,21 @@ angular.module("sampleApp")
 
             //invoked when the user wishes to view a bundle
             $scope.bundleFromWF = function (bundle) {
-                console.log(bundle)
+               // console.log(bundle)
                 $scope.$close(bundle)
 
             }
+
+
+            $scope.makeSummary = function () {
+                makeWorkflowSummary().then(function (summary) {
+                    $scope.workflowSummary = summary
+                })
+
+                $scope.input.state = 'workflowSummary'
+
+            }
+
 
             $scope.fitGraph = function () {
                 $timeout(function () {
@@ -347,19 +367,58 @@ angular.module("sampleApp")
 
                         $scope.$digest();
                     });
+                    
+                }
+
+            }
+
+            $scope.deleteStep = async function () {
+                if (confirm("Are you sure you wish to delete this step in the workflow? It cannot be recovered.")) {
+
+                    let conversationKey = $scope.input.selectedStep.conversationKey //this is always assigned - even before the conversation is created
+
+                    $scope.input.selectedWorkflow.steps =
+                        $scope.input.selectedWorkflow.steps.filter(item => item.conversationKey !== conversationKey)
+
+                    delete $scope.input.selectedStep
 
 
 
 
                 }
-
             }
 
+            $scope.deleteWorkflow = async function () {
+                if (confirm("Are you sure you wish to delete this workflow? It cannot be recovered (you may wish to download it first)")){
+                    //first delete all the associated conversations
+                    for (let step of $scope.input.selectedWorkflow.steps || []) {
+                        if (step.conversationKey) {
+                            await localforage.removeItem(step.conversationKey)
+                        }
+                    }
+                    await localforage.removeItem($scope.input.selectedWorkflow.key)
+                    alert("Workflow has been removed")
+                    delete $scope.input.selectedWorkflow
+
+                    //re-read the workflow list
+                    $scope.allWorkflows = []
+                    localforage.iterate(function(value, key) {
+                        if (key.startsWith('aiWorkflow')) {
+                            $scope.allWorkflows.push(value)
+
+                        }
+                    })
+
+                }
+                
+            }
+            
             $scope.export = function () {
                 exportWorkflow()
             }
 
-            async function exportWorkflow() {
+
+            async function makeWorkflowSummary() {
                 let key = $scope.input.selectedWorkflow.key
                 //let obj = angular.copy($scope.input.selectedWorkflow)
 
@@ -373,9 +432,29 @@ angular.module("sampleApp")
 
                     }
                 }
+                return obj
+            }
 
+            async function exportWorkflow() {
+                let obj = await makeWorkflowSummary()
+                /*
+                let key = $scope.input.selectedWorkflow.key
+                //let obj = angular.copy($scope.input.selectedWorkflow)
+
+                let obj = await localforage.getItem(key);
+                for (const step of obj.steps || []) {
+                    let cKey = step.conversationKey
+                    if (cKey) {
+                        const conversation = await localforage.getItem(cKey);
+                        step.conversation = conversation
+                        delete step.conversationKey
+
+                    }
+                }
+*/
                 let json = angular.toJson(obj)
-                console.log(key,json.length, obj)
+
+                //console.log(key,json.length, obj)
 
                 $scope.downloadJson(obj, defaultName = "workflow.json")
 
@@ -383,6 +462,7 @@ angular.module("sampleApp")
             }
 
 
+            //set up the handlers for importing a workflow
             $timeout(function () {
                 // ------------ import
                 const input = document.getElementById("jsonInput");
@@ -392,13 +472,41 @@ angular.module("sampleApp")
                     if (!file) return;
                     try {
                         const text = await file.text();
-                        const result = JSON.parse(text);
+                        const wf = JSON.parse(text);
+
+                        //parse the workflow.
+                        //save the conversations from each step.
+                        // update all keys
+                        wf.key = `aiWorkflow-${new Date().getTime()}`
+                        for (let step of wf.steps || []) {
+                            let conversation = step.conversation
+                            //if there's no conversation just ignore it
+                            if (conversation) {
+                                conversation.key=`aiWfConversation-${new Date().getTime()}`
+                                step.conversationKey = conversation.key
+                                await localforage.setItem(conversation.key,conversation)
+                                delete step.conversation
+                            }
+
+                        }
+                        wf.title += ' Imported'
+                        await localforage.setItem(wf.key,wf)
+
+
+                        //add to the list of workflows and display
+                        $scope.allWorkflows.push(wf)
+                        $scope.input.selectedWorkflow = $scope.allWorkflows[$scope.allWorkflows.length-1]
+                        $scope.input.selectedStep = $scope.input.selectedWorkflow.steps?.[0] || {}
+                        $scope.input.state = "showWorkflow"
+                        saveCurrentState()
+
                         $scope.$evalAsync(() => {
-                            console.log(result)
+                            console.log(wf)
                             //$scope.data = result;
                             //$scope.error = null;
                         });
                     } catch (err) {
+                        console.log(err)
                         $scope.$evalAsync(() => {
                             alert("Invalid JSON file");
                         });

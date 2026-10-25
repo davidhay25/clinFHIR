@@ -13,36 +13,78 @@
   <div class="row rounded-box-filled">
     <div class="col-md-3">
       <select class="form-control" ng-model="input.selectedWorkflow"
+              ng-hide = "input.state == 'newWorkflow'"
               ng-change="selectWorkflow(input.selectedWorkflow)"
               ng-options="wf.title for wf in allWorkflows"></select>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-5">
       <div ng-show = "input.selectedWorkflow"  style="margin-top: 8px">
         {{input.selectedWorkflow.description}}
       </div>
     </div>
     <div class="col-md-2">
-      <i class=" clickable glyphicon glyphicon-edit iconSpacing"
+
+
+
+      <div class="pull-right">
+
+
+        <i class=" clickable glyphicon glyphicon-edit iconSpacing"
+           ng-show="input.selectedWorkflow"
+           style="margin-top: 12px"
+           uib-popover="Show the workflow editing page"
+           popover-placement="top"
+           popover-trigger="'mouseenter'"
+           ng-click = "input.state = 'editWorkflow'">
+
+        </i>
+
+        <i class=" clickable glyphicon glyphicon-tasks iconSpacing"
+           ng-show="input.selectedWorkflow"
+           style="margin-top: 12px"
+           uib-popover="Show the resource history page"
+           popover-placement="top"
+           popover-trigger="'mouseenter'"
+           ng-click = "input.state = 'resourceHistory'">
+
+        </i>
+
+        <i class=" clickable glyphicon glyphicon glyphicon-list-alt iconSpacing"
+           ng-show="input.selectedWorkflow"
+           style="margin-top: 12px"
+           uib-popover="Show a summary of the whole workflow"
+           popover-placement="top"
+           popover-trigger="'mouseenter'"
+           ng-click = "makeSummary()">
+
+        </i>
+
+        <i class=" clickable glyphicon glyphicon-trash iconSpacing"
+         ng-show="input.selectedWorkflow"
          style="margin-top: 12px"
-         uib-popover="Show the workflow editing page"
+         uib-popover="Delete this workflow."
          popover-placement="top"
          popover-trigger="'mouseenter'"
-         ng-click = "input.state = 'editWorkflow'">
+         ng-click = "deleteWorkflow()">
 
       </i>
-
-      <i class=" clickable glyphicon glyphicon-tasks iconSpacing"
-         style="margin-top: 12px"
-         uib-popover="Show the resource history page"
-         popover-placement="top"
-         popover-trigger="'mouseenter'"
-         ng-click = "input.state = 'resourceHistory'">
-
-      </i>
-
+      </div>
     </div>
     <div class="col-md-1">
-      <button class="pull-right btn-primary btn" ng-click="addWorkflow()">New workflow</button>
+      <i class=" clickable glyphicon glyphicon-th-list iconSpacing"
+         ng-if="input.selectedWorkflow && input.state !== 'showWorkflow'"
+         style="margin-top: 12px"
+         uib-popover="Show the main workflow page"
+         popover-placement="top"
+         popover-trigger="'mouseenter'"
+         ng-click = "input.state = 'showWorkflow'">
+
+      </i>
+    </div>
+    <div class="col-md-1">
+      <button class="pull-right btn-primary btn"
+              ng-disabled="input.state == 'newWorkflow'"
+              ng-click="addWorkflow()">New workflow</button>
     </div>
   </div>
 
@@ -54,20 +96,92 @@
     </div>
   </div>
 
+
+
+  <div ng-show="input.state == 'workflowSummary'">
+    <h4>Summary of workflow</h4>
+
+    <div ng-repeat="step in workflowSummary.steps">
+
+      <div>
+        <strong>{{step.title}} {{step.description}}</strong>
+      </div>
+      <table class="table table-bordered">
+        <tr ng-repeat="message in step.conversation.messages">
+          <td style="width:30%">{{message.prompt}}</td>
+          <td>
+            {{message.summary}}
+            <ul>
+              <li ng-repeat="note in message['modelling_notes']">{{note}}</li>
+            </ul>
+
+          </td>
+        </tr>
+      </table>
+
+    </div>
+
+
+
+  </div>
+
   <div ng-show="input.state == 'resourceHistory'">
     <h4>Resource history</h4>
+
+    This page will show the history of changes to specific resource instances over different steps in the workflow.
+    Click the close link or click the 'show workflow' (
+    <i class="clickable glyphicon glyphicon-th-list" ng-click="input.state = 'showWorkflow'"></i> )
+    icon to display the main workflow page.
 
     <div class="pull-right">
       <span class="clickable pull-right" ng-click="input.state = 'showWorkflow'">Close</span>
     </div>
   </div>
 
+  <div ng-show="input.state == 'newWorkflow'">
 
-<div class="row" ng-hide="input.state == 'editWorkflow' || (input.state == 'resourceHistory')">
+    <h4>Create a new Workflow</h4>
+
+    <div class="row">
+      <div class="col-md-2">
+        Upload a saved Workflow
+      </div>
+      <div class="col-md-10">
+        <div> <input type="file" id="jsonInput" accept=".json,application/json"></div>
+      </div>
+    </div>
+    <br/>
+    Or:
+    <br/> <br/>
+    <div class="row">
+      <div class="col-md-2">
+        Create a new  Workflow
+      </div>
+      <div class="col-md-10">
+
+        <table class="table table-bordered">
+          <tr>
+            <td>Title</td>
+            <td><input type="text" class="form-control" ng-model="input.newWfTitle"/> </td>
+          </tr>
+          <tr>
+            <td>Description</td>
+            <td><textarea class="form-control" ng-model="input.newWfDescription"></textarea> </td>
+          </tr>
+
+        </table>
+
+        <div class="clickable pull-right" ng-click="saveWorkflow()">Add new Workflow</div>
+        <div class="clickable" ng-click="reset()">Cancel</div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="row" ng-hide="input.state == 'editWorkflow'|| (input.state == 'workflowSummary') || (input.state == 'resourceHistory') || ! input.selectedWorkflow">
   <div class="col-md-3">
     <br/>
-
-
 
     <div ng-show="input.selectedWorkflow">
       <h4>Workflow steps</h4>
@@ -86,7 +200,7 @@
       <div><em>Drag to re-order</em></div>
 
 
-      <div ng-hide="input.state=='newStep'" class="btn btn-link" ng-click="input.state='newStep'">Add new step</div>
+      <div ng-hide="input.state=='newStep'" class="btn btn-link" ng-click="addStep()">Add new step</div>
 
     </div>
 
@@ -98,40 +212,33 @@
             style="margin-top: 8px">Download workflow</button>
 
 
-    <div ng-show="input.state == 'newWorkflow'">
-
-
-      <div> <input type="file" id="jsonInput" accept=".json,application/json"></div>
-
-      <em>Enter the details of the new workflow</em>
-      <table class="table table-bordered">
-        <tr>
-          <td>Title</td>
-          <td><input type="text" class="form-control" ng-model="input.newWfTitle"/> </td>
-        </tr>
-        <tr>
-          <td>Description</td>
-          <td><textarea class="form-control" ng-model="input.newWfDescription"></textarea> </td>
-        </tr>
-
-      </table>
-
-      <div class="clickable pull-right" ng-click="saveWorkflow()">Add new Workflow</div>
-      <div class="clickable" ng-click="reset()">Cancel</div>
-
-    </div>
 
 
     <br/>
-    <uib-tabset ng-hide="(input.state == 'newWorkflow')">
+    <uib-tabset ng-hide="(input.state == 'newWorkflow')"  active="input.selectWfTabActive">
       <uib-tab heading="Conversation">
         <br/>
         <div class="rounded-box-filled" ng-show="input.selectedStep">
-          {{input.selectedStep.title}}
-          {{input.selectedStep.description}}
+
+          <i class="clickable glyphicon glyphicon-trash iconSpacing pull-right"
+             ng-if="input.selectedWorkflow && input.selectedStep.conversationKey"
+             style="padding: 4px"
+             uib-popover="Delete this step."
+             popover-placement="top"
+             popover-trigger="'mouseenter'"
+             ng-click = "deleteStep()">
+
+          </i>
+
+          {{input.selectedStep.description || input.selectedStep.title}}
+
           {{input.selectedStep.baseBundle}}
 
-          <div class="clickable pull-right">Delete step</div>
+
+
+
+
+
 
         </div>
         <br/>
@@ -170,7 +277,7 @@
           <div class="clickable" ng-click="reset()">Cancel</div>
         </div>
 
-        <div ng-show="input.state == 'showStep'">
+        <div ng-show="input.state == 'showStep' && input.selectedStep">
           <aiconversation conversation="selectedWfConversation"
                           inputbundle="inputBundle"
                           airesponse="onAIResponse(bundle)"

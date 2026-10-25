@@ -1,6 +1,6 @@
 angular.module("sampleApp")
     .controller('aiAssistantCtrl',
-        function ($scope,aiAssistantSvc,$interval,$http,$timeout) {
+        function ($scope,$interval,$http,$timeout) {
 
             $scope.input = {}
             let validationServer = "https://hapi.fhir.org/baseR4"
@@ -397,8 +397,9 @@ angular.module("sampleApp")
 
 
             $scope.downloadJson = async function(obj, defaultName = "data.json") {
-                const json = JSON.stringify(obj, null, 2);
 
+                const json = angular.toJson(obj,true) //JSON.stringify(obj, null, 2);
+console.log(obj,json)
                 if (window.showSaveFilePicker) {
                     try {
                         const handle = await window.showSaveFilePicker({

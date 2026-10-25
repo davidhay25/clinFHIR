@@ -14,6 +14,11 @@ angular.module('sampleApp')
 
                 let validationServer = "https://hapi.fhir.org/baseR4"
 
+                let updateMessage = "If there is a need to change an existing resource, for example if" +
+                    "the status of a workflow resource like ServiceRequest or MedicationRequest needs to" +
+                    "change, then be sure to alter the existing resource and retain the id rather than " +
+                    "creating a new one."
+
                 $scope.input = {showDetailed:{},showValidation:{}}
 
                 $scope.models = [] // ['Fast (Haiku 5.5)','Medium (Sonnet 5.5)','Slow (Opus 5.5)']
@@ -36,13 +41,27 @@ angular.module('sampleApp')
                         return $scope.inputbundle},
                     function() {
                         //when conversation changes, do stuff
+                        $scope.localInputBundle = $scope.inputbundle
                         console.log($scope.inputbundle)
 
                     }
                 );
 
 
+                $scope.useInputBundle = function () {
+                    if ($scope.conversation) {
+                        $scope.conversation.messages = $scope.conversation.messages || []
+                        if ($scope.inputbundle && $scope.conversation.messages.length == 0) {
+                            return true
+                        }
+                    }
+
+                }
+
                 $scope.sendMessage = function (msg) {
+
+                    //determine whether to use a passed in bundle. Only if $scope.messages.length == 0
+
 
                     //create default messages just for testing
                     if (! msg) {
@@ -51,27 +70,36 @@ angular.module('sampleApp')
                             msg = "Create a bundle with a patient and asthma"
                         }
                     }
-
-                    $scope.loading = true  //we're going to add the current bundle to the message later so kee[ this for the hx
-                    let userMessage = msg //
-
                     $scope.count = 0;
 
                     let timer = $interval(function() {
                         $scope.count++;
                     }, 1000);
 
+
+                    $scope.loading = true  //we're going to add the current bundle to the message later so kee[ this for the hx
+                    let userMessage = msg //the original user message
+
+
                     let currentBundle
+                    //only add the inputbundle as the bundle to update if there aren't already any messages
+                    if ($scope.useInputBundle()) {
+                        currentBundle = $scope.inputbundle
+
+                    } else {
+
+                    }
+
 
                     let messages = [] //this will be the list of messages to send to the AI
-
                     for (let msg of $scope.conversation.messages || []) {
 
                         //first the user query
                         messages.push({role:'user',content:msg.prompt || "Unknown prompt"})
                         //then the response
 
-                        if (msg.bundle) {
+                        //we only look for the most recent bundle in the messages if one wasn't supplied
+                        if (! $scope.useInputBundle() && msg.bundle) {
                             currentBundle = msg.bundle  //we want to get the latest bundle
                         }
 
@@ -87,6 +115,10 @@ angular.module('sampleApp')
                         newUserMessage += `<current_bundle>${angular.toJson(currentBundle)}</current_bundle>`
                     } else {
                         newUserMessage = msg
+                    }
+
+                    if ($scope.inputbundle) {
+                        newUserMessage += updateMessage
                     }
 
                     //console.log(newUserMessage)
