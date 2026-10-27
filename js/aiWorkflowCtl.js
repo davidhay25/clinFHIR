@@ -1,6 +1,6 @@
 angular.module("sampleApp")
     .controller('aiWorkflowCtrl',
-        function ($scope,$http,$timeout, v2ToFhirSvc,aiAssistantSvc) {
+        function ($scope,$http,$timeout, v2ToFhirSvc,aiAssistantSvc,$uibModal) {
 
             let networkGraph        //a reference to the network graph so it can be destroyed
             //reset the state after a cancel
@@ -52,7 +52,8 @@ angular.module("sampleApp")
                                 $scope.input.lastSelectedWorkflow = $scope.input.selectedWorkflow
                             }
                         }
-                        $scope.input.state = 'showWorkflow'
+                        $scope.input.state = 'showStep'
+                        //$scope.$evalAsync()
                        // $scope.input.selectedWorkflow = value.
                     })
 
@@ -116,6 +117,40 @@ angular.module("sampleApp")
                 localforage.setItem("aiCurrentState", appState)
             }
 
+            // ------- summary routines
+            $scope.refreshSummary = async function () {
+                //rebuild the summary of all resources
+
+
+                $scope.resourceSummary = aiAssistantSvc.makeResourceDifferencesSummary(await makeWorkflowSummary())
+                console.log($scope.resourceSummary)
+                $scope.input.state = 'resourceHistory'
+                $scope.$evalAsync()
+            }
+            
+            $scope.selectResourceFromSummary = function (resource) {
+                $scope.stepsForSelectedResource = $scope.resourceSummary.hashResource[resource.id]?.steps
+
+                if ($scope.stepsForSelectedResource.length > 1) {
+                    for (let inx = 1; inx < $scope.stepsForSelectedResource.length; inx++) {
+                        let r1 = $scope.stepsForSelectedResource[inx-1].resource
+                        let r2 = $scope.stepsForSelectedResource[inx].resource
+                        let diff = aiAssistantSvc.differenceBetweenResources(r1,r2)
+                        console.log(diff)
+                        $scope.stepsForSelectedResource[inx].diff = diff
+                    }
+
+
+                }
+
+
+
+
+                
+            }
+            
+            //-------------
+
             //when a wf is selected, load the full workflow
             $scope.selectWorkflow = function (wf) {
                 //$scope.input.selectedWorkflow has been set (it's the model of the dropdown).
@@ -127,14 +162,14 @@ angular.module("sampleApp")
 
 
             //flag to add a new workflow
-            $scope.addWorkflow = function () {
+            $scope.addWorkflowDEP = function () {
                 $scope.input.lastSelectedWorkflow = $scope.input.selectedWorkflow
                 delete $scope.input.selectedWorkflow
                 $scope.input.state = "newWorkflow"
             }
 
             //save a new workflow to the list and make current
-            $scope.saveWorkflow = function () {
+            $scope.saveWorkflowDEP = function () {
 
                 delete $scope.input.selectedStep
 
@@ -233,14 +268,173 @@ angular.module("sampleApp")
 
             }
 
+            function editWorkflow(workflow) {
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/aiEditWorkflow.html',
+                    backdrop: 'static',
+                    //size : 'lg',
+                    controller: function ($scope,workflow) {
+
+                        $scope.input = {}
+                        if (workflow) {
+                            //edit
+                            $scope.input.newWfDescription = workflow.description
+                            $scope.input.newWfTitle = workflow.title
+                        }
+
+
+                        $scope.save = function () {
+
+                            let key = `aiWorkflow-${new Date().getTime()}`
+                            let wf = {key:key,title:$scope.input.newWfTitle,description:$scope.input.newWfDescription}
+                            wf.steps = []
+
+                            $scope.$close(wf)
+
+                        }
+                    },
+
+                    resolve: {
+                        workflow: function () {
+                            return workflow
+                        }
+                    }
+
+                }).result.then(function (wf) {
+
+                    localforage.setItem(wf.key, wf).then(function () {
+                        alert("Workflow has been saved")
+                        $scope.allWorkflows.push(wf)
+                        $scope.input.selectedWorkflow = wf
+                        $scope.input.lastSelectedWorkflow = wf
+
+                        $scope.input.scope = "showWorkflow"
+                        saveCurrentState()      //for when app is reloaded
+                        $scope.$evalAsync()
+                    }).catch(function(err) {
+                        alert(err)
+                    });
+
+                    $scope.input.state = 'showWorkflow'
+
+            })}
+
+            $scope.addWorkflow = function () {
+                $scope.input.lastSelectedWorkflow = $scope.input.selectedWorkflow
+                delete $scope.input.selectedWorkflow
+                $scope.input.state = "newWorkflow"
+                
+                editWorkflow()
+            }
+
+            function editStep(step) {
+                $uibModal.open({
+                    templateUrl: 'modalTemplates/aiEditStep.html',
+                    backdrop: 'static',
+                    //size : 'lg',
+                    controller: function ($scope,step,workflow) {
+                        $scope.workflow = workflow
+                        $scope.input = {}
+                        if (step) {
+                            //edit
+                            $scope.input.wfStepDescription = step.description
+                            $scope.input.wfStepTitle = step.title
+                            if (step.baseBundle) { //baseBundle is actually the conversationKey of the event conversation to copy
+                                $scope.input.wfStepBaseBundle = workflow.steps.find(step1 => step1.conversationKey == step.baseBundle)
+                            }
+                        }
+
+                        $scope.clearBB = function () {
+                            delete $scope.input.wfStepBaseBundle
+                        }
+
+                        $scope.save = function () {
+                            //create a new step object regardless of new / update but for update keep the same conversationKey
+                            let conversationKey = step?.conversationKey || `aiWfConversation-${new Date().getTime()}`
+
+                            let step = {description:$scope.input.wfStepDescription,
+                                title:$scope.input.wfStepTitle,
+                                conversationKey:conversationKey}
+
+                            if ($scope.input.wfStepBaseBundle) {
+                                step.baseBundle = $scope.input.wfStepBaseBundle.conversationKey
+                                step.baseBundleStepTitle = $scope.input.wfStepBaseBundle.title
+                            } else {
+                                delete step.baseBundle
+                                delete step.baseBundleStepTitle
+                            }
+
+                            $scope.$close(step)
+
+                        }
+                    },
+
+                    resolve: {
+                        workflow: function () {
+                            return $scope.input.selectedWorkflow
+                        },
+                        step: function () {
+                            return step
+                        }
+                    }
+
+                }).result.then(function (newStep) {
+                    if (step) {
+                        //update
+                        Object.keys(step).forEach(key => delete step[key]);
+                        Object.assign(step, newStep)
+                        localforage.setItem($scope.input.selectedWorkflow.key, $scope.input.selectedWorkflow)
+
+                        return
+
+                        let oldStep = $scope.input.selectedWorkflow.steps.find(step => step.conversationKey == newStep.conversationKey)
+                        if (oldStep) {
+                            Object.assign(oldStep, newStep)
+                            localforage.setItem($scope.input.selectedWorkflow.key, $scope.input.selectedWorkflow)
+                        }
+
+                    } else {
+                        //new
+                        //the conversation within the step is saved as a separate indexedDb object with a key in the
+                        //step to retrieve it
+
+
+                        $scope.input.selectedWorkflow.steps = $scope.input.selectedWorkflow.steps || []
+                        $scope.input.selectedWorkflow.steps.push(newStep)
+
+                        //update the workflow
+                        localforage.setItem($scope.input.selectedWorkflow.key, $scope.input.selectedWorkflow)
+
+                        $scope.selectStep(newStep)
+
+                        /*
+                        localforage.setItem($scope.input.selectedWorkflow.key, $scope.input.selectedWorkflow).then(function () {
+                            $scope.input.wfStepDescription = ""
+                            $scope.input.wfStepTitle = ""
+
+                            $scope.selectStep(newStep)
+                        }).catch(function(err) {
+                            alert(angular.toJson(err))
+                        });
+                        */
+                    }
+                })
+
+            }
+
+            $scope.updateStep = function (step) {
+                editStep(step)
+            }
 
             $scope.addStep = function () {
-                $scope.input.state='newStep'
-                $scope.input.selectWfTabActive = 0 //ensure conversation tab is showing
+                editStep()
+
+                //temp$scope.input.state='newStep'
+               // $scope.input.selectWfTabActive = 0 //ensure conversation tab is showing
             }
 
             //when the new step details have been entered add to the workflow
-            $scope.saveStep = function () {
+            $scope.saveStepDEP = function () {
                 //$scope.wfNewStep = false
                 //the conversation within the step is saved as a separate indexedDb object with a key in the
                 //step to retrieve it
@@ -249,9 +443,8 @@ angular.module("sampleApp")
 
                 if ($scope.input.wfStepBaseBundle) {
                     step.baseBundle = $scope.input.wfStepBaseBundle.conversationKey
+                    step.baseBundleStepTitle = $scope.input.wfStepBaseBundle.title
                 }
-
-
 
                 $scope.input.selectedWorkflow.steps = $scope.input.selectedWorkflow.steps || []
                 $scope.input.selectedWorkflow.steps.push(step)
@@ -273,12 +466,11 @@ angular.module("sampleApp")
                 drawGraph(bundle)
                 $scope.latestBundle = bundle    //used for the list of resources...
 
+
             }
 
             //after re-order of steps to save the updated workflow
             $scope.onStepsReordered = function () {
-                //alert('reorder')
-
                 localforage.setItem($scope.input.selectedWorkflow.key, $scope.input.selectedWorkflow)
             }
 
@@ -380,7 +572,12 @@ angular.module("sampleApp")
                     $scope.input.selectedWorkflow.steps =
                         $scope.input.selectedWorkflow.steps.filter(item => item.conversationKey !== conversationKey)
 
+                    await localforage.setItem($scope.input.selectedWorkflow.key,$scope.input.selectedWorkflow)
+
+
                     delete $scope.input.selectedStep
+
+
 
 
 

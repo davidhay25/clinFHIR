@@ -1,0 +1,68 @@
+<div>
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+
+                <h3>Edit workflow</h3>
+
+            </div>
+
+
+            <div class="col-md-4 col-sm-4">
+
+                <div class="pull-right">
+                    <button class="btn btn-link" ng-click="$dismiss()">Cancel</button>
+                    <button class="btn btn-primary"
+
+                            ng-click="save()">Save event</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="modal-body">
+
+        <h4>Create a new Workflow</h4>
+
+        <div class="row">
+            <div class="col-md-2">
+                Upload a saved Workflow
+            </div>
+            <div class="col-md-10">
+                <div> <input type="file" id="jsonInput" accept=".json,application/json"></div>
+            </div>
+        </div>
+        <br/>
+        Or:
+        <br/> <br/>
+        <div class="row">
+            <div class="col-md-2">
+                Create a new  Workflow
+            </div>
+            <div class="col-md-10">
+
+                <table class="table table-bordered">
+                    <tr>
+                        <td>Title</td>
+                        <td><input type="text" class="form-control" ng-model="input.newWfTitle"/> </td>
+                    </tr>
+                    <tr>
+                        <td>Description</td>
+                        <td><textarea class="form-control" ng-model="input.newWfDescription"></textarea> </td>
+                    </tr>
+
+                </table>
+
+                <div class="clickable pull-right" ng-click="saveWorkflow()">Add new Workflow</div>
+                <div class="clickable" ng-click="reset()">Cancel</div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <div class="modal-header">
+
+    </div>
+</div>

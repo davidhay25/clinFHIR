@@ -8,7 +8,18 @@
       height: 600px;
       border: 1px solid lightgray;
     }
+    .different {
+      background-color: mistyrose;
+    }
   </style>
+
+
+
+  <!--
+  <i class="fa-solid fa-wand-magic-sparkles"></i>
+  <i class="fa-solid fa-comment-dots"></i>
+  -->
+
 
   <div class="row rounded-box-filled">
     <div class="col-md-3">
@@ -17,19 +28,19 @@
               ng-change="selectWorkflow(input.selectedWorkflow)"
               ng-options="wf.title for wf in allWorkflows"></select>
     </div>
-    <div class="col-md-5">
+    <div class="col-md-4">
       <div ng-show = "input.selectedWorkflow"  style="margin-top: 8px">
         {{input.selectedWorkflow.description}}
       </div>
     </div>
-    <div class="col-md-2">
+    <div class="col-md-3">
 
 
 
       <div class="pull-right">
 
 
-        <i class=" clickable glyphicon glyphicon-edit iconSpacing"
+        <i class=" clickable glyphicon glyphicon-edit iconSpacingWide"
            ng-show="input.selectedWorkflow"
            style="margin-top: 12px"
            uib-popover="Show the workflow editing page"
@@ -39,17 +50,17 @@
 
         </i>
 
-        <i class=" clickable glyphicon glyphicon-tasks iconSpacing"
+        <i class=" clickable glyphicon glyphicon-tasks iconSpacingWide"
            ng-show="input.selectedWorkflow"
            style="margin-top: 12px"
            uib-popover="Show the resource history page"
            popover-placement="top"
            popover-trigger="'mouseenter'"
-           ng-click = "input.state = 'resourceHistory'">
+           ng-click = "refreshSummary()">
 
         </i>
 
-        <i class=" clickable glyphicon glyphicon glyphicon-list-alt iconSpacing"
+        <i class=" clickable glyphicon glyphicon glyphicon-list-alt iconSpacingWide"
            ng-show="input.selectedWorkflow"
            style="margin-top: 12px"
            uib-popover="Show a summary of the whole workflow"
@@ -59,7 +70,7 @@
 
         </i>
 
-        <i class=" clickable glyphicon glyphicon-trash iconSpacing"
+        <i class=" clickable glyphicon glyphicon-trash iconSpacingWide"
          ng-show="input.selectedWorkflow"
          style="margin-top: 12px"
          uib-popover="Delete this workflow."
@@ -71,7 +82,17 @@
       </div>
     </div>
     <div class="col-md-1">
-      <i class=" clickable glyphicon glyphicon-th-list iconSpacing"
+
+      <i class=" clickable glyphicon glyphicon-plus iconSpacing"
+         ng-if="input.state !== 'newWorkflow'"
+         style="margin-top: 12px"
+         uib-popover="Add a new workflow"
+         popover-placement="top"
+         popover-trigger="'mouseenter'"
+         ng-click = "addWorkflow()">
+
+      </i>
+      <!--       <i class=" clickable glyphicon glyphicon-th-list iconSpacing"
          ng-if="input.selectedWorkflow && input.state !== 'showWorkflow'"
          style="margin-top: 12px"
          uib-popover="Show the main workflow page"
@@ -79,14 +100,20 @@
          popover-trigger="'mouseenter'"
          ng-click = "input.state = 'showWorkflow'">
 
-      </i>
+      </i> -->
     </div>
     <div class="col-md-1">
       <button class="pull-right btn-primary btn"
               ng-disabled="input.state == 'newWorkflow'"
-              ng-click="addWorkflow()">New workflow</button>
+              ng-click="input.state = 'showWorkflow'">Home</button>
+
+      <!-- <button class="pull-right btn-primary btn"
+              ng-disabled="input.state == 'newWorkflow'"
+              ng-click="addWorkflow()">New workflow</button>-->
     </div>
   </div>
+
+
 
   <div ng-show="input.state == 'editWorkflow'">
     <h4>Edit workflow</h4>
@@ -127,18 +154,64 @@
 
   <div ng-show="input.state == 'resourceHistory'">
     <h4>Resource history</h4>
+<!--
+    <div class="clickable" ng-click="refreshSummary()">Refresh summary</div>
+-->
+    <div class="row">
+      <div class="col-md-3">
+        <div class="list-group">
+          <div ng-repeat="item in resourceSummary.arResources"ng-click="selectResourceFromSummary(item.resource)"
 
-    This page will show the history of changes to specific resource instances over different steps in the workflow.
+            ng-class="{'list-group-item':true}">
+            <strong>{{item.resource.resourceType}}</strong>
+            <div>{{item.resource.text.div | cleanTextDiv}}</div>
+          </div>
+        </div>
+
+
+      </div>
+      <div class="col-md-9">
+
+        <div ng-repeat="step in stepsForSelectedResource">
+          <strong>{{step.stepTitle}}</strong>
+          <div><em>{{step.stepDescription}}</em></div>
+
+          <table ng-show="step.diff" class="table-bordered table">
+            <tr>
+              <th>Path</th>
+              <th>Previous instance</th>
+              <th>This instance</th>
+            </tr>
+            <tr ng-repeat="(k,v) in step.diff"
+              ng-class="{different:v[0] !== v[1]}">
+              <td>{{k | dropFirstInPath}}</td>
+              <td ng-repeat="val in v track by $index">
+                {{val}}
+              </td>
+            </tr>
+          </table>
+
+
+        </div>
+
+
+
+
+      </div>
+    </div>
+
+
+
+    This page will show the history of changes to specific resource instances over different events in the workflow.
     Click the close link or click the 'show workflow' (
     <i class="clickable glyphicon glyphicon-th-list" ng-click="input.state = 'showWorkflow'"></i> )
     icon to display the main workflow page.
-
     <div class="pull-right">
       <span class="clickable pull-right" ng-click="input.state = 'showWorkflow'">Close</span>
     </div>
   </div>
 
-  <div ng-show="input.state == 'newWorkflow'">
+  <div ng-show="input.state == 'newWorkflowXXX'">
 
     <h4>Create a new Workflow</h4>
 
@@ -184,7 +257,7 @@
     <br/>
 
     <div ng-show="input.selectedWorkflow">
-      <h4>Workflow steps</h4>
+      <h4>Events</h4>
 
       <div class="list-group">
         <div ng-repeat="step in input.selectedWorkflow.steps"
@@ -197,10 +270,13 @@
           {{step.title || step.description}}
         </div>
       </div>
-      <div><em>Drag to re-order</em></div>
+
+      <div ng-if="input.selectedWorkflow.steps.length > 1">
+        <em>Drag to re-order</em>
+      </div>
 
 
-      <div ng-hide="input.state=='newStep'" class="btn btn-link" ng-click="addStep()">Add new step</div>
+      <div ng-hide="input.state=='newStep'" class="clickable" ng-click="addStep()">Add new event</div>
 
     </div>
 
@@ -220,10 +296,21 @@
         <br/>
         <div class="rounded-box-filled" ng-show="input.selectedStep">
 
-          <i class="clickable glyphicon glyphicon-trash iconSpacing pull-right"
+
+          <i class=" clickable glyphicon glyphicon-edit iconSpacingWide  pull-right"
              ng-if="input.selectedWorkflow && input.selectedStep.conversationKey"
              style="padding: 4px"
-             uib-popover="Delete this step."
+             uib-popover="Edit this event"
+             popover-placement="top"
+             popover-trigger="'mouseenter'"
+             ng-click = "updateStep(input.selectedStep)">
+
+          </i>
+
+          <i class="clickable glyphicon glyphicon-trash iconSpacingWide pull-right"
+             ng-if="input.selectedWorkflow && input.selectedStep.conversationKey"
+             style="padding: 4px"
+             uib-popover="Delete this event."
              popover-placement="top"
              popover-trigger="'mouseenter'"
              ng-click = "deleteStep()">
@@ -232,34 +319,28 @@
 
           {{input.selectedStep.description || input.selectedStep.title}}
 
-          {{input.selectedStep.baseBundle}}
+          <span ng-show="input.selectedStep.baseBundleStepTitle">
+            Base bundle: {{input.selectedStep.baseBundleStepTitle}}
 
-
-
-
-
+          </span>
 
 
         </div>
         <br/>
 
-
-
-
         <div ng-show="input.state == 'newStep'">
-          Add a new step
-
+          Add a new event
 
           <table class="table table-bordered">
             <tr>
               <td>Title</td>
               <td style="width: 50%"><input type="text" class="form-control" ng-model="input.wfStepTitle"/> </td>
-              <td>Displayed in the list of steps</td>
+              <td>Displayed in the list of events</td>
             </tr>
             <tr>
               <td>Description</td>
               <td><textarea class="form-control" ng-model="input.wfStepDescription"></textarea> </td>
-              <td>The purpose and outcome of this step</td>
+              <td>The purpose and outcome of this event</td>
             </tr>
             <tr>
               <td>Base bundle</td>
@@ -268,14 +349,16 @@
                         ng-options="step.title for step in input.selectedWorkflow.steps"></select>
 
               </td>
-              <td>If specified here, the latest bundle from this step will be the input for the first prompt</td>
+              <td>If specified here, the latest bundle from the event will be the input for the first prompt of this one.</td>
             </tr>
 
           </table>
 
-          <div class="clickable pull-right" ng-click="saveStep()">Save step</div>
+          <div class="clickable pull-right" ng-click="saveStep()">Save event</div>
           <div class="clickable" ng-click="reset()">Cancel</div>
         </div>
+
+
 
         <div ng-show="input.state == 'showStep' && input.selectedStep">
           <aiconversation conversation="selectedWfConversation"
@@ -285,12 +368,12 @@
         </div>
 
       </uib-tab>
-      <uib-tab heading="Latest bundle in step" select="fitGraph()">
+      <uib-tab heading="Latest bundle in step" ng-show="latestBundle" select="fitGraph()">
 
         <div id="bundleGraph"></div>
 
       </uib-tab>
-      <uib-tab heading="Latest resource list">
+      <uib-tab heading="Latest resource list" ng-show="latestBundle" >
         <div class="row">
           <div class="col-md-3">
             <br/>

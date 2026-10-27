@@ -84,6 +84,12 @@
     padding-right: 5px;
 }
 
+.iconSpacingWide {
+    /*  left and right spacing for icons in a horizontalbar */
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
 .icon-ext {
     background-image: url('/icons/icon_reference.png');
 }

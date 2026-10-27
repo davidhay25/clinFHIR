@@ -1,0 +1,59 @@
+<div>
+    <div class="modal-header">
+
+        <div class="row">
+            <div class="col-md-8 col-sm-8">
+
+                <h3>Edit event</h3>
+
+            </div>
+
+
+            <div class="col-md-4 col-sm-4">
+
+                <div class="pull-right">
+                    <button class="btn btn-link" ng-click="$dismiss()">Cancel</button>
+                    <button class="btn btn-primary"
+
+                            ng-click="save()">Save event</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="modal-body">
+
+        <table class="table table-bordered">
+            <tr>
+                <td>Title</td>
+                <td style="width: 50%"><input type="text" class="form-control" ng-model="input.wfStepTitle"/> </td>
+                <td>Displayed in the list of events</td>
+            </tr>
+            <tr>
+                <td>Description</td>
+                <td><textarea class="form-control" ng-model="input.wfStepDescription"></textarea> </td>
+                <td>The purpose and outcome of this event</td>
+            </tr>
+            <tr>
+                <td>Base bundle</td>
+                <td>
+                    <select class="form-control" ng-model="input.wfStepBaseBundle"
+                            ng-options="step.title for step in workflow.steps">
+                    </select>
+                        <div>
+                            <div class="clickable pull-right" ng-click="clearBB()">Clear</div>
+                        </div>
+
+                </td>
+                <td>If specified here, the latest bundle from the event will be the input for the first prompt of this one.</td>
+            </tr>
+
+        </table>
+
+
+    </div>
+
+    <div class="modal-header">
+
+    </div>
+</div>
