@@ -14,8 +14,8 @@
                 <div class="pull-right">
                     <button class="btn btn-link" ng-click="$dismiss()">Cancel</button>
                     <button class="btn btn-primary"
-
-                            ng-click="save()">Save event</button>
+                        ng-show="input.newWfTitle"
+                            ng-click="save()">Save workflow</button>
                 </div>
             </div>
         </div>
@@ -54,8 +54,6 @@
 
                 </table>
 
-                <div class="clickable pull-right" ng-click="saveWorkflow()">Add new Workflow</div>
-                <div class="clickable" ng-click="reset()">Cancel</div>
             </div>
         </div>
 

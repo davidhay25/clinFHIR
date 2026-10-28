@@ -272,7 +272,7 @@ angular.module("sampleApp")
                 $uibModal.open({
                     templateUrl: 'modalTemplates/aiEditWorkflow.html',
                     backdrop: 'static',
-                    //size : 'lg',
+                    size : 'lg',
                     controller: function ($scope,workflow) {
 
                         $scope.input = {}
@@ -285,9 +285,9 @@ angular.module("sampleApp")
 
                         $scope.save = function () {
 
-                            let key = `aiWorkflow-${new Date().getTime()}`
+                            let key = workflow?.key || `aiWorkflow-${new Date().getTime()}`
                             let wf = {key:key,title:$scope.input.newWfTitle,description:$scope.input.newWfDescription}
-                            wf.steps = []
+                            wf.steps = workflow?.steps || []
 
                             $scope.$close(wf)
 
@@ -301,37 +301,55 @@ angular.module("sampleApp")
                     }
 
                 }).result.then(function (wf) {
+                    if (workflow) {
+                        //edit
 
-                    localforage.setItem(wf.key, wf).then(function () {
-                        alert("Workflow has been saved")
-                        $scope.allWorkflows.push(wf)
-                        $scope.input.selectedWorkflow = wf
-                        $scope.input.lastSelectedWorkflow = wf
+                        Object.keys(workflow).forEach(key => delete workflow[key]);
+                        Object.assign(workflow, wf)
 
-                        $scope.input.scope = "showWorkflow"
-                        saveCurrentState()      //for when app is reloaded
-                        $scope.$evalAsync()
-                    }).catch(function(err) {
-                        alert(err)
-                    });
+                        localforage.setItem(wf.key, wf)
+
+
+                    } else {
+                        //new
+                        localforage.setItem(wf.key, wf).then(function () {
+                            alert("Workflow has been saved")
+                            $scope.allWorkflows.push(wf)
+                            $scope.input.selectedWorkflow = wf
+                            $scope.input.lastSelectedWorkflow = wf
+
+                            $scope.input.scope = "showWorkflow"
+                            saveCurrentState()      //for when app is reloaded
+                            $scope.$evalAsync()
+                        }).catch(function(err) {
+                            alert(err)
+                        });
+                    }
+
+
 
                     $scope.input.state = 'showWorkflow'
 
             })}
 
             $scope.addWorkflow = function () {
-                $scope.input.lastSelectedWorkflow = $scope.input.selectedWorkflow
-                delete $scope.input.selectedWorkflow
-                $scope.input.state = "newWorkflow"
-                
+
+                //$scope.input.lastSelectedWorkflow = $scope.input.selectedWorkflow
+                //delete $scope.input.selectedWorkflow
+                //$scope.input.state = "newWorkflow"  //todo - can review states
+
                 editWorkflow()
+            }
+
+            $scope.editWorkflow = function () {
+                editWorkflow($scope.input.selectedWorkflow)
             }
 
             function editStep(step) {
                 $uibModal.open({
                     templateUrl: 'modalTemplates/aiEditStep.html',
                     backdrop: 'static',
-                    //size : 'lg',
+                    size : 'lg',
                     controller: function ($scope,step,workflow) {
                         $scope.workflow = workflow
                         $scope.input = {}
@@ -352,19 +370,19 @@ angular.module("sampleApp")
                             //create a new step object regardless of new / update but for update keep the same conversationKey
                             let conversationKey = step?.conversationKey || `aiWfConversation-${new Date().getTime()}`
 
-                            let step = {description:$scope.input.wfStepDescription,
+                            let newStep = {description:$scope.input.wfStepDescription,
                                 title:$scope.input.wfStepTitle,
                                 conversationKey:conversationKey}
 
                             if ($scope.input.wfStepBaseBundle) {
-                                step.baseBundle = $scope.input.wfStepBaseBundle.conversationKey
-                                step.baseBundleStepTitle = $scope.input.wfStepBaseBundle.title
+                                newStep.baseBundle = $scope.input.wfStepBaseBundle.conversationKey
+                                newStep.baseBundleStepTitle = $scope.input.wfStepBaseBundle.title
                             } else {
-                                delete step.baseBundle
-                                delete step.baseBundleStepTitle
+                               // delete step.baseBundle
+                               // delete step.baseBundleStepTitle
                             }
 
-                            $scope.$close(step)
+                            $scope.$close(newStep)
 
                         }
                     },
